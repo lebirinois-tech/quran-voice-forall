@@ -17,6 +17,15 @@ export const RECITERS = {
 
 export type ReciterId = keyof typeof RECITERS;
 
+export type RepeatMode = 'none' | 'verse' | 'range' | 'page';
+
+export interface RepeatSettings {
+  mode: RepeatMode;
+  count: number; // 0 = infinite
+  rangeStart?: number;
+  rangeEnd?: number;
+}
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
@@ -28,6 +37,8 @@ export const useQuranAudio = ({
   const [reciter, setReciter] = useState<ReciterId>('alafasy');
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [repeatSettings, setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
+  const [currentRepeatCount, setCurrentRepeatCount] = useState(0);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
@@ -67,23 +78,67 @@ export const useQuranAudio = ({
     };
   }, []);
 
-  // Handle auto-play next verse
+  // Handle auto-play next verse with repeat logic
   useEffect(() => {
     if (autoPlayNextRef.current && !isPlaying) {
       autoPlayNextRef.current = false;
-      if (currentVerse < totalVerses) {
-        const nextVerse = currentVerse + 1;
-        setCurrentVerse(nextVerse);
-        onVerseChange?.(nextVerse);
-        // Auto-play will be triggered by the verse change effect
-        setTimeout(() => {
-          playVerse(nextVerse);
-        }, 300);
+      
+      const { mode, count, rangeStart, rangeEnd } = repeatSettings;
+      
+      // Handle repeat modes
+      if (mode === 'verse') {
+        // Repeat current verse
+        const shouldRepeat = count === 0 || currentRepeatCount < count - 1;
+        if (shouldRepeat) {
+          setCurrentRepeatCount(prev => prev + 1);
+          setTimeout(() => playVerse(currentVerse), 300);
+          return;
+        } else {
+          setCurrentRepeatCount(0);
+          // Move to next verse after repeat is done
+          if (currentVerse < totalVerses) {
+            const nextVerse = currentVerse + 1;
+            setCurrentVerse(nextVerse);
+            onVerseChange?.(nextVerse);
+            setTimeout(() => playVerse(nextVerse), 300);
+            return;
+          }
+        }
+      } else if (mode === 'range' && rangeStart !== undefined && rangeEnd !== undefined) {
+        // Repeat range of verses
+        if (currentVerse < rangeEnd) {
+          const nextVerse = currentVerse + 1;
+          setCurrentVerse(nextVerse);
+          onVerseChange?.(nextVerse);
+          setTimeout(() => playVerse(nextVerse), 300);
+          return;
+        } else {
+          // End of range, check if we should repeat
+          const shouldRepeat = count === 0 || currentRepeatCount < count - 1;
+          if (shouldRepeat) {
+            setCurrentRepeatCount(prev => prev + 1);
+            setCurrentVerse(rangeStart);
+            onVerseChange?.(rangeStart);
+            setTimeout(() => playVerse(rangeStart), 300);
+            return;
+          } else {
+            setCurrentRepeatCount(0);
+            toast.success('Fin de la répétition');
+          }
+        }
       } else {
-        toast.success('Fin de la sourate');
+        // Normal playback (no repeat or page mode continues normally)
+        if (currentVerse < totalVerses) {
+          const nextVerse = currentVerse + 1;
+          setCurrentVerse(nextVerse);
+          onVerseChange?.(nextVerse);
+          setTimeout(() => playVerse(nextVerse), 300);
+        } else {
+          toast.success('Fin de la sourate');
+        }
       }
     }
-  }, [isPlaying, currentVerse, totalVerses, onVerseChange]);
+  }, [isPlaying, currentVerse, totalVerses, onVerseChange, repeatSettings, currentRepeatCount]);
 
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
     const edition = RECITERS[reciterId].id;
@@ -185,6 +240,27 @@ export const useQuranAudio = ({
     }
   }, []);
 
+  const setRepeatMode = useCallback((mode: RepeatMode, count: number = 1, rangeStart?: number, rangeEnd?: number) => {
+    setRepeatSettings({ mode, count, rangeStart, rangeEnd });
+    setCurrentRepeatCount(0);
+    
+    if (mode === 'none') {
+      toast.info('Répétition désactivée');
+    } else if (mode === 'verse') {
+      toast.success(`Répétition du verset: ${count === 0 ? '∞' : count}x`);
+    } else if (mode === 'range' && rangeStart && rangeEnd) {
+      toast.success(`Répétition versets ${rangeStart}-${rangeEnd}: ${count === 0 ? '∞' : count}x`);
+    }
+  }, []);
+
+  const toggleRepeatVerse = useCallback(() => {
+    if (repeatSettings.mode === 'verse') {
+      setRepeatMode('none');
+    } else {
+      setRepeatMode('verse', 3); // Default: repeat 3 times
+    }
+  }, [repeatSettings.mode, setRepeatMode]);
+
   return {
     isPlaying,
     isLoading,
@@ -192,6 +268,8 @@ export const useQuranAudio = ({
     reciter,
     progress,
     duration,
+    repeatSettings,
+    currentRepeatCount,
     play,
     pause,
     togglePlayPause,
@@ -202,5 +280,7 @@ export const useQuranAudio = ({
     changeReciter,
     seek,
     setCurrentVerse,
+    setRepeatMode,
+    toggleRepeatVerse,
   };
 };
