@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { ReciterId, RECITERS, RepeatMode, RepeatSettings } from '@/hooks/useQuranAudio';
@@ -29,6 +29,7 @@ interface AudioPlayerProps {
   surahNumber?: number;
   repeatSettings?: RepeatSettings;
   currentRepeatCount?: number;
+  playbackSpeed?: number;
   onPlay: () => void;
   onPause: () => void;
   onNext: () => void;
@@ -36,6 +37,7 @@ interface AudioPlayerProps {
   onReciterChange?: (reciter: ReciterId) => void;
   onSeek?: (percentage: number) => void;
   onRepeatModeChange?: (mode: RepeatMode, count: number, rangeStart?: number, rangeEnd?: number) => void;
+  onSpeedChange?: (speed: number) => void;
   surahName?: string;
   className?: string;
 }
@@ -50,6 +52,7 @@ export const AudioPlayer = ({
   surahNumber = 1,
   repeatSettings = { mode: 'none', count: 1 },
   currentRepeatCount = 0,
+  playbackSpeed = 1,
   onPlay,
   onPause,
   onNext,
@@ -57,6 +60,7 @@ export const AudioPlayer = ({
   onReciterChange,
   onSeek,
   onRepeatModeChange,
+  onSpeedChange,
   surahName,
   className,
 }: AudioPlayerProps) => {
@@ -223,8 +227,45 @@ export const AudioPlayer = ({
             </Button>
           </div>
 
-          {/* Download & Repeat Buttons */}
+          {/* Speed, Repeat & Download Buttons */}
           <div className="flex-1 flex justify-end gap-1">
+            {/* Speed Control */}
+            {onSpeedChange && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "rounded-full",
+                      playbackSpeed !== 1 && "text-primary bg-primary/10"
+                    )}
+                    aria-label="Vitesse de lecture"
+                  >
+                    <span className="text-xs font-bold">{playbackSpeed}x</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48" align="end">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Vitesse de lecture</h4>
+                    <div className="grid grid-cols-4 gap-1">
+                      {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
+                        <Button
+                          key={speed}
+                          variant={playbackSpeed === speed ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => onSpeedChange(speed)}
+                          className="text-xs px-2"
+                        >
+                          {speed}x
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+
             {/* Repeat Button with Popover */}
             {onRepeatModeChange && (
               <Popover>

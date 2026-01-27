@@ -39,6 +39,7 @@ export const useQuranAudio = ({
   const [duration, setDuration] = useState(0);
   const [repeatSettings, setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
   const [currentRepeatCount, setCurrentRepeatCount] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
@@ -240,6 +241,14 @@ export const useQuranAudio = ({
     }
   }, []);
 
+  const changeSpeed = useCallback((speed: number) => {
+    setPlaybackSpeed(speed);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = speed;
+    }
+    toast.success(`Vitesse: ${speed}x`);
+  }, []);
+
   const setRepeatMode = useCallback((mode: RepeatMode, count: number = 1, rangeStart?: number, rangeEnd?: number) => {
     setRepeatSettings({ mode, count, rangeStart, rangeEnd });
     setCurrentRepeatCount(0);
@@ -270,6 +279,7 @@ export const useQuranAudio = ({
     duration,
     repeatSettings,
     currentRepeatCount,
+    playbackSpeed,
     play,
     pause,
     togglePlayPause,
@@ -282,5 +292,6 @@ export const useQuranAudio = ({
     setCurrentVerse,
     setRepeatMode,
     toggleRepeatVerse,
+    changeSpeed,
   };
 };
