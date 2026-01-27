@@ -46,6 +46,40 @@ export const getVersePage = (surahNumber: number, verseNumber: number, totalVers
   return Math.floor(startPage + (pagesInSurah * verseProgress));
 };
 
+// Juz (part) mapping - each Juz starts at [surahNumber, verseNumber]
+export const juzMapping: Record<number, { surah: number; verse: number; name: string }> = {
+  1: { surah: 1, verse: 1, name: "Alif Lam Mim" },
+  2: { surah: 2, verse: 142, name: "Sayaqul" },
+  3: { surah: 2, verse: 253, name: "Tilka ar-Rusul" },
+  4: { surah: 3, verse: 93, name: "Lan Tanaloo" },
+  5: { surah: 4, verse: 24, name: "Wal Muhsanat" },
+  6: { surah: 4, verse: 148, name: "La Yuhibbu Allah" },
+  7: { surah: 5, verse: 82, name: "Wa Iza Sami'u" },
+  8: { surah: 6, verse: 111, name: "Wa Law Annana" },
+  9: { surah: 7, verse: 88, name: "Qal al-Mala" },
+  10: { surah: 8, verse: 41, name: "Wa A'lamu" },
+  11: { surah: 9, verse: 93, name: "Ya'taziruna" },
+  12: { surah: 11, verse: 6, name: "Wa ma min Dabbah" },
+  13: { surah: 12, verse: 53, name: "Wa ma Ubarri'u" },
+  14: { surah: 15, verse: 1, name: "Alif Lam Ra" },
+  15: { surah: 17, verse: 1, name: "Subhana Allazi" },
+  16: { surah: 18, verse: 75, name: "Qal Alam" },
+  17: { surah: 21, verse: 1, name: "Iqtaraba lin-Nas" },
+  18: { surah: 23, verse: 1, name: "Qad Aflaha" },
+  19: { surah: 25, verse: 21, name: "Wa Qal Allazina" },
+  20: { surah: 27, verse: 56, name: "A'man Khalaqa" },
+  21: { surah: 29, verse: 46, name: "Utlu ma Uhiya" },
+  22: { surah: 33, verse: 31, name: "Wa man Yaqnut" },
+  23: { surah: 36, verse: 28, name: "Wa ma Anzalna" },
+  24: { surah: 39, verse: 32, name: "Fa man Azlamu" },
+  25: { surah: 41, verse: 47, name: "Ilayhi Yuraddu" },
+  26: { surah: 46, verse: 1, name: "Ha Mim" },
+  27: { surah: 51, verse: 31, name: "Qala Fama" },
+  28: { surah: 58, verse: 1, name: "Qad Sami'a" },
+  29: { surah: 67, verse: 1, name: "Tabaraka Allazi" },
+  30: { surah: 78, verse: 1, name: "Amma Yatasa'alun" },
+};
+
 export const surahs: Surah[] = [
   { number: 1, name: "Al-Fatiha", nameArabic: "الفاتحة", englishName: "The Opening", versesCount: 7, revelationType: "Meccan" },
   { number: 2, name: "Al-Baqarah", nameArabic: "البقرة", englishName: "The Cow", versesCount: 286, revelationType: "Medinan" },
