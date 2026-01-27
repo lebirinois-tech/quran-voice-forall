@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface VoiceCommandsOptions {
   onNavigateToSurah?: (surahNumber: number) => void;
+  onNavigateToPage?: (pageNumber: number) => void;
   onPlay?: () => void;
   onPause?: () => void;
   onNextVerse?: () => void;
@@ -142,6 +143,34 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
         if (lowerText.includes(name)) {
           options.onNavigateToSurah?.(num);
           return `Navigation vers ${name}`;
+        }
+      }
+    }
+
+    // Page navigation
+    if (lowerText.includes('page')) {
+      const pageMatch = lowerText.match(/page\s*(\d+)/);
+      if (pageMatch) {
+        const pageNum = parseInt(pageMatch[0].match(/\d+/)![0]);
+        if (pageNum >= 1 && pageNum <= 604) {
+          options.onNavigateToPage?.(pageNum);
+          return `Navigation vers page ${pageNum}`;
+        }
+      }
+      
+      // French numbers for pages
+      const frenchPageNumbers: Record<string, number> = {
+        'un': 1, 'une': 1, 'premier': 1, 'première': 1,
+        'deux': 2, 'trois': 3, 'quatre': 4, 'cinq': 5,
+        'six': 6, 'sept': 7, 'huit': 8, 'neuf': 9, 'dix': 10,
+        'vingt': 20, 'trente': 30, 'quarante': 40, 'cinquante': 50,
+        'soixante': 60, 'cent': 100, 'deux cent': 200, 'trois cent': 300,
+      };
+      
+      for (const [word, num] of Object.entries(frenchPageNumbers)) {
+        if (lowerText.includes(word)) {
+          options.onNavigateToPage?.(num);
+          return `Navigation vers page ${num}`;
         }
       }
     }
