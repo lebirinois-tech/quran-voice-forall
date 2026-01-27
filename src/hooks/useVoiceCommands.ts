@@ -355,6 +355,15 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
   const startListening = useCallback((continuous: boolean = false) => {
     if (!isSupported) return;
 
+    // Stop any existing recognition first
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {
+        // Ignore errors
+      }
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
@@ -363,6 +372,7 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     recognition.lang = 'fr-FR';
 
     recognition.onstart = () => {
+      console.log('Voice recognition started, continuous:', continuous);
       setIsListening(true);
     };
 
@@ -373,8 +383,11 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
       setTranscript(transcriptText);
 
       if (result.isFinal) {
-        if (isContinuousMode || continuous) {
-          processContinuousText(transcriptText);
+        console.log('Final transcript:', transcriptText, 'continuous:', continuous);
+        // In continuous mode or when started as continuous, always process as continuous
+        if (continuous || shouldRestartRef.current) {
+          const commandResult = processContinuousText(transcriptText);
+          console.log('Command result:', commandResult);
         } else {
           processCommand(transcriptText);
         }
@@ -391,20 +404,27 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     };
 
     recognition.onend = () => {
+      console.log('Voice recognition ended, shouldRestart:', shouldRestartRef.current);
       setIsListening(false);
       // Auto-restart in continuous mode
-      if (shouldRestartRef.current && isContinuousMode) {
+      if (shouldRestartRef.current) {
         setTimeout(() => {
           if (shouldRestartRef.current) {
+            console.log('Restarting voice recognition...');
             startListening(true);
           }
-        }, 100);
+        }, 300);
       }
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
-  }, [isSupported, processCommand, processContinuousText, isContinuousMode]);
+    
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error('Failed to start recognition:', e);
+    }
+  }, [isSupported, processCommand, processContinuousText]);
 
   const stopListening = useCallback(() => {
     shouldRestartRef.current = false;
@@ -452,11 +472,14 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     if (isSupported) {
       // Small delay to ensure component is fully mounted
       const timer = setTimeout(() => {
-        enableContinuousMode();
-      }, 500);
+        console.log('Auto-enabling continuous mode...');
+        setIsContinuousMode(true);
+        shouldRestartRef.current = true;
+        startListening(true);
+      }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isSupported]); // Only run once on mount when supported
+  }, []); // Empty deps - only run once on mount
 
   // Cleanup on unmount
   useEffect(() => {
