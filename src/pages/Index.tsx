@@ -5,6 +5,7 @@ import { SurahCard } from '@/components/SurahCard';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { VoiceCommandHelp } from '@/components/VoiceCommandHelp';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Search, BookOpen, FileText, Layers } from 'lucide-react';
@@ -17,6 +18,7 @@ const Index = () => {
   const [pageNumber, setPageNumber] = useState('');
   const [juzNumber, setJuzNumber] = useState('');
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
+  const appSettings = useAppSettings();
 
   const handleNavigateToSurah = (surahNumber: number) => {
     navigate(`/surah/${surahNumber}`);
@@ -74,10 +76,14 @@ const Index = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pattern-islamic">
+    <div className="min-h-screen pattern-islamic" style={{ backgroundColor: appSettings.backgroundColor }}>
       <Header 
         onAccessibilityToggle={() => setIsAccessibilityMode(!isAccessibilityMode)}
         isAccessibilityMode={isAccessibilityMode}
+        reciter={appSettings.reciter}
+        onReciterChange={appSettings.onReciterChange}
+        backgroundColor={appSettings.backgroundColor}
+        onBackgroundColorChange={appSettings.onBackgroundColorChange}
       />
 
       <main className="container mx-auto px-4 py-6">

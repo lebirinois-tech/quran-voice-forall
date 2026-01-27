@@ -1,6 +1,8 @@
 import { BookOpen, Home, Accessibility, Radio, Podcast } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { SettingsDialog } from './SettingsDialog';
+import { ReciterId } from '@/hooks/useQuranAudio';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -9,6 +11,10 @@ interface HeaderProps {
   isAccessibilityMode?: boolean;
   isContinuousMode?: boolean;
   onToggleContinuous?: () => void;
+  reciter?: ReciterId;
+  onReciterChange?: (reciter: ReciterId) => void;
+  backgroundColor?: string;
+  onBackgroundColorChange?: (color: string) => void;
 }
 
 export const Header = ({ 
@@ -17,7 +23,11 @@ export const Header = ({
   onAccessibilityToggle,
   isAccessibilityMode,
   isContinuousMode,
-  onToggleContinuous
+  onToggleContinuous,
+  reciter = 'alafasy',
+  onReciterChange,
+  backgroundColor = 'hsl(45, 30%, 96%)',
+  onBackgroundColorChange,
 }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
@@ -53,6 +63,14 @@ export const Header = ({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {onReciterChange && onBackgroundColorChange && (
+              <SettingsDialog
+                reciter={reciter}
+                onReciterChange={onReciterChange}
+                backgroundColor={backgroundColor}
+                onBackgroundColorChange={onBackgroundColorChange}
+              />
+            )}
             {onToggleContinuous && (
               <Button
                 variant="ghost"
