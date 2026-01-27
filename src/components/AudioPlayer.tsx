@@ -1,7 +1,7 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { ReciterId, RECITERS } from '@/hooks/useQuranAudio';
+import { ReciterId, RECITERS, RepeatMode, RepeatSettings } from '@/hooks/useQuranAudio';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import {
@@ -11,6 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from './ui/popover';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 interface AudioPlayerProps {
   isPlaying: boolean;
@@ -20,12 +27,15 @@ interface AudioPlayerProps {
   progress?: number;
   reciter?: ReciterId;
   surahNumber?: number;
+  repeatSettings?: RepeatSettings;
+  currentRepeatCount?: number;
   onPlay: () => void;
   onPause: () => void;
   onNext: () => void;
   onPrevious: () => void;
   onReciterChange?: (reciter: ReciterId) => void;
   onSeek?: (percentage: number) => void;
+  onRepeatModeChange?: (mode: RepeatMode, count: number, rangeStart?: number, rangeEnd?: number) => void;
   surahName?: string;
   className?: string;
 }
@@ -38,17 +48,23 @@ export const AudioPlayer = ({
   progress = 0,
   reciter = 'alafasy',
   surahNumber = 1,
+  repeatSettings = { mode: 'none', count: 1 },
+  currentRepeatCount = 0,
   onPlay,
   onPause,
   onNext,
   onPrevious,
   onReciterChange,
   onSeek,
+  onRepeatModeChange,
   surahName,
   className,
 }: AudioPlayerProps) => {
   const verseProgress = ((currentVerse) / totalVerses) * 100;
   const [isDownloading, setIsDownloading] = useState(false);
+  const [rangeStart, setRangeStart] = useState(currentVerse.toString());
+  const [rangeEnd, setRangeEnd] = useState(currentVerse.toString());
+  const [repeatCount, setRepeatCount] = useState('3');
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onSeek) return;
@@ -120,6 +136,12 @@ export const AudioPlayer = ({
           <div className="flex justify-between mt-1">
             <span className="text-xs text-muted-foreground">
               Verset {currentVerse} / {totalVerses}
+              {repeatSettings.mode !== 'none' && (
+                <span className="ml-2 text-primary">
+                  🔁 {repeatSettings.mode === 'verse' ? 'Verset' : `${repeatSettings.rangeStart}-${repeatSettings.rangeEnd}`}
+                  {repeatSettings.count > 0 ? ` (${currentRepeatCount + 1}/${repeatSettings.count})` : ' (∞)'}
+                </span>
+              )}
             </span>
             {isLoading && (
               <span className="text-xs text-primary flex items-center gap-1">
@@ -201,8 +223,126 @@ export const AudioPlayer = ({
             </Button>
           </div>
 
-          {/* Download Button */}
-          <div className="flex-1 flex justify-end gap-2">
+          {/* Download & Repeat Buttons */}
+          <div className="flex-1 flex justify-end gap-1">
+            {/* Repeat Button with Popover */}
+            {onRepeatModeChange && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "rounded-full",
+                      repeatSettings.mode !== 'none' && "text-primary bg-primary/10"
+                    )}
+                    aria-label="Options de répétition"
+                  >
+                    {repeatSettings.mode === 'verse' ? (
+                      <Repeat1 className="h-5 w-5" />
+                    ) : (
+                      <Repeat className="h-5 w-5" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72" align="end">
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm">Mode de répétition</h4>
+                    
+                    {/* Quick options */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant={repeatSettings.mode === 'none' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => onRepeatModeChange('none', 1)}
+                        className="text-xs"
+                      >
+                        Désactivé
+                      </Button>
+                      <Button
+                        variant={repeatSettings.mode === 'verse' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => onRepeatModeChange('verse', parseInt(repeatCount) || 3)}
+                        className="text-xs"
+                      >
+                        Verset actuel
+                      </Button>
+                    </div>
+
+                    {/* Repeat count */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Nombre de répétitions</Label>
+                      <div className="flex gap-2">
+                        {['3', '5', '10', '0'].map((num) => (
+                          <Button
+                            key={num}
+                            variant={repeatCount === num ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              setRepeatCount(num);
+                              if (repeatSettings.mode !== 'none') {
+                                onRepeatModeChange(
+                                  repeatSettings.mode, 
+                                  parseInt(num),
+                                  repeatSettings.rangeStart,
+                                  repeatSettings.rangeEnd
+                                );
+                              }
+                            }}
+                            className="flex-1 text-xs"
+                          >
+                            {num === '0' ? '∞' : num}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Range selection */}
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <Label className="text-xs">Répéter une plage de versets</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="1"
+                          max={totalVerses}
+                          value={rangeStart}
+                          onChange={(e) => setRangeStart(e.target.value)}
+                          className="h-8 text-xs"
+                          placeholder="Début"
+                        />
+                        <span className="text-muted-foreground">à</span>
+                        <Input
+                          type="number"
+                          min="1"
+                          max={totalVerses}
+                          value={rangeEnd}
+                          onChange={(e) => setRangeEnd(e.target.value)}
+                          className="h-8 text-xs"
+                          placeholder="Fin"
+                        />
+                      </div>
+                      <Button
+                        variant={repeatSettings.mode === 'range' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          const start = parseInt(rangeStart);
+                          const end = parseInt(rangeEnd);
+                          if (start >= 1 && end <= totalVerses && start <= end) {
+                            onRepeatModeChange('range', parseInt(repeatCount) || 3, start, end);
+                          } else {
+                            toast.error('Plage de versets invalide');
+                          }
+                        }}
+                        className="w-full text-xs"
+                      >
+                        Répéter cette plage
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+
             <Button
               variant="ghost"
               size="icon"
