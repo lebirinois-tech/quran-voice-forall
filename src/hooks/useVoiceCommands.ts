@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 interface VoiceCommandsOptions {
   onNavigateToSurah?: (surahNumber: number) => void;
   onNavigateToPage?: (pageNumber: number) => void;
+  onNavigateToJuz?: (juzNumber: number) => void;
   onPlay?: () => void;
   onPause?: () => void;
   onNextVerse?: () => void;
@@ -171,6 +172,38 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
         if (lowerText.includes(word)) {
           options.onNavigateToPage?.(num);
           return `Navigation vers page ${num}`;
+        }
+      }
+    }
+
+    // Juz navigation
+    if (lowerText.includes('juz') || lowerText.includes('partie') || lowerText.includes('hizb')) {
+      const juzMatch = lowerText.match(/\d+/);
+      if (juzMatch) {
+        const juzNum = parseInt(juzMatch[0]);
+        if (juzNum >= 1 && juzNum <= 30) {
+          options.onNavigateToJuz?.(juzNum);
+          return `Navigation vers Juz ${juzNum}`;
+        }
+      }
+      
+      // French numbers for Juz
+      const frenchJuzNumbers: Record<string, number> = {
+        'un': 1, 'une': 1, 'premier': 1, 'première': 1,
+        'deux': 2, 'deuxième': 2, 'trois': 3, 'troisième': 3,
+        'quatre': 4, 'cinq': 5, 'six': 6, 'sept': 7, 'huit': 8,
+        'neuf': 9, 'dix': 10, 'onze': 11, 'douze': 12, 'treize': 13,
+        'quatorze': 14, 'quinze': 15, 'seize': 16, 'dix-sept': 17,
+        'dix-huit': 18, 'dix-neuf': 19, 'vingt': 20, 'vingt-et-un': 21,
+        'vingt-deux': 22, 'vingt-trois': 23, 'vingt-quatre': 24,
+        'vingt-cinq': 25, 'vingt-six': 26, 'vingt-sept': 27,
+        'vingt-huit': 28, 'vingt-neuf': 29, 'trente': 30,
+      };
+      
+      for (const [word, num] of Object.entries(frenchJuzNumbers)) {
+        if (lowerText.includes(word)) {
+          options.onNavigateToJuz?.(num);
+          return `Navigation vers Juz ${num}`;
         }
       }
     }

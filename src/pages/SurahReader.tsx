@@ -7,7 +7,7 @@ import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
-import { surahs, Surah } from '@/data/surahs';
+import { surahs, Surah, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -86,6 +86,14 @@ const SurahReader = () => {
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
 
+  const handleNavigateToJuz = (juzNum: number) => {
+    const juz = juzMapping[juzNum];
+    if (juz) {
+      navigate(`/surah/${juz.surah}`);
+      toast.success(`Navigation vers Juz ${juzNum} - ${juz.name}`);
+    }
+  };
+
   const voiceCommands = useVoiceCommands({
     onPlay: () => {
       quranAudio.play();
@@ -106,6 +114,7 @@ const SurahReader = () => {
     onGoHome: handleGoHome,
     onNavigateToSurah: handleNavigateToSurah,
     onNavigateToPage: handleNavigateToPage,
+    onNavigateToJuz: handleNavigateToJuz,
     onReadVerse: (verseNum) => {
       if (verseNum >= 1 && verseNum <= verses.length) {
         quranAudio.playVerse(verseNum);
