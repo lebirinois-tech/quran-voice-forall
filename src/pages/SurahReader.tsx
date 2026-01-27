@@ -305,8 +305,11 @@ const SurahReader = () => {
       <div className="fixed bottom-28 right-4 z-50">
         <VoiceCommandButton
           isListening={voiceCommands.isListening}
+          isContinuousMode={voiceCommands.isContinuousMode}
+          isAwaitingCommand={voiceCommands.isAwaitingCommand}
           isSupported={voiceCommands.isSupported}
           onToggle={voiceCommands.toggleListening}
+          onToggleContinuous={voiceCommands.toggleContinuousMode}
           transcript={voiceCommands.transcript}
         />
       </div>
