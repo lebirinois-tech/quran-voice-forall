@@ -158,6 +158,8 @@ const SurahReader = () => {
         onBack={handleGoHome}
         onAccessibilityToggle={() => setIsAccessibilityMode(!isAccessibilityMode)}
         isAccessibilityMode={isAccessibilityMode}
+        isContinuousMode={voiceCommands.isContinuousMode}
+        onToggleContinuous={voiceCommands.toggleContinuousMode}
       />
 
       <main className="container mx-auto px-4 py-6">
@@ -301,7 +303,7 @@ const SurahReader = () => {
         )}
       </main>
 
-      {/* Voice Command Button */}
+      {/* Voice Command Button - simplified without continuous mode toggle */}
       <div className="fixed bottom-28 right-4 z-50">
         <VoiceCommandButton
           isListening={voiceCommands.isListening}
@@ -309,7 +311,6 @@ const SurahReader = () => {
           isAwaitingCommand={voiceCommands.isAwaitingCommand}
           isSupported={voiceCommands.isSupported}
           onToggle={voiceCommands.toggleListening}
-          onToggleContinuous={voiceCommands.toggleContinuousMode}
           transcript={voiceCommands.transcript}
         />
       </div>

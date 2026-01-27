@@ -1,4 +1,4 @@
-import { BookOpen, Home, Settings, Accessibility } from 'lucide-react';
+import { BookOpen, Home, Accessibility, Radio, Podcast } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
@@ -7,13 +7,17 @@ interface HeaderProps {
   onBack?: () => void;
   onAccessibilityToggle?: () => void;
   isAccessibilityMode?: boolean;
+  isContinuousMode?: boolean;
+  onToggleContinuous?: () => void;
 }
 
 export const Header = ({ 
   showBackButton, 
   onBack,
   onAccessibilityToggle,
-  isAccessibilityMode 
+  isAccessibilityMode,
+  isContinuousMode,
+  onToggleContinuous
 }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
@@ -49,6 +53,25 @@ export const Header = ({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {onToggleContinuous && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleContinuous}
+                className={cn(
+                  "text-primary-foreground hover:bg-primary-foreground/10",
+                  isContinuousMode && "bg-primary-foreground/20 ring-2 ring-primary-foreground/50"
+                )}
+                aria-label={isContinuousMode ? "Désactiver le mode mains libres" : "Activer le mode mains libres"}
+                aria-pressed={isContinuousMode}
+              >
+                {isContinuousMode ? (
+                  <Radio className="h-5 w-5 animate-pulse" />
+                ) : (
+                  <Podcast className="h-5 w-5" />
+                )}
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
