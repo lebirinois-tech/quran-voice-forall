@@ -64,11 +64,10 @@ export const VerseCard = ({
         </Button>
       </div>
 
-      {/* Arabic Text with Tajweed */}
-      <p 
-        className="tajweed-text text-2xl md:text-3xl text-foreground leading-loose mb-4 text-right font-amiri"
-        dangerouslySetInnerHTML={{ __html: verse.text }}
-      />
+      {/* Arabic Text */}
+      <p className="arabic-text text-2xl md:text-3xl text-foreground leading-loose mb-4 text-right font-amiri">
+        {verse.text}
+      </p>
 
       {/* Translation */}
       <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
