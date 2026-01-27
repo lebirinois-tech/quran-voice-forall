@@ -6,25 +6,29 @@ import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
-import { surahs, getSurahVerses, Surah, Verse } from '@/data/surahs';
+import { useQuranData } from '@/hooks/useQuranData';
+import { surahs, Surah } from '@/data/surahs';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const SurahReader = () => {
   const navigate = useNavigate();
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [surah, setSurah] = useState<Surah | null>(null);
-  const [verses, setVerses] = useState<Verse[]>([]);
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
 
   const num = parseInt(surahNumber || '1');
 
+  // Fetch surah metadata
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
     if (foundSurah) {
       setSurah(foundSurah);
-      setVerses(getSurahVerses(num));
     }
   }, [num]);
+
+  // Fetch verses with Tajweed from API
+  const { verses, isLoading: isLoadingVerses, error } = useQuranData(num);
 
   const quranAudio = useQuranAudio({
     surahNumber: num,
@@ -122,21 +126,38 @@ const SurahReader = () => {
           </div>
         )}
 
+        {/* Loading State */}
+        {isLoadingVerses && (
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <Loader2 className="h-10 w-10 text-primary animate-spin" />
+            <p className="text-muted-foreground">Chargement des versets avec Tajweed...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-destructive">{error}</p>
+          </div>
+        )}
+
         {/* Verses */}
-        <div className="space-y-4 max-w-3xl mx-auto">
-          {verses.map((verse) => (
-            <VerseCard
-              key={verse.number}
-              id={`verse-${verse.number}`}
-              verse={verse}
-              surahNumber={surah.number}
-              isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-              isHighlighted={quranAudio.currentVerse === verse.number}
-              isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
-              onPlay={() => quranAudio.playVerse(verse.number)}
-            />
-          ))}
-        </div>
+        {!isLoadingVerses && !error && (
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {verses.map((verse) => (
+              <VerseCard
+                key={verse.number}
+                id={`verse-${verse.number}`}
+                verse={verse}
+                surahNumber={surah.number}
+                isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
+                isHighlighted={quranAudio.currentVerse === verse.number}
+                isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
+                onPlay={() => quranAudio.playVerse(verse.number)}
+              />
+            ))}
+          </div>
+        )}
       </main>
 
       {/* Voice Command Button */}
@@ -154,7 +175,7 @@ const SurahReader = () => {
         isPlaying={quranAudio.isPlaying}
         isLoading={quranAudio.isLoading}
         currentVerse={quranAudio.currentVerse}
-        totalVerses={verses.length}
+        totalVerses={verses.length || 1}
         progress={quranAudio.progress}
         reciter={quranAudio.reciter}
         onPlay={quranAudio.play}
