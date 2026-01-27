@@ -125,6 +125,22 @@ const SurahReader = () => {
         toast.success(`Lecture du verset ${verseNum}`);
       }
     },
+    onRepeatVerse: (count) => {
+      quranAudio.setRepeatMode('verse', count);
+      toast.success(`Répétition du verset actuel (${count === 0 ? '∞' : count + 'x'})`);
+    },
+    onRepeatRange: (start, end, count) => {
+      if (start >= 1 && end <= verses.length && start <= end) {
+        quranAudio.setRepeatMode('range', count, start, end);
+        toast.success(`Répétition des versets ${start} à ${end} (${count === 0 ? '∞' : count + 'x'})`);
+      } else {
+        toast.error('Plage de versets invalide');
+      }
+    },
+    onStopRepeat: () => {
+      quranAudio.setRepeatMode('none', 1);
+      toast.info('Répétition désactivée');
+    },
   });
 
   if (!surah) {

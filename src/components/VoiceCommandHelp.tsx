@@ -1,4 +1,4 @@
-import { Mic, Play, Pause, ArrowRight, ArrowLeft, Home, BookOpen, FileText, Layers } from 'lucide-react';
+import { Mic, Play, Pause, ArrowRight, ArrowLeft, Home, BookOpen, FileText, Layers, Repeat, Repeat1 } from 'lucide-react';
 
 export const VoiceCommandHelp = () => {
   const commands = [
@@ -6,6 +6,9 @@ export const VoiceCommandHelp = () => {
     { icon: Pause, command: '"Pause" / "Arrêter"', description: 'Mettre en pause' },
     { icon: ArrowRight, command: '"Suivant"', description: 'Verset suivant' },
     { icon: ArrowLeft, command: '"Précédent"', description: 'Verset précédent' },
+    { icon: Repeat1, command: '"Répéter 3 fois" / "5 fois" / "infini"', description: 'Répéter le verset actuel' },
+    { icon: Repeat, command: '"Répéter versets 1 à 5"', description: 'Répéter une plage de versets' },
+    { icon: Pause, command: '"Arrêter répétition"', description: 'Désactiver la répétition' },
     { icon: Home, command: '"Accueil" / "Retour"', description: 'Retour à l\'accueil' },
     { icon: BookOpen, command: '"Sourate [numéro/nom]"', description: 'Naviguer vers une sourate' },
     { icon: FileText, command: '"Page [numéro]"', description: 'Naviguer vers une page (1-604)' },

@@ -10,6 +10,9 @@ interface VoiceCommandsOptions {
   onPreviousVerse?: () => void;
   onGoHome?: () => void;
   onReadVerse?: (verseNumber: number) => void;
+  onRepeatVerse?: (count: number) => void;
+  onRepeatRange?: (start: number, end: number, count: number) => void;
+  onStopRepeat?: () => void;
 }
 
 interface SpeechRecognitionEvent {
@@ -209,13 +212,77 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     }
 
     // Verse reading
-    if (lowerText.includes('verset')) {
+    if (lowerText.includes('verset') && !lowerText.includes('répéter') && !lowerText.includes('repeter')) {
       const verseMatch = lowerText.match(/verset\s*(\d+)/);
       if (verseMatch) {
         const verseNum = parseInt(verseMatch[1]);
         options.onReadVerse?.(verseNum);
         return `Lecture du verset ${verseNum}`;
       }
+    }
+
+    // Stop repetition commands
+    if (lowerText.includes('arrêter répétition') || lowerText.includes('arreter repetition') || 
+        lowerText.includes('stop répétition') || lowerText.includes('stop repetition') ||
+        lowerText.includes('désactiver répétition') || lowerText.includes('desactiver repetition')) {
+      options.onStopRepeat?.();
+      return 'Répétition désactivée';
+    }
+
+    // Repeat verse commands - "répéter verset 3 fois", "répéter 5 fois", "répéter infini"
+    if (lowerText.includes('répéter') || lowerText.includes('repeter') || 
+        lowerText.includes('répétition') || lowerText.includes('repetition')) {
+      
+      // Check for range repetition: "répéter versets 1 à 5" or "répéter du verset 1 au verset 5"
+      const rangeMatch = lowerText.match(/(?:versets?|du verset)\s*(\d+)\s*(?:à|a|au verset|au)\s*(\d+)/);
+      if (rangeMatch) {
+        const start = parseInt(rangeMatch[1]);
+        const end = parseInt(rangeMatch[2]);
+        
+        // Check for count
+        let count = 3; // default
+        if (lowerText.includes('infini') || lowerText.includes('boucle') || lowerText.includes('sans fin')) {
+          count = 0;
+        } else {
+          const countMatch = lowerText.match(/(\d+)\s*fois/);
+          if (countMatch) {
+            count = parseInt(countMatch[1]);
+          }
+        }
+        
+        options.onRepeatRange?.(start, end, count);
+        return `Répétition des versets ${start} à ${end} (${count === 0 ? '∞' : count + 'x'})`;
+      }
+      
+      // Single verse repetition
+      let repeatCount = 3; // default
+      
+      // Check for infinite
+      if (lowerText.includes('infini') || lowerText.includes('boucle') || lowerText.includes('sans fin')) {
+        repeatCount = 0;
+      } else {
+        // Check for specific count: "3 fois", "5 fois", "10 fois"
+        const countMatch = lowerText.match(/(\d+)\s*fois/);
+        if (countMatch) {
+          repeatCount = parseInt(countMatch[1]);
+        } else {
+          // Check for French number words
+          const frenchCounts: Record<string, number> = {
+            'trois': 3, 'cinq': 5, 'dix': 10,
+            'deux': 2, 'quatre': 4, 'six': 6,
+            'sept': 7, 'huit': 8, 'neuf': 9,
+          };
+          for (const [word, num] of Object.entries(frenchCounts)) {
+            if (lowerText.includes(word + ' fois')) {
+              repeatCount = num;
+              break;
+            }
+          }
+        }
+      }
+      
+      options.onRepeatVerse?.(repeatCount);
+      return `Répétition du verset actuel (${repeatCount === 0 ? '∞' : repeatCount + 'x'})`;
     }
 
     return null;
