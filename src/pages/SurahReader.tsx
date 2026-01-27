@@ -322,6 +322,7 @@ const SurahReader = () => {
         surahNumber={num}
         repeatSettings={quranAudio.repeatSettings}
         currentRepeatCount={quranAudio.currentRepeatCount}
+        playbackSpeed={quranAudio.playbackSpeed}
         onPlay={quranAudio.play}
         onPause={quranAudio.pause}
         onNext={quranAudio.nextVerse}
@@ -329,6 +330,7 @@ const SurahReader = () => {
         onReciterChange={quranAudio.changeReciter}
         onSeek={quranAudio.seek}
         onRepeatModeChange={quranAudio.setRepeatMode}
+        onSpeedChange={quranAudio.changeSpeed}
         surahName={`${surah.name} - ${surah.nameArabic}`}
       />
     </div>
