@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.42617e512ca9460bbad591ead30442a7",
+  "appName": "Quran Accès Pour Tous",
+  "webDir": "dist",
+  "server": {
+    "url": "https://42617e51-2ca9-460b-bad5-91ead30442a7.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
