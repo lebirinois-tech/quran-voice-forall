@@ -1,28 +1,34 @@
 import { Verse } from '@/data/surahs';
 import { cn } from '@/lib/utils';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface VerseCardProps {
+  id?: string;
   verse: Verse;
   surahNumber: number;
   isPlaying?: boolean;
   isHighlighted?: boolean;
+  isLoading?: boolean;
   onPlay?: () => void;
 }
 
 export const VerseCard = ({ 
+  id,
   verse, 
   surahNumber, 
   isPlaying, 
   isHighlighted,
+  isLoading,
   onPlay 
 }: VerseCardProps) => {
   return (
     <div
+      id={id}
       className={cn(
         "p-6 rounded-xl bg-card border border-border transition-all duration-300",
-        isHighlighted && "verse-highlight bg-secondary/5",
+        isHighlighted && "verse-highlight bg-secondary/5 ring-2 ring-primary/20",
+        isPlaying && "bg-primary/5",
         "animate-fade-in"
       )}
       style={{ animationDelay: `${verse.number * 0.05}s` }}
@@ -44,10 +50,13 @@ export const VerseCard = ({
           variant="ghost"
           size="icon"
           onClick={onPlay}
+          disabled={isLoading}
           className="rounded-full hover:bg-primary/10"
           aria-label={isPlaying ? "Pause" : "Écouter ce verset"}
         >
-          {isPlaying ? (
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 text-primary animate-spin" />
+          ) : isPlaying ? (
             <Pause className="h-5 w-5 text-primary" />
           ) : (
             <Play className="h-5 w-5 text-primary" />

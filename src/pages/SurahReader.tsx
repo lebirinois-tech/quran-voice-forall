@@ -5,6 +5,7 @@ import { VerseCard } from '@/components/VerseCard';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
+import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { surahs, getSurahVerses, Surah, Verse } from '@/data/surahs';
 import { toast } from 'sonner';
 
@@ -13,61 +14,62 @@ const SurahReader = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [surah, setSurah] = useState<Surah | null>(null);
   const [verses, setVerses] = useState<Verse[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentVerse, setCurrentVerse] = useState(1);
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
 
+  const num = parseInt(surahNumber || '1');
+
   useEffect(() => {
-    const num = parseInt(surahNumber || '1');
     const foundSurah = surahs.find(s => s.number === num);
     if (foundSurah) {
       setSurah(foundSurah);
       setVerses(getSurahVerses(num));
     }
-  }, [surahNumber]);
+  }, [num]);
 
-  const handlePlay = () => {
-    setIsPlaying(true);
-    toast.success('Lecture démarrée');
-  };
-
-  const handlePause = () => {
-    setIsPlaying(false);
-    toast.info('Lecture en pause');
-  };
-
-  const handleNext = () => {
-    if (currentVerse < verses.length) {
-      setCurrentVerse(prev => prev + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentVerse > 1) {
-      setCurrentVerse(prev => prev - 1);
-    }
-  };
+  const quranAudio = useQuranAudio({
+    surahNumber: num,
+    totalVerses: verses.length || 1,
+    onVerseChange: (verseNum) => {
+      // Scroll to the verse
+      const verseElement = document.getElementById(`verse-${verseNum}`);
+      if (verseElement) {
+        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    },
+  });
 
   const handleGoHome = () => {
     navigate('/');
   };
 
-  const handleNavigateToSurah = (num: number) => {
-    navigate(`/surah/${num}`);
-    toast.success(`Navigation vers sourate ${num}`);
+  const handleNavigateToSurah = (surahNum: number) => {
+    navigate(`/surah/${surahNum}`);
+    toast.success(`Navigation vers sourate ${surahNum}`);
   };
 
   const voiceCommands = useVoiceCommands({
-    onPlay: handlePlay,
-    onPause: handlePause,
-    onNextVerse: handleNext,
-    onPreviousVerse: handlePrevious,
+    onPlay: () => {
+      quranAudio.play();
+      toast.success('Lecture démarrée');
+    },
+    onPause: () => {
+      quranAudio.pause();
+      toast.info('Lecture en pause');
+    },
+    onNextVerse: () => {
+      quranAudio.nextVerse();
+      toast.success(`Verset ${quranAudio.currentVerse + 1}`);
+    },
+    onPreviousVerse: () => {
+      quranAudio.previousVerse();
+      toast.success(`Verset ${quranAudio.currentVerse - 1}`);
+    },
     onGoHome: handleGoHome,
     onNavigateToSurah: handleNavigateToSurah,
     onReadVerse: (verseNum) => {
       if (verseNum >= 1 && verseNum <= verses.length) {
-        setCurrentVerse(verseNum);
-        toast.success(`Verset ${verseNum} sélectionné`);
+        quranAudio.playVerse(verseNum);
+        toast.success(`Lecture du verset ${verseNum}`);
       }
     },
   });
@@ -125,14 +127,13 @@ const SurahReader = () => {
           {verses.map((verse) => (
             <VerseCard
               key={verse.number}
+              id={`verse-${verse.number}`}
               verse={verse}
               surahNumber={surah.number}
-              isPlaying={isPlaying && currentVerse === verse.number}
-              isHighlighted={currentVerse === verse.number}
-              onPlay={() => {
-                setCurrentVerse(verse.number);
-                setIsPlaying(true);
-              }}
+              isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
+              isHighlighted={quranAudio.currentVerse === verse.number}
+              isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
+              onPlay={() => quranAudio.playVerse(verse.number)}
             />
           ))}
         </div>
@@ -150,13 +151,18 @@ const SurahReader = () => {
 
       {/* Audio Player */}
       <AudioPlayer
-        isPlaying={isPlaying}
-        currentVerse={currentVerse}
+        isPlaying={quranAudio.isPlaying}
+        isLoading={quranAudio.isLoading}
+        currentVerse={quranAudio.currentVerse}
         totalVerses={verses.length}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
+        progress={quranAudio.progress}
+        reciter={quranAudio.reciter}
+        onPlay={quranAudio.play}
+        onPause={quranAudio.pause}
+        onNext={quranAudio.nextVerse}
+        onPrevious={quranAudio.previousVerse}
+        onReciterChange={quranAudio.changeReciter}
+        onSeek={quranAudio.seek}
         surahName={`${surah.name} - ${surah.nameArabic}`}
       />
     </div>
