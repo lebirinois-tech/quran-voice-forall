@@ -447,6 +447,17 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     }
   }, [isContinuousMode, enableContinuousMode, disableContinuousMode]);
 
+  // Auto-enable continuous mode on mount for maximum accessibility
+  useEffect(() => {
+    if (isSupported) {
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        enableContinuousMode();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isSupported]); // Only run once on mount when supported
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
