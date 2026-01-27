@@ -51,6 +51,41 @@ const SurahReader = () => {
     toast.success(`Navigation vers sourate ${surahNum}`);
   };
 
+  const handleNavigateToPage = (pageNum: number) => {
+    // Simplified page to surah mapping (page start numbers for each surah)
+    const pageStartMap: [number, number][] = [
+      [1, 1], [2, 2], [50, 3], [77, 4], [106, 5], [128, 6], [151, 7],
+      [177, 8], [187, 9], [208, 10], [221, 11], [235, 12], [249, 13],
+      [255, 14], [262, 15], [267, 16], [282, 17], [293, 18], [305, 19],
+      [312, 20], [322, 21], [332, 22], [342, 23], [350, 24], [359, 25],
+      [367, 26], [377, 27], [385, 28], [396, 29], [404, 30], [411, 31],
+      [415, 32], [418, 33], [428, 34], [434, 35], [440, 36], [446, 37],
+      [453, 38], [458, 39], [467, 40], [477, 41], [483, 42], [489, 43],
+      [496, 44], [499, 45], [502, 46], [507, 47], [510, 48], [515, 49],
+      [518, 50], [520, 51], [523, 52], [526, 53], [528, 54], [531, 55],
+      [534, 56], [537, 57], [542, 58], [545, 59], [549, 60], [551, 61],
+      [553, 62], [554, 63], [556, 64], [558, 65], [560, 66], [562, 67],
+      [564, 68], [566, 69], [568, 70], [570, 71], [572, 72], [574, 73],
+      [575, 74], [577, 75], [578, 76], [580, 77], [582, 78], [583, 79],
+      [585, 80], [586, 81], [587, 82], [588, 83], [589, 84], [590, 85],
+      [591, 86], [592, 88], [593, 89], [594, 90], [595, 91], [596, 93],
+      [597, 95], [598, 97], [599, 99], [600, 101], [601, 103], [602, 106],
+      [603, 109], [604, 112],
+    ];
+    
+    let targetSurah = 1;
+    for (const [page, surah] of pageStartMap) {
+      if (page <= pageNum) {
+        targetSurah = surah;
+      } else {
+        break;
+      }
+    }
+    
+    navigate(`/surah/${targetSurah}`);
+    toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
+  };
+
   const voiceCommands = useVoiceCommands({
     onPlay: () => {
       quranAudio.play();
@@ -70,6 +105,7 @@ const SurahReader = () => {
     },
     onGoHome: handleGoHome,
     onNavigateToSurah: handleNavigateToSurah,
+    onNavigateToPage: handleNavigateToPage,
     onReadVerse: (verseNum) => {
       if (verseNum >= 1 && verseNum <= verses.length) {
         quranAudio.playVerse(verseNum);

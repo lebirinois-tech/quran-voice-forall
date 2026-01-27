@@ -1,4 +1,4 @@
-import { Mic, Play, Pause, ArrowRight, ArrowLeft, Home, BookOpen } from 'lucide-react';
+import { Mic, Play, Pause, ArrowRight, ArrowLeft, Home, BookOpen, FileText } from 'lucide-react';
 
 export const VoiceCommandHelp = () => {
   const commands = [
@@ -8,6 +8,7 @@ export const VoiceCommandHelp = () => {
     { icon: ArrowLeft, command: '"Précédent"', description: 'Verset précédent' },
     { icon: Home, command: '"Accueil" / "Retour"', description: 'Retour à l\'accueil' },
     { icon: BookOpen, command: '"Sourate [numéro/nom]"', description: 'Naviguer vers une sourate' },
+    { icon: FileText, command: '"Page [numéro]"', description: 'Naviguer vers une page (1-604)' },
   ];
 
   return (
