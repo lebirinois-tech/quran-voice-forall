@@ -5,14 +5,17 @@ import { SurahCard } from '@/components/SurahCard';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { VoiceCommandHelp } from '@/components/VoiceCommandHelp';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
-import { surahs } from '@/data/surahs';
+import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, Mic } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [pageNumber, setPageNumber] = useState('');
+  const [juzNumber, setJuzNumber] = useState('');
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
 
   const handleNavigateToSurah = (surahNumber: number) => {
@@ -20,8 +23,44 @@ const Index = () => {
     toast.success(`Ouverture de la sourate ${surahNumber}`);
   };
 
+  const handleNavigateToPage = (pageNum: number) => {
+    if (pageNum < 1 || pageNum > 604) {
+      toast.error('Numéro de page invalide (1-604)');
+      return;
+    }
+    
+    // Find surah for this page
+    const pageStartEntries = Object.entries(surahPageStart)
+      .map(([surah, page]) => ({ surah: parseInt(surah), page }))
+      .sort((a, b) => a.page - b.page);
+    
+    let targetSurah = 1;
+    for (const entry of pageStartEntries) {
+      if (entry.page <= pageNum) {
+        targetSurah = entry.surah;
+      } else {
+        break;
+      }
+    }
+    
+    navigate(`/surah/${targetSurah}`);
+    toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
+  };
+
+  const handleNavigateToJuz = (juzNum: number) => {
+    const juz = juzMapping[juzNum];
+    if (juz) {
+      navigate(`/surah/${juz.surah}`);
+      toast.success(`Navigation vers Juz ${juzNum} - ${juz.name}`);
+    } else {
+      toast.error('Numéro de Juz invalide (1-30)');
+    }
+  };
+
   const voiceCommands = useVoiceCommands({
     onNavigateToSurah: handleNavigateToSurah,
+    onNavigateToPage: handleNavigateToPage,
+    onNavigateToJuz: handleNavigateToJuz,
     onGoHome: () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
@@ -71,6 +110,71 @@ const Index = () => {
           )}
         </section>
 
+        {/* Navigation by Page & Juz */}
+        <section className="mb-6 max-w-lg mx-auto animate-fade-in" style={{ animationDelay: '0.05s' }}>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Page Navigation */}
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Aller à la page</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min="1"
+                  max="604"
+                  placeholder="1-604"
+                  value={pageNumber}
+                  onChange={(e) => setPageNumber(e.target.value)}
+                  className="h-10 text-base bg-background"
+                  aria-label="Numéro de page"
+                />
+                <Button 
+                  onClick={() => {
+                    const num = parseInt(pageNumber);
+                    if (num) handleNavigateToPage(num);
+                  }}
+                  size="sm"
+                  className="px-4"
+                >
+                  Go
+                </Button>
+              </div>
+            </div>
+
+            {/* Juz Navigation */}
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Layers className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Aller au Juz</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min="1"
+                  max="30"
+                  placeholder="1-30"
+                  value={juzNumber}
+                  onChange={(e) => setJuzNumber(e.target.value)}
+                  className="h-10 text-base bg-background"
+                  aria-label="Numéro de Juz"
+                />
+                <Button 
+                  onClick={() => {
+                    const num = parseInt(juzNumber);
+                    if (num) handleNavigateToJuz(num);
+                  }}
+                  size="sm"
+                  className="px-4"
+                >
+                  Go
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Search Bar */}
         <section className="mb-6 max-w-md mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <div className="relative">
@@ -97,8 +201,8 @@ const Index = () => {
             <p className="text-xs text-muted-foreground">Versets</p>
           </div>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
-            <p className="text-2xl font-bold text-primary">30</p>
-            <p className="text-xs text-muted-foreground">Juz</p>
+            <p className="text-2xl font-bold text-primary">604</p>
+            <p className="text-xs text-muted-foreground">Pages</p>
           </div>
         </section>
 
