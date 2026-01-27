@@ -1,7 +1,9 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { ReciterId, RECITERS } from '@/hooks/useQuranAudio';
+import { toast } from 'sonner';
+import { useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -17,6 +19,7 @@ interface AudioPlayerProps {
   totalVerses: number;
   progress?: number;
   reciter?: ReciterId;
+  surahNumber?: number;
   onPlay: () => void;
   onPause: () => void;
   onNext: () => void;
@@ -34,6 +37,7 @@ export const AudioPlayer = ({
   totalVerses,
   progress = 0,
   reciter = 'alafasy',
+  surahNumber = 1,
   onPlay,
   onPause,
   onNext,
@@ -44,12 +48,45 @@ export const AudioPlayer = ({
   className,
 }: AudioPlayerProps) => {
   const verseProgress = ((currentVerse) / totalVerses) * 100;
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onSeek) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const percentage = ((e.clientX - rect.left) / rect.width) * 100;
     onSeek(Math.max(0, Math.min(100, percentage)));
+  };
+
+  const handleDownloadCurrentVerse = async () => {
+    setIsDownloading(true);
+    try {
+      const edition = RECITERS[reciter].id;
+      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${currentVerse}/${edition}`);
+      const data = await response.json();
+      
+      if (data.code === 200 && data.data?.audio) {
+        const audioResponse = await fetch(data.data.audio);
+        const blob = await audioResponse.blob();
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Surah_${surahNumber}_Verset_${currentVerse}_${RECITERS[reciter].name}.mp3`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        toast.success('Téléchargement terminé');
+      } else {
+        throw new Error('Audio non disponible');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Erreur lors du téléchargement');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -164,8 +201,22 @@ export const AudioPlayer = ({
             </Button>
           </div>
 
-          {/* Volume (placeholder) */}
-          <div className="flex-1 flex justify-end">
+          {/* Download Button */}
+          <div className="flex-1 flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDownloadCurrentVerse}
+              disabled={isDownloading || isLoading}
+              className="rounded-full"
+              aria-label="Télécharger le verset actuel"
+            >
+              {isDownloading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Download className="h-5 w-5" />
+              )}
+            </Button>
             <Volume2 className="h-5 w-5 text-muted-foreground" />
           </div>
         </div>

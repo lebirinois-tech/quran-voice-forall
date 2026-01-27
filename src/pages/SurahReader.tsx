@@ -277,6 +277,7 @@ const SurahReader = () => {
                 isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
                 isHighlighted={quranAudio.currentVerse === verse.number}
                 isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
+                reciter={quranAudio.reciter}
                 onPlay={() => quranAudio.playVerse(verse.number)}
               />
             ))}
@@ -302,6 +303,7 @@ const SurahReader = () => {
         totalVerses={verses.length || 1}
         progress={quranAudio.progress}
         reciter={quranAudio.reciter}
+        surahNumber={num}
         onPlay={quranAudio.play}
         onPause={quranAudio.pause}
         onNext={quranAudio.nextVerse}
