@@ -7,15 +7,19 @@ import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
-import { surahs, Surah, juzMapping } from '@/data/surahs';
+import { surahs, Surah, juzMapping, surahPageStart } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText, Layers } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const SurahReader = () => {
   const navigate = useNavigate();
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [surah, setSurah] = useState<Surah | null>(null);
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
+  const [pageInput, setPageInput] = useState('');
+  const [juzInput, setJuzInput] = useState('');
 
   const num = parseInt(surahNumber || '1');
 
@@ -157,6 +161,81 @@ const SurahReader = () => {
           <p className="text-muted-foreground">
             {surah.englishName} • {surah.versesCount} versets
           </p>
+        </div>
+
+        {/* Quick Navigation */}
+        <div className="max-w-lg mx-auto mb-6 animate-fade-in">
+          <div className="grid grid-cols-2 gap-3">
+            {/* Page Navigation */}
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-foreground">Page</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min="1"
+                  max="604"
+                  placeholder="1-604"
+                  value={pageInput}
+                  onChange={(e) => setPageInput(e.target.value)}
+                  className="h-9 text-sm bg-background"
+                  aria-label="Numéro de page"
+                />
+                <Button 
+                  onClick={() => {
+                    const num = parseInt(pageInput);
+                    if (num >= 1 && num <= 604) {
+                      handleNavigateToPage(num);
+                      setPageInput('');
+                    } else {
+                      toast.error('Numéro de page invalide (1-604)');
+                    }
+                  }}
+                  size="sm"
+                  className="px-3"
+                >
+                  Go
+                </Button>
+              </div>
+            </div>
+
+            {/* Juz Navigation */}
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Layers className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-foreground">Juz</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min="1"
+                  max="30"
+                  placeholder="1-30"
+                  value={juzInput}
+                  onChange={(e) => setJuzInput(e.target.value)}
+                  className="h-9 text-sm bg-background"
+                  aria-label="Numéro de Juz"
+                />
+                <Button 
+                  onClick={() => {
+                    const num = parseInt(juzInput);
+                    if (num >= 1 && num <= 30) {
+                      handleNavigateToJuz(num);
+                      setJuzInput('');
+                    } else {
+                      toast.error('Numéro de Juz invalide (1-30)');
+                    }
+                  }}
+                  size="sm"
+                  className="px-3"
+                >
+                  Go
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Bismillah */}
