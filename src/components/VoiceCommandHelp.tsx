@@ -1,7 +1,8 @@
-import { Mic, Play, Pause, ArrowRight, ArrowLeft, Home, BookOpen, FileText, Layers, Repeat, Repeat1 } from 'lucide-react';
+import { Mic, Play, Pause, ArrowRight, ArrowLeft, Home, BookOpen, FileText, Layers, Repeat, Repeat1, Radio } from 'lucide-react';
 
 export const VoiceCommandHelp = () => {
   const commands = [
+    { icon: Radio, command: '"Coran" + commande', description: 'Mode mains libres - activez le mode continu' },
     { icon: Play, command: '"Jouer" / "Lecture"', description: 'Démarrer la lecture audio' },
     { icon: Pause, command: '"Pause" / "Arrêter"', description: 'Mettre en pause' },
     { icon: ArrowRight, command: '"Suivant"', description: 'Verset suivant' },
@@ -23,7 +24,7 @@ export const VoiceCommandHelp = () => {
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Commandes Vocales</h3>
-          <p className="text-sm text-muted-foreground">Dites une commande après avoir activé le micro</p>
+          <p className="text-sm text-muted-foreground">Mode continu: dites "Coran" suivi de votre commande</p>
         </div>
       </div>
 

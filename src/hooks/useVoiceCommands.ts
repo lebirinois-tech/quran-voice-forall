@@ -47,10 +47,17 @@ declare global {
 
 export const useVoiceCommands = (options: VoiceCommandsOptions) => {
   const [isListening, setIsListening] = useState(false);
+  const [isContinuousMode, setIsContinuousMode] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isSupported, setIsSupported] = useState(false);
   const [lastCommand, setLastCommand] = useState<string | null>(null);
+  const [isAwaitingCommand, setIsAwaitingCommand] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const shouldRestartRef = useRef(false);
+  const commandTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Wake words to activate command mode
+  const WAKE_WORDS = ['coran', 'quran', 'ok coran', 'hey coran'];
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -288,13 +295,70 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     return null;
   }, [options]);
 
-  const startListening = useCallback(() => {
+  // Check if text contains a wake word
+  const containsWakeWord = useCallback((text: string) => {
+    const lowerText = text.toLowerCase().trim();
+    return WAKE_WORDS.some(word => lowerText.includes(word));
+  }, []);
+
+  // Process text in continuous mode - check for wake word or direct command
+  const processContinuousText = useCallback((text: string) => {
+    const lowerText = text.toLowerCase().trim();
+    
+    // If awaiting command after wake word, process the command
+    if (isAwaitingCommand) {
+      const result = processCommand(text);
+      if (result) {
+        setIsAwaitingCommand(false);
+        if (commandTimeoutRef.current) {
+          clearTimeout(commandTimeoutRef.current);
+        }
+        return result;
+      }
+    }
+    
+    // Check for wake word
+    if (containsWakeWord(lowerText)) {
+      // Remove wake word and check if there's a command after it
+      let commandPart = lowerText;
+      for (const word of WAKE_WORDS) {
+        commandPart = commandPart.replace(word, '').trim();
+      }
+      
+      if (commandPart.length > 2) {
+        // There's a command after the wake word
+        return processCommand(commandPart);
+      } else {
+        // Just wake word, wait for command
+        setIsAwaitingCommand(true);
+        // Reset after 5 seconds if no command
+        if (commandTimeoutRef.current) {
+          clearTimeout(commandTimeoutRef.current);
+        }
+        commandTimeoutRef.current = setTimeout(() => {
+          setIsAwaitingCommand(false);
+        }, 5000);
+        return 'Écoute...';
+      }
+    }
+    
+    // In continuous mode, also try to detect direct commands for convenience
+    // This allows commands like "jouer", "pause" without wake word
+    const directCommands = ['jouer', 'play', 'pause', 'stop', 'suivant', 'précédent', 'arrêter'];
+    if (directCommands.some(cmd => lowerText.includes(cmd))) {
+      return processCommand(text);
+    }
+    
+    return null;
+  }, [isAwaitingCommand, processCommand, containsWakeWord]);
+
+  const startListening = useCallback((continuous: boolean = false) => {
     if (!isSupported) return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
-    recognition.continuous = false;
+    recognition.continuous = continuous;
     recognition.interimResults = true;
     recognition.lang = 'fr-FR';
 
@@ -309,45 +373,101 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
       setTranscript(transcriptText);
 
       if (result.isFinal) {
-        processCommand(transcriptText);
+        if (isContinuousMode || continuous) {
+          processContinuousText(transcriptText);
+        } else {
+          processCommand(transcriptText);
+        }
       }
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
-      setIsListening(false);
+      // Don't stop continuous mode on transient errors
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        setIsListening(false);
+        shouldRestartRef.current = false;
+      }
     };
 
     recognition.onend = () => {
       setIsListening(false);
+      // Auto-restart in continuous mode
+      if (shouldRestartRef.current && isContinuousMode) {
+        setTimeout(() => {
+          if (shouldRestartRef.current) {
+            startListening(true);
+          }
+        }, 100);
+      }
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [isSupported, processCommand]);
+  }, [isSupported, processCommand, processContinuousText, isContinuousMode]);
 
   const stopListening = useCallback(() => {
+    shouldRestartRef.current = false;
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       setIsListening(false);
     }
+    if (commandTimeoutRef.current) {
+      clearTimeout(commandTimeoutRef.current);
+    }
+    setIsAwaitingCommand(false);
   }, []);
 
   const toggleListening = useCallback(() => {
     if (isListening) {
       stopListening();
     } else {
-      startListening();
+      startListening(false);
     }
   }, [isListening, startListening, stopListening]);
 
+  // Enable/disable continuous listening mode
+  const enableContinuousMode = useCallback(() => {
+    setIsContinuousMode(true);
+    shouldRestartRef.current = true;
+    startListening(true);
+  }, [startListening]);
+
+  const disableContinuousMode = useCallback(() => {
+    setIsContinuousMode(false);
+    shouldRestartRef.current = false;
+    stopListening();
+  }, [stopListening]);
+
+  const toggleContinuousMode = useCallback(() => {
+    if (isContinuousMode) {
+      disableContinuousMode();
+    } else {
+      enableContinuousMode();
+    }
+  }, [isContinuousMode, enableContinuousMode, disableContinuousMode]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (commandTimeoutRef.current) {
+        clearTimeout(commandTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return {
     isListening,
+    isContinuousMode,
+    isAwaitingCommand,
     transcript,
     isSupported,
     lastCommand,
     startListening,
     stopListening,
     toggleListening,
+    enableContinuousMode,
+    disableContinuousMode,
+    toggleContinuousMode,
   };
 };
