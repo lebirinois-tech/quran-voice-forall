@@ -1,6 +1,6 @@
-import { Verse } from '@/data/surahs';
+import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
-import { Play, Pause, Loader2 } from 'lucide-react';
+import { Play, Pause, Loader2, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface VerseCardProps {
@@ -22,6 +22,9 @@ export const VerseCard = ({
   isLoading,
   onPlay 
 }: VerseCardProps) => {
+  const surah = surahs.find(s => s.number === surahNumber);
+  const pageNumber = verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
+
   return (
     <div
       id={id}
@@ -41,9 +44,15 @@ export const VerseCard = ({
               {verse.number}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">
-            {surahNumber}:{verse.number}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground">
+              {surahNumber}:{verse.number}
+            </span>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              Page {pageNumber}
+            </span>
+          </div>
         </div>
         
         <Button
