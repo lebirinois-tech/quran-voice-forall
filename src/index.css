@@ -118,6 +118,60 @@
     line-height: 2.2;
   }
 
+  /* Tajweed coloring for Quranic text */
+  .tajweed-text {
+    font-family: 'Amiri', serif;
+    direction: rtl;
+    line-height: 2.4;
+    word-spacing: 0.1em;
+  }
+
+  /* Tajweed rules colors - Based on standard Tajweed color coding */
+  .tajweed-text [class^="h"], /* Hamza */
+  .tajweed-text [class*=" h"] {
+    color: hsl(340 80% 45%); /* Deep pink for Hamza-wasl */
+  }
+
+  .tajweed-text [class^="s"], /* Slnt - Silent */
+  .tajweed-text [class*=" s"] {
+    color: hsl(200 70% 45%); /* Blue for silent letters */
+  }
+
+  .tajweed-text [class^="l"], /* Laam shamsiyya */
+  .tajweed-text [class*=" l"] {
+    color: hsl(35 90% 45%); /* Orange for laam shamsiyya */
+  }
+
+  .tajweed-text [class^="n"], /* Noon/Meem with ghunna */
+  .tajweed-text [class*=" n"] {
+    color: hsl(158 70% 40%); /* Green for ghunna */
+  }
+
+  .tajweed-text [class^="q"], /* Qalqala */
+  .tajweed-text [class*=" q"] {
+    color: hsl(280 60% 50%); /* Purple for qalqala */
+  }
+
+  .tajweed-text [class^="i"], /* Ikhfa */
+  .tajweed-text [class*=" i"] {
+    color: hsl(45 85% 45%); /* Gold for ikhfa */
+  }
+
+  .tajweed-text [class^="a"], /* Idgham */
+  .tajweed-text [class*=" a"] {
+    color: hsl(200 75% 50%); /* Cyan for idgham */
+  }
+
+  .tajweed-text [class^="o"], /* Iqlab */
+  .tajweed-text [class*=" o"] {
+    color: hsl(340 75% 55%); /* Magenta for iqlab */
+  }
+
+  .tajweed-text [class^="m"], /* Madd */
+  .tajweed-text [class*=" m"] {
+    color: hsl(0 75% 55%); /* Red for madd (elongation) */
+  }
+
   .font-amiri {
     font-family: 'Amiri', serif;
   }
