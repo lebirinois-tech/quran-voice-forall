@@ -19,39 +19,37 @@ interface QuranApiResponse {
 // Using Quran University / Al Muhafez standard color scheme
 // Colors extracted from official GTAF Quran app documentation
 const parseTajweedText = (text: string): string => {
-  // Official Al Quran Cloud API Tajweed color scheme
-  // Source: https://alquran.cloud/tajweed-guide
+  // FROZEN Tajweed color scheme - Quran University / Al Muhafez standard
+  // DO NOT MODIFY - User explicitly requested this exact version
   const tajweedColors: Record<string, string> = {
-    // Gray - Silent/Not pronounced letters
+    // Gray - Silent letters / Idgham without Ghunnah
     'h': '#AAAAAA',      // Hamzat ul Wasl
     's': '#AAAAAA',      // Silent
     'l': '#AAAAAA',      // Laam Shamsiyyah
-    'd': '#A1A1A1',      // Idgham Mutajanisayn
-    'b': '#A1A1A1',      // Idgham Mutaqaribayn
+    'u': '#AAAAAA',      // Idgham without Ghunnah
+    'd': '#AAAAAA',      // Idgham Mutajanisayn
+    'b': '#AAAAAA',      // Idgham Mutaqaribayn
     
-    // Orange - Ghunnah (nasalization - 2 vowels)
-    'g': '#FF7E1E',      // Ghunnah - ORANGE
+    // Orange - Ghunnah (#D4740C)
+    'g': '#D4740C',
     
-    // Violet/Purple - Ikhfa (hiding/softening)
-    'f': '#9400A8',      // Ikhfa - purple
-    'c': '#D500B7',      // Ikhfa Shafawi (with Meem) - pink/magenta
+    // Red - Ikhfa / Madd (#DD0000)
+    'f': '#DD0000',      // Ikhfa
+    'c': '#DD0000',      // Ikhfa Shafawi
+    'n': '#DD0000',      // Madd Normal
+    'p': '#CC0000',      // Madd Permissible
+    'm': '#BB0000',      // Madd Necessary
+    'o': '#AA0000',      // Madd Obligatory
     
-    // Green - Idgham with Ghunnah
-    'a': '#169777',      // Idgham with Ghunnah - teal/green
-    'u': '#169200',      // Idgham without Ghunnah - green
-    'w': '#58B800',      // Idgham Shafawi (with Meem) - lime green
+    // Violet - Idgham with Ghunnah (#B266D9)
+    'a': '#B266D9',
+    'w': '#B266D9',      // Idgham Shafawi
     
-    // Red - Qalqalah (echoing sound)
-    'q': '#DD0008',      // Qalqalah - RED
+    // Green - Qalqalah (#2AAD2A)
+    'q': '#2AAD2A',
     
-    // Blue - Iqlab (assimilation/flipping)
-    'i': '#26BFFD',      // Iqlab - light blue
-    
-    // Blue shades - Madd (prolongation)
-    'n': '#537FFF',      // Madd Normal (2 vowels)
-    'p': '#4050FF',      // Madd Permissible (2,4,6 vowels)
-    'm': '#000EBC',      // Madd Necessary (6 vowels)
-    'o': '#2144C1',      // Madd Obligatory (4-5 vowels)
+    // Blue - Iqlab (#2E6ECB)
+    'i': '#2E6ECB',
   };
   
   let result = text;
