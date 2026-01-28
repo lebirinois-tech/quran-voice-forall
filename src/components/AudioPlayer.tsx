@@ -109,6 +109,55 @@ export const AudioPlayer = ({
     }
   };
 
+  const handleDownloadSurah = async () => {
+    setIsDownloading(true);
+    toast.info(`Téléchargement de la sourate ${surahNumber} en cours...`);
+    
+    try {
+      const edition = RECITERS[reciter].id;
+      const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
+      const data = await response.json();
+      
+      if (data.code === 200 && data.data?.ayahs) {
+        const ayahs = data.data.ayahs;
+        let downloadedCount = 0;
+        
+        for (const ayah of ayahs) {
+          if (ayah.audio) {
+            try {
+              const audioResponse = await fetch(ayah.audio);
+              const blob = await audioResponse.blob();
+              const url = URL.createObjectURL(blob);
+              
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `Surah_${surahNumber}_Verset_${ayah.numberInSurah}_${RECITERS[reciter].name}.mp3`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+              
+              downloadedCount++;
+              // Small delay to prevent browser blocking
+              await new Promise(resolve => setTimeout(resolve, 200));
+            } catch (e) {
+              console.error(`Error downloading verse ${ayah.numberInSurah}:`, e);
+            }
+          }
+        }
+        
+        toast.success(`${downloadedCount} versets téléchargés`);
+      } else {
+        throw new Error('Sourate non disponible');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Erreur lors du téléchargement');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className={cn(
       "fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated z-40",
@@ -384,20 +433,54 @@ export const AudioPlayer = ({
               </Popover>
             )}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDownloadCurrentVerse}
-              disabled={isDownloading || isLoading}
-              className="rounded-full"
-              aria-label="Télécharger le verset actuel"
-            >
-              {isDownloading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Download className="h-5 w-5" />
-              )}
-            </Button>
+            {/* Download Options */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={isDownloading || isLoading}
+                  className="rounded-full"
+                  aria-label="Options de téléchargement"
+                >
+                  {isDownloading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Download className="h-5 w-5" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm mb-3">Télécharger l'audio</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadCurrentVerse}
+                    disabled={isDownloading}
+                    className="w-full justify-start text-xs"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Verset actuel ({currentVerse})
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadSurah}
+                    disabled={isDownloading}
+                    className="w-full justify-start text-xs"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Sourate entière ({totalVerses} versets)
+                  </Button>
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs text-muted-foreground">
+                      Récitateur: {RECITERS[reciter].name}
+                    </p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Volume2 className="h-5 w-5 text-muted-foreground" />
           </div>
         </div>
