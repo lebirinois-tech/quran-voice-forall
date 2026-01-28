@@ -385,7 +385,23 @@ const SurahReader = () => {
         repeatSettings={quranAudio.repeatSettings}
         currentRepeatCount={quranAudio.currentRepeatCount}
         playbackSpeed={quranAudio.playbackSpeed}
-        onPlay={quranAudio.play}
+        onPlay={() => {
+          // En mode Mushaf, démarrer depuis le premier verset de la page affichée
+          if (viewMode === 'mushaf' && verses.length > 0) {
+            const startPage = surahPageStart[num] || 1;
+            const nextSurahStart = surahPageStart[num + 1] || 605;
+            const pagesInSurah = Math.max(1, nextSurahStart - startPage);
+            
+            // Calculer le verset correspondant à la page Mushaf courante
+            const pageProgress = (mushafPage - startPage) / Math.max(1, pagesInSurah);
+            const estimatedVerse = Math.max(1, Math.floor(pageProgress * verses.length) + 1);
+            const verseToPlay = Math.min(estimatedVerse, verses.length);
+            
+            quranAudio.playVerse(verseToPlay);
+          } else {
+            quranAudio.play();
+          }
+        }}
         onPause={quranAudio.pause}
         onNext={quranAudio.nextVerse}
         onPrevious={quranAudio.previousVerse}
