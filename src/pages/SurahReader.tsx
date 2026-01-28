@@ -24,6 +24,7 @@ const SurahReader = () => {
   const [juzInput, setJuzInput] = useState('');
   const [viewMode, setViewMode] = useState<'text' | 'mushaf'>('text');
   const [mushafPage, setMushafPage] = useState(1);
+  const [lastSyncedVerse, setLastSyncedVerse] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -53,15 +54,24 @@ const SurahReader = () => {
     },
   });
 
-  // Auto-sync Mushaf page with current verse during audio playback
+  // Auto-sync Mushaf page only when verse CHANGES during playback (not on play start)
   useEffect(() => {
     if (quranAudio.isPlaying && verses.length > 0 && viewMode === 'mushaf') {
-      const newPage = getVersePage(num, quranAudio.currentVerse, verses.length);
-      if (newPage !== mushafPage && newPage >= 1 && newPage <= 604) {
-        setMushafPage(newPage);
+      // Only sync if the verse has changed (not on initial play)
+      if (lastSyncedVerse !== null && quranAudio.currentVerse !== lastSyncedVerse) {
+        const newPage = getVersePage(num, quranAudio.currentVerse, verses.length);
+        if (newPage !== mushafPage && newPage >= 1 && newPage <= 604) {
+          setMushafPage(newPage);
+        }
       }
+      setLastSyncedVerse(quranAudio.currentVerse);
     }
-  }, [quranAudio.currentVerse, quranAudio.isPlaying, verses.length, num, viewMode, mushafPage]);
+    
+    // Reset sync tracking when playback stops
+    if (!quranAudio.isPlaying) {
+      setLastSyncedVerse(null);
+    }
+  }, [quranAudio.currentVerse, quranAudio.isPlaying, verses.length, num, viewMode, mushafPage, lastSyncedVerse]);
 
   const handleGoHome = () => {
     navigate('/');
