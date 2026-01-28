@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Settings, Volume2, Download, Palette, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Settings, Volume2, Download, Palette, Check, Type, BookOpen } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
+import { TextDisplayStyle } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 
 interface SettingsDialogProps {
@@ -18,6 +19,8 @@ interface SettingsDialogProps {
   onReciterChange: (reciter: ReciterId) => void;
   backgroundColor: string;
   onBackgroundColorChange: (color: string) => void;
+  textDisplayStyle: TextDisplayStyle;
+  onTextDisplayStyleChange: (style: TextDisplayStyle) => void;
 }
 
 const BACKGROUND_COLORS = [
@@ -29,11 +32,34 @@ const BACKGROUND_COLORS = [
   { id: 'emerald-light', name: 'Émeraude clair', value: 'hsl(158, 30%, 95%)' },
 ];
 
+const TEXT_DISPLAY_STYLES = [
+  { 
+    id: 'tajweed' as TextDisplayStyle, 
+    name: 'Tajweed coloré', 
+    description: 'Police Uthmanic avec couleurs Tajweed',
+    icon: '🎨'
+  },
+  { 
+    id: 'simple' as TextDisplayStyle, 
+    name: 'Texte simple', 
+    description: 'Texte arabe sans couleurs',
+    icon: '📝'
+  },
+  { 
+    id: 'mushaf' as TextDisplayStyle, 
+    name: 'Style Mushaf', 
+    description: 'Affichage page par page',
+    icon: '📖'
+  },
+];
+
 export const SettingsDialog = ({
   reciter,
   onReciterChange,
   backgroundColor,
   onBackgroundColorChange,
+  textDisplayStyle,
+  onTextDisplayStyleChange,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -125,6 +151,41 @@ export const SettingsDialog = ({
                     {name}
                   </Label>
                   {reciter === key && <Check className="h-4 w-4 text-primary" />}
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+
+          {/* Text Display Style */}
+          <div className="space-y-3">
+            <Label className="text-foreground flex items-center gap-2 text-base font-semibold">
+              <Type className="h-4 w-4 text-primary" />
+              Style d'affichage
+            </Label>
+            <RadioGroup
+              value={textDisplayStyle}
+              onValueChange={(value) => onTextDisplayStyleChange(value as TextDisplayStyle)}
+              className="space-y-2"
+            >
+              {TEXT_DISPLAY_STYLES.map((style) => (
+                <div
+                  key={style.id}
+                  className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                >
+                  <RadioGroupItem value={style.id} id={`style-${style.id}`} />
+                  <Label
+                    htmlFor={`style-${style.id}`}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{style.icon}</span>
+                      <div>
+                        <p className="text-foreground font-medium">{style.name}</p>
+                        <p className="text-xs text-muted-foreground">{style.description}</p>
+                      </div>
+                    </div>
+                  </Label>
+                  {textDisplayStyle === style.id && <Check className="h-4 w-4 text-primary" />}
                 </div>
               ))}
             </RadioGroup>

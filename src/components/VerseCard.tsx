@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { Play, Pause, Loader2, FileText, Download } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
+import { TextDisplayStyle } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
@@ -14,6 +15,7 @@ interface VerseCardProps {
   isHighlighted?: boolean;
   isLoading?: boolean;
   reciter?: ReciterId;
+  textDisplayStyle?: TextDisplayStyle;
   onPlay?: () => void;
 }
 
@@ -25,6 +27,7 @@ export const VerseCard = ({
   isHighlighted,
   isLoading,
   reciter = 'alafasy',
+  textDisplayStyle = 'tajweed',
   onPlay 
 }: VerseCardProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
@@ -63,6 +66,20 @@ export const VerseCard = ({
     }
   };
 
+  // Choose the appropriate text style class
+  const getTextClassName = () => {
+    switch (textDisplayStyle) {
+      case 'tajweed':
+        return 'quran-text text-3xl md:text-4xl leading-relaxed';
+      case 'simple':
+        return 'font-amiri text-3xl md:text-4xl leading-relaxed text-foreground';
+      case 'mushaf':
+        return 'quran-text text-2xl md:text-3xl leading-loose';
+      default:
+        return 'quran-text text-3xl md:text-4xl leading-relaxed';
+    }
+  };
+
   return (
     <div
       id={id}
@@ -70,6 +87,7 @@ export const VerseCard = ({
         "p-6 rounded-xl bg-card border border-border transition-all duration-300",
         isHighlighted && "verse-highlight bg-secondary/5 ring-2 ring-primary/20",
         isPlaying && "bg-primary/5",
+        textDisplayStyle === 'mushaf' && "bg-ivory/50 dark:bg-card",
         "animate-fade-in"
       )}
       style={{ animationDelay: `${verse.number * 0.05}s` }}
@@ -77,8 +95,16 @@ export const VerseCard = ({
       {/* Verse Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-sm font-semibold text-primary">
+          <div className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center",
+            textDisplayStyle === 'mushaf' 
+              ? "bg-primary text-primary-foreground" 
+              : "bg-primary/10"
+          )}>
+            <span className={cn(
+              "text-sm font-semibold",
+              textDisplayStyle === 'mushaf' ? "text-primary-foreground" : "text-primary"
+            )}>
               {verse.number}
             </span>
           </div>
@@ -128,13 +154,14 @@ export const VerseCard = ({
         </div>
       </div>
 
-      {/* Arabic Text with KFGQPC Uthmanic Script - Professional Tajweed */}
+      {/* Arabic Text */}
       <p 
-        className="quran-text text-3xl md:text-4xl leading-relaxed mb-4 text-right"
+        className={cn(getTextClassName(), "mb-4 text-right")}
         dir="rtl"
       >
         {verse.text}
       </p>
+
       {/* Translation */}
       <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
         {verse.translation}
