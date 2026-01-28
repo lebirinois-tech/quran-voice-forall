@@ -331,6 +331,10 @@ const SurahReader = () => {
               <MushafPageView
                 initialPage={mushafPage}
                 onPageChange={setMushafPage}
+                currentVerse={quranAudio.currentVerse}
+                isPlaying={quranAudio.isPlaying}
+                surahName={surah.name}
+                surahNumber={surah.number}
               />
             </TabsContent>
           </Tabs>
