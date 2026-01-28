@@ -19,37 +19,37 @@ interface QuranApiResponse {
 // Using Quran University / Al Muhafez standard color scheme
 // Colors extracted from official GTAF Quran app documentation
 const parseTajweedText = (text: string): string => {
-  // FROZEN Tajweed color scheme - Quran University / Al Muhafez standard
-  // DO NOT MODIFY - User explicitly requested this exact version
+  // User-specified Tajweed color scheme
+  // Qalqalah = Blue, Madd = Red, Ghunnah = Green
   const tajweedColors: Record<string, string> = {
     // Gray - Silent letters / Idgham without Ghunnah
-    'h': '#AAAAAA',      // Hamzat ul Wasl
-    's': '#AAAAAA',      // Silent
-    'l': '#AAAAAA',      // Laam Shamsiyyah
-    'u': '#AAAAAA',      // Idgham without Ghunnah
-    'd': '#AAAAAA',      // Idgham Mutajanisayn
-    'b': '#AAAAAA',      // Idgham Mutaqaribayn
+    'h': '#AAAAAA',
+    's': '#AAAAAA',
+    'l': '#AAAAAA',
+    'u': '#AAAAAA',
+    'd': '#AAAAAA',
+    'b': '#AAAAAA',
     
-    // Orange - Ghunnah (#D4740C)
-    'g': '#D4740C',
+    // Green - Ghunnah
+    'g': '#2AAD2A',
     
-    // Red - Ikhfa / Madd (#DD0000)
-    'f': '#DD0000',      // Ikhfa
-    'c': '#DD0000',      // Ikhfa Shafawi
-    'n': '#DD0000',      // Madd Normal
-    'p': '#CC0000',      // Madd Permissible
-    'm': '#BB0000',      // Madd Necessary
-    'o': '#AA0000',      // Madd Obligatory
+    // Red - Ikhfa / Madd
+    'f': '#DD0000',
+    'c': '#DD0000',
+    'n': '#DD0000',
+    'p': '#CC0000',
+    'm': '#BB0000',
+    'o': '#AA0000',
     
-    // Violet - Idgham with Ghunnah (#B266D9)
+    // Violet - Idgham with Ghunnah
     'a': '#B266D9',
-    'w': '#B266D9',      // Idgham Shafawi
+    'w': '#B266D9',
     
-    // Green - Qalqalah (#2AAD2A)
-    'q': '#2AAD2A',
+    // Blue - Qalqalah
+    'q': '#2E6ECB',
     
-    // Blue - Iqlab (#2E6ECB)
-    'i': '#2E6ECB',
+    // Orange - Iqlab
+    'i': '#D4740C',
   };
   
   let result = text;
