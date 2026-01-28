@@ -15,8 +15,46 @@ interface QuranApiResponse {
   };
 }
 
+// Parse tajweed markers from API into styled HTML
+const parseTajweedText = (text: string): string => {
+  // The quran-tajweed API returns text with markers like [h, [s, [l, etc.
+  // We need to convert these to proper HTML with CSS classes
+  
+  const tajweedRules: Record<string, { class: string; color: string }> = {
+    'h': { class: 'ham_wasl', color: '#AAAAAA' },      // Hamzat ul Wasl - grey
+    's': { class: 'slnt', color: '#AAAAAA' },          // Silent - grey
+    'l': { class: 'laam_shamsiyah', color: '#AAAAAA' }, // Laam Shamsiyyah - grey
+    'n': { class: 'madda_normal', color: '#537FFF' },  // Normal Madd - blue
+    'p': { class: 'madda_permissible', color: '#4050FF' }, // Permissible Madd - blue
+    'o': { class: 'madda_obligatory', color: '#000EBC' }, // Obligatory Madd - dark blue
+    'a': { class: 'iqlb', color: '#26BFFD' },          // Iqlab - cyan
+    'u': { class: 'qalqala', color: '#DD0008' },       // Qalqalah - red
+    'q': { class: 'madda_necessary', color: '#000080' }, // Necessary Madd - navy
+    'i': { class: 'ikhfa_shafawi', color: '#D500B7' }, // Ikhfa Shafawi - pink
+    'f': { class: 'ikhfa', color: '#9400A8' },         // Ikhfa - purple
+    'w': { class: 'idgham_shafawi', color: '#58B800' }, // Idgham Shafawi - light green
+    'g': { class: 'ghunnah', color: '#FF7E1E' },       // Ghunnah - orange
+    'd': { class: 'idgham_ghunnah', color: '#169200' }, // Idgham with Ghunnah - green
+    'b': { class: 'idgham_wo_ghunnah', color: '#169200' }, // Idgham without Ghunnah - green
+    'm': { class: 'idgham_mutajanisayn', color: '#A1A1A1' }, // Idgham Mutajanisayn - grey
+    'e': { class: 'idgham_mutaqaribayn', color: '#A1A1A1' }, // Idgham Mutaqaribayn - grey
+  };
+  
+  let result = text;
+  
+  // Replace each tajweed marker with styled span
+  Object.entries(tajweedRules).forEach(([marker, { class: className, color }]) => {
+    // Match pattern: [marker followed by text until ]
+    const regex = new RegExp(`\\[${marker}([^\\[\\]]*?)\\]`, 'g');
+    result = result.replace(regex, `<span class="tajweed-${className}" style="color: ${color};">$1</span>`);
+  });
+  
+  return result;
+};
+
 export const useQuranData = (surahNumber: number) => {
   const [verses, setVerses] = useState<Verse[]>([]);
+  const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,13 +64,15 @@ export const useQuranData = (surahNumber: number) => {
       setError(null);
 
       try {
-        // Fetch Uthmanic Arabic text and French translation
-        const [arabicResponse, translationResponse] = await Promise.all([
+        // Fetch Uthmanic Arabic text, Tajweed text, and French translation
+        const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
+          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
         ]);
 
         const arabicData: QuranApiResponse = await arabicResponse.json();
+        const tajweedData: QuranApiResponse = await tajweedResponse.json();
         const translationData: QuranApiResponse = await translationResponse.json();
 
         if (arabicData.code === 200 && translationData.code === 200) {
@@ -43,7 +83,16 @@ export const useQuranData = (surahNumber: number) => {
             page: ayah.page,
           }));
 
+          // Parse tajweed text and store separately
+          const tajweedMap: Record<number, string> = {};
+          if (tajweedData.code === 200) {
+            tajweedData.data.ayahs.forEach((ayah) => {
+              tajweedMap[ayah.numberInSurah] = parseTajweedText(ayah.text);
+            });
+          }
+
           setVerses(combinedVerses);
+          setVersesTajweed(tajweedMap);
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -58,5 +107,5 @@ export const useQuranData = (surahNumber: number) => {
     fetchVerses();
   }, [surahNumber]);
 
-  return { verses, isLoading, error };
+  return { verses, versesTajweed, isLoading, error };
 };

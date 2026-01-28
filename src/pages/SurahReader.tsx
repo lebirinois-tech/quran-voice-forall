@@ -64,7 +64,7 @@ const SurahReader = () => {
   }, [num]);
 
   // Fetch verses with Tajweed from API
-  const { verses, isLoading: isLoadingVerses, error } = useQuranData(num);
+  const { verses, versesTajweed, isLoading: isLoadingVerses, error } = useQuranData(num);
 
   const quranAudio = useQuranAudio({
     surahNumber: num,
@@ -310,6 +310,7 @@ const SurahReader = () => {
                   isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
                   reciter={appSettings.reciter}
                   textDisplayStyle={appSettings.textDisplayStyle}
+                  tajweedHtml={versesTajweed[verse.number]}
                   onPlay={() => quranAudio.playVerse(verse.number)}
                 />
               ))}

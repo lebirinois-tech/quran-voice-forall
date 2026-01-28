@@ -16,6 +16,7 @@ interface VerseCardProps {
   isLoading?: boolean;
   reciter?: ReciterId;
   textDisplayStyle?: TextDisplayStyle;
+  tajweedHtml?: string;
   onPlay?: () => void;
 }
 
@@ -28,6 +29,7 @@ export const VerseCard = ({
   isLoading,
   reciter = 'alafasy',
   textDisplayStyle = 'tajweed',
+  tajweedHtml,
   onPlay 
 }: VerseCardProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
@@ -155,12 +157,20 @@ export const VerseCard = ({
       </div>
 
       {/* Arabic Text */}
-      <p 
-        className={cn(getTextClassName(), "mb-4 text-right")}
-        dir="rtl"
-      >
-        {verse.text}
-      </p>
+      {textDisplayStyle === 'tajweed' && tajweedHtml ? (
+        <p 
+          className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
+          dir="rtl"
+          dangerouslySetInnerHTML={{ __html: tajweedHtml }}
+        />
+      ) : (
+        <p 
+          className={cn(getTextClassName(), "mb-4 text-right")}
+          dir="rtl"
+        >
+          {verse.text}
+        </p>
+      )}
 
       {/* Translation */}
       <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
