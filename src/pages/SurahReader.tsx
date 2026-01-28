@@ -8,7 +8,7 @@ import { MushafPageView } from '@/components/MushafPageView';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
-import { surahs, Surah, juzMapping, surahPageStart } from '@/data/surahs';
+import { surahs, Surah, juzMapping, surahPageStart, getVersePage } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, BookOpen, AlignLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -45,10 +45,18 @@ const SurahReader = () => {
     surahNumber: num,
     totalVerses: verses.length || 1,
     onVerseChange: (verseNum) => {
-      // Scroll to the verse
+      // Scroll to the verse in text mode
       const verseElement = document.getElementById(`verse-${verseNum}`);
       if (verseElement) {
         verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // Auto-update Mushaf page based on current verse
+      if (surah && verses.length > 0) {
+        const newPage = getVersePage(num, verseNum, verses.length);
+        if (newPage !== mushafPage) {
+          setMushafPage(newPage);
+        }
       }
     },
   });
