@@ -431,6 +431,7 @@ const SurahReader = () => {
                   initialPage={mushafPage}
                   onPageChange={setMushafPage}
                   currentVerse={quranAudio.currentVerse}
+                  currentVerseText={verses[quranAudio.currentVerse - 1]?.text}
                   isPlaying={quranAudio.isPlaying}
                   surahName={surah.name}
                   surahNumber={surah.number}
