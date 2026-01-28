@@ -4,14 +4,16 @@ import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
+import { MushafPageView } from '@/components/MushafPageView';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
 import { surahs, Surah, juzMapping, surahPageStart } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers } from 'lucide-react';
+import { Loader2, FileText, Layers, BookOpen, AlignLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const SurahReader = () => {
   const navigate = useNavigate();
@@ -20,14 +22,19 @@ const SurahReader = () => {
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const [pageInput, setPageInput] = useState('');
   const [juzInput, setJuzInput] = useState('');
+  const [viewMode, setViewMode] = useState<'text' | 'mushaf'>('text');
+  const [mushafPage, setMushafPage] = useState(1);
 
   const num = parseInt(surahNumber || '1');
 
-  // Fetch surah metadata
+  // Fetch surah metadata and set initial Mushaf page
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
     if (foundSurah) {
       setSurah(foundSurah);
+      // Set initial Mushaf page based on surah
+      const startPage = surahPageStart[num] || 1;
+      setMushafPage(startPage);
     }
   }, [num]);
 
@@ -256,51 +263,78 @@ const SurahReader = () => {
           </div>
         </div>
 
-        {/* Bismillah */}
-        {surah.number !== 1 && surah.number !== 9 && (
-          <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
-            <p className="font-amiri text-2xl md:text-3xl text-foreground">
-              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
-            </p>
-          </div>
-        )}
+        {/* View Mode Toggle */}
+        <div className="max-w-3xl mx-auto mb-6">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'text' | 'mushaf')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-xs mx-auto">
+              <TabsTrigger value="text" className="flex items-center gap-2">
+                <AlignLeft className="h-4 w-4" />
+                Texte
+              </TabsTrigger>
+              <TabsTrigger value="mushaf" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Mushaf
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Loading State */}
-        {isLoadingVerses && (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <Loader2 className="h-10 w-10 text-primary animate-spin" />
-            <p className="text-muted-foreground">Chargement des versets avec Tajweed...</p>
-          </div>
-        )}
+            {/* Text View */}
+            <TabsContent value="text" className="mt-6">
+              {/* Bismillah */}
+              {surah.number !== 1 && surah.number !== 9 && (
+                <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
+                  <p className="font-amiri text-2xl md:text-3xl text-foreground">
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
+                  </p>
+                </div>
+              )}
 
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-12">
-            <p className="text-destructive">{error}</p>
-          </div>
-        )}
+              {/* Loading State */}
+              {isLoadingVerses && (
+                <div className="flex flex-col items-center justify-center py-12 gap-4">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                  <p className="text-muted-foreground">Chargement des versets...</p>
+                </div>
+              )}
 
-        {/* Verses */}
-        {!isLoadingVerses && !error && (
-          <div className="space-y-4 max-w-3xl mx-auto">
-            {verses.map((verse) => (
-              <VerseCard
-                key={verse.number}
-                id={`verse-${verse.number}`}
-                verse={verse}
-                surahNumber={surah.number}
-                isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-                isHighlighted={quranAudio.currentVerse === verse.number}
-                isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
-                reciter={quranAudio.reciter}
-                onPlay={() => quranAudio.playVerse(verse.number)}
+              {/* Error State */}
+              {error && (
+                <div className="text-center py-12">
+                  <p className="text-destructive">{error}</p>
+                </div>
+              )}
+
+              {/* Verses */}
+              {!isLoadingVerses && !error && (
+                <div className="space-y-4">
+                  {verses.map((verse) => (
+                    <VerseCard
+                      key={verse.number}
+                      id={`verse-${verse.number}`}
+                      verse={verse}
+                      surahNumber={surah.number}
+                      isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
+                      isHighlighted={quranAudio.currentVerse === verse.number}
+                      isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
+                      reciter={quranAudio.reciter}
+                      onPlay={() => quranAudio.playVerse(verse.number)}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Mushaf Page View */}
+            <TabsContent value="mushaf" className="mt-6">
+              <MushafPageView
+                initialPage={mushafPage}
+                onPageChange={setMushafPage}
               />
-            ))}
-          </div>
-        )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
 
       {/* Voice Command Button - simplified without continuous mode toggle */}
