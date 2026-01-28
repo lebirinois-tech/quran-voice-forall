@@ -53,7 +53,6 @@ const SurahReader = () => {
   const [juzInput, setJuzInput] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('text');
   const [mushafPage, setMushafPage] = useState(1);
-  const [lastSyncedVerse, setLastSyncedVerse] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -144,10 +143,11 @@ const SurahReader = () => {
       return;
     }
 
-    const verseToPlay = getVerseForPageInSurah(mushafPage, verses.length);
+    const idx = verses.findIndex(v => v.page === mushafPage);
+    const verseToPlay = idx >= 0 ? idx + 1 : getVerseForPageInSurah(mushafPage, verses.length);
     quranAudio.playVerse(verseToPlay);
     toast.success(`Lecture depuis la page ${mushafPage}`);
-  }, [viewMode, verses.length, getSurahForPage, mushafPage, num, navigate, quranAudio, getVerseForPageInSurah]);
+  }, [viewMode, verses, getSurahForPage, mushafPage, num, navigate, quranAudio, getVerseForPageInSurah]);
 
   // Auto-start after navigation from a Mushaf page (so it doesn't stop at end of current surah like /surah/1 page 2).
   useEffect(() => {
@@ -156,29 +156,29 @@ const SurahReader = () => {
     if (verses.length === 0) return;
     if (getSurahForPage(autoplayFromPage) !== num) return;
 
-    const verseToPlay = getVerseForPageInSurah(autoplayFromPage, verses.length);
+    const idx = verses.findIndex(v => v.page === autoplayFromPage);
+    const verseToPlay = idx >= 0 ? idx + 1 : getVerseForPageInSurah(autoplayFromPage, verses.length);
     quranAudio.playVerse(verseToPlay);
     clearAutoplayState();
-  }, [autoplayFromPage, verses.length, num, viewMode, getSurahForPage, getVerseForPageInSurah, quranAudio, clearAutoplayState]);
+  }, [autoplayFromPage, verses, num, viewMode, getSurahForPage, getVerseForPageInSurah, quranAudio, clearAutoplayState]);
 
-  // Auto-sync Mushaf page only when verse CHANGES during playback (not on play start)
+  // Auto-sync Mushaf page to the *exact* page reported by the API (fallback to approximation)
   useEffect(() => {
-    if (quranAudio.isPlaying && verses.length > 0 && viewMode === 'mushaf') {
-      // Only sync if the verse has changed (not on initial play)
-      if (lastSyncedVerse !== null && quranAudio.currentVerse !== lastSyncedVerse) {
-        const newPage = getVersePage(num, quranAudio.currentVerse, verses.length);
-        if (newPage !== mushafPage && newPage >= 1 && newPage <= 604) {
-          setMushafPage(newPage);
-        }
-      }
-      setLastSyncedVerse(quranAudio.currentVerse);
+    if (viewMode !== 'mushaf') return;
+    if (!quranAudio.isPlaying) return;
+    if (verses.length === 0) return;
+
+    const verseIndex = Math.max(0, Math.min(verses.length - 1, quranAudio.currentVerse - 1));
+    const exactPage = verses[verseIndex]?.page;
+    const newPage =
+      typeof exactPage === 'number'
+        ? exactPage
+        : getVersePage(num, quranAudio.currentVerse, verses.length);
+
+    if (newPage !== mushafPage && newPage >= 1 && newPage <= 604) {
+      setMushafPage(newPage);
     }
-    
-    // Reset sync tracking when playback stops
-    if (!quranAudio.isPlaying) {
-      setLastSyncedVerse(null);
-    }
-  }, [quranAudio.currentVerse, quranAudio.isPlaying, verses.length, num, viewMode, mushafPage, lastSyncedVerse]);
+  }, [viewMode, quranAudio.isPlaying, quranAudio.currentVerse, verses, num, mushafPage]);
 
   const handleGoHome = () => {
     navigate('/');
@@ -426,14 +426,16 @@ const SurahReader = () => {
 
             {/* Mushaf Page View */}
             <TabsContent value="mushaf" className="mt-6">
-              <MushafPageView
-                initialPage={mushafPage}
-                onPageChange={setMushafPage}
-                currentVerse={quranAudio.currentVerse}
-                isPlaying={quranAudio.isPlaying}
-                surahName={surah.name}
-                surahNumber={surah.number}
-              />
+              <div>
+                <MushafPageView
+                  initialPage={mushafPage}
+                  onPageChange={setMushafPage}
+                  currentVerse={quranAudio.currentVerse}
+                  isPlaying={quranAudio.isPlaying}
+                  surahName={surah.name}
+                  surahNumber={surah.number}
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

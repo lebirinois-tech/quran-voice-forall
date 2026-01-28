@@ -5,6 +5,7 @@ interface QuranApiVerse {
   number: number;
   text: string;
   numberInSurah: number;
+  page: number;
 }
 
 interface QuranApiResponse {
@@ -39,6 +40,7 @@ export const useQuranData = (surahNumber: number) => {
             number: ayah.numberInSurah,
             text: ayah.text,
             translation: translationData.data.ayahs[index]?.text || '',
+            page: ayah.page,
           }));
 
           setVerses(combinedVerses);
