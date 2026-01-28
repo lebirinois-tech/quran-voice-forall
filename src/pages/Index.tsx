@@ -84,6 +84,8 @@ const Index = () => {
         onReciterChange={appSettings.onReciterChange}
         backgroundColor={appSettings.backgroundColor}
         onBackgroundColorChange={appSettings.onBackgroundColorChange}
+        textDisplayStyle={appSettings.textDisplayStyle}
+        onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
       />
 
       <main className="container mx-auto px-4 py-6">

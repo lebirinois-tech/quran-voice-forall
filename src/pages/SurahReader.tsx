@@ -7,6 +7,7 @@ import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import { surahs, Surah, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers } from 'lucide-react';
@@ -41,6 +42,7 @@ const SurahReader = () => {
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const [pageInput, setPageInput] = useState('');
   const [juzInput, setJuzInput] = useState('');
+  const appSettings = useAppSettings();
 
   const num = parseInt(surahNumber || '1');
 
@@ -155,7 +157,7 @@ const SurahReader = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pattern-islamic pb-32">
+    <div className="min-h-screen bg-background pattern-islamic pb-32" style={{ backgroundColor: appSettings.backgroundColor }}>
       <Header 
         showBackButton 
         onBack={handleGoHome}
@@ -163,6 +165,12 @@ const SurahReader = () => {
         isAccessibilityMode={isAccessibilityMode}
         isContinuousMode={voiceCommands.isContinuousMode}
         onToggleContinuous={voiceCommands.toggleContinuousMode}
+        reciter={appSettings.reciter}
+        onReciterChange={appSettings.onReciterChange}
+        backgroundColor={appSettings.backgroundColor}
+        onBackgroundColorChange={appSettings.onBackgroundColorChange}
+        textDisplayStyle={appSettings.textDisplayStyle}
+        onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
       />
 
       <main className="container mx-auto px-4 py-6">
@@ -300,7 +308,8 @@ const SurahReader = () => {
                   isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
                   isHighlighted={quranAudio.currentVerse === verse.number}
                   isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
-                  reciter={quranAudio.reciter}
+                  reciter={appSettings.reciter}
+                  textDisplayStyle={appSettings.textDisplayStyle}
                   onPlay={() => quranAudio.playVerse(verse.number)}
                 />
               ))}
