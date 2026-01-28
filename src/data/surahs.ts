@@ -38,12 +38,15 @@ export const surahPageStart: Record<number, number> = {
 // Calculate approximate page number for a verse
 export const getVersePage = (surahNumber: number, verseNumber: number, totalVerses: number): number => {
   const startPage = surahPageStart[surahNumber] || 1;
-  const nextSurahStart = surahPageStart[surahNumber + 1] || startPage + 1;
-  const pagesInSurah = nextSurahStart - startPage;
+  const nextSurahStart = surahPageStart[surahNumber + 1] || 605;
+  const pagesInSurah = Math.max(1, nextSurahStart - startPage);
   
-  // Estimate page based on verse position
-  const verseProgress = verseNumber / totalVerses;
-  return Math.floor(startPage + (pagesInSurah * verseProgress));
+  // Calculate page based on verse position (0-indexed progress)
+  const verseProgress = (verseNumber - 1) / Math.max(1, totalVerses - 1);
+  const calculatedPage = Math.floor(startPage + (pagesInSurah * verseProgress));
+  
+  // Ensure we stay within the surah's page range
+  return Math.min(Math.max(calculatedPage, startPage), nextSurahStart - 1);
 };
 
 // Juz (part) mapping - each Juz starts at [surahNumber, verseNumber]

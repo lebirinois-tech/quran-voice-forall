@@ -50,16 +50,18 @@ const SurahReader = () => {
       if (verseElement) {
         verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      
-      // Auto-update Mushaf page based on current verse
-      if (surah && verses.length > 0) {
-        const newPage = getVersePage(num, verseNum, verses.length);
-        if (newPage !== mushafPage) {
-          setMushafPage(newPage);
-        }
-      }
     },
   });
+
+  // Auto-sync Mushaf page with current verse during audio playback
+  useEffect(() => {
+    if (quranAudio.isPlaying && verses.length > 0 && viewMode === 'mushaf') {
+      const newPage = getVersePage(num, quranAudio.currentVerse, verses.length);
+      if (newPage !== mushafPage && newPage >= 1 && newPage <= 604) {
+        setMushafPage(newPage);
+      }
+    }
+  }, [quranAudio.currentVerse, quranAudio.isPlaying, verses.length, num, viewMode, mushafPage]);
 
   const handleGoHome = () => {
     navigate('/');
