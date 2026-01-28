@@ -9,26 +9,20 @@ import { useState } from 'react';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
-// Official color codes from alquran.cloud/tajweed-guide
+// Using Dar Al-Maarifah standard color scheme
 const parseTajweedFallback = (text: string): string => {
   const tajweedColors: Record<string, string> = {
-    h: '#AAAAAA',      // Hamzat ul Wasl
-    s: '#AAAAAA',      // Silent
-    l: '#AAAAAA',      // Laam Shamsiyyah
-    n: '#537FFF',      // Madd Normal
-    p: '#4050FF',      // Madd Permissible
-    m: '#000EBC',      // Madd Necessary
-    q: '#DD0008',      // Qalqalah
-    o: '#2144C1',      // Madd Obligatory
-    c: '#D500B7',      // Ikhfa Shafawi
-    f: '#9400A8',      // Ikhfa
-    w: '#58B800',      // Idgham Shafawi
-    i: '#26BFFD',      // Iqlab
-    a: '#169777',      // Idgham with Ghunnah
-    u: '#169200',      // Idgham without Ghunnah
-    d: '#A1A1A1',      // Idgham Mutajanisayn
-    b: '#A1A1A1',      // Idgham Mutaqaribayn
-    g: '#FF7E1E',      // Ghunnah
+    // Gray - Letters not pronounced
+    h: '#707070', s: '#707070', l: '#707070',
+    // Red shades - Madd
+    n: '#A00000', p: '#E74C3C', m: '#8B0000', o: '#C0392B',
+    // Blue - Qalqalah
+    q: '#4A90D9',
+    // Green - Nasalization
+    c: '#27AE60', f: '#27AE60', w: '#27AE60', i: '#27AE60',
+    a: '#27AE60', g: '#27AE60',
+    // Gray - Idgham (not pronounced)
+    u: '#707070', d: '#707070', b: '#707070',
   };
 
   let html = text;
