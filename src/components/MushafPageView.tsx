@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut, RotateCcw, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
@@ -8,6 +8,10 @@ import { cn } from '@/lib/utils';
 interface MushafPageViewProps {
   initialPage: number;
   onPageChange?: (page: number) => void;
+  currentVerse?: number;
+  isPlaying?: boolean;
+  surahName?: string;
+  surahNumber?: number;
 }
 
 // EasyQuran Tajweed Mushaf CDN (high-res colored Tajweed)
@@ -15,7 +19,14 @@ const getMushafPageUrl = (page: number): string => {
   return `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`;
 };
 
-export const MushafPageView = ({ initialPage, onPageChange }: MushafPageViewProps) => {
+export const MushafPageView = ({ 
+  initialPage, 
+  onPageChange,
+  currentVerse,
+  isPlaying,
+  surahName,
+  surahNumber
+}: MushafPageViewProps) => {
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageInput, setPageInput] = useState(initialPage.toString());
   const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +81,17 @@ export const MushafPageView = ({ initialPage, onPageChange }: MushafPageViewProp
 
   return (
     <div className="flex flex-col items-center gap-4">
+      {/* Current Verse Indicator - Shows when audio is playing */}
+      {isPlaying && currentVerse && (
+        <div className="animate-fade-in flex items-center gap-3 bg-primary text-primary-foreground px-4 py-2 rounded-full shadow-lg">
+          <Volume2 className="h-5 w-5 animate-pulse" />
+          <span className="font-medium">
+            {surahName ? `${surahName} - ` : surahNumber ? `Sourate ${surahNumber} - ` : ''}
+            Verset {currentVerse}
+          </span>
+        </div>
+      )}
+
       {/* Navigation Controls */}
       <div className="flex items-center gap-3 flex-wrap justify-center bg-card border border-border rounded-xl p-3 shadow-soft">
         {/* Previous Page */}
