@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { AudioPlayer } from '@/components/AudioPlayer';
@@ -15,29 +15,96 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
+type ViewMode = 'text' | 'mushaf';
+
+type LocationState = {
+  autoplayFromPage?: number;
+  autoplayViewMode?: ViewMode;
+} | null;
+
+// (page start -> surah) mapping
+const PAGE_START_MAP: [number, number][] = [
+  [1, 1], [2, 2], [50, 3], [77, 4], [106, 5], [128, 6], [151, 7],
+  [177, 8], [187, 9], [208, 10], [221, 11], [235, 12], [249, 13],
+  [255, 14], [262, 15], [267, 16], [282, 17], [293, 18], [305, 19],
+  [312, 20], [322, 21], [332, 22], [342, 23], [350, 24], [359, 25],
+  [367, 26], [377, 27], [385, 28], [396, 29], [404, 30], [411, 31],
+  [415, 32], [418, 33], [428, 34], [434, 35], [440, 36], [446, 37],
+  [453, 38], [458, 39], [467, 40], [477, 41], [483, 42], [489, 43],
+  [496, 44], [499, 45], [502, 46], [507, 47], [510, 48], [515, 49],
+  [518, 50], [520, 51], [523, 52], [526, 53], [528, 54], [531, 55],
+  [534, 56], [537, 57], [542, 58], [545, 59], [549, 60], [551, 61],
+  [553, 62], [554, 63], [556, 64], [558, 65], [560, 66], [562, 67],
+  [564, 68], [566, 69], [568, 70], [570, 71], [572, 72], [574, 73],
+  [575, 74], [577, 75], [578, 76], [580, 77], [582, 78], [583, 79],
+  [585, 80], [586, 81], [587, 82], [588, 83], [589, 84], [590, 85],
+  [591, 86], [592, 88], [593, 89], [594, 90], [595, 91], [596, 93],
+  [597, 95], [598, 97], [599, 99], [600, 101], [601, 103], [602, 106],
+  [603, 109], [604, 112],
+];
+
 const SurahReader = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [surah, setSurah] = useState<Surah | null>(null);
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const [pageInput, setPageInput] = useState('');
   const [juzInput, setJuzInput] = useState('');
-  const [viewMode, setViewMode] = useState<'text' | 'mushaf'>('text');
+  const [viewMode, setViewMode] = useState<ViewMode>('text');
   const [mushafPage, setMushafPage] = useState(1);
   const [lastSyncedVerse, setLastSyncedVerse] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
+
+  const { autoplayFromPage, autoplayViewMode } = useMemo(() => {
+    const state = (location.state as LocationState) || null;
+    return {
+      autoplayFromPage: state?.autoplayFromPage,
+      autoplayViewMode: state?.autoplayViewMode,
+    };
+  }, [location.state]);
+
+  const getSurahForPage = useCallback((pageNum: number) => {
+    let targetSurah = 1;
+    for (const [page, s] of PAGE_START_MAP) {
+      if (page <= pageNum) targetSurah = s;
+      else break;
+    }
+    return targetSurah;
+  }, []);
+
+  const getVerseForPageInSurah = useCallback((page: number, totalVerses: number) => {
+    const startPage = surahPageStart[num] || 1;
+    const nextSurahStart = surahPageStart[num + 1] || 605;
+    const pagesInSurah = Math.max(1, nextSurahStart - startPage);
+    const clampedPage = Math.min(Math.max(page, startPage), nextSurahStart - 1);
+
+    // Approximation: map page progress within the surah to verse index.
+    const pageProgress = (clampedPage - startPage) / Math.max(1, pagesInSurah);
+    const estimatedVerse = Math.max(1, Math.floor(pageProgress * totalVerses) + 1);
+    return Math.min(estimatedVerse, totalVerses);
+  }, [num]);
 
   // Fetch surah metadata and set initial Mushaf page
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
     if (foundSurah) {
       setSurah(foundSurah);
-      // Set initial Mushaf page based on surah
+
+      if (autoplayViewMode === 'mushaf') {
+        setViewMode('mushaf');
+      }
+
+      // Set initial Mushaf page based on surah, but preserve requested page if we navigated here from a page.
       const startPage = surahPageStart[num] || 1;
-      setMushafPage(startPage);
+      const initialPage =
+        typeof autoplayFromPage === 'number' && getSurahForPage(autoplayFromPage) === num
+          ? autoplayFromPage
+          : startPage;
+      setMushafPage(initialPage);
     }
-  }, [num]);
+  }, [num, autoplayFromPage, autoplayViewMode, getSurahForPage]);
 
   // Fetch verses with Tajweed from API
   const { verses, isLoading: isLoadingVerses, error } = useQuranData(num);
@@ -53,6 +120,46 @@ const SurahReader = () => {
       }
     },
   });
+
+  const clearAutoplayState = useCallback(() => {
+    if (autoplayFromPage !== undefined || autoplayViewMode !== undefined) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [autoplayFromPage, autoplayViewMode, navigate, location.pathname]);
+
+  const handlePlayRequest = useCallback(() => {
+    if (viewMode !== 'mushaf' || verses.length === 0) {
+      quranAudio.play();
+      toast.success('Lecture démarrée');
+      return;
+    }
+
+    const targetSurah = getSurahForPage(mushafPage);
+    if (targetSurah !== num) {
+      // La page affichée appartient à une autre sourate: on y navigue et on auto-démarre.
+      navigate(`/surah/${targetSurah}`, {
+        state: { autoplayFromPage: mushafPage, autoplayViewMode: 'mushaf' },
+      });
+      toast.info(`Navigation vers la sourate ${targetSurah} (page ${mushafPage})`);
+      return;
+    }
+
+    const verseToPlay = getVerseForPageInSurah(mushafPage, verses.length);
+    quranAudio.playVerse(verseToPlay);
+    toast.success(`Lecture depuis la page ${mushafPage}`);
+  }, [viewMode, verses.length, getSurahForPage, mushafPage, num, navigate, quranAudio, getVerseForPageInSurah]);
+
+  // Auto-start after navigation from a Mushaf page (so it doesn't stop at end of current surah like /surah/1 page 2).
+  useEffect(() => {
+    if (viewMode !== 'mushaf') return;
+    if (typeof autoplayFromPage !== 'number') return;
+    if (verses.length === 0) return;
+    if (getSurahForPage(autoplayFromPage) !== num) return;
+
+    const verseToPlay = getVerseForPageInSurah(autoplayFromPage, verses.length);
+    quranAudio.playVerse(verseToPlay);
+    clearAutoplayState();
+  }, [autoplayFromPage, verses.length, num, viewMode, getSurahForPage, getVerseForPageInSurah, quranAudio, clearAutoplayState]);
 
   // Auto-sync Mushaf page only when verse CHANGES during playback (not on play start)
   useEffect(() => {
@@ -83,35 +190,7 @@ const SurahReader = () => {
   };
 
   const handleNavigateToPage = (pageNum: number) => {
-    // Simplified page to surah mapping (page start numbers for each surah)
-    const pageStartMap: [number, number][] = [
-      [1, 1], [2, 2], [50, 3], [77, 4], [106, 5], [128, 6], [151, 7],
-      [177, 8], [187, 9], [208, 10], [221, 11], [235, 12], [249, 13],
-      [255, 14], [262, 15], [267, 16], [282, 17], [293, 18], [305, 19],
-      [312, 20], [322, 21], [332, 22], [342, 23], [350, 24], [359, 25],
-      [367, 26], [377, 27], [385, 28], [396, 29], [404, 30], [411, 31],
-      [415, 32], [418, 33], [428, 34], [434, 35], [440, 36], [446, 37],
-      [453, 38], [458, 39], [467, 40], [477, 41], [483, 42], [489, 43],
-      [496, 44], [499, 45], [502, 46], [507, 47], [510, 48], [515, 49],
-      [518, 50], [520, 51], [523, 52], [526, 53], [528, 54], [531, 55],
-      [534, 56], [537, 57], [542, 58], [545, 59], [549, 60], [551, 61],
-      [553, 62], [554, 63], [556, 64], [558, 65], [560, 66], [562, 67],
-      [564, 68], [566, 69], [568, 70], [570, 71], [572, 72], [574, 73],
-      [575, 74], [577, 75], [578, 76], [580, 77], [582, 78], [583, 79],
-      [585, 80], [586, 81], [587, 82], [588, 83], [589, 84], [590, 85],
-      [591, 86], [592, 88], [593, 89], [594, 90], [595, 91], [596, 93],
-      [597, 95], [598, 97], [599, 99], [600, 101], [601, 103], [602, 106],
-      [603, 109], [604, 112],
-    ];
-    
-    let targetSurah = 1;
-    for (const [page, surah] of pageStartMap) {
-      if (page <= pageNum) {
-        targetSurah = surah;
-      } else {
-        break;
-      }
-    }
+    const targetSurah = getSurahForPage(pageNum);
     
     navigate(`/surah/${targetSurah}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
@@ -127,8 +206,7 @@ const SurahReader = () => {
 
   const voiceCommands = useVoiceCommands({
     onPlay: () => {
-      quranAudio.play();
-      toast.success('Lecture démarrée');
+      handlePlayRequest();
     },
     onPause: () => {
       quranAudio.pause();
@@ -385,23 +463,7 @@ const SurahReader = () => {
         repeatSettings={quranAudio.repeatSettings}
         currentRepeatCount={quranAudio.currentRepeatCount}
         playbackSpeed={quranAudio.playbackSpeed}
-        onPlay={() => {
-          // En mode Mushaf, démarrer depuis le premier verset de la page affichée
-          if (viewMode === 'mushaf' && verses.length > 0) {
-            const startPage = surahPageStart[num] || 1;
-            const nextSurahStart = surahPageStart[num + 1] || 605;
-            const pagesInSurah = Math.max(1, nextSurahStart - startPage);
-            
-            // Calculer le verset correspondant à la page Mushaf courante
-            const pageProgress = (mushafPage - startPage) / Math.max(1, pagesInSurah);
-            const estimatedVerse = Math.max(1, Math.floor(pageProgress * verses.length) + 1);
-            const verseToPlay = Math.min(estimatedVerse, verses.length);
-            
-            quranAudio.playVerse(verseToPlay);
-          } else {
-            quranAudio.play();
-          }
-        }}
+        onPlay={handlePlayRequest}
         onPause={quranAudio.pause}
         onNext={quranAudio.nextVerse}
         onPrevious={quranAudio.previousVerse}
