@@ -4,15 +4,14 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useMushafDownload } from '@/hooks/useMushafDownload';
 
 interface MushafPageViewProps {
   initialPage: number;
   onPageChange?: (page: number) => void;
 }
 
-// Fallback CDN for Mushaf Tajweed pages
-const getFallbackUrl = (page: number): string => {
+// EasyQuran Tajweed Mushaf CDN (high-res colored Tajweed)
+const getMushafPageUrl = (page: number): string => {
   return `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`;
 };
 
@@ -22,9 +21,6 @@ export const MushafPageView = ({ initialPage, onPageChange }: MushafPageViewProp
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [useFallback, setUseFallback] = useState(false);
-  
-  const { getPageUrl, isComplete } = useMushafDownload();
 
   useEffect(() => {
     setCurrentPage(initialPage);
@@ -188,18 +184,11 @@ export const MushafPageView = ({ initialPage, onPageChange }: MushafPageViewProp
             }}
           >
             <img
-              src={isComplete && !useFallback ? getPageUrl(currentPage) : getFallbackUrl(currentPage)}
+              src={getMushafPageUrl(currentPage)}
               alt={`Page ${currentPage} du Mushaf Tajweed`}
               className="max-w-full h-auto rounded-lg shadow-md"
               onLoad={handleImageLoad}
-              onError={() => {
-                // If local storage fails, try fallback
-                if (!useFallback) {
-                  setUseFallback(true);
-                } else {
-                  handleImageError();
-                }
-              }}
+              onError={handleImageError}
               loading="eager"
             />
           </div>
