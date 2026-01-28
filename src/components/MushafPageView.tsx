@@ -81,14 +81,24 @@ export const MushafPageView = ({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Current Verse Indicator - Shows when audio is playing */}
+      {/* Current Verse Indicator - Sticky when playing */}
       {isPlaying && currentVerse && (
-        <div className="animate-fade-in flex items-center gap-3 bg-primary text-primary-foreground px-4 py-2 rounded-full shadow-lg">
-          <Volume2 className="h-5 w-5 animate-pulse" />
-          <span className="font-medium">
-            {surahName ? `${surahName} - ` : surahNumber ? `Sourate ${surahNumber} - ` : ''}
-            Verset {currentVerse}
-          </span>
+        <div className="sticky top-20 z-20 animate-fade-in">
+          <div className="flex items-center gap-3 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground px-6 py-3 rounded-full shadow-xl border-2 border-primary-foreground/20">
+            <div className="relative">
+              <Volume2 className="h-6 w-6" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-ping" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg">
+                Verset {currentVerse}
+              </span>
+              <span className="text-xs opacity-90">
+                {surahName || (surahNumber ? `Sourate ${surahNumber}` : '')} • Page {currentPage}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
