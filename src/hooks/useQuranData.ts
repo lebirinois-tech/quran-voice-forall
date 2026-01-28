@@ -19,8 +19,10 @@ interface QuranApiResponse {
 // Using Quran University / Al Muhafez standard color scheme
 // Colors extracted from official GTAF Quran app documentation
 const parseTajweedText = (text: string): string => {
-  // User-specified Tajweed color scheme
-  // Qalqalah = Blue, Madd = Red, Ghunnah = Green
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FROZEN TAJWEED COLOR SCHEME - DO NOT MODIFY
+  // User confirmed on 2026-01-28: Qalqalah=Blue, Madd=Red, Ghunnah=Green
+  // ═══════════════════════════════════════════════════════════════════════════
   const tajweedColors: Record<string, string> = {
     // Gray - Silent letters / Idgham without Ghunnah
     'h': '#AAAAAA',

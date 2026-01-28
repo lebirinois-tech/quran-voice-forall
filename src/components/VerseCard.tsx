@@ -9,8 +9,10 @@ import { useState } from 'react';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
-// User-specified Tajweed color scheme
-// Qalqalah = Blue, Madd = Red, Ghunnah = Green
+// ═══════════════════════════════════════════════════════════════════════════
+// FROZEN TAJWEED COLOR SCHEME - DO NOT MODIFY
+// User confirmed on 2026-01-28: Qalqalah=Blue, Madd=Red, Ghunnah=Green
+// ═══════════════════════════════════════════════════════════════════════════
 const parseTajweedFallback = (text: string): string => {
   const tajweedColors: Record<string, string> = {
     // Gray - Silent / Idgham without Ghunnah
