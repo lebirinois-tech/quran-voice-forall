@@ -56,48 +56,68 @@ export const SettingsDialog = ({
   onTextDisplayStyleChange,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
-  const handleDownloadFullSurah = async () => {
-    setIsDownloading(true);
+  const getCurrentSurahNumber = () => {
+    const pathMatch = window.location.pathname.match(/\/surah\/(\d+)/);
+    return pathMatch ? parseInt(pathMatch[1]) : null;
+  };
+
+  const handleDownloadSurah = async () => {
+    const surahNumber = getCurrentSurahNumber();
+    if (!surahNumber) {
+      toast.info('Ouvrez une sourate pour télécharger son audio');
+      return;
+    }
+
+    setIsDownloadingSurah(true);
+    setDownloadProgress(0);
+    
     try {
-      // Get current surah from URL if on surah page
-      const pathMatch = window.location.pathname.match(/\/surah\/(\d+)/);
-      if (!pathMatch) {
-        toast.info('Ouvrez une sourate pour télécharger son audio');
-        return;
-      }
-      
-      const surahNumber = parseInt(pathMatch[1]);
       const edition = RECITERS[reciter].id;
-      
-      // Fetch surah audio info
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
       const data = await response.json();
       
       if (data.code === 200 && data.data?.ayahs) {
-        // Download first verse as example (full surah download would be multiple files)
-        const firstAyah = data.data.ayahs[0];
-        if (firstAyah?.audio) {
-          const audioResponse = await fetch(firstAyah.audio);
-          const blob = await audioResponse.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `surah-${surahNumber}-verse-1-${reciter}.mp3`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          toast.success('Téléchargement du premier verset réussi');
+        const ayahs = data.data.ayahs;
+        const surahName = data.data.englishName || `Surah-${surahNumber}`;
+        
+        // Download all verses
+        for (let i = 0; i < ayahs.length; i++) {
+          const ayah = ayahs[i];
+          if (ayah?.audio) {
+            const audioResponse = await fetch(ayah.audio);
+            const blob = await audioResponse.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${surahName}_Verset_${ayah.numberInSurah}_${RECITERS[reciter].name}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }
+          setDownloadProgress(Math.round(((i + 1) / ayahs.length) * 100));
+          // Small delay to prevent browser blocking
+          await new Promise(resolve => setTimeout(resolve, 200));
         }
+        
+        toast.success(`Sourate ${surahName} téléchargée (${ayahs.length} versets)`);
       }
     } catch (error) {
       console.error('Download error:', error);
       toast.error('Erreur de téléchargement');
     } finally {
-      setIsDownloading(false);
+      setIsDownloadingSurah(false);
+      setDownloadProgress(0);
     }
+  };
+
+  const handleOpenQuranDownloadLink = () => {
+    // Open external link for full Quran download
+    window.open(`https://quranicaudio.com/quran/${RECITERS[reciter].id}`, '_blank');
+    toast.info('Redirection vers QuranicAudio pour le Quran complet');
   };
 
   return (
@@ -224,24 +244,38 @@ export const SettingsDialog = ({
               <Download className="h-3.5 w-3.5 text-primary" />
               Télécharger l'audio
             </Label>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={handleDownloadFullSurah}
-              disabled={isDownloading}
-            >
-              {isDownloading ? (
-                <>Téléchargement...</>
-              ) : (
-                <>
-                  <Download className="h-3.5 w-3.5 mr-2" />
-                  Télécharger le verset actuel
-                </>
-              )}
-            </Button>
+            <div className="space-y-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={handleDownloadSurah}
+                disabled={isDownloadingSurah || !getCurrentSurahNumber()}
+              >
+                {isDownloadingSurah ? (
+                  <>
+                    <Download className="h-3.5 w-3.5 mr-2 animate-pulse" />
+                    Téléchargement... {downloadProgress}%
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-3.5 w-3.5 mr-2" />
+                    📖 Télécharger la Sourate
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={handleOpenQuranDownloadLink}
+              >
+                <Download className="h-3.5 w-3.5 mr-2" />
+                📚 Quran complet (lien externe)
+              </Button>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Télécharge l'audio avec le récitateur sélectionné
+              Avec le récitateur: {RECITERS[reciter].name}
             </p>
           </div>
         </div>
