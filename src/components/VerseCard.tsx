@@ -128,10 +128,12 @@ export const VerseCard = ({
         </div>
       </div>
 
-      {/* Arabic Text */}
-      <p className="arabic-text text-2xl md:text-3xl leading-loose mb-4 text-right font-amiri text-red-600">
-        {verse.text}
-      </p>
+      {/* Arabic Text with Tajweed */}
+      <p 
+        className="tajweed-text arabic-text text-2xl md:text-3xl leading-loose mb-4 text-right font-amiri"
+        dir="rtl"
+        dangerouslySetInnerHTML={{ __html: verse.text }}
+      />
 
       {/* Translation */}
       <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">

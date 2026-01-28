@@ -220,3 +220,85 @@
     line-height: 2;
   }
 }
+
+/* Tajweed Colors - Based on standard Tajweed rules */
+.tajweed-text {
+  color: hsl(var(--foreground));
+}
+
+/* Ghunnah - Orange */
+.tajweed-text tajweed.ghn {
+  color: #FF7E1E;
+}
+
+/* Qalqalah - Red */
+.tajweed-text tajweed.qlq {
+  color: #DD0008;
+}
+
+/* Idgham with Ghunnah - Green */
+.tajweed-text tajweed.idgh_ghn {
+  color: #169200;
+}
+
+/* Idgham without Ghunnah - Green */
+.tajweed-text tajweed.idgh_w_ghn {
+  color: #169200;
+}
+
+/* Iqlab - Cyan/Blue */
+.tajweed-text tajweed.iqlb {
+  color: #26BFFD;
+}
+
+/* Ikhfa - Purple */
+.tajweed-text tajweed.ikhf {
+  color: #9400A8;
+}
+
+/* Ikhfa Shafawi - Pink */
+.tajweed-text tajweed.ikhf_shfw {
+  color: #D500B7;
+}
+
+/* Madd Normal - Blue */
+.tajweed-text tajweed.madd_normal {
+  color: #537FFF;
+}
+
+/* Madd Permissible - Blue */
+.tajweed-text tajweed.madd_permissible {
+  color: #4050FF;
+}
+
+/* Madd Necessary - Dark Blue */
+.tajweed-text tajweed.madd_necessary {
+  color: #000EBC;
+}
+
+/* Madd Obligatory - Blue */
+.tajweed-text tajweed.madd_obligatory {
+  color: #2144DF;
+}
+
+/* Hamzat ul Wasl - Gray */
+.tajweed-text tajweed.ham_wasl {
+  color: #AAAAAA;
+}
+
+/* Lam Shamsiyyah - Teal */
+.tajweed-text tajweed.laam_shamsiyah {
+  color: #008088;
+}
+
+/* Silent - Gray light */
+.tajweed-text tajweed.slnt {
+  color: #CCCCCC;
+}
+
+/* Hover effects for all Tajweed tags */
+.tajweed-text tajweed:hover {
+  cursor: help;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
