@@ -25,19 +25,19 @@ export const useQuranData = (surahNumber: number) => {
       setError(null);
 
       try {
-        // Fetch Arabic text with Tajweed coloring and French translation
-        const [tajweedResponse, translationResponse] = await Promise.all([
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
+        // Fetch Arabic text and French translation
+        const [arabicResponse, translationResponse] = await Promise.all([
+          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.alafasy`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
         ]);
 
-        const tajweedData: QuranApiResponse = await tajweedResponse.json();
+        const arabicData: QuranApiResponse = await arabicResponse.json();
         const translationData: QuranApiResponse = await translationResponse.json();
 
-        if (tajweedData.code === 200 && translationData.code === 200) {
-          const combinedVerses: Verse[] = tajweedData.data.ayahs.map((ayah, index) => ({
+        if (arabicData.code === 200 && translationData.code === 200) {
+          const combinedVerses: Verse[] = arabicData.data.ayahs.map((ayah, index) => ({
             number: ayah.numberInSurah,
-            text: ayah.text, // This now contains HTML with Tajweed classes
+            text: ayah.text,
             translation: translationData.data.ayahs[index]?.text || '',
           }));
 
