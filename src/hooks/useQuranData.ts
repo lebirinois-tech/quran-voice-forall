@@ -16,34 +16,45 @@ interface QuranApiResponse {
 }
 
 // Parse tajweed markers from API into styled HTML
-// Official API format from alquran.cloud: [marker:number[content] or [marker[content]
-// Reference: https://alquran.cloud/tajweed-guide
+// Using Dar Al-Maarifah standard color scheme (most common in Quran apps)
+// Reference: https://easyquran.com/en/tajweed-quran-colors-roles/
 const parseTajweedText = (text: string): string => {
-  // Official color codes from alquran.cloud/tajweed-guide
+  // Dar Al-Maarifah standard Tajweed color scheme:
+  // - RED shades: Madd (prolongation)
+  // - GRAY: Letters not pronounced (silent, Laam Shamsiyyah, Hamzat ul Wasl)
+  // - BLUE: Qalqalah and emphatic Ra
+  // - GREEN: Nasalization (Ghunnah, Ikhfa, Iqlab, Idgham)
   const tajweedColors: Record<string, string> = {
-    'h': '#AAAAAA',      // Hamzat ul Wasl - grey
-    's': '#AAAAAA',      // Silent - grey
-    'l': '#AAAAAA',      // Laam Shamsiyyah - grey
-    'n': '#537FFF',      // Madd Normal (2 vowels) - blue
-    'p': '#4050FF',      // Madd Permissible (2,4,6 vowels) - blue
-    'm': '#000EBC',      // Madd Necessary (6 vowels) - dark blue
-    'q': '#DD0008',      // Qalqalah - red
-    'o': '#2144C1',      // Madd Obligatory (4-5 vowels) - blue
-    'c': '#D500B7',      // Ikhfa Shafawi (with Meem) - pink
-    'f': '#9400A8',      // Ikhfa - purple
-    'w': '#58B800',      // Idgham Shafawi (with Meem) - light green
-    'i': '#26BFFD',      // Iqlab - cyan
-    'a': '#169777',      // Idgham with Ghunnah - teal green
-    'u': '#169200',      // Idgham without Ghunnah - green
-    'd': '#A1A1A1',      // Idgham Mutajanisayn - grey
-    'b': '#A1A1A1',      // Idgham Mutaqaribayn - grey
-    'g': '#FF7E1E',      // Ghunnah (2 vowels) - orange
+    // Gray - Letters not pronounced
+    'h': '#707070',      // Hamzat ul Wasl - gray
+    's': '#707070',      // Silent - gray
+    'l': '#707070',      // Laam Shamsiyyah - gray
+    
+    // Red shades - Madd (prolongation)
+    'n': '#A00000',      // Madd Normal (2 vowels) - cumin red
+    'p': '#E74C3C',      // Madd Permissible (2,4,6 vowels) - orange red
+    'm': '#8B0000',      // Madd Necessary (6 vowels) - dark red
+    'o': '#C0392B',      // Madd Obligatory (4-5 vowels) - blood red
+    
+    // Blue - Qalqalah
+    'q': '#4A90D9',      // Qalqalah - light blue
+    
+    // Green - Nasalization (Ghunnah, Ikhfa, Iqlab, Idgham)
+    'c': '#27AE60',      // Ikhfa Shafawi (with Meem) - green
+    'f': '#27AE60',      // Ikhfa - green
+    'w': '#27AE60',      // Idgham Shafawi (with Meem) - green
+    'i': '#27AE60',      // Iqlab - green
+    'a': '#27AE60',      // Idgham with Ghunnah - green
+    'u': '#707070',      // Idgham without Ghunnah - gray (not pronounced)
+    'd': '#707070',      // Idgham Mutajanisayn - gray
+    'b': '#707070',      // Idgham Mutaqaribayn - gray
+    'g': '#27AE60',      // Ghunnah (2 vowels) - green
   };
   
   let result = text;
   
   // The format is [marker:number[content] or [marker[content]
-  // Example: [h:9421[ٱ] -> <span style="color:#AAAAAA;">ٱ</span>
+  // Example: [h:9421[ٱ] -> <span style="color:#707070;">ٱ</span>
   Object.entries(tajweedColors).forEach(([marker, color]) => {
     const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
     result = result.replace(regex, `<span style="color: ${color};">$1</span>`);
