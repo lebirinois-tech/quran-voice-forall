@@ -9,20 +9,23 @@ import { useState } from 'react';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
-// Using Dar Al-Maarifah standard color scheme
+// Using Quran University / Al Muhafez standard color scheme
 const parseTajweedFallback = (text: string): string => {
   const tajweedColors: Record<string, string> = {
-    // Gray - Letters not pronounced
-    h: '#707070', s: '#707070', l: '#707070',
-    // Red shades - Madd
-    n: '#A00000', p: '#E74C3C', m: '#8B0000', o: '#C0392B',
-    // Blue - Qalqalah
-    q: '#4A90D9',
-    // Green - Nasalization
-    c: '#27AE60', f: '#27AE60', w: '#27AE60', i: '#27AE60',
-    a: '#27AE60', g: '#27AE60',
-    // Gray - Idgham (not pronounced)
-    u: '#707070', d: '#707070', b: '#707070',
+    // Gray - Letters not pronounced / Idgham without Ghunnah
+    h: '#AAAAAA', s: '#AAAAAA', l: '#AAAAAA', u: '#AAAAAA', d: '#AAAAAA', b: '#AAAAAA',
+    // Orange - Ghunnah
+    g: '#D4740C',
+    // Red - Ikhfa
+    f: '#DD0000', c: '#DD0000',
+    // Purple/Violet - Idgham with Ghunnah
+    a: '#B266D9', w: '#B266D9',
+    // Green - Qalqalah
+    q: '#2AAD2A',
+    // Blue - Iqlab
+    i: '#2E6ECB',
+    // Red - Madd
+    n: '#DD0000', p: '#CC0000', m: '#BB0000', o: '#AA0000',
   };
 
   let html = text;
