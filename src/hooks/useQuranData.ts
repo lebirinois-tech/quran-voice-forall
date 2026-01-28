@@ -16,45 +16,53 @@ interface QuranApiResponse {
 }
 
 // Parse tajweed markers from API into styled HTML
-// Using Dar Al-Maarifah standard color scheme (most common in Quran apps)
-// Reference: https://easyquran.com/en/tajweed-quran-colors-roles/
+// Using Quran University / Al Muhafez standard color scheme
+// Colors extracted from official GTAF Quran app documentation
 const parseTajweedText = (text: string): string => {
-  // Dar Al-Maarifah standard Tajweed color scheme:
-  // - RED shades: Madd (prolongation)
-  // - GRAY: Letters not pronounced (silent, Laam Shamsiyyah, Hamzat ul Wasl)
-  // - BLUE: Qalqalah and emphatic Ra
-  // - GREEN: Nasalization (Ghunnah, Ikhfa, Iqlab, Idgham)
+  // Quran University / Al Muhafez standard Tajweed color scheme:
+  // - ORANGE: Ghunnah (nasalisation)
+  // - RED: Ikhfa (hiding/softening)
+  // - PURPLE/VIOLET: Idgham with Ghunnah (merging with nasalization)
+  // - GREEN: Qalqalah (echoing)
+  // - BLUE: Iqlab (flipping/assimilation)
+  // - GRAY: Idgham without Ghunnah, silent letters
   const tajweedColors: Record<string, string> = {
-    // Gray - Letters not pronounced
-    'h': '#707070',      // Hamzat ul Wasl - gray
-    's': '#707070',      // Silent - gray
-    'l': '#707070',      // Laam Shamsiyyah - gray
+    // Gray - Letters not pronounced / Idgham without Ghunnah
+    'h': '#AAAAAA',      // Hamzat ul Wasl - gray
+    's': '#AAAAAA',      // Silent - gray
+    'l': '#AAAAAA',      // Laam Shamsiyyah - gray
+    'u': '#AAAAAA',      // Idgham without Ghunnah - gray
+    'd': '#AAAAAA',      // Idgham Mutajanisayn - gray
+    'b': '#AAAAAA',      // Idgham Mutaqaribayn - gray
     
-    // Red shades - Madd (prolongation)
-    'n': '#A00000',      // Madd Normal (2 vowels) - cumin red
-    'p': '#E74C3C',      // Madd Permissible (2,4,6 vowels) - orange red
-    'm': '#8B0000',      // Madd Necessary (6 vowels) - dark red
-    'o': '#C0392B',      // Madd Obligatory (4-5 vowels) - blood red
+    // Orange - Ghunnah (nasalization sound from nose)
+    'g': '#D4740C',      // Ghunnah (2 vowels) - orange
     
-    // Blue - Qalqalah
-    'q': '#4A90D9',      // Qalqalah - light blue
+    // Red - Ikhfa (hiding/softening the sound)
+    'f': '#DD0000',      // Ikhfa - red
+    'c': '#DD0000',      // Ikhfa Shafawi (with Meem) - red
     
-    // Green - Nasalization (Ghunnah, Ikhfa, Iqlab, Idgham)
-    'c': '#27AE60',      // Ikhfa Shafawi (with Meem) - green
-    'f': '#27AE60',      // Ikhfa - green
-    'w': '#27AE60',      // Idgham Shafawi (with Meem) - green
-    'i': '#27AE60',      // Iqlab - green
-    'a': '#27AE60',      // Idgham with Ghunnah - green
-    'u': '#707070',      // Idgham without Ghunnah - gray (not pronounced)
-    'd': '#707070',      // Idgham Mutajanisayn - gray
-    'b': '#707070',      // Idgham Mutaqaribayn - gray
-    'g': '#27AE60',      // Ghunnah (2 vowels) - green
+    // Purple/Violet - Idgham with Ghunnah (merging with nasalization)
+    'a': '#B266D9',      // Idgham with Ghunnah - purple/violet
+    'w': '#B266D9',      // Idgham Shafawi (with Meem) - purple/violet
+    
+    // Green - Qalqalah (echoing sound)
+    'q': '#2AAD2A',      // Qalqalah - green
+    
+    // Blue - Iqlab (assimilation/flipping)
+    'i': '#2E6ECB',      // Iqlab - blue
+    
+    // Red shades - Madd (prolongation) - using same red family
+    'n': '#DD0000',      // Madd Normal (2 vowels) - red
+    'p': '#CC0000',      // Madd Permissible (2,4,6 vowels) - dark red
+    'm': '#BB0000',      // Madd Necessary (6 vowels) - darker red
+    'o': '#AA0000',      // Madd Obligatory (4-5 vowels) - darkest red
   };
   
   let result = text;
   
   // The format is [marker:number[content] or [marker[content]
-  // Example: [h:9421[ٱ] -> <span style="color:#707070;">ٱ</span>
+  // Example: [h:9421[ٱ] -> <span style="color:#AAAAAA;">ٱ</span>
   Object.entries(tajweedColors).forEach(([marker, color]) => {
     const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
     result = result.replace(regex, `<span style="color: ${color};">$1</span>`);
