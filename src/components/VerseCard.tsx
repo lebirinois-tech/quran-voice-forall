@@ -9,22 +9,22 @@ import { useState } from 'react';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
-// FROZEN Tajweed color scheme - Quran University / Al Muhafez standard
-// DO NOT MODIFY - User explicitly requested this exact version
+// User-specified Tajweed color scheme
+// Qalqalah = Blue, Madd = Red, Ghunnah = Green
 const parseTajweedFallback = (text: string): string => {
   const tajweedColors: Record<string, string> = {
-    // Gray - Silent / Idgham without Ghunnah (#AAAAAA)
+    // Gray - Silent / Idgham without Ghunnah
     h: '#AAAAAA', s: '#AAAAAA', l: '#AAAAAA', u: '#AAAAAA', d: '#AAAAAA', b: '#AAAAAA',
-    // Orange - Ghunnah (#D4740C)
-    g: '#D4740C',
-    // Red - Ikhfa / Madd (#DD0000)
+    // Green - Ghunnah
+    g: '#2AAD2A',
+    // Red - Ikhfa / Madd
     f: '#DD0000', c: '#DD0000', n: '#DD0000', p: '#CC0000', m: '#BB0000', o: '#AA0000',
-    // Violet - Idgham with Ghunnah (#B266D9)
+    // Violet - Idgham with Ghunnah
     a: '#B266D9', w: '#B266D9',
-    // Green - Qalqalah (#2AAD2A)
-    q: '#2AAD2A',
-    // Blue - Iqlab (#2E6ECB)
-    i: '#2E6ECB',
+    // Blue - Qalqalah
+    q: '#2E6ECB',
+    // Orange - Iqlab
+    i: '#D4740C',
   };
 
   let html = text;
