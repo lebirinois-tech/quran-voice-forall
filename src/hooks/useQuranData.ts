@@ -16,37 +16,37 @@ interface QuranApiResponse {
 }
 
 // Parse tajweed markers from API into styled HTML
+// API format: [h:1[ٱ] or [n[ـٰ] - marker followed by optional :number, then [ content ]
 const parseTajweedText = (text: string): string => {
-  // The quran-tajweed API returns text with markers like [h, [s, [l, etc.
-  // We need to convert these to proper HTML with CSS classes
-  
-  const tajweedRules: Record<string, { class: string; color: string }> = {
-    'h': { class: 'ham_wasl', color: '#AAAAAA' },      // Hamzat ul Wasl - grey
-    's': { class: 'slnt', color: '#AAAAAA' },          // Silent - grey
-    'l': { class: 'laam_shamsiyah', color: '#AAAAAA' }, // Laam Shamsiyyah - grey
-    'n': { class: 'madda_normal', color: '#537FFF' },  // Normal Madd - blue
-    'p': { class: 'madda_permissible', color: '#4050FF' }, // Permissible Madd - blue
-    'o': { class: 'madda_obligatory', color: '#000EBC' }, // Obligatory Madd - dark blue
-    'a': { class: 'iqlb', color: '#26BFFD' },          // Iqlab - cyan
-    'u': { class: 'qalqala', color: '#DD0008' },       // Qalqalah - red
-    'q': { class: 'madda_necessary', color: '#000080' }, // Necessary Madd - navy
-    'i': { class: 'ikhfa_shafawi', color: '#D500B7' }, // Ikhfa Shafawi - pink
-    'f': { class: 'ikhfa', color: '#9400A8' },         // Ikhfa - purple
-    'w': { class: 'idgham_shafawi', color: '#58B800' }, // Idgham Shafawi - light green
-    'g': { class: 'ghunnah', color: '#FF7E1E' },       // Ghunnah - orange
-    'd': { class: 'idgham_ghunnah', color: '#169200' }, // Idgham with Ghunnah - green
-    'b': { class: 'idgham_wo_ghunnah', color: '#169200' }, // Idgham without Ghunnah - green
-    'm': { class: 'idgham_mutajanisayn', color: '#A1A1A1' }, // Idgham Mutajanisayn - grey
-    'e': { class: 'idgham_mutaqaribayn', color: '#A1A1A1' }, // Idgham Mutaqaribayn - grey
+  const tajweedColors: Record<string, string> = {
+    'h': '#AAAAAA',      // Hamzat ul Wasl - grey
+    's': '#AAAAAA',      // Silent - grey
+    'l': '#AAAAAA',      // Laam Shamsiyyah - grey
+    'n': '#537FFF',      // Normal Madd - blue
+    'p': '#4050FF',      // Permissible Madd - blue
+    'o': '#000EBC',      // Obligatory Madd - dark blue
+    'a': '#26BFFD',      // Iqlab - cyan
+    'u': '#DD0008',      // Qalqalah - red
+    'q': '#000080',      // Necessary Madd - navy
+    'i': '#D500B7',      // Ikhfa Shafawi - pink
+    'f': '#9400A8',      // Ikhfa - purple
+    'w': '#58B800',      // Idgham Shafawi - light green
+    'g': '#FF7E1E',      // Ghunnah - orange
+    'd': '#169200',      // Idgham with Ghunnah - green
+    'b': '#169200',      // Idgham without Ghunnah - green
+    'm': '#A1A1A1',      // Idgham Mutajanisayn - grey
+    'e': '#A1A1A1',      // Idgham Mutaqaribayn - grey
   };
   
   let result = text;
   
-  // Replace each tajweed marker with styled span
-  Object.entries(tajweedRules).forEach(([marker, { class: className, color }]) => {
-    // Match pattern: [marker followed by text until ]
-    const regex = new RegExp(`\\[${marker}([^\\[\\]]*?)\\]`, 'g');
-    result = result.replace(regex, `<span class="tajweed-${className}" style="color: ${color};">$1</span>`);
+  // The format is [marker:number[content] or [marker[content]
+  // We need to match: [h:1[ٱ] -> <span style="color:#AAAAAA;">ٱ</span>
+  Object.entries(tajweedColors).forEach(([marker, color]) => {
+    // Match pattern: [marker or [marker:number followed by [content]
+    // The regex matches: [h:1[ٱ] or [n[ـٰ]
+    const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
+    result = result.replace(regex, `<span style="color: ${color};">$1</span>`);
   });
   
   return result;
