@@ -7,6 +7,43 @@ import { TextDisplayStyle } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
+// Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
+// convert it to colored HTML so we never render the raw markers to the user.
+const parseTajweedFallback = (text: string): string => {
+  const tajweedColors: Record<string, string> = {
+    h: '#AAAAAA',
+    s: '#AAAAAA',
+    l: '#AAAAAA',
+    n: '#537FFF',
+    p: '#4050FF',
+    o: '#000EBC',
+    a: '#26BFFD',
+    u: '#DD0008',
+    q: '#000080',
+    i: '#D500B7',
+    f: '#9400A8',
+    w: '#58B800',
+    g: '#FF7E1E',
+    d: '#169200',
+    b: '#169200',
+    m: '#A1A1A1',
+    e: '#A1A1A1',
+  };
+
+  let html = text;
+
+  Object.entries(tajweedColors).forEach(([marker, color]) => {
+    const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
+    html = html.replace(regex, `<span style="color: ${color};">$1</span>`);
+  });
+
+  // Cleanup any leftovers
+  html = html.replace(/\[[a-z](?::\d+)?\[?/gi, '');
+  html = html.replace(/\]/g, '');
+
+  return html;
+};
+
 interface VerseCardProps {
   id?: string;
   verse: Verse;
@@ -35,6 +72,11 @@ export const VerseCard = ({
   const surah = surahs.find(s => s.number === surahNumber);
   const pageNumber = verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const effectiveTajweedHtml =
+    textDisplayStyle === 'tajweed'
+      ? (tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined))
+      : undefined;
 
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -157,11 +199,11 @@ export const VerseCard = ({
       </div>
 
       {/* Arabic Text */}
-      {textDisplayStyle === 'tajweed' && tajweedHtml ? (
+      {textDisplayStyle === 'tajweed' && effectiveTajweedHtml ? (
         <p 
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
-          dangerouslySetInnerHTML={{ __html: tajweedHtml }}
+          dangerouslySetInnerHTML={{ __html: effectiveTajweedHtml }}
         />
       ) : (
         <p 
