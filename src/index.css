@@ -124,52 +124,74 @@
     direction: rtl;
     line-height: 2.4;
     word-spacing: 0.1em;
+    color: hsl(var(--foreground));
   }
 
-  /* Tajweed rules colors - Based on standard Tajweed color coding */
-  .tajweed-text [class^="h"], /* Hamza */
-  .tajweed-text [class*=" h"] {
-    color: hsl(340 80% 45%); /* Deep pink for Hamza-wasl */
+  /* Tajweed rules colors - Based on standard Tajweed color coding from quran-tajweed API */
+  /* Hamzat al-Wasl - Connecting Hamza */
+  .tajweed-text .ham_wasl {
+    color: hsl(340 80% 45%);
   }
 
-  .tajweed-text [class^="s"], /* Slnt - Silent */
-  .tajweed-text [class*=" s"] {
-    color: hsl(200 70% 45%); /* Blue for silent letters */
+  /* Silent letters */
+  .tajweed-text .slnt {
+    color: hsl(200 70% 45%);
+    opacity: 0.6;
   }
 
-  .tajweed-text [class^="l"], /* Laam shamsiyya */
-  .tajweed-text [class*=" l"] {
-    color: hsl(35 90% 45%); /* Orange for laam shamsiyya */
+  /* Laam Shamsiyya - Sun letters */
+  .tajweed-text .laam_shamsiyah {
+    color: hsl(35 90% 45%);
   }
 
-  .tajweed-text [class^="n"], /* Noon/Meem with ghunna */
-  .tajweed-text [class*=" n"] {
-    color: hsl(158 70% 40%); /* Green for ghunna */
+  /* Ghunna - Nasalization (Noon/Meem) */
+  .tajweed-text .ghunnah {
+    color: hsl(158 70% 35%);
   }
 
-  .tajweed-text [class^="q"], /* Qalqala */
-  .tajweed-text [class*=" q"] {
-    color: hsl(280 60% 50%); /* Purple for qalqala */
+  /* Ikhfa - Concealment */
+  .tajweed-text .ikhf,
+  .tajweed-text .ikhf_shafawi {
+    color: hsl(280 65% 50%);
   }
 
-  .tajweed-text [class^="i"], /* Ikhfa */
-  .tajweed-text [class*=" i"] {
-    color: hsl(45 85% 45%); /* Gold for ikhfa */
+  /* Idgham - Assimilation */
+  .tajweed-text .idghaam_ghunnah,
+  .tajweed-text .idghaam_w_ghunnah,
+  .tajweed-text .idghaam_wo_ghunnah,
+  .tajweed-text .idgh_shafawi,
+  .tajweed-text .idghaam_mutajanisayn,
+  .tajweed-text .idghaam_mutaqaribayn {
+    color: hsl(200 75% 45%);
   }
 
-  .tajweed-text [class^="a"], /* Idgham */
-  .tajweed-text [class*=" a"] {
-    color: hsl(200 75% 50%); /* Cyan for idgham */
+  /* Iqlab - Conversion */
+  .tajweed-text .iqlb {
+    color: hsl(320 75% 50%);
   }
 
-  .tajweed-text [class^="o"], /* Iqlab */
-  .tajweed-text [class*=" o"] {
-    color: hsl(340 75% 55%); /* Magenta for iqlab */
+  /* Qalqala - Echo */
+  .tajweed-text .qlq {
+    color: hsl(25 90% 50%);
   }
 
-  .tajweed-text [class^="m"], /* Madd */
-  .tajweed-text [class*=" m"] {
-    color: hsl(0 75% 55%); /* Red for madd (elongation) */
+  /* Madd - Prolongation */
+  .tajweed-text .madd_normal,
+  .tajweed-text .madd_permissible,
+  .tajweed-text .madd_obligatory,
+  .tajweed-text .madd_lin,
+  .tajweed-text .madd_munfasil,
+  .tajweed-text .madd_muttasil,
+  .tajweed-text .madd_arid,
+  .tajweed-text .madd_silah,
+  .tajweed-text .madd_laazim,
+  .tajweed-text .madd {
+    color: hsl(0 75% 50%);
+  }
+
+  /* Izhar - Clear pronunciation */
+  .tajweed-text .ikhf_shafawi {
+    color: hsl(45 85% 45%);
   }
 
   .font-amiri {
