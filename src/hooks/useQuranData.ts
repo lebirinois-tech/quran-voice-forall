@@ -19,44 +19,39 @@ interface QuranApiResponse {
 // Using Quran University / Al Muhafez standard color scheme
 // Colors extracted from official GTAF Quran app documentation
 const parseTajweedText = (text: string): string => {
-  // Quran University / Al Muhafez standard Tajweed color scheme:
-  // - ORANGE: Ghunnah (nasalisation)
-  // - RED: Ikhfa (hiding/softening)
-  // - PURPLE/VIOLET: Idgham with Ghunnah (merging with nasalization)
-  // - GREEN: Qalqalah (echoing)
-  // - BLUE: Iqlab (flipping/assimilation)
-  // - GRAY: Idgham without Ghunnah, silent letters
+  // Official Al Quran Cloud API Tajweed color scheme
+  // Source: https://alquran.cloud/tajweed-guide
   const tajweedColors: Record<string, string> = {
-    // Gray - Letters not pronounced / Idgham without Ghunnah
-    'h': '#AAAAAA',      // Hamzat ul Wasl - gray
-    's': '#AAAAAA',      // Silent - gray
-    'l': '#AAAAAA',      // Laam Shamsiyyah - gray
-    'u': '#AAAAAA',      // Idgham without Ghunnah - gray
-    'd': '#AAAAAA',      // Idgham Mutajanisayn - gray
-    'b': '#AAAAAA',      // Idgham Mutaqaribayn - gray
+    // Gray - Silent/Not pronounced letters
+    'h': '#AAAAAA',      // Hamzat ul Wasl
+    's': '#AAAAAA',      // Silent
+    'l': '#AAAAAA',      // Laam Shamsiyyah
+    'd': '#A1A1A1',      // Idgham Mutajanisayn
+    'b': '#A1A1A1',      // Idgham Mutaqaribayn
     
-    // Orange - Ghunnah (nasalization sound from nose)
-    'g': '#D4740C',      // Ghunnah (2 vowels) - orange
+    // Orange - Ghunnah (nasalization - 2 vowels)
+    'g': '#FF7E1E',      // Ghunnah - ORANGE
     
-    // Red - Ikhfa (hiding/softening the sound)
-    'f': '#DD0000',      // Ikhfa - red
-    'c': '#DD0000',      // Ikhfa Shafawi (with Meem) - red
+    // Violet/Purple - Ikhfa (hiding/softening)
+    'f': '#9400A8',      // Ikhfa - purple
+    'c': '#D500B7',      // Ikhfa Shafawi (with Meem) - pink/magenta
     
-    // Purple/Violet - Idgham with Ghunnah (merging with nasalization)
-    'a': '#B266D9',      // Idgham with Ghunnah - purple/violet
-    'w': '#B266D9',      // Idgham Shafawi (with Meem) - purple/violet
+    // Green - Idgham with Ghunnah
+    'a': '#169777',      // Idgham with Ghunnah - teal/green
+    'u': '#169200',      // Idgham without Ghunnah - green
+    'w': '#58B800',      // Idgham Shafawi (with Meem) - lime green
     
-    // Green - Qalqalah (echoing sound)
-    'q': '#2AAD2A',      // Qalqalah - green
+    // Red - Qalqalah (echoing sound)
+    'q': '#DD0008',      // Qalqalah - RED
     
     // Blue - Iqlab (assimilation/flipping)
-    'i': '#2E6ECB',      // Iqlab - blue
+    'i': '#26BFFD',      // Iqlab - light blue
     
-    // Red shades - Madd (prolongation) - using same red family
-    'n': '#DD0000',      // Madd Normal (2 vowels) - red
-    'p': '#CC0000',      // Madd Permissible (2,4,6 vowels) - dark red
-    'm': '#BB0000',      // Madd Necessary (6 vowels) - darker red
-    'o': '#AA0000',      // Madd Obligatory (4-5 vowels) - darkest red
+    // Blue shades - Madd (prolongation)
+    'n': '#537FFF',      // Madd Normal (2 vowels)
+    'p': '#4050FF',      // Madd Permissible (2,4,6 vowels)
+    'm': '#000EBC',      // Madd Necessary (6 vowels)
+    'o': '#2144C1',      // Madd Obligatory (4-5 vowels)
   };
   
   let result = text;
