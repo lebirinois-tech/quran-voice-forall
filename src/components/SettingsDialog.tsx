@@ -45,12 +45,6 @@ const TEXT_DISPLAY_STYLES = [
     description: 'Texte arabe sans couleurs',
     icon: '📝'
   },
-  { 
-    id: 'mushaf' as TextDisplayStyle, 
-    name: 'Style Mushaf', 
-    description: 'Affichage page par page',
-    icon: '📖'
-  },
 ];
 
 export const SettingsDialog = ({
