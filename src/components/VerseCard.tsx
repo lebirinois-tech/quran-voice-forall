@@ -53,6 +53,7 @@ interface VerseCardProps {
   reciter?: ReciterId;
   textDisplayStyle?: TextDisplayStyle;
   tajweedHtml?: string;
+  pageNumber?: number;
   onPlay?: () => void;
 }
 
@@ -66,11 +67,15 @@ export const VerseCard = ({
   reciter = 'alafasy',
   textDisplayStyle = 'tajweed',
   tajweedHtml,
+  pageNumber: propPageNumber,
   onPlay 
 }: VerseCardProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
-  const pageNumber = verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
+  const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
+  
+  // Alternate background colors based on page number (odd/even)
+  const isEvenPage = pageNumber % 2 === 0;
 
   const effectiveTajweedHtml =
     textDisplayStyle === 'tajweed'
@@ -127,9 +132,13 @@ export const VerseCard = ({
     <div
       id={id}
       className={cn(
-        "p-6 rounded-xl bg-card border border-border transition-all duration-300",
-        isHighlighted && "verse-highlight bg-secondary/5 ring-2 ring-primary/20",
-        isPlaying && "bg-primary/5",
+        "p-6 rounded-xl border border-border transition-all duration-300",
+        // Page-based alternating background colors
+        isEvenPage 
+          ? "bg-primary/5 dark:bg-primary/10" 
+          : "bg-secondary/5 dark:bg-secondary/10",
+        isHighlighted && "verse-highlight ring-2 ring-primary/20",
+        isPlaying && "ring-2 ring-primary/40",
         textDisplayStyle === 'mushaf' && "bg-ivory/50 dark:bg-card",
         "animate-fade-in"
       )}
