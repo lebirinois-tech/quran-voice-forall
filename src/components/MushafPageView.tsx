@@ -10,11 +10,10 @@ interface MushafPageViewProps {
   onPageChange?: (page: number) => void;
 }
 
-// CDN for Mushaf Tajweed coloré (Madina Mushaf with Tajweed colors)
+// CDN for Mushaf Tajweed pages - using EasyQuran high-res Tajweed images
 const getMushafPageUrl = (page: number): string => {
-  // Using quran.com's V4 Mushaf Tajweed images
-  const paddedPage = page.toString().padStart(3, '0');
-  return `https://static.qurancdn.com/images/w/rq-color/page${paddedPage}.png`;
+  // EasyQuran Tajweed Mushaf (Hafs reading) - high resolution scaled images
+  return `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`;
 };
 
 export const MushafPageView = ({ initialPage, onPageChange }: MushafPageViewProps) => {
