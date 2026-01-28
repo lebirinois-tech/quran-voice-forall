@@ -9,25 +9,26 @@ import { useState } from 'react';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
+// Official color codes from alquran.cloud/tajweed-guide
 const parseTajweedFallback = (text: string): string => {
   const tajweedColors: Record<string, string> = {
-    h: '#AAAAAA',
-    s: '#AAAAAA',
-    l: '#AAAAAA',
-    n: '#537FFF',
-    p: '#4050FF',
-    o: '#000EBC',
-    a: '#26BFFD',
-    u: '#DD0008',
-    q: '#000080',
-    i: '#D500B7',
-    f: '#9400A8',
-    w: '#58B800',
-    g: '#FF7E1E',
-    d: '#169200',
-    b: '#169200',
-    m: '#A1A1A1',
-    e: '#A1A1A1',
+    h: '#AAAAAA',      // Hamzat ul Wasl
+    s: '#AAAAAA',      // Silent
+    l: '#AAAAAA',      // Laam Shamsiyyah
+    n: '#537FFF',      // Madd Normal
+    p: '#4050FF',      // Madd Permissible
+    m: '#000EBC',      // Madd Necessary
+    q: '#DD0008',      // Qalqalah
+    o: '#2144C1',      // Madd Obligatory
+    c: '#D500B7',      // Ikhfa Shafawi
+    f: '#9400A8',      // Ikhfa
+    w: '#58B800',      // Idgham Shafawi
+    i: '#26BFFD',      // Iqlab
+    a: '#169777',      // Idgham with Ghunnah
+    u: '#169200',      // Idgham without Ghunnah
+    d: '#A1A1A1',      // Idgham Mutajanisayn
+    b: '#A1A1A1',      // Idgham Mutaqaribayn
+    g: '#FF7E1E',      // Ghunnah
   };
 
   let html = text;

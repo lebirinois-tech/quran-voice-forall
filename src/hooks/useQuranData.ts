@@ -16,74 +16,40 @@ interface QuranApiResponse {
 }
 
 // Parse tajweed markers from API into styled HTML
-// API format examples:
-// - [h:1[ٱ]  (marker + optional :number + [content])
-// - [l[ل]
-// Some environments can also show standalone tokens like [h:1] in RTL contexts,
-// so we also handle token-style markers to avoid showing raw tags.
+// Official API format from alquran.cloud: [marker:number[content] or [marker[content]
+// Reference: https://alquran.cloud/tajweed-guide
 const parseTajweedText = (text: string): string => {
+  // Official color codes from alquran.cloud/tajweed-guide
   const tajweedColors: Record<string, string> = {
-    h: '#AAAAAA', // Hamzat ul Wasl
-    s: '#AAAAAA', // Silent
-    l: '#AAAAAA', // Laam Shamsiyyah
-    n: '#537FFF', // Normal Madd
-    p: '#4050FF', // Permissible Madd
-    o: '#000EBC', // Obligatory Madd
-    a: '#26BFFD', // Iqlab
-    u: '#DD0008', // Qalqalah
-    q: '#000080', // Necessary Madd
-    i: '#D500B7', // Ikhfa Shafawi
-    f: '#9400A8', // Ikhfa
-    w: '#58B800', // Idgham Shafawi
-    g: '#FF7E1E', // Ghunnah
-    d: '#169200', // Idgham with Ghunnah
-    b: '#169200', // Idgham without Ghunnah
-    m: '#A1A1A1', // Idgham Mutajanisayn
-    e: '#A1A1A1', // Idgham Mutaqaribayn
+    'h': '#AAAAAA',      // Hamzat ul Wasl - grey
+    's': '#AAAAAA',      // Silent - grey
+    'l': '#AAAAAA',      // Laam Shamsiyyah - grey
+    'n': '#537FFF',      // Madd Normal (2 vowels) - blue
+    'p': '#4050FF',      // Madd Permissible (2,4,6 vowels) - blue
+    'm': '#000EBC',      // Madd Necessary (6 vowels) - dark blue
+    'q': '#DD0008',      // Qalqalah - red
+    'o': '#2144C1',      // Madd Obligatory (4-5 vowels) - blue
+    'c': '#D500B7',      // Ikhfa Shafawi (with Meem) - pink
+    'f': '#9400A8',      // Ikhfa - purple
+    'w': '#58B800',      // Idgham Shafawi (with Meem) - light green
+    'i': '#26BFFD',      // Iqlab - cyan
+    'a': '#169777',      // Idgham with Ghunnah - teal green
+    'u': '#169200',      // Idgham without Ghunnah - green
+    'd': '#A1A1A1',      // Idgham Mutajanisayn - grey
+    'b': '#A1A1A1',      // Idgham Mutaqaribayn - grey
+    'g': '#FF7E1E',      // Ghunnah (2 vowels) - orange
   };
-
-  let html = text;
-
-  // Format A: [h:1[ٱ] or [n[ـٰ]
+  
+  let result = text;
+  
+  // The format is [marker:number[content] or [marker[content]
+  // Example: [h:9421[ٱ] -> <span style="color:#AAAAAA;">ٱ</span>
   Object.entries(tajweedColors).forEach(([marker, color]) => {
     const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
-    html = html.replace(regex, `<span style="color: ${color};">$1</span>`);
+    result = result.replace(regex, `<span style="color: ${color};">$1</span>`);
   });
-
-  // Format B (fallback): standalone marker tokens [h:1] that apply until next marker
-  // This prevents unreadable output where markers remain visible.
-  const tokenRegex = /\[([hslnpoauqifwgdbme])(?::\d+)?\]/g;
-  if (tokenRegex.test(html)) {
-    const tokenRegex2 = /\[([hslnpoauqifwgdbme])(?::\d+)?\]/g;
-    let out = '';
-    let lastIndex = 0;
-    let isOpen = false;
-
-    for (const match of html.matchAll(tokenRegex2)) {
-      const idx = match.index ?? 0;
-      const marker = match[1];
-      out += html.slice(lastIndex, idx);
-      if (isOpen) out += '</span>';
-      const color = tajweedColors[marker];
-      if (color) {
-        out += `<span style="color: ${color};">`;
-        isOpen = true;
-      } else {
-        isOpen = false;
-      }
-      lastIndex = idx + match[0].length;
-    }
-
-    out += html.slice(lastIndex);
-    if (isOpen) out += '</span>';
-    html = out;
-  }
-
-  // Final cleanup: remove any leftover bracketed tags (safety net)
-  html = html.replace(/\[[a-z](?::\d+)?\[?/gi, '');
-  html = html.replace(/\]/g, '');
-
-  return html;
+  
+  return result;
 };
 
 export const useQuranData = (surahNumber: number) => {
