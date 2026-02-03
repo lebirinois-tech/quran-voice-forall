@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "Quran pour tous",
-        short_name: "Quran pour tous",
+        name: "Apprenons le Coran",
+        short_name: "Apprenons le Coran",
         description: "Application coranique accessible avec commandes vocales",
         theme_color: "#1B5E20",
         background_color: "#FDF6E3",
