@@ -17,6 +17,19 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
   const [error, setError] = useState<string | null>(null);
 
   const speakSessionIdRef = useRef(0);
+  const ttsActiveRef = useRef(false);
+
+  const notifyTtsStart = useCallback(() => {
+    if (ttsActiveRef.current) return;
+    ttsActiveRef.current = true;
+    window.dispatchEvent(new CustomEvent('app:tts-start'));
+  }, []);
+
+  const notifyTtsEnd = useCallback(() => {
+    if (!ttsActiveRef.current) return;
+    ttsActiveRef.current = false;
+    window.dispatchEvent(new CustomEvent('app:tts-end'));
+  }, []);
 
   // Fetch Tafsir when panel opens
   useEffect(() => {
@@ -142,6 +155,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
         if (sessionId !== speakSessionIdRef.current) return;
         if (idx >= chunks.length) {
           setIsSpeaking(false);
+          notifyTtsEnd();
           return;
         }
 
@@ -163,22 +177,28 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
         u.onerror = (event) => {
           console.error('Speech error:', event.error);
           setIsSpeaking(false);
+          notifyTtsEnd();
         };
 
         synth.speak(u);
       };
 
+      notifyTtsStart();
       speakNext();
     } catch (e) {
       console.error('Speech synthesis failed:', e);
       setIsSpeaking(false);
+      notifyTtsEnd();
     }
   }, [tafsirText]);
 
   const stopSpeaking = useCallback(() => {
+    // Invalidate any running queue
+    speakSessionIdRef.current += 1;
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
-  }, []);
+    notifyTtsEnd();
+  }, [notifyTtsEnd]);
 
   const toggleSpeech = () => {
     if (isSpeaking) {

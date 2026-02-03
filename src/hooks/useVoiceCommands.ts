@@ -56,6 +56,11 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
   const shouldRestartRef = useRef(false);
   const commandTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // When speech synthesis is playing (e.g., Tafsir TTS), some browsers interrupt TTS
+  // if SpeechRecognition is running. We temporarily suspend recognition during TTS.
+  const ttsSuspendedRef = useRef(false);
+  const resumeContinuousAfterTtsRef = useRef(false);
+
   // Wake words to activate command mode
   const WAKE_WORDS = ['coran', 'quran', 'ok coran', 'hey coran'];
 
@@ -355,6 +360,9 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
   const startListening = useCallback((continuous: boolean = false) => {
     if (!isSupported) return;
 
+    // If TTS is active, don't start recognition
+    if (ttsSuspendedRef.current) return;
+
     // Stop any existing recognition first
     if (recognitionRef.current) {
       try {
@@ -407,7 +415,7 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
       console.log('Voice recognition ended, shouldRestart:', shouldRestartRef.current);
       setIsListening(false);
       // Auto-restart in continuous mode
-      if (shouldRestartRef.current) {
+      if (shouldRestartRef.current && !ttsSuspendedRef.current) {
         setTimeout(() => {
           if (shouldRestartRef.current) {
             console.log('Restarting voice recognition...');
@@ -425,6 +433,53 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
       console.error('Failed to start recognition:', e);
     }
   }, [isSupported, processCommand, processContinuousText]);
+
+  // Suspend voice recognition while TTS is speaking (Tafsir audio)
+  useEffect(() => {
+    const onTtsStart = () => {
+      // Remember whether continuous mode was active
+      resumeContinuousAfterTtsRef.current = shouldRestartRef.current;
+      ttsSuspendedRef.current = true;
+
+      // Prevent auto-restart while suspended
+      shouldRestartRef.current = false;
+
+      // Stop current recognition immediately
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+      setIsListening(false);
+    };
+
+    const onTtsEnd = () => {
+      const shouldResumeContinuous = resumeContinuousAfterTtsRef.current;
+      ttsSuspendedRef.current = false;
+      resumeContinuousAfterTtsRef.current = false;
+
+      if (shouldResumeContinuous) {
+        // Restore continuous mode
+        shouldRestartRef.current = true;
+        setIsContinuousMode(true);
+        // Small delay so speech engine releases the audio session
+        setTimeout(() => {
+          if (shouldRestartRef.current && !ttsSuspendedRef.current) {
+            startListening(true);
+          }
+        }, 350);
+      }
+    };
+
+    window.addEventListener('app:tts-start', onTtsStart as EventListener);
+    window.addEventListener('app:tts-end', onTtsEnd as EventListener);
+    return () => {
+      window.removeEventListener('app:tts-start', onTtsStart as EventListener);
+      window.removeEventListener('app:tts-end', onTtsEnd as EventListener);
+    };
+  }, [startListening]);
 
   const stopListening = useCallback(() => {
     shouldRestartRef.current = false;
