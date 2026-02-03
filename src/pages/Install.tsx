@@ -59,7 +59,7 @@ const Install = () => {
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="text-center mb-8 animate-fade-in">
           <div className="w-24 h-24 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
-            <img src="/pwa-192x192.png" alt="Quran pour tous" className="w-full h-full object-cover" />
+            <img src="/pwa-192x192.png" alt="Apprenons le Coran" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Installer l'Application
