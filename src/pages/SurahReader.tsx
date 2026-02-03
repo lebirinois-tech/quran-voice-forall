@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { AudioPlayer } from '@/components/AudioPlayer';
@@ -8,9 +8,11 @@ import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { useAuth } from '@/hooks/useAuth';
+import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, Surah, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers } from 'lucide-react';
+import { Loader2, FileText, Layers, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -38,11 +40,15 @@ const PAGE_START_MAP: [number, number][] = [
 const SurahReader = () => {
   const navigate = useNavigate();
   const { surahNumber } = useParams<{ surahNumber: string }>();
+  const [searchParams] = useSearchParams();
   const [surah, setSurah] = useState<Surah | null>(null);
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const [pageInput, setPageInput] = useState('');
   const [juzInput, setJuzInput] = useState('');
   const appSettings = useAppSettings();
+  const { isAuthenticated } = useAuth();
+  const { saveProgress, getSurahProgress } = useReadingProgress();
+  const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -54,14 +60,6 @@ const SurahReader = () => {
     }
     return targetSurah;
   }, []);
-
-  // Fetch surah metadata
-  useEffect(() => {
-    const foundSurah = surahs.find(s => s.number === num);
-    if (foundSurah) {
-      setSurah(foundSurah);
-    }
-  }, [num]);
 
   // Fetch verses with Tajweed from API
   const { verses, versesTajweed, isLoading: isLoadingVerses, error } = useQuranData(num);
@@ -77,6 +75,51 @@ const SurahReader = () => {
       }
     },
   });
+
+  // Fetch surah metadata
+  useEffect(() => {
+    const foundSurah = surahs.find(s => s.number === num);
+    if (foundSurah) {
+      setSurah(foundSurah);
+    }
+  }, [num]);
+
+  // Scroll to verse from URL param
+  useEffect(() => {
+    const verseParam = searchParams.get('verse');
+    if (verseParam) {
+      const verseNum = parseInt(verseParam);
+      setTimeout(() => {
+        const verseElement = document.getElementById(`verse-${verseNum}`);
+        if (verseElement) {
+          verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+    }
+  }, [searchParams, verses]);
+
+  // Auto-save reading progress when verse changes
+  useEffect(() => {
+    if (isAuthenticated && quranAudio.currentVerse > 0 && quranAudio.currentVerse !== lastSavedVerse) {
+      const timer = setTimeout(() => {
+        saveProgress(num, quranAudio.currentVerse);
+        setLastSavedVerse(quranAudio.currentVerse);
+      }, 2000); // Debounce save to avoid too many requests
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, quranAudio.currentVerse, num, saveProgress, lastSavedVerse]);
+
+  const handleSaveProgress = useCallback(async (verseNumber: number) => {
+    if (!isAuthenticated) {
+      toast.info('Connectez-vous pour sauvegarder votre progression');
+      return;
+    }
+    const { error } = await saveProgress(num, verseNumber);
+    if (!error) {
+      toast.success('Progression sauvegardée');
+      setLastSavedVerse(verseNumber);
+    }
+  }, [isAuthenticated, num, saveProgress]);
 
   const handleGoHome = () => {
     navigate('/');
@@ -312,6 +355,8 @@ const SurahReader = () => {
                   textDisplayStyle={appSettings.textDisplayStyle}
                   tajweedHtml={versesTajweed[verse.number]}
                   onPlay={() => quranAudio.playVerse(verse.number)}
+                  onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
+                  isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
                 />
               ))}
             </div>

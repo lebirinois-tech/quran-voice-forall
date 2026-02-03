@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SurahCard } from '@/components/SurahCard';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { VoiceCommandHelp } from '@/components/VoiceCommandHelp';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { useAuth } from '@/hooks/useAuth';
+import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers, Download } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -20,6 +21,26 @@ const Index = () => {
   const [juzNumber, setJuzNumber] = useState('');
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const appSettings = useAppSettings();
+  const { user, isAuthenticated, signOut, loading: authLoading } = useAuth();
+  const { fetchProgress, getLastRead, progress } = useReadingProgress();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProgress();
+    }
+  }, [isAuthenticated, fetchProgress]);
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error('Erreur lors de la déconnexion');
+    } else {
+      toast.success('Déconnexion réussie');
+    }
+  };
+
+  const lastRead = getLastRead();
+  const lastReadSurah = lastRead ? surahs.find(s => s.number === lastRead.surah_number) : null;
 
   const handleNavigateToSurah = (surahNumber: number) => {
     navigate(`/surah/${surahNumber}`);
@@ -90,6 +111,58 @@ const Index = () => {
       />
 
       <main className="container mx-auto px-4 py-6">
+        {/* Auth Section */}
+        <section className="mb-6 flex justify-end animate-fade-in">
+          {authLoading ? (
+            <div className="h-10 w-24 bg-muted animate-pulse rounded-lg" />
+          ) : isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <User className="h-4 w-4" />
+                {user?.email?.split('@')[0]}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Déconnexion
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth">
+              <Button variant="default" size="sm" className="gap-2">
+                <LogIn className="h-4 w-4" />
+                Connexion
+              </Button>
+            </Link>
+          )}
+        </section>
+
+        {/* Continue Reading Section */}
+        {isAuthenticated && lastReadSurah && (
+          <section className="mb-6 animate-fade-in">
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                    <History className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Reprendre la lecture</p>
+                    <p className="font-semibold text-foreground">
+                      {lastReadSurah.name} - Verset {lastRead.verse_number}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate(`/surah/${lastRead.surah_number}?verse=${lastRead.verse_number}`)}
+                  size="sm"
+                >
+                  Continuer
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Hero Section */}
         <section className="text-center mb-8 animate-fade-in">
           <div className="inline-block p-4 rounded-full bg-primary/10 mb-4">

@@ -1,6 +1,6 @@
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
-import { Play, Pause, Loader2, FileText, Download } from 'lucide-react';
+import { Play, Pause, Loader2, FileText, Download, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle } from '@/hooks/useAppSettings';
@@ -56,6 +56,8 @@ interface VerseCardProps {
   tajweedHtml?: string;
   pageNumber?: number;
   onPlay?: () => void;
+  onBookmark?: () => void;
+  isBookmarked?: boolean;
 }
 
 export const VerseCard = ({ 
@@ -69,7 +71,9 @@ export const VerseCard = ({
   textDisplayStyle = 'tajweed',
   tajweedHtml,
   pageNumber: propPageNumber,
-  onPlay 
+  onPlay,
+  onBookmark,
+  isBookmarked
 }: VerseCardProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
@@ -174,6 +178,24 @@ export const VerseCard = ({
         </div>
         
         <div className="flex items-center gap-1">
+          {onBookmark && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onBookmark}
+              className={cn(
+                "rounded-full hover:bg-primary/10",
+                isBookmarked && "bg-primary/10"
+              )}
+              aria-label="Marquer comme progression"
+            >
+              <Bookmark className={cn(
+                "h-4 w-4",
+                isBookmarked ? "text-primary fill-primary" : "text-muted-foreground"
+              )} />
+            </Button>
+          )}
+          
           <Button
             variant="ghost"
             size="icon"
