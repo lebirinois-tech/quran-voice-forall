@@ -66,32 +66,68 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
   const speakTafsir = useCallback(() => {
     if (!tafsirText || !('speechSynthesis' in window)) {
+      console.log('Speech synthesis not available or no text');
       return;
     }
 
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(tafsirText);
-    utterance.lang = 'ar-SA';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
+    const startSpeech = () => {
+      const utterance = new SpeechSynthesisUtterance(tafsirText);
+      utterance.lang = 'ar-SA';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
 
-    // Try to find an Arabic voice
+      // Try to find an Arabic voice
+      const voices = window.speechSynthesis.getVoices();
+      console.log('Available voices:', voices.length);
+      
+      const arabicVoice = voices.find(voice => 
+        voice.lang.startsWith('ar') || voice.name.toLowerCase().includes('arabic')
+      );
+      
+      if (arabicVoice) {
+        utterance.voice = arabicVoice;
+        console.log('Using Arabic voice:', arabicVoice.name);
+      } else {
+        console.log('No Arabic voice found, using default');
+      }
+
+      utterance.onstart = () => {
+        console.log('Speech started');
+        setIsSpeaking(true);
+      };
+      utterance.onend = () => {
+        console.log('Speech ended');
+        setIsSpeaking(false);
+      };
+      utterance.onerror = (event) => {
+        console.error('Speech error:', event.error);
+        setIsSpeaking(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // Voices may not be loaded yet, wait for them
     const voices = window.speechSynthesis.getVoices();
-    const arabicVoice = voices.find(voice => 
-      voice.lang.startsWith('ar') || voice.name.toLowerCase().includes('arabic')
-    );
-    if (arabicVoice) {
-      utterance.voice = arabicVoice;
+    if (voices.length === 0) {
+      // Wait for voices to load
+      window.speechSynthesis.onvoiceschanged = () => {
+        startSpeech();
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+      // Fallback timeout - start anyway after 500ms
+      setTimeout(() => {
+        if (!isSpeaking) {
+          startSpeech();
+        }
+      }, 500);
+    } else {
+      startSpeech();
     }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
-  }, [tafsirText]);
+  }, [tafsirText, isSpeaking]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis.cancel();
