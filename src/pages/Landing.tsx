@@ -80,15 +80,15 @@ const Landing = () => {
           <div className="max-w-4xl mx-auto text-center">
             {/* App Icon */}
             <div className="w-28 h-28 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl border-4 border-primary/20 animate-scale-in">
-              <img 
+              <img
                 src="/pwa-512x512.png" 
-                alt="Quran Accès Pour Tous" 
+                alt="Quran pour tous" 
                 className="w-full h-full object-cover"
               />
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-in">
-              Quran Accès Pour Tous
+              Quran pour tous
             </h1>
             
             <p className="text-2xl md:text-3xl font-arabic text-primary mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -319,7 +319,7 @@ const Landing = () => {
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 Quran Accès Pour Tous - Application accessible pour tous
+            © 2024 Quran pour tous - Application accessible pour tous
           </p>
           <p className="text-primary font-arabic mt-2">
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
