@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
+import { sanitizeTajweedHtml } from '@/lib/sanitize';
 
 interface QuranApiVerse {
   number: number;
@@ -97,11 +98,11 @@ export const useQuranData = (surahNumber: number) => {
             page: ayah.page,
           }));
 
-          // Parse tajweed text and store separately
+          // Parse tajweed text and store separately (sanitized for XSS protection)
           const tajweedMap: Record<number, string> = {};
           if (tajweedData.code === 200) {
             tajweedData.data.ayahs.forEach((ayah) => {
-              tajweedMap[ayah.numberInSurah] = parseTajweedText(ayah.text);
+              tajweedMap[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
             });
           }
 

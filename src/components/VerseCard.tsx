@@ -1,5 +1,6 @@
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
+import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { Play, Pause, Loader2, FileText, Download, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
@@ -83,9 +84,10 @@ export const VerseCard = ({
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
 
+  // Sanitize Tajweed HTML to prevent XSS attacks
   const effectiveTajweedHtml =
     textDisplayStyle === 'tajweed'
-      ? (tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined))
+      ? sanitizeTajweedHtml(tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined) || '')
       : undefined;
 
   const handleDownload = async () => {
