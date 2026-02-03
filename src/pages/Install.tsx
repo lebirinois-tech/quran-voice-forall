@@ -1,55 +1,15 @@
-import { useState, useEffect } from 'react';
+import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, Monitor, Apple, Chrome } from 'lucide-react';
+import { Download, Smartphone, Monitor, Apple } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
 
 const Install = () => {
   const navigate = useNavigate();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
-
-  useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-    }
-
-    // Detect platform
-    const userAgent = navigator.userAgent.toLowerCase();
-    setIsIOS(/iphone|ipad|ipod/.test(userAgent));
-    setIsAndroid(/android/.test(userAgent));
-
-    // Listen for install prompt
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-    };
-  }, []);
+  const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-    }
-    setDeferredPrompt(null);
+    await install();
   };
 
   return (
@@ -69,6 +29,24 @@ const Install = () => {
           </p>
         </div>
 
+        {isPreviewHost && (
+          <div className="mb-6 rounded-xl border border-border bg-muted/30 p-4 text-sm">
+            <p className="font-medium text-foreground">Remarque</p>
+            <p className="text-muted-foreground">
+              Dans la prévisualisation, le bouton/icone d’installation peut ne pas apparaître. Ouvre plutôt
+              {" "}
+              <a
+                href="https://quran-voice-forall.lovable.app"
+                className="underline underline-offset-4"
+              >
+                quran-voice-forall.lovable.app
+              </a>
+              {" "}
+              dans Chrome ou Edge.
+            </p>
+          </div>
+        )}
+
         {isInstalled ? (
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-6 text-center animate-scale-in">
             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
@@ -80,7 +58,7 @@ const Install = () => {
             <p className="text-muted-foreground mb-4">
               التطبيق مثبت بالفعل
             </p>
-            <Button onClick={() => navigate('/')} className="mt-2">
+            <Button onClick={() => navigate('/app')} className="mt-2">
               Ouvrir l'application
             </Button>
           </div>

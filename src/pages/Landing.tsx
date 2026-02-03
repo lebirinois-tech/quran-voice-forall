@@ -1,45 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from 'next-themes';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import { usePwaInstall } from '@/contexts/PwaInstallContext';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-    }
-
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-  }, []);
+  const { deferredPrompt, isInstalled, install } = usePwaInstall();
 
   const handleInstall = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setIsInstalled(true);
-      }
-      setDeferredPrompt(null);
-    } else {
-      navigate('/install');
-    }
+    if (deferredPrompt) await install();
+    else navigate('/install');
   };
 
   const features = [
@@ -104,7 +76,7 @@ const Landing = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
               {isInstalled ? (
                 <Button 
-                  onClick={() => navigate('/')} 
+                  onClick={() => navigate('/app')} 
                   size="lg" 
                   className="gap-2 text-lg px-8 py-6"
                 >
@@ -122,7 +94,7 @@ const Landing = () => {
                     Installer Gratuitement
                   </Button>
                   <Button 
-                    onClick={() => navigate('/')} 
+                    onClick={() => navigate('/app')} 
                     variant="outline" 
                     size="lg" 
                     className="gap-2 text-lg px-8 py-6"
