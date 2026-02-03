@@ -8,7 +8,8 @@ import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -254,6 +255,14 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border py-6 mt-8">
         <div className="container mx-auto px-4 text-center">
+          {/* Install Button */}
+          <Link to="/install">
+            <Button variant="outline" className="gap-2 mb-4">
+              <Download className="h-4 w-4" />
+              Installer l'application
+            </Button>
+          </Link>
+          
           <p className="text-sm text-muted-foreground">
             Quran Accès Pour Tous © {new Date().getFullYear()}
           </p>
