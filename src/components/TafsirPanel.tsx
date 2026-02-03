@@ -136,13 +136,23 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
     try {
       const synth = window.speechSynthesis;
+
+      // IMPORTANT: pause voice recognition ASAP (it can interrupt TTS on mobile)
+      notifyTtsStart();
+
       synth.cancel();
       // Certains navigateurs restent en pause
       synth.resume();
 
+      // Give the browser time to fully cancel any audio session / release mic focus
+      await new Promise((r) => setTimeout(r, 350));
+
       const voices = await ensureVoices();
       // Si l'utilisateur a relancé entre-temps, on abandonne
-      if (sessionId !== speakSessionIdRef.current) return;
+      if (sessionId !== speakSessionIdRef.current) {
+        notifyTtsEnd();
+        return;
+      }
 
       const arabicVoice = voices.find(
         (v) => v.lang?.toLowerCase().startsWith('ar') || v.name?.toLowerCase().includes('arab')
@@ -183,14 +193,13 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
         synth.speak(u);
       };
 
-      notifyTtsStart();
       speakNext();
     } catch (e) {
       console.error('Speech synthesis failed:', e);
       setIsSpeaking(false);
       notifyTtsEnd();
     }
-  }, [tafsirText]);
+  }, [tafsirText, notifyTtsStart, notifyTtsEnd]);
 
   const stopSpeaking = useCallback(() => {
     // Invalidate any running queue
