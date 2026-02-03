@@ -24,25 +24,25 @@ interface SettingsDialogProps {
 }
 
 const BACKGROUND_COLORS = [
-  { id: 'default', name: 'Crème (Défaut)', value: 'hsl(45, 30%, 96%)' },
-  { id: 'white', name: 'Blanc', value: 'hsl(0, 0%, 100%)' },
-  { id: 'sepia', name: 'Sépia', value: 'hsl(35, 40%, 90%)' },
-  { id: 'dark', name: 'Sombre', value: 'hsl(150, 30%, 8%)' },
-  { id: 'night', name: 'Nuit', value: 'hsl(220, 20%, 12%)' },
-  { id: 'emerald-light', name: 'Émeraude clair', value: 'hsl(158, 30%, 95%)' },
+  { id: 'default', name: 'Crème / كريمي', value: 'hsl(45, 30%, 96%)' },
+  { id: 'white', name: 'Blanc / أبيض', value: 'hsl(0, 0%, 100%)' },
+  { id: 'sepia', name: 'Sépia / بني داكن', value: 'hsl(35, 40%, 90%)' },
+  { id: 'dark', name: 'Sombre / داكن', value: 'hsl(150, 30%, 8%)' },
+  { id: 'night', name: 'Nuit / ليلي', value: 'hsl(220, 20%, 12%)' },
+  { id: 'emerald-light', name: 'Émeraude / زمردي', value: 'hsl(158, 30%, 95%)' },
 ];
 
 const TEXT_DISPLAY_STYLES = [
   { 
     id: 'tajweed' as TextDisplayStyle, 
-    name: 'Tajweed coloré', 
-    description: 'Police Uthmanic avec couleurs Tajweed',
+    name: 'Tajweed coloré / تجويد ملون', 
+    description: 'Police Uthmanic avec couleurs Tajweed / خط عثماني مع ألوان التجويد',
     icon: '🎨'
   },
   { 
     id: 'simple' as TextDisplayStyle, 
-    name: 'Texte simple', 
-    description: 'Texte arabe sans couleurs',
+    name: 'Texte simple / نص بسيط', 
+    description: 'Texte arabe sans couleurs / نص عربي بدون ألوان',
     icon: '📝'
   },
 ];
@@ -136,7 +136,7 @@ export const SettingsDialog = ({
         <DialogHeader>
           <DialogTitle className="text-foreground flex items-center gap-2 text-base">
             <Settings className="h-4 w-4" />
-            Paramètres
+            Paramètres / الإعدادات
           </DialogTitle>
         </DialogHeader>
         
@@ -145,7 +145,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Volume2 className="h-3.5 w-3.5 text-primary" />
-              Récitateur
+              Récitateur / القارئ
             </Label>
             <RadioGroup
               value={reciter}
@@ -174,7 +174,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Type className="h-3.5 w-3.5 text-primary" />
-              Style d'affichage
+              Style d'affichage / نمط العرض
             </Label>
             <RadioGroup
               value={textDisplayStyle}
@@ -209,7 +209,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Palette className="h-3.5 w-3.5 text-primary" />
-              Couleur de fond
+              Couleur de fond / لون الخلفية
             </Label>
             <div className="grid grid-cols-3 gap-1.5">
               {BACKGROUND_COLORS.map((color) => (
@@ -242,7 +242,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Download className="h-3.5 w-3.5 text-primary" />
-              Télécharger l'audio
+              Télécharger l'audio / تحميل الصوت
             </Label>
             <div className="space-y-1.5">
               <Button
@@ -255,12 +255,12 @@ export const SettingsDialog = ({
                 {isDownloadingSurah ? (
                   <>
                     <Download className="h-3.5 w-3.5 mr-2 animate-pulse" />
-                    Téléchargement... {downloadProgress}%
+                    تحميل... {downloadProgress}%
                   </>
                 ) : (
                   <>
                     <Download className="h-3.5 w-3.5 mr-2" />
-                    📖 Télécharger la Sourate
+                    📖 Sourate / السورة
                   </>
                 )}
               </Button>
@@ -271,11 +271,11 @@ export const SettingsDialog = ({
                 onClick={handleOpenQuranDownloadLink}
               >
                 <Download className="h-3.5 w-3.5 mr-2" />
-                📚 Quran complet (lien externe)
+                📚 Quran complet / القرآن كاملاً
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Avec le récitateur: {RECITERS[reciter].name}
+              Récitateur / القارئ: {RECITERS[reciter].name}
             </p>
           </div>
         </div>
