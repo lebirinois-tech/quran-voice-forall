@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { BookOpen, Volume2, VolumeX, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,8 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const speakSessionIdRef = useRef(0);
 
   // Fetch Tafsir when panel opens
   useEffect(() => {
@@ -64,70 +66,114 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     }
   };
 
-  const speakTafsir = useCallback(() => {
-    if (!tafsirText || !('speechSynthesis' in window)) {
-      console.log('Speech synthesis not available or no text');
-      return;
-    }
+  const speakTafsir = useCallback(async () => {
+    if (!tafsirText || !('speechSynthesis' in window)) return;
 
-    // Stop any ongoing speech
-    window.speechSynthesis.cancel();
+    // Incrémenter la session pour invalider toute lecture précédente
+    const sessionId = ++speakSessionIdRef.current;
 
-    const startSpeech = () => {
-      const utterance = new SpeechSynthesisUtterance(tafsirText);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
+    const ensureVoices = async (): Promise<SpeechSynthesisVoice[]> => {
+      const synth = window.speechSynthesis;
+      const initial = synth.getVoices();
+      if (initial.length > 0) return initial;
 
-      // Try to find an Arabic voice
-      const voices = window.speechSynthesis.getVoices();
-      console.log('Available voices:', voices.length);
-      
-      const arabicVoice = voices.find(voice => 
-        voice.lang.startsWith('ar') || voice.name.toLowerCase().includes('arabic')
-      );
-      
-      if (arabicVoice) {
-        utterance.voice = arabicVoice;
-        console.log('Using Arabic voice:', arabicVoice.name);
-      } else {
-        console.log('No Arabic voice found, using default');
-      }
+      return await new Promise((resolve) => {
+        const prev = synth.onvoiceschanged;
+        const done = () => {
+          const v = synth.getVoices();
+          synth.onvoiceschanged = prev ?? null;
+          resolve(v);
+        };
 
-      utterance.onstart = () => {
-        console.log('Speech started');
-        setIsSpeaking(true);
-      };
-      utterance.onend = () => {
-        console.log('Speech ended');
-        setIsSpeaking(false);
-      };
-      utterance.onerror = (event) => {
-        console.error('Speech error:', event.error);
-        setIsSpeaking(false);
-      };
+        synth.onvoiceschanged = () => {
+          done();
+        };
 
-      window.speechSynthesis.speak(utterance);
+        // Fallback: ne pas rester bloqué
+        setTimeout(done, 800);
+      });
     };
 
-    // Voices may not be loaded yet, wait for them
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) {
-      // Wait for voices to load
-      window.speechSynthesis.onvoiceschanged = () => {
-        startSpeech();
-        window.speechSynthesis.onvoiceschanged = null;
-      };
-      // Fallback timeout - start anyway after 500ms
-      setTimeout(() => {
-        if (!isSpeaking) {
-          startSpeech();
+    const splitText = (text: string, maxLen = 220) => {
+      const cleaned = text.replace(/\s+/g, ' ').trim();
+      if (cleaned.length <= maxLen) return [cleaned];
+
+      const parts = cleaned
+        .split(/(?<=[\.!؟\?؛،])\s+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const chunks: string[] = [];
+      let buf = '';
+      for (const p of parts) {
+        if (!buf) {
+          buf = p;
+          continue;
         }
-      }, 500);
-    } else {
-      startSpeech();
+        if ((buf + ' ' + p).length <= maxLen) {
+          buf = buf + ' ' + p;
+        } else {
+          chunks.push(buf);
+          buf = p;
+        }
+      }
+      if (buf) chunks.push(buf);
+      return chunks.length ? chunks : [cleaned];
+    };
+
+    try {
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      // Certains navigateurs restent en pause
+      synth.resume();
+
+      const voices = await ensureVoices();
+      // Si l'utilisateur a relancé entre-temps, on abandonne
+      if (sessionId !== speakSessionIdRef.current) return;
+
+      const arabicVoice = voices.find(
+        (v) => v.lang?.toLowerCase().startsWith('ar') || v.name?.toLowerCase().includes('arab')
+      );
+
+      const chunks = splitText(tafsirText);
+
+      let idx = 0;
+      const speakNext = () => {
+        if (sessionId !== speakSessionIdRef.current) return;
+        if (idx >= chunks.length) {
+          setIsSpeaking(false);
+          return;
+        }
+
+        const u = new SpeechSynthesisUtterance(chunks[idx++]);
+        u.rate = 0.9;
+        u.pitch = 1;
+        u.volume = 1;
+
+        if (arabicVoice) {
+          u.voice = arabicVoice;
+          u.lang = arabicVoice.lang;
+        } else {
+          // Laisser le navigateur choisir une voix disponible
+          u.lang = 'ar';
+        }
+
+        u.onstart = () => setIsSpeaking(true);
+        u.onend = () => speakNext();
+        u.onerror = (event) => {
+          console.error('Speech error:', event.error);
+          setIsSpeaking(false);
+        };
+
+        synth.speak(u);
+      };
+
+      speakNext();
+    } catch (e) {
+      console.error('Speech synthesis failed:', e);
+      setIsSpeaking(false);
     }
-  }, [tafsirText, isSpeaking]);
+  }, [tafsirText]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis.cancel();
