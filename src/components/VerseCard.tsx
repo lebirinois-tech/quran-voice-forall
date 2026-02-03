@@ -6,6 +6,7 @@ import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { TafsirPanel } from './TafsirPanel';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
@@ -73,6 +74,7 @@ export const VerseCard = ({
   const surah = surahs.find(s => s.number === surahNumber);
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isTafsirOpen, setIsTafsirOpen] = useState(false);
   
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
@@ -226,6 +228,14 @@ export const VerseCard = ({
       <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
         {verse.translation}
       </p>
+
+      {/* Tafsir Panel */}
+      <TafsirPanel
+        surahNumber={surahNumber}
+        verseNumber={verse.number}
+        isOpen={isTafsirOpen}
+        onToggle={() => setIsTafsirOpen(!isTafsirOpen)}
+      />
     </div>
   );
 };
