@@ -7,9 +7,28 @@ import { useNavigate } from 'react-router-dom';
 const Install = () => {
   const navigate = useNavigate();
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
+  const publishedUrl = 'https://quran-voice-forall.lovable.app';
 
   const handleInstall = async () => {
     await install();
+  };
+
+  const openPublished = () => {
+    // In preview iframe, normal navigation to an external domain can be blocked.
+    // Force a new tab/window to open.
+    window.open(publishedUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const copyPublishedUrl = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(publishedUrl);
+        return;
+      }
+    } catch {
+      // ignore and fallback
+    }
+    window.prompt('Copiez ce lien :', publishedUrl);
   };
 
   return (
@@ -36,14 +55,30 @@ const Install = () => {
               Dans la prévisualisation, le bouton/icone d’installation peut ne pas apparaître. Ouvre plutôt
               {" "}
               <a
-                href="https://quran-voice-forall.lovable.app"
+                href={publishedUrl}
                 className="underline underline-offset-4"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  // Ensure it opens even when the preview iframe blocks external navigation
+                  e.preventDefault();
+                  openPublished();
+                }}
               >
                 quran-voice-forall.lovable.app
               </a>
               {" "}
               dans Chrome ou Edge.
             </p>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={openPublished}>
+                Ouvrir le site
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={copyPublishedUrl}>
+                Copier le lien
+              </Button>
+            </div>
           </div>
         )}
 

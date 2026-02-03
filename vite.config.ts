@@ -28,7 +28,8 @@ export default defineConfig(({ mode }) => ({
         display: "standalone",
         orientation: "portrait",
         scope: "/",
-        start_url: "/",
+          // Open directly in the actual app experience after installation.
+          start_url: "/app",
         icons: [
           {
             src: "/pwa-192x192.png",
