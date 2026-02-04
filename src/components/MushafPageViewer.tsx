@@ -22,9 +22,8 @@ const getHafsPageUrl = (page: number): string => {
 };
 
 const getWarshPageUrl = (page: number): string => {
-  // KFGQPC Warsh pages (authentic Warsh script)
-  const paddedPage = String(page).padStart(3, '0');
-  return `https://www.mp3quran.net/api/quran_pages_warsh/${paddedPage}.png`;
+  // QuranHub KFGQPC Warsh pages (authentic Warsh script) via GitHub raw
+  return `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`;
 };
 
 // Get surah start and end pages
