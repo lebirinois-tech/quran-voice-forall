@@ -214,6 +214,8 @@ const SurahReader = () => {
         onBackgroundColorChange={appSettings.onBackgroundColorChange}
         textDisplayStyle={appSettings.textDisplayStyle}
         onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+        fontSize={appSettings.fontSize}
+        onFontSizeChange={appSettings.onFontSizeChange}
       />
 
       <main className="container mx-auto px-4 py-6">
@@ -353,6 +355,7 @@ const SurahReader = () => {
                   isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
                   reciter={appSettings.reciter}
                   textDisplayStyle={appSettings.textDisplayStyle}
+                  fontSize={appSettings.fontSize}
                   tajweedHtml={versesTajweed[verse.number]}
                   onPlay={() => quranAudio.playVerse(verse.number)}
                   onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}

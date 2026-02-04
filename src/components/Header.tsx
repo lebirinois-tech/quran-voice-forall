@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from './SettingsDialog';
 import { ReciterId } from '@/hooks/useQuranAudio';
-import { TextDisplayStyle } from '@/hooks/useAppSettings';
+import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -18,6 +18,8 @@ interface HeaderProps {
   onBackgroundColorChange?: (color: string) => void;
   textDisplayStyle?: TextDisplayStyle;
   onTextDisplayStyleChange?: (style: TextDisplayStyle) => void;
+  fontSize?: FontSize;
+  onFontSizeChange?: (size: FontSize) => void;
 }
 
 export const Header = ({ 
@@ -33,6 +35,8 @@ export const Header = ({
   onBackgroundColorChange,
   textDisplayStyle = 'tajweed',
   onTextDisplayStyleChange,
+  fontSize = 'medium',
+  onFontSizeChange,
 }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
@@ -68,7 +72,7 @@ export const Header = ({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {onReciterChange && onBackgroundColorChange && onTextDisplayStyleChange && (
+            {onReciterChange && onBackgroundColorChange && onTextDisplayStyleChange && onFontSizeChange && (
               <SettingsDialog
                 reciter={reciter}
                 onReciterChange={onReciterChange}
@@ -76,6 +80,8 @@ export const Header = ({
                 onBackgroundColorChange={onBackgroundColorChange}
                 textDisplayStyle={textDisplayStyle}
                 onTextDisplayStyleChange={onTextDisplayStyleChange}
+                fontSize={fontSize}
+                onFontSizeChange={onFontSizeChange}
               />
             )}
             {onToggleContinuous && (
