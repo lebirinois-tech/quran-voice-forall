@@ -9,6 +9,12 @@ const Landing = () => {
   const { theme, setTheme } = useTheme();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
 
+  const openApp = () => {
+    // In some installed-PWA desktop contexts, client-side navigation can appear to do nothing.
+    // A hard navigation to /app is more reliable.
+    window.location.assign('/app');
+  };
+
   const handleInstall = async () => {
     if (deferredPrompt) await install();
     else navigate('/install');
@@ -76,7 +82,7 @@ const Landing = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
               {isInstalled ? (
                 <Button 
-                  onClick={() => navigate('/app')} 
+                  onClick={openApp}
                   size="lg" 
                   className="gap-2 text-lg px-8 py-6"
                 >
@@ -94,7 +100,7 @@ const Landing = () => {
                     Installer Gratuitement
                   </Button>
                   <Button 
-                    onClick={() => navigate('/app')} 
+                    onClick={openApp}
                     variant="outline" 
                     size="lg" 
                     className="gap-2 text-lg px-8 py-6"

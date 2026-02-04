@@ -9,6 +9,11 @@ const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
   const publishedUrl = 'https://quran-voice-forall.lovable.app';
 
+  const openApp = () => {
+    // More reliable than client-side navigation in certain installed desktop PWA contexts.
+    window.location.assign('/app');
+  };
+
   const handleInstall = async () => {
     await install();
   };
@@ -93,7 +98,7 @@ const Install = () => {
             <p className="text-muted-foreground mb-4">
               التطبيق مثبت بالفعل
             </p>
-            <Button onClick={() => navigate('/app')} className="mt-2">
+            <Button onClick={openApp} className="mt-2">
               Ouvrir l'application
             </Button>
           </div>
