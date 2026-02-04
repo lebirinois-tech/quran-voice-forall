@@ -37,25 +37,16 @@ export const RECITERS: Record<string, ReciterInfo> = {
   alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', qiraat: 'hafs', quranicAudioId: 7 },
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', qiraat: 'hafs', quranicAudioId: 18 },
   minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', qiraat: 'hafs', quranicAudioId: 21 },
-  abdulbasit: { id: 'ar.abdulbasit', name: 'Abdul Basit Abdul Samad', qiraat: 'hafs', quranicAudioId: 1 },
+  abdulbasit: { id: 'ar.abdulbasitmujawwad', name: 'Abdul Basit Abdul Samad', qiraat: 'hafs', quranicAudioId: 1 },
   sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', qiraat: 'hafs', quranicAudioId: 10 },
-  shuraym: { id: 'ar.saaborinalshatri', name: 'Saud Al-Shuraym', qiraat: 'hafs', quranicAudioId: 11 },
+  shuraym: { id: 'ar.saulodshurem', name: 'Saud Al-Shuraym', qiraat: 'hafs', quranicAudioId: 11 },
   mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', qiraat: 'hafs', quranicAudioId: 6 },
   
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع) - Popular in North & West Africa
+  // Note: AlQuran.cloud API has limited Warsh support
   // ═══════════════════════════════════════════════════════════════════════════
-  husaryWarsh: { id: 'ar.husarymujawwad', name: 'Al-Husary (Warsh)', qiraat: 'warsh', quranicAudioId: 17 },
-  
-  // ═══════════════════════════════════════════════════════════════════════════
-  // QALUN (قالون عن نافع) - Used in Libya, Tunisia, parts of Algeria
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Note: Limited availability in the API
-  
-  // ═══════════════════════════════════════════════════════════════════════════
-  // AL-DOORI (الدوري عن أبي عمرو) - Historical reading
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Note: Limited availability in the API
+  husaryWarsh: { id: 'ar.husary', name: 'Al-Husary (Warsh audio limited)', qiraat: 'warsh', quranicAudioId: 35 },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
