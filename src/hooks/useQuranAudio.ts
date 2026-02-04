@@ -1,11 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
-interface UseQuranAudioOptions {
-  surahNumber: number;
-  totalVerses: number;
-  onVerseChange?: (verseNumber: number) => void;
-}
+// Interface moved inside hook for better organization
 
 // Reciter options organized by Qira'at (reading style)
 export const QIRAAT_LABELS = {
@@ -60,20 +56,33 @@ export interface RepeatSettings {
   rangeEnd?: number;
 }
 
+interface UseQuranAudioOptions {
+  surahNumber: number;
+  totalVerses: number;
+  reciter?: ReciterId;
+  onVerseChange?: (verseNumber: number) => void;
+}
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
+  reciter: externalReciter = 'alafasy',
   onVerseChange 
 }: UseQuranAudioOptions) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentVerse, setCurrentVerse] = useState(1);
-  const [reciter, setReciter] = useState<ReciterId>('alafasy');
+  const [reciter, setReciter] = useState<ReciterId>(externalReciter);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [repeatSettings, setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
   const [currentRepeatCount, setCurrentRepeatCount] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+
+  // Sync reciter with external prop
+  useEffect(() => {
+    setReciter(externalReciter);
+  }, [externalReciter]);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
