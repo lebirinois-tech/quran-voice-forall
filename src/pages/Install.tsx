@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,12 @@ const Install = () => {
     // More reliable than client-side navigation in certain installed desktop PWA contexts.
     window.location.assign('/app');
   };
+
+  useEffect(() => {
+    // If user somehow lands on /install from an installed app, bring them into the app.
+    if (isInstalled) openApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInstalled]);
 
   const handleInstall = async () => {
     await install();
