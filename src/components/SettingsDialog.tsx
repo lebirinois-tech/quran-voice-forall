@@ -138,8 +138,9 @@ export const SettingsDialog = ({
   };
 
   const handleOpenQuranDownloadLink = () => {
-    // Open external link for full Quran download
-    window.open(`https://quranicaudio.com/quran/${RECITERS[reciter].id}`, '_blank');
+    // Open external link for full Quran download using correct QuranicAudio ID
+    const quranicAudioId = RECITERS[reciter].quranicAudioId || 7; // Default to Alafasy
+    window.open(`https://quranicaudio.com/quran/${quranicAudioId}`, '_blank');
     toast.info('Redirection vers QuranicAudio pour le Quran complet');
   };
 

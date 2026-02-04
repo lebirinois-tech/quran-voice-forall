@@ -23,22 +23,29 @@ export interface ReciterInfo {
   qiraat: QiraatId;
 }
 
+export interface ReciterInfo {
+  id: string;
+  name: string;
+  qiraat: QiraatId;
+  quranicAudioId?: number; // ID for quranicaudio.com download links
+}
+
 export const RECITERS: Record<string, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // HAFS (حفص عن عاصم) - The most widely used reading
   // ═══════════════════════════════════════════════════════════════════════════
-  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', qiraat: 'hafs' },
-  husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', qiraat: 'hafs' },
-  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', qiraat: 'hafs' },
-  abdulbasit: { id: 'ar.abdulbasit', name: 'Abdul Basit Abdul Samad', qiraat: 'hafs' },
-  sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', qiraat: 'hafs' },
-  shuraym: { id: 'ar.saaborinalshatri', name: 'Saud Al-Shuraym', qiraat: 'hafs' },
-  mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', qiraat: 'hafs' },
+  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', qiraat: 'hafs', quranicAudioId: 7 },
+  husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', qiraat: 'hafs', quranicAudioId: 18 },
+  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', qiraat: 'hafs', quranicAudioId: 21 },
+  abdulbasit: { id: 'ar.abdulbasit', name: 'Abdul Basit Abdul Samad', qiraat: 'hafs', quranicAudioId: 1 },
+  sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', qiraat: 'hafs', quranicAudioId: 10 },
+  shuraym: { id: 'ar.saaborinalshatri', name: 'Saud Al-Shuraym', qiraat: 'hafs', quranicAudioId: 11 },
+  mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', qiraat: 'hafs', quranicAudioId: 6 },
   
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع) - Popular in North & West Africa
   // ═══════════════════════════════════════════════════════════════════════════
-  husaryWarsh: { id: 'ar.husarymujawwad', name: 'Al-Husary (Warsh)', qiraat: 'warsh' },
+  husaryWarsh: { id: 'ar.husarymujawwad', name: 'Al-Husary (Warsh)', qiraat: 'warsh', quranicAudioId: 17 },
   
   // ═══════════════════════════════════════════════════════════════════════════
   // QALUN (قالون عن نافع) - Used in Libya, Tunisia, parts of Algeria
