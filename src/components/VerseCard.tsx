@@ -4,7 +4,7 @@ import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { Play, Pause, Loader2, FileText, Download, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
-import { TextDisplayStyle } from '@/hooks/useAppSettings';
+import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { TafsirPanel } from './TafsirPanel';
@@ -54,6 +54,7 @@ interface VerseCardProps {
   isLoading?: boolean;
   reciter?: ReciterId;
   textDisplayStyle?: TextDisplayStyle;
+  fontSize?: FontSize;
   tajweedHtml?: string;
   pageNumber?: number;
   onPlay?: () => void;
@@ -70,6 +71,7 @@ export const VerseCard = ({
   isLoading,
   reciter = 'alafasy',
   textDisplayStyle = 'tajweed',
+  fontSize = 'medium',
   tajweedHtml,
   pageNumber: propPageNumber,
   onPlay,
@@ -122,17 +124,29 @@ export const VerseCard = ({
     }
   };
 
+  // Map fontSize setting to Tailwind classes
+  const getFontSizeClass = () => {
+    switch (fontSize) {
+      case 'small': return 'text-2xl md:text-3xl';
+      case 'medium': return 'text-3xl md:text-4xl';
+      case 'large': return 'text-4xl md:text-5xl';
+      case 'xlarge': return 'text-5xl md:text-6xl';
+      default: return 'text-3xl md:text-4xl';
+    }
+  };
+
   // Choose the appropriate text style class
   const getTextClassName = () => {
+    const sizeClass = getFontSizeClass();
     switch (textDisplayStyle) {
       case 'tajweed':
-        return 'quran-text text-3xl md:text-4xl leading-relaxed';
+        return `quran-text ${sizeClass} leading-relaxed`;
       case 'simple':
-        return 'font-amiri text-3xl md:text-4xl leading-relaxed text-foreground';
+        return `font-amiri ${sizeClass} leading-relaxed text-foreground`;
       case 'mushaf':
-        return 'quran-text text-2xl md:text-3xl leading-loose';
+        return `quran-text ${sizeClass} leading-loose`;
       default:
-        return 'quran-text text-3xl md:text-4xl leading-relaxed';
+        return `quran-text ${sizeClass} leading-relaxed`;
     }
   };
 

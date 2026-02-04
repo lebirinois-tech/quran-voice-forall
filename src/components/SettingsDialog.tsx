@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Volume2, Download, Palette, Check, Type, BookOpen } from 'lucide-react';
+import { Settings, Volume2, Download, Palette, Check, Type, TextCursor } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
-import { TextDisplayStyle } from '@/hooks/useAppSettings';
+import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 
 interface SettingsDialogProps {
@@ -21,6 +21,8 @@ interface SettingsDialogProps {
   onBackgroundColorChange: (color: string) => void;
   textDisplayStyle: TextDisplayStyle;
   onTextDisplayStyleChange: (style: TextDisplayStyle) => void;
+  fontSize: FontSize;
+  onFontSizeChange: (size: FontSize) => void;
 }
 
 const BACKGROUND_COLORS = [
@@ -47,6 +49,13 @@ const TEXT_DISPLAY_STYLES = [
   },
 ];
 
+const FONT_SIZES = [
+  { id: 'small' as FontSize, name: 'Petit / صغير', size: 'text-2xl' },
+  { id: 'medium' as FontSize, name: 'Moyen / متوسط', size: 'text-3xl' },
+  { id: 'large' as FontSize, name: 'Grand / كبير', size: 'text-4xl' },
+  { id: 'xlarge' as FontSize, name: 'Très grand / كبير جداً', size: 'text-5xl' },
+];
+
 export const SettingsDialog = ({
   reciter,
   onReciterChange,
@@ -54,6 +63,8 @@ export const SettingsDialog = ({
   onBackgroundColorChange,
   textDisplayStyle,
   onTextDisplayStyleChange,
+  fontSize,
+  onFontSizeChange,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
@@ -202,7 +213,33 @@ export const SettingsDialog = ({
                   {textDisplayStyle === style.id && <Check className="h-3.5 w-3.5 text-primary" />}
                 </div>
               ))}
-            </RadioGroup>
+          </RadioGroup>
+          </div>
+
+          {/* Font Size */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <TextCursor className="h-3.5 w-3.5 text-primary" />
+              Taille de police / حجم الخط
+            </Label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {FONT_SIZES.map((size) => (
+                <button
+                  key={size.id}
+                  onClick={() => onFontSizeChange(size.id)}
+                  className={`p-2 rounded-lg border-2 transition-all text-center ${
+                    fontSize === size.id
+                      ? 'border-primary ring-2 ring-primary/30 bg-primary/10'
+                      : 'border-border hover:border-primary/50 bg-muted/50'
+                  }`}
+                  aria-label={size.name}
+                >
+                  <span className="text-xs font-medium text-foreground">
+                    {size.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Background Color */}
