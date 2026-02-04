@@ -11,6 +11,7 @@ import SurahReader from "./pages/SurahReader";
 import Install from "./pages/Install";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Reset from "./pages/Reset";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/app" element={<Index />} />
               <Route path="/surah/:surahNumber" element={<SurahReader />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/reset" element={<Reset />} />
               <Route path="/auth" element={<Auth />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
