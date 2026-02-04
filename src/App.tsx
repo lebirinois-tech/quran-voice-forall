@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { PwaInstallProvider } from "@/contexts/PwaInstallContext";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import SurahReader from "./pages/SurahReader";
@@ -21,6 +22,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" />
+        <UpdatePrompt />
         <PwaInstallProvider>
           <BrowserRouter>
             <Routes>
