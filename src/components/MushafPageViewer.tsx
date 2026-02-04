@@ -53,27 +53,24 @@ export const MushafPageViewer = ({
     [surahNumber]
   );
   
-  // Calculate initial page based on current verse
-  const initialPage = useMemo(() => {
-    if (currentVerse > 0 && surah) {
-      return getVersePage(surahNumber, currentVerse, surah.versesCount);
-    }
-    return surahStartPage;
-  }, [surahNumber, currentVerse, surah, surahStartPage]);
-  
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [currentPage, setCurrentPage] = useState(surahStartPage);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [isManualNavigation, setIsManualNavigation] = useState(false);
 
-  // Update page when verse changes
+  // Initialize page based on surah start page when surah changes
   useEffect(() => {
-    if (currentVerse > 0 && surah) {
+    setCurrentPage(surahStartPage);
+    setIsManualNavigation(false);
+  }, [surahNumber, surahStartPage]);
+
+  // Update page when verse changes (only if not manually navigating)
+  useEffect(() => {
+    if (!isManualNavigation && currentVerse > 0 && surah) {
       const versePage = getVersePage(surahNumber, currentVerse, surah.versesCount);
-      if (versePage !== currentPage) {
-        setCurrentPage(versePage);
-      }
+      setCurrentPage(versePage);
     }
-  }, [currentVerse, surahNumber, surah, currentPage]);
+  }, [currentVerse, surahNumber, surah, isManualNavigation]);
 
   // Reset loading state when page changes
   useEffect(() => {
@@ -87,6 +84,7 @@ export const MushafPageViewer = ({
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
+      setIsManualNavigation(true);
       const newPage = currentPage - 1;
       setCurrentPage(newPage);
       onPageChange?.(newPage);
@@ -95,6 +93,7 @@ export const MushafPageViewer = ({
 
   const handleNextPage = () => {
     if (currentPage < 604) {
+      setIsManualNavigation(true);
       const newPage = currentPage + 1;
       setCurrentPage(newPage);
       onPageChange?.(newPage);
