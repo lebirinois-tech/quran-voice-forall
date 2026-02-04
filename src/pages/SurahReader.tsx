@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
+import { MushafPageViewer } from '@/components/MushafPageViewer';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
@@ -12,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, Surah, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Bookmark } from 'lucide-react';
+import { Loader2, FileText, Layers } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -314,8 +315,10 @@ const SurahReader = () => {
 
         {/* Verses Content */}
         <div className="max-w-3xl mx-auto">
-          {/* Bismillah */}
-          {surah.number !== 1 && surah.number !== 9 && (
+          {/* Bismillah - only show for text modes */}
+          {surah.number !== 1 && surah.number !== 9 && 
+           appSettings.textDisplayStyle !== 'mushaf-hafs' && 
+           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -326,43 +329,60 @@ const SurahReader = () => {
             </div>
           )}
 
-          {/* Loading State */}
-          {isLoadingVerses && (
-            <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-muted-foreground">Chargement des versets Tajweed...</p>
-            </div>
+          {/* Mushaf Image Viewer Mode */}
+          {(appSettings.textDisplayStyle === 'mushaf-hafs' || 
+            appSettings.textDisplayStyle === 'mushaf-warsh') && (
+            <MushafPageViewer
+              surahNumber={num}
+              totalVerses={verses.length || surah.versesCount}
+              currentVerse={quranAudio.currentVerse}
+              mushafType={appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 'warsh'}
+            />
           )}
 
-          {/* Error State */}
-          {error && (
-            <div className="text-center py-12">
-              <p className="text-destructive">{error}</p>
-            </div>
-          )}
+          {/* Text-based display modes (Tajweed / Simple) */}
+          {appSettings.textDisplayStyle !== 'mushaf-hafs' && 
+           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+            <>
+              {/* Loading State */}
+              {isLoadingVerses && (
+                <div className="flex flex-col items-center justify-center py-12 gap-4">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                  <p className="text-muted-foreground">Chargement des versets Tajweed...</p>
+                </div>
+              )}
 
-          {/* Verses */}
-          {!isLoadingVerses && !error && (
-            <div className="space-y-4">
-              {verses.map((verse) => (
-                <VerseCard
-                  key={verse.number}
-                  id={`verse-${verse.number}`}
-                  verse={verse}
-                  surahNumber={surah.number}
-                  isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-                  isHighlighted={quranAudio.currentVerse === verse.number}
-                  isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
-                  reciter={appSettings.reciter}
-                  textDisplayStyle={appSettings.textDisplayStyle}
-                  fontSize={appSettings.fontSize}
-                  tajweedHtml={versesTajweed[verse.number]}
-                  onPlay={() => quranAudio.playVerse(verse.number)}
-                  onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
-                  isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
-                />
-              ))}
-            </div>
+              {/* Error State */}
+              {error && (
+                <div className="text-center py-12">
+                  <p className="text-destructive">{error}</p>
+                </div>
+              )}
+
+              {/* Verses */}
+              {!isLoadingVerses && !error && (
+                <div className="space-y-4">
+                  {verses.map((verse) => (
+                    <VerseCard
+                      key={verse.number}
+                      id={`verse-${verse.number}`}
+                      verse={verse}
+                      surahNumber={surah.number}
+                      isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
+                      isHighlighted={quranAudio.currentVerse === verse.number}
+                      isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
+                      reciter={appSettings.reciter}
+                      textDisplayStyle={appSettings.textDisplayStyle}
+                      fontSize={appSettings.fontSize}
+                      tajweedHtml={versesTajweed[verse.number]}
+                      onPlay={() => quranAudio.playVerse(verse.number)}
+                      onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
+                      isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

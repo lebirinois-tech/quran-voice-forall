@@ -38,14 +38,26 @@ const TEXT_DISPLAY_STYLES = [
   { 
     id: 'tajweed' as TextDisplayStyle, 
     name: 'Tajweed coloré / تجويد ملون', 
-    description: 'Police Uthmanic avec couleurs Tajweed / خط عثماني مع ألوان التجويد',
+    description: 'Texte interactif avec couleurs Tajweed (Hafs)',
     icon: '🎨'
   },
   { 
     id: 'simple' as TextDisplayStyle, 
     name: 'Texte simple / نص بسيط', 
-    description: 'Texte arabe sans couleurs / نص عربي بدون ألوان',
+    description: 'Texte arabe sans couleurs',
     icon: '📝'
+  },
+  { 
+    id: 'mushaf-hafs' as TextDisplayStyle, 
+    name: 'Mushaf Hafs Tajweed / مصحف حفص', 
+    description: 'Pages du Mushaf avec Tajweed coloré',
+    icon: '📖'
+  },
+  { 
+    id: 'mushaf-warsh' as TextDisplayStyle, 
+    name: 'Mushaf Warsh / مصحف ورش', 
+    description: 'Pages du Mushaf en riwaya Warsh authentique',
+    icon: '📜'
   },
 ];
 

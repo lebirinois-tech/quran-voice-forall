@@ -143,7 +143,8 @@ export const VerseCard = ({
         return `quran-text ${sizeClass} leading-relaxed`;
       case 'simple':
         return `font-amiri ${sizeClass} leading-relaxed text-foreground`;
-      case 'mushaf':
+      case 'mushaf-hafs':
+      case 'mushaf-warsh':
         return `quran-text ${sizeClass} leading-loose`;
       default:
         return `quran-text ${sizeClass} leading-relaxed`;
@@ -161,7 +162,7 @@ export const VerseCard = ({
           : "bg-secondary/5 dark:bg-secondary/10",
         isHighlighted && "verse-highlight ring-2 ring-primary/20",
         isPlaying && "ring-2 ring-primary/40",
-        textDisplayStyle === 'mushaf' && "bg-ivory/50 dark:bg-card",
+        (textDisplayStyle === 'mushaf-hafs' || textDisplayStyle === 'mushaf-warsh') && "bg-ivory/50 dark:bg-card",
         "animate-fade-in"
       )}
       style={{ animationDelay: `${verse.number * 0.05}s` }}
@@ -171,13 +172,13 @@ export const VerseCard = ({
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center",
-            textDisplayStyle === 'mushaf' 
+            (textDisplayStyle === 'mushaf-hafs' || textDisplayStyle === 'mushaf-warsh')
               ? "bg-primary text-primary-foreground" 
               : "bg-primary/10"
           )}>
             <span className={cn(
               "text-sm font-semibold",
-              textDisplayStyle === 'mushaf' ? "text-primary-foreground" : "text-primary"
+              (textDisplayStyle === 'mushaf-hafs' || textDisplayStyle === 'mushaf-warsh') ? "text-primary-foreground" : "text-primary"
             )}>
               {verse.number}
             </span>
