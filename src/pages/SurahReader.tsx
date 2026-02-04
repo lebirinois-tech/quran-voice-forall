@@ -318,7 +318,8 @@ const SurahReader = () => {
           {/* Bismillah - only show for text modes */}
           {surah.number !== 1 && surah.number !== 9 && 
            appSettings.textDisplayStyle !== 'mushaf-hafs' && 
-           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+           appSettings.textDisplayStyle !== 'mushaf-warsh' &&
+           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -331,18 +332,23 @@ const SurahReader = () => {
 
           {/* Mushaf Image Viewer Mode */}
           {(appSettings.textDisplayStyle === 'mushaf-hafs' || 
-            appSettings.textDisplayStyle === 'mushaf-warsh') && (
+            appSettings.textDisplayStyle === 'mushaf-warsh' ||
+            appSettings.textDisplayStyle === 'mushaf-warsh-tajweed') && (
             <MushafPageViewer
               surahNumber={num}
               totalVerses={verses.length || surah.versesCount}
               currentVerse={quranAudio.currentVerse}
-              mushafType={appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 'warsh'}
+              mushafType={
+                appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 
+                appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ? 'warsh-tajweed' : 'warsh'
+              }
             />
           )}
 
           {/* Text-based display modes (Tajweed / Simple) */}
           {appSettings.textDisplayStyle !== 'mushaf-hafs' && 
-           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+           appSettings.textDisplayStyle !== 'mushaf-warsh' &&
+           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' && (
             <>
               {/* Loading State */}
               {isLoadingVerses && (

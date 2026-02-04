@@ -5,7 +5,7 @@ import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 
-type MushafType = 'hafs' | 'warsh';
+type MushafType = 'hafs' | 'warsh' | 'warsh-tajweed';
 
 interface MushafPageViewerProps {
   surahNumber: number;
@@ -17,13 +17,18 @@ interface MushafPageViewerProps {
 
 // Page image sources
 const getHafsPageUrl = (page: number): string => {
-  // EasyQuran Hafs Tajweed colored pages
+  // EasyQuran Hafs Tajweed colored pages (September 2022 folder)
   return `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`;
 };
 
 const getWarshPageUrl = (page: number): string => {
-  // QuranHub KFGQPC Warsh pages (authentic Warsh script) via GitHub raw
+  // QuranHub KFGQPC Warsh pages (authentic Warsh script without Tajweed colors)
   return `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`;
+};
+
+const getWarshTajweedPageUrl = (page: number): string => {
+  // EasyQuran Warsh Tajweed colored pages (October 2022 folder)
+  return `https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`;
 };
 
 // Get surah start and end pages
@@ -79,7 +84,15 @@ export const MushafPageViewer = ({
   }, [currentPage, mushafType]);
 
   const getPageUrl = (page: number): string => {
-    return mushafType === 'hafs' ? getHafsPageUrl(page) : getWarshPageUrl(page);
+    switch (mushafType) {
+      case 'hafs':
+        return getHafsPageUrl(page);
+      case 'warsh-tajweed':
+        return getWarshTajweedPageUrl(page);
+      case 'warsh':
+      default:
+        return getWarshPageUrl(page);
+    }
   };
 
   const handlePreviousPage = () => {
@@ -115,7 +128,9 @@ export const MushafPageViewer = ({
       {/* Page Info Header */}
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="text-sm text-muted-foreground">
-          {mushafType === 'hafs' ? '📖 Mushaf Hafs Tajweed' : '📜 Mushaf Warsh'}
+          {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
+          {mushafType === 'warsh-tajweed' && '🎨 Mushaf Warsh Tajweed'}
+          {mushafType === 'warsh' && '📜 Mushaf Warsh'}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-foreground">
@@ -196,9 +211,9 @@ export const MushafPageViewer = ({
       {/* Mushaf type indicator */}
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
         <p className="text-xs text-center text-muted-foreground">
-          {mushafType === 'hafs' 
-            ? '🎨 Hafs avec Tajweed coloré (lecture standard)'
-            : '📜 Warsh - Script authentique maghrébin (sans couleurs Tajweed)'}
+          {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré (lecture standard)'}
+          {mushafType === 'warsh-tajweed' && '🎨 Warsh avec Tajweed coloré (lecture maghrébine)'}
+          {mushafType === 'warsh' && '📜 Warsh - Script authentique maghrébin (sans couleurs Tajweed)'}
         </p>
       </div>
     </div>
