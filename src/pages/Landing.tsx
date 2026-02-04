@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun } from 'lucide-react';
@@ -14,6 +15,13 @@ const Landing = () => {
     // A hard navigation to /app is more reliable.
     window.location.assign('/app');
   };
+
+  useEffect(() => {
+    // If the PWA launches on the marketing landing (e.g. old cached start_url),
+    // immediately send users to the actual app experience.
+    if (isInstalled) openApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInstalled]);
 
   const handleInstall = async () => {
     if (deferredPrompt) await install();

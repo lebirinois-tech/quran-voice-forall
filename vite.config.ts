@@ -50,6 +50,11 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
+        // SPA fallback + more reliable updates for installed PWA
+        navigateFallback: "/index.html",
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {
