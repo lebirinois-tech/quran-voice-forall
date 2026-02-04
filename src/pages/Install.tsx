@@ -3,10 +3,8 @@ import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const Install = () => {
-  const navigate = useNavigate();
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
   const publishedUrl = 'https://quran-voice-forall.lovable.app';
 
@@ -45,7 +43,7 @@ const Install = () => {
 
   return (
     <div className="min-h-screen bg-background pattern-islamic">
-      <Header showBackButton onBack={() => navigate('/')} />
+      <Header showBackButton onBack={() => window.location.assign('/')} />
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="text-center mb-8 animate-fade-in">
