@@ -40,9 +40,10 @@ export const RECITERS: Record<string, ReciterInfo> = {
   
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع) - Popular in North & West Africa
-  // Note: AlQuran.cloud API has limited Warsh support
+  // Using everyayah.com which has proper Warsh recordings
   // ═══════════════════════════════════════════════════════════════════════════
-  husaryWarsh: { id: 'ar.husary', name: 'Al-Husary (Warsh audio limited)', qiraat: 'warsh', quranicAudioId: 35 },
+  husaryWarsh: { id: 'warsh_husary', name: 'Al-Husary (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
+  yasserDossari: { id: 'warsh_dossary', name: 'Yasser Al-Dossari (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
@@ -184,9 +185,22 @@ export const useQuranAudio = ({
     }
   }, [isPlaying, currentVerse, totalVerses, onVerseChange, repeatSettings, currentRepeatCount]);
 
-  const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
-    const edition = RECITERS[reciterId].id;
-    return `https://api.alquran.cloud/v1/ayah/${surah}:${verse}/${edition}`;
+  // Helper to format verse number for everyayah.com (e.g., 001, 002, 123)
+  const formatVerseNumber = (num: number) => num.toString().padStart(3, '0');
+  const formatSurahNumber = (num: number) => num.toString().padStart(3, '0');
+
+  const getWarshAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
+    // everyayah.com format: https://everyayah.com/data/[reciter]/SSSAAA.mp3
+    // SSS = surah number (001-114), AAA = ayah number (001-286)
+    const surahStr = formatSurahNumber(surah);
+    const verseStr = formatVerseNumber(verse);
+    
+    if (reciterId === 'husaryWarsh') {
+      return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${surahStr}${verseStr}.mp3`;
+    } else if (reciterId === 'yasserDossari') {
+      return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${surahStr}${verseStr}.mp3`;
+    }
+    return null;
   }, []);
 
   const playVerse = useCallback(async (verseNumber: number) => {
@@ -195,7 +209,24 @@ export const useQuranAudio = ({
     setIsLoading(true);
     
     try {
-      const response = await fetch(getAudioUrl(surahNumber, verseNumber, reciter));
+      const reciterInfo = RECITERS[reciter];
+      
+      // Check if this is a Warsh reciter (use everyayah.com)
+      if (reciterInfo.qiraat === 'warsh') {
+        const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
+        if (warshUrl) {
+          audioRef.current.src = warshUrl;
+          await audioRef.current.play();
+          setIsPlaying(true);
+          setCurrentVerse(verseNumber);
+          onVerseChange?.(verseNumber);
+          return;
+        }
+      }
+      
+      // Default: use AlQuran.cloud API for Hafs reciters
+      const edition = reciterInfo.id;
+      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/${edition}`);
       const data = await response.json();
       
       if (data.code === 200 && data.data?.audio) {
@@ -213,7 +244,7 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [surahNumber, reciter, getAudioUrl, onVerseChange]);
+  }, [surahNumber, reciter, getWarshAudioUrl, onVerseChange]);
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
