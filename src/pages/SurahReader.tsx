@@ -68,6 +68,7 @@ const SurahReader = () => {
   const quranAudio = useQuranAudio({
     surahNumber: num,
     totalVerses: verses.length || 1,
+    reciter: appSettings.reciter,
     onVerseChange: (verseNum) => {
       // Scroll to the verse
       const verseElement = document.getElementById(`verse-${verseNum}`);
@@ -421,7 +422,7 @@ const SurahReader = () => {
         onPause={quranAudio.pause}
         onNext={quranAudio.nextVerse}
         onPrevious={quranAudio.previousVerse}
-        onReciterChange={quranAudio.changeReciter}
+        onReciterChange={appSettings.onReciterChange}
         onSeek={quranAudio.seek}
         onRepeatModeChange={quranAudio.setRepeatMode}
         onSpeedChange={quranAudio.changeSpeed}
