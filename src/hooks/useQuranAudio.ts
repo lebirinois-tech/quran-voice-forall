@@ -7,12 +7,48 @@ interface UseQuranAudioOptions {
   onVerseChange?: (verseNumber: number) => void;
 }
 
-// Reciter options
-export const RECITERS = {
-  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy' },
-  husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary' },
-  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi' },
-  abdulbasit: { id: 'ar.abdulbasit', name: 'Abdul Basit Abdul Samad' },
+// Reciter options organized by Qira'at (reading style)
+export const QIRAAT_LABELS = {
+  hafs: 'Hafs (حفص)',
+  warsh: 'Warsh (ورش)',
+  qalun: 'Qalun (قالون)',
+  doori: 'Al-Doori (الدوري)',
+} as const;
+
+export type QiraatId = keyof typeof QIRAAT_LABELS;
+
+export interface ReciterInfo {
+  id: string;
+  name: string;
+  qiraat: QiraatId;
+}
+
+export const RECITERS: Record<string, ReciterInfo> = {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // HAFS (حفص عن عاصم) - The most widely used reading
+  // ═══════════════════════════════════════════════════════════════════════════
+  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', qiraat: 'hafs' },
+  husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', qiraat: 'hafs' },
+  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', qiraat: 'hafs' },
+  abdulbasit: { id: 'ar.abdulbasit', name: 'Abdul Basit Abdul Samad', qiraat: 'hafs' },
+  sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', qiraat: 'hafs' },
+  shuraym: { id: 'ar.saaborinalshatri', name: 'Saud Al-Shuraym', qiraat: 'hafs' },
+  mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', qiraat: 'hafs' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // WARSH (ورش عن نافع) - Popular in North & West Africa
+  // ═══════════════════════════════════════════════════════════════════════════
+  husaryWarsh: { id: 'ar.husarymujawwad', name: 'Al-Husary (Warsh)', qiraat: 'warsh' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // QALUN (قالون عن نافع) - Used in Libya, Tunisia, parts of Algeria
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Note: Limited availability in the API
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AL-DOORI (الدوري عن أبي عمرو) - Historical reading
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Note: Limited availability in the API
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;

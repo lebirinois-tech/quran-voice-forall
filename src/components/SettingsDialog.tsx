@@ -10,7 +10,7 @@ import {
 } from './ui/dialog';
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
+import { RECITERS, QIRAAT_LABELS, ReciterId, QiraatId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 
@@ -152,33 +152,50 @@ export const SettingsDialog = ({
         </DialogHeader>
         
         <div className="space-y-4 py-2">
-          {/* Reciter Selection */}
+          {/* Reciter Selection by Qira'at */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Volume2 className="h-3.5 w-3.5 text-primary" />
               Récitateur / القارئ
             </Label>
-            <RadioGroup
-              value={reciter}
-              onValueChange={(value) => onReciterChange(value as ReciterId)}
-              className="space-y-1"
-            >
-              {Object.entries(RECITERS).map(([key, { name }]) => (
-                <div
-                  key={key}
-                  className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  <RadioGroupItem value={key} id={`reciter-${key}`} className="h-3.5 w-3.5" />
-                  <Label
-                    htmlFor={`reciter-${key}`}
-                    className="flex-1 cursor-pointer text-foreground text-sm"
+            
+            {/* Group reciters by Qira'at */}
+            {Object.entries(QIRAAT_LABELS).map(([qiraatKey, qiraatLabel]) => {
+              const recitersForQiraat = Object.entries(RECITERS).filter(
+                ([_, info]) => info.qiraat === qiraatKey
+              );
+              
+              if (recitersForQiraat.length === 0) return null;
+              
+              return (
+                <div key={qiraatKey} className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground px-1 pt-1">
+                    {qiraatLabel}
+                  </p>
+                  <RadioGroup
+                    value={reciter}
+                    onValueChange={(value) => onReciterChange(value as ReciterId)}
+                    className="space-y-1"
                   >
-                    {name}
-                  </Label>
-                  {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
+                    {recitersForQiraat.map(([key, { name }]) => (
+                      <div
+                        key={key}
+                        className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <RadioGroupItem value={key} id={`reciter-${key}`} className="h-3.5 w-3.5" />
+                        <Label
+                          htmlFor={`reciter-${key}`}
+                          className="flex-1 cursor-pointer text-foreground text-sm"
+                        >
+                          {name}
+                        </Label>
+                        {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
+                      </div>
+                    ))}
+                  </RadioGroup>
                 </div>
-              ))}
-            </RadioGroup>
+              );
+            })}
           </div>
 
           {/* Text Display Style */}
