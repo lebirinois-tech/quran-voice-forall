@@ -41,9 +41,11 @@ export const RECITERS: Record<string, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع) - Popular in North & West Africa
   // Using everyayah.com which has proper Warsh recordings
+  // Available: Ibrahim Al-Dosary (complete), Yassin Al-Jazaery (complete)
+  // Note: Al-Husary Warsh is NOT available on everyayah.com
   // ═══════════════════════════════════════════════════════════════════════════
-  husaryWarsh: { id: 'warsh_husary', name: 'Al-Husary (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
-  yasserDossari: { id: 'warsh_dossary', name: 'Yasser Al-Dossari (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
+  ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
+  yassinJazaeryWarsh: { id: 'warsh_yassin_jazaery', name: 'Yassin Al-Jazaery (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
@@ -195,10 +197,10 @@ export const useQuranAudio = ({
     const surahStr = formatSurahNumber(surah);
     const verseStr = formatVerseNumber(verse);
     
-    if (reciterId === 'husaryWarsh') {
+    if (reciterId === 'ibrahimDosaryWarsh') {
       return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${surahStr}${verseStr}.mp3`;
-    } else if (reciterId === 'yasserDossari') {
-      return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${surahStr}${verseStr}.mp3`;
+    } else if (reciterId === 'yassinJazaeryWarsh') {
+      return `https://everyayah.com/data/Yassin_Al-Jazaery_64kbps/${surahStr}${verseStr}.mp3`;
     }
     return null;
   }, []);
