@@ -63,7 +63,7 @@ const SurahReader = () => {
   }, []);
 
   // Fetch verses with Tajweed from API
-  const { verses, versesTajweed, isLoading: isLoadingVerses, error } = useQuranData(num);
+  const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
 
   const quranAudio = useQuranAudio({
     surahNumber: num,
@@ -356,6 +356,13 @@ const SurahReader = () => {
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <Loader2 className="h-10 w-10 text-primary animate-spin" />
                   <p className="text-muted-foreground">Chargement des versets Tajweed...</p>
+                </div>
+              )}
+
+              {/* Offline indicator */}
+              {isOffline && (
+                <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-center py-2 px-4 rounded-lg text-sm mb-4">
+                  📴 Mode hors ligne — données en cache
                 </div>
               )}
 
