@@ -218,6 +218,7 @@ export const useQuranAudio = ({
         const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
         if (warshUrl) {
           audioRef.current.src = warshUrl;
+          audioRef.current.playbackRate = playbackSpeed;
           await audioRef.current.play();
           setIsPlaying(true);
           setCurrentVerse(verseNumber);
@@ -233,6 +234,7 @@ export const useQuranAudio = ({
       
       if (data.code === 200 && data.data?.audio) {
         audioRef.current.src = data.data.audio;
+        audioRef.current.playbackRate = playbackSpeed;
         await audioRef.current.play();
         setIsPlaying(true);
         setCurrentVerse(verseNumber);
@@ -246,7 +248,7 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [surahNumber, reciter, getWarshAudioUrl, onVerseChange]);
+  }, [surahNumber, reciter, getWarshAudioUrl, onVerseChange, playbackSpeed]);
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
