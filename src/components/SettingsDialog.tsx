@@ -12,6 +12,7 @@ import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { RECITERS, QIRAAT_LABELS, ReciterId, QiraatId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
+import { AudioCacheSettings } from './AudioCacheSettings';
 import { toast } from 'sonner';
 
 interface SettingsDialogProps {
@@ -46,6 +47,12 @@ const TEXT_DISPLAY_STYLES = [
     name: 'Texte simple / نص بسيط', 
     description: 'Texte arabe sans couleurs',
     icon: '📝'
+  },
+  { 
+    id: 'warsh-text' as TextDisplayStyle, 
+    name: 'Texte Warsh / نص ورش', 
+    description: 'Police Warsh verset par verset',
+    icon: '✍️'
   },
   { 
     id: 'mushaf-hafs' as TextDisplayStyle, 
@@ -310,6 +317,9 @@ export const SettingsDialog = ({
               ))}
             </div>
           </div>
+
+          {/* Offline Audio Cache */}
+          <AudioCacheSettings />
 
           {/* Download Audio */}
           <div className="space-y-2">

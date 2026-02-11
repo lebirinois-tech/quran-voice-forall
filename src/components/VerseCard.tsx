@@ -1,7 +1,7 @@
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { Play, Pause, Loader2, FileText, Download, Bookmark } from 'lucide-react';
+import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
@@ -124,6 +124,22 @@ export const VerseCard = ({
     }
   };
 
+  const handleShare = async () => {
+    const surahName = surah?.name || `Sourate ${surahNumber}`;
+    const text = `${verse.text}\n\n${verse.translation}\n\n— ${surahName} (${surahNumber}:${verse.number})`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${surahName} - Verset ${verse.number}`, text });
+      } catch (e) {
+        // User cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(text);
+      toast.success('Verset copié dans le presse-papier');
+    }
+  };
+
   // Map fontSize setting to Tailwind classes
   const getFontSizeClass = () => {
     switch (fontSize) {
@@ -143,6 +159,8 @@ export const VerseCard = ({
         return `quran-text ${sizeClass} leading-relaxed`;
       case 'simple':
         return `font-amiri ${sizeClass} leading-relaxed text-foreground`;
+      case 'warsh-text':
+        return `font-amiri ${sizeClass} leading-loose text-foreground`;
       case 'mushaf-hafs':
       case 'mushaf-warsh':
         return `quran-text ${sizeClass} leading-loose`;
@@ -195,6 +213,15 @@ export const VerseCard = ({
         </div>
         
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            className="rounded-full hover:bg-primary/10"
+            aria-label="Partager le verset"
+          >
+            <Share2 className="h-4 w-4 text-primary" />
+          </Button>
           {onBookmark && (
             <Button
               variant="ghost"
