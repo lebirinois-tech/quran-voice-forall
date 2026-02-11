@@ -346,7 +346,7 @@ const SurahReader = () => {
             />
           )}
 
-          {/* Text-based display modes (Tajweed / Simple) */}
+          {/* Text-based display modes (Tajweed / Simple / Warsh text) */}
           {appSettings.textDisplayStyle !== 'mushaf-hafs' && 
            appSettings.textDisplayStyle !== 'mushaf-warsh' &&
            appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' && (
