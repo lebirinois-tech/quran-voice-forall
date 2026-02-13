@@ -143,11 +143,11 @@ export const VerseCard = ({
   // Map fontSize setting to Tailwind classes
   const getFontSizeClass = () => {
     switch (fontSize) {
-      case 'small': return 'text-2xl md:text-3xl';
-      case 'medium': return 'text-3xl md:text-4xl';
-      case 'large': return 'text-4xl md:text-5xl';
-      case 'xlarge': return 'text-5xl md:text-6xl';
-      default: return 'text-3xl md:text-4xl';
+      case 'small': return 'text-3xl md:text-4xl';
+      case 'medium': return 'text-4xl md:text-5xl';
+      case 'large': return 'text-5xl md:text-6xl';
+      case 'xlarge': return 'text-6xl md:text-7xl';
+      default: return 'text-4xl md:text-5xl';
     }
   };
 
