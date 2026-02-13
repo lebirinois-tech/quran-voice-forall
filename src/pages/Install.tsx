@@ -164,21 +164,51 @@ const Install = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">Android</h3>
-                    <p className="text-sm text-muted-foreground">Chrome</p>
+                    <p className="text-sm text-muted-foreground">Toutes versions</p>
                   </div>
                 </div>
-                <ol className="space-y-3 text-sm text-foreground" dir="ltr">
+
+                <h4 className="font-medium text-foreground mb-2 text-sm">Méthode 1 : Chrome (recommandé)</h4>
+                <ol className="space-y-3 text-sm text-foreground mb-5" dir="ltr">
                   <li className="flex items-start gap-2">
                     <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                    <span>Appuyez sur le menu <strong>⋮</strong> (trois points) en haut à droite</span>
+                    <span>Ouvrez ce site dans <strong>Chrome</strong></span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                    <span>Appuyez sur <strong>"Installer l'application"</strong> ou <strong>"Ajouter à l'écran d'accueil"</strong></span>
+                    <span>Appuyez sur le menu <strong>⋮</strong> (trois points) en haut à droite</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                    <span>Confirmez en appuyant sur <strong>"Installer"</strong></span>
+                    <span>Appuyez sur <strong>"Installer l'application"</strong> ou <strong>"Ajouter à l'écran d'accueil"</strong></span>
+                  </li>
+                </ol>
+
+                <h4 className="font-medium text-foreground mb-2 text-sm">Méthode 2 : Autres navigateurs (Samsung, Firefox…)</h4>
+                <ol className="space-y-3 text-sm text-foreground mb-5" dir="ltr">
+                  <li className="flex items-start gap-2">
+                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                    <span>Ouvrez le menu du navigateur (⋮ ou ≡)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                    <span>Cherchez <strong>"Ajouter à l'écran d'accueil"</strong> ou <strong>"Installer"</strong></span>
+                  </li>
+                </ol>
+
+                <h4 className="font-medium text-foreground mb-2 text-sm">Méthode 3 : Anciens Android (4.x – 7.x)</h4>
+                <ol className="space-y-3 text-sm text-foreground" dir="ltr">
+                  <li className="flex items-start gap-2">
+                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                    <span>Ouvrez <strong>Chrome</strong> et accédez au site</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                    <span>Menu ⋮ → <strong>"Ajouter à l'écran d'accueil"</strong></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                    <span>Un raccourci sera créé — l'appli s'ouvrira en plein écran</span>
                   </li>
                 </ol>
               </div>
