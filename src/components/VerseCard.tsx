@@ -56,6 +56,7 @@ interface VerseCardProps {
   textDisplayStyle?: TextDisplayStyle;
   fontSize?: FontSize;
   tajweedHtml?: string;
+  warshText?: string;
   pageNumber?: number;
   onPlay?: () => void;
   onBookmark?: () => void;
@@ -73,6 +74,7 @@ export const VerseCard = ({
   textDisplayStyle = 'tajweed',
   fontSize = 'medium',
   tajweedHtml,
+  warshText,
   pageNumber: propPageNumber,
   onPlay,
   onBookmark,
@@ -161,6 +163,8 @@ export const VerseCard = ({
         return `font-amiri ${sizeClass} leading-relaxed text-foreground`;
       case 'warsh-text':
         return `font-amiri ${sizeClass} leading-loose text-foreground`;
+      case 'warsh-tajweed':
+        return `font-warsh ${sizeClass} leading-loose text-foreground`;
       case 'mushaf-hafs':
       case 'mushaf-warsh':
         return `quran-text ${sizeClass} leading-loose`;
@@ -281,6 +285,13 @@ export const VerseCard = ({
           dir="rtl"
           dangerouslySetInnerHTML={{ __html: effectiveTajweedHtml }}
         />
+      ) : textDisplayStyle === 'warsh-tajweed' && warshText ? (
+        <p 
+          className={cn(getTextClassName(), "mb-4 text-right")}
+          dir="rtl"
+        >
+          {warshText}
+        </p>
       ) : (
         <p 
           className={cn(getTextClassName(), "mb-4 text-right")}

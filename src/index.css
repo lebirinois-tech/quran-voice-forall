@@ -13,6 +13,16 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* KFGQPC Warsh Uthmanic Script - King Fahd Complex Official Warsh Font */
+@font-face {
+  font-family: 'warsh10';
+  src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/warsh/font/warsh.10.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/warsh/font/warsh.10.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 @layer base {
   :root {
     /* Islamic-inspired color palette */
@@ -142,6 +152,10 @@
 
   .font-uthmanic {
     font-family: 'KFGQPC Hafs Uthmanic Script', 'Amiri', serif;
+  }
+
+  .font-warsh {
+    font-family: 'warsh10', 'Amiri', serif;
   }
 
   .font-cairo {
