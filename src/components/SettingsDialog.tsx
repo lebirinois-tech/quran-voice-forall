@@ -55,6 +55,12 @@ const TEXT_DISPLAY_STYLES = [
     icon: '✍️'
   },
   { 
+    id: 'warsh-tajweed' as TextDisplayStyle, 
+    name: 'Warsh Tajweed / ورش تجويد', 
+    description: 'Police KFGQPC Warsh ottomane par verset',
+    icon: '🕌'
+  },
+  { 
     id: 'mushaf-hafs' as TextDisplayStyle, 
     name: 'Mushaf Hafs Tajweed / مصحف حفص', 
     description: 'Pages du Mushaf Hafs avec Tajweed coloré',
