@@ -30,8 +30,8 @@ const getWarshTajweedPageUrl = (page: number): string => {
 };
 
 const getQalunPageUrl = (page: number): string => {
-  // Use Warsh script pages (same Nafi' base reading as Qalun)
-  return `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`;
+  // Use EasyQuran Warsh Tajweed pages (same Nafi' base reading as Qalun)
+  return `https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`;
 };
 
 // Page audio from everyayah.com
@@ -231,7 +231,7 @@ export const MushafPageViewer = ({
           {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
           {mushafType === 'warsh-tajweed' && '🎨 Mushaf Warsh Tajweed'}
           {mushafType === 'warsh' && '📜 Mushaf Warsh'}
-          {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
+          {mushafType === 'qalun' && '📗 Mushaf Qalun (Nafi\')'}
         </div>
         <div className="flex items-center gap-2">
           {/* Page Audio Button */}
@@ -314,7 +314,7 @@ export const MushafPageViewer = ({
           {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré (lecture standard)'}
           {mushafType === 'warsh-tajweed' && '🎨 Warsh avec Tajweed coloré (lecture maghrébine)'}
           {mushafType === 'warsh' && '📜 Warsh - Script authentique maghrébin (sans couleurs Tajweed)'}
-          {mushafType === 'qalun' && '📗 Qalun avec Tajweed coloré (lecture de Nafi\')'}
+          {mushafType === 'qalun' && '📗 Qalun - Pages Tajweed de la lecture de Nafi\' (Warsh Tajweed)'}
         </p>
       </div>
     </div>
