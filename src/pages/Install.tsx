@@ -126,32 +126,100 @@ const Install = () => {
               </div>
             )}
 
-            {/* iOS Instructions */}
+            {/* iOS Instructions - All iPhone Models */}
             {isIOS && !deferredPrompt && (
               <div className="bg-card border border-border rounded-xl p-6 animate-fade-in">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Apple className="h-6 w-6 text-gray-800" />
+                  <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                    <Apple className="h-6 w-6 text-gray-800 dark:text-gray-200" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">iPhone / iPad</h3>
-                    <p className="text-sm text-muted-foreground">Safari</p>
+                    <p className="text-sm text-muted-foreground">Tous les modèles</p>
                   </div>
                 </div>
-                <ol className="space-y-3 text-sm text-foreground" dir="ltr">
-                  <li className="flex items-start gap-2">
-                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                    <span>Appuyez sur le bouton <strong>Partager</strong> (icône carré avec flèche vers le haut)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                    <span>Faites défiler et appuyez sur <strong>"Sur l'écran d'accueil"</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                    <span>Appuyez sur <strong>"Ajouter"</strong> en haut à droite</span>
-                  </li>
-                </ol>
+
+                {/* Safari Method - Primary */}
+                <div className="mb-5">
+                  <h4 className="font-medium text-foreground mb-2 text-sm flex items-center gap-2">
+                    🌐 Méthode 1 : Safari (recommandé)
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Fonctionne sur tous les iPhone (iPhone 6 et +, iOS 11.3+)
+                  </p>
+                  <ol className="space-y-3 text-sm text-foreground" dir="ltr">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                      <span>Ouvrez ce site dans <strong>Safari</strong> (obligatoire, pas Chrome ni Firefox)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                      <span>Appuyez sur le bouton <strong>Partager</strong> <span className="inline-block text-lg leading-none">⬆️</span> (carré avec flèche, en bas de l'écran)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                      <span>Faites défiler et appuyez sur <strong>"Sur l'écran d'accueil"</strong> (icône ➕)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                      <span>Appuyez sur <strong>"Ajouter"</strong> en haut à droite</span>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* iOS 16.4+ with Chrome/Edge */}
+                <div className="mb-5 pt-4 border-t border-border">
+                  <h4 className="font-medium text-foreground mb-2 text-sm flex items-center gap-2">
+                    📱 Méthode 2 : Chrome / Edge (iOS 16.4+)
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    iPhone 8 et + avec iOS 16.4 ou supérieur (2023+)
+                  </p>
+                  <ol className="space-y-3 text-sm text-foreground" dir="ltr">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                      <span>Ouvrez ce site dans <strong>Chrome</strong> ou <strong>Edge</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                      <span>Appuyez sur le bouton <strong>Partager</strong> <span className="inline-block text-lg leading-none">⬆️</span></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                      <span>Appuyez sur <strong>"Ajouter à l'écran d'accueil"</strong></span>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* Compatibility Info */}
+                <div className="bg-muted/50 rounded-lg p-3 mt-3">
+                  <h4 className="text-xs font-semibold text-foreground mb-2">📋 Compatibilité iPhone</h4>
+                  <div className="space-y-1.5 text-xs text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <span className="text-primary shrink-0">✓</span>
+                      <span><strong>iPhone 15/16 Pro Max</strong> — Safari ou Chrome (iOS 17/18)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-primary shrink-0">✓</span>
+                      <span><strong>iPhone 12/13/14</strong> — Safari ou Chrome (iOS 16.4+)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-primary shrink-0">✓</span>
+                      <span><strong>iPhone X/XR/XS/11</strong> — Safari recommandé</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-primary shrink-0">✓</span>
+                      <span><strong>iPhone 6s/7/8/SE</strong> — Safari uniquement</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-primary shrink-0">✓</span>
+                      <span><strong>iPad</strong> — Toutes versions avec Safari</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                    💡 Sur iOS, utilisez toujours Safari pour la meilleure expérience hors-ligne.
+                  </p>
+                </div>
               </div>
             )}
 
