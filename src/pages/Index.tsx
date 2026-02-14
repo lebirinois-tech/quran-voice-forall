@@ -10,9 +10,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw } from 'lucide-react';
+import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ const Index = () => {
   const appSettings = useAppSettings();
   const { user, isAuthenticated, signOut, loading: authLoading } = useAuth();
   const { fetchProgress, getLastRead, progress } = useReadingProgress();
+  const { isChecking, checkForUpdate } = useUpdateCheck();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -328,13 +331,25 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border py-6 mt-8">
         <div className="container mx-auto px-4 text-center">
-          {/* Install Button */}
-          <Link to="/install">
-            <Button variant="outline" className="gap-2 mb-4">
-              <Download className="h-4 w-4" />
-              Installer l'application
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            {/* Install Button */}
+            <Link to="/install">
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Installer l'application
+              </Button>
+            </Link>
+            {/* Update Check Button */}
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={checkForUpdate}
+              disabled={isChecking}
+            >
+              <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
+              {isChecking ? 'Vérification...' : 'Rechercher une mise à jour'}
             </Button>
-          </Link>
+          </div>
           
           <p className="text-sm text-muted-foreground">
             Quran Accès Pour Tous © {new Date().getFullYear()}
