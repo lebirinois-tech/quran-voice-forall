@@ -78,6 +78,12 @@ const TEXT_DISPLAY_STYLES = [
     description: 'Pages du Mushaf en riwaya Warsh (sans couleurs)',
     icon: '📜'
   },
+  { 
+    id: 'mushaf-qalun' as TextDisplayStyle, 
+    name: 'Mushaf Qalun Tajweed / مصحف قالون', 
+    description: 'Pages du Mushaf en riwaya Qalun avec Tajweed coloré',
+    icon: '📗'
+  },
 ];
 
 const FONT_SIZES = [

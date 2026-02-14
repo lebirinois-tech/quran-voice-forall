@@ -322,7 +322,8 @@ const SurahReader = () => {
           {surah.number !== 1 && surah.number !== 9 && 
            appSettings.textDisplayStyle !== 'mushaf-hafs' && 
            appSettings.textDisplayStyle !== 'mushaf-warsh' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' && (
+           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' &&
+           appSettings.textDisplayStyle !== 'mushaf-qalun' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -336,14 +337,16 @@ const SurahReader = () => {
           {/* Mushaf Image Viewer Mode */}
           {(appSettings.textDisplayStyle === 'mushaf-hafs' || 
             appSettings.textDisplayStyle === 'mushaf-warsh' ||
-            appSettings.textDisplayStyle === 'mushaf-warsh-tajweed') && (
+            appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
+            appSettings.textDisplayStyle === 'mushaf-qalun') && (
             <MushafPageViewer
               surahNumber={num}
               totalVerses={verses.length || surah.versesCount}
               currentVerse={quranAudio.currentVerse}
               mushafType={
                 appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 
-                appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ? 'warsh-tajweed' : 'warsh'
+                appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ? 'warsh-tajweed' :
+                appSettings.textDisplayStyle === 'mushaf-qalun' ? 'qalun' : 'warsh'
               }
             />
           )}
@@ -351,7 +354,8 @@ const SurahReader = () => {
           {/* Text-based display modes (Tajweed / Simple / Warsh text) */}
           {appSettings.textDisplayStyle !== 'mushaf-hafs' && 
            appSettings.textDisplayStyle !== 'mushaf-warsh' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' && (
+           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' &&
+           appSettings.textDisplayStyle !== 'mushaf-qalun' && (
             <>
               {/* Loading State */}
               {isLoadingVerses && (
