@@ -44,7 +44,17 @@ serve(async (req) => {
       );
     }
 
-    const { page, action } = await req.json();
+    const body = await req.json();
+    const { page, action } = body;
+
+    // Validate action against whitelist
+    const VALID_ACTIONS = ['check-status', 'download-page', 'download-batch'];
+    if (!action || !VALID_ACTIONS.includes(action)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid action. Must be one of: check-status, download-page, download-batch' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Use service role for storage operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -141,9 +151,8 @@ serve(async (req) => {
 
     // Download a batch of pages
     if (action === "download-batch") {
-      const { startPage, endPage } = await req.json();
-      const start = parseInt(startPage) || 1;
-      const end = Math.min(parseInt(endPage) || start + 9, 604);
+      const start = parseInt(body.startPage) || 1;
+      const end = Math.min(parseInt(body.endPage) || start + 9, 604);
       
       const results = [];
       for (let p = start; p <= end; p++) {
