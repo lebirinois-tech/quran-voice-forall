@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { getCachedAudioUrl } from './useAudioCache';
 
 // Interface moved inside hook for better organization
 
@@ -228,6 +229,18 @@ export const useQuranAudio = ({
       }
       
       // Default: use AlQuran.cloud API for Hafs reciters
+      // First check localStorage for cached audio URL (offline support)
+      const cachedUrl = getCachedAudioUrl(reciter, surahNumber, verseNumber);
+      if (cachedUrl) {
+        audioRef.current.src = cachedUrl;
+        audioRef.current.playbackRate = playbackSpeed;
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setCurrentVerse(verseNumber);
+        onVerseChange?.(verseNumber);
+        return;
+      }
+
       const edition = reciterInfo.id;
       const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/${edition}`);
       const data = await response.json();
