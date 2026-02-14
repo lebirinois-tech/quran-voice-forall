@@ -30,15 +30,22 @@ const getWarshTajweedPageUrl = (page: number): string => {
 };
 
 const getQalunPageUrl = (page: number): string => {
-  // EasyQuran Qalun Tajweed colored pages (November 2022 folder)
-  return `https://easyquran.com/wp-content/uploads/2022/11/${page}-scaled.jpg`;
+  // Use Warsh script pages (same Nafi' base reading as Qalun)
+  return `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`;
 };
 
 // Page audio from everyayah.com
-const getPageAudioUrl = (page: number): string => {
+// Page audio sources
+const getPageAudioUrl = (page: number, type: MushafType): string => {
   const paddedPage = page.toString().padStart(3, '0');
-  // Alafasy 128kbps page MP3s
+  // Alafasy 128kbps page MP3s (Hafs) - used for hafs, warsh, warsh-tajweed
   return `https://everyayah.com/data/Alafasy_128kbps/PageMp3s/Page${paddedPage}.mp3`;
+};
+
+// Qalun surah audio from mp3quran.net (Al-Deban, Qaloon recitation)
+const getQalunSurahAudioUrl = (surahNumber: number): string => {
+  const paddedSurah = surahNumber.toString().padStart(3, '0');
+  return `https://server16.mp3quran.net/deban/Rewayat-Qalon-A-n-Nafi/${paddedSurah}.mp3`;
 };
 
 // Get surah start and end pages
@@ -108,13 +115,21 @@ export const MushafPageViewer = ({
     
     const handleEnded = () => {
       setIsPageAudioPlaying(false);
-      if (currentPage < 604) {
+      if (mushafType === 'qalun') {
+        toast.success('Fin de la récitation Qalun');
+      } else if (currentPage < 604) {
         const nextPage = currentPage + 1;
         setCurrentPage(nextPage);
         setIsManualNavigation(true);
         onPageChange?.(nextPage);
-        // Auto-play next page after short delay
-        setTimeout(() => playPageAudio(nextPage), 500);
+        // Inline auto-play next page
+        setTimeout(() => {
+          if (pageAudioRef.current) {
+            const paddedPage = nextPage.toString().padStart(3, '0');
+            pageAudioRef.current.src = `https://everyayah.com/data/Alafasy_128kbps/PageMp3s/Page${paddedPage}.mp3`;
+            pageAudioRef.current.play().then(() => setIsPageAudioPlaying(true)).catch(() => {});
+          }
+        }, 500);
       } else {
         toast.success('Fin de la lecture par page');
       }
@@ -124,7 +139,7 @@ export const MushafPageViewer = ({
     audio.removeEventListener('ended', handleEnded);
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [currentPage, onPageChange]);
+  }, [currentPage, onPageChange, mushafType, surahNumber]);
 
   useEffect(() => {
     setCurrentPage(surahStartPage);
@@ -157,16 +172,22 @@ export const MushafPageViewer = ({
     if (!pageAudioRef.current) return;
     setIsPageAudioLoading(true);
     try {
-      pageAudioRef.current.src = getPageAudioUrl(page);
+      if (mushafType === 'qalun') {
+        // Qalun: play surah-level audio (no per-page Qalun audio exists)
+        pageAudioRef.current.src = getQalunSurahAudioUrl(surahNumber);
+      } else {
+        // Hafs/Warsh: play per-page audio
+        pageAudioRef.current.src = getPageAudioUrl(page, mushafType);
+      }
       await pageAudioRef.current.play();
       setIsPageAudioPlaying(true);
     } catch (err) {
       console.error('Page audio error:', err);
-      toast.error('Impossible de charger l\'audio de la page');
+      toast.error('Impossible de charger l\'audio');
     } finally {
       setIsPageAudioLoading(false);
     }
-  }, []);
+  }, [mushafType, surahNumber]);
 
   const togglePageAudio = useCallback(() => {
     if (!pageAudioRef.current) return;
@@ -232,7 +253,7 @@ export const MushafPageViewer = ({
             ) : (
               <Play className="h-3.5 w-3.5" />
             )}
-            <span className="text-xs">Page</span>
+            <span className="text-xs">{mushafType === 'qalun' ? 'Sourate' : 'Page'}</span>
           </Button>
           <span className="text-sm font-medium text-foreground">
             Page {currentPage} / 604
