@@ -65,6 +65,25 @@ export const UpdatePrompt = () => {
     },
   });
 
+  // Check for updates on launch
+  useEffect(() => {
+    const checkOnLaunch = async () => {
+      try {
+        const registrations = await navigator.serviceWorker?.getRegistrations();
+        if (registrations) {
+          for (const reg of registrations) {
+            await reg.update();
+          }
+        }
+      } catch (err) {
+        console.error('Launch update check error:', err);
+      }
+    };
+    // Small delay to let the app render first
+    const timer = setTimeout(checkOnLaunch, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     if (needRefresh) setShowPrompt(true);
   }, [needRefresh]);
