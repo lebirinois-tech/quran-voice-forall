@@ -359,7 +359,6 @@ const SurahReader = () => {
               key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
               totalVerses={verses.length || surah.versesCount}
-              currentVerse={quranAudio.currentVerse}
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               mushafType={
                 appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 

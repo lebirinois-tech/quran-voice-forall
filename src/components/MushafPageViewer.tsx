@@ -11,7 +11,6 @@ type MushafType = 'hafs' | 'warsh' | 'warsh-tajweed' | 'qalun';
 interface MushafPageViewerProps {
   surahNumber: number;
   totalVerses: number;
-  currentVerse: number;
   mushafType: MushafType;
   initialPage?: number;
   onPageChange?: (page: number) => void;
@@ -61,7 +60,6 @@ const getSurahPages = (surahNumber: number): { start: number; end: number } => {
 export const MushafPageViewer = ({
   surahNumber,
   totalVerses,
-  currentVerse,
   mushafType,
   initialPage,
   onPageChange,
@@ -79,11 +77,12 @@ export const MushafPageViewer = ({
   );
   const [isLoading, setIsLoading] = useState(true);
 
-
   const [imageError, setImageError] = useState(false);
-  const [isManualNavigation, setIsManualNavigation] = useState(
+  // Use a ref to track manual navigation - survives re-renders without triggering effects
+  const hasManuallyNavigatedRef = useRef(
     !!(initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage)
   );
+  const prevSurahNumberRef = useRef(surahNumber);
   
   // Page audio state
   const [isPageAudioPlaying, setIsPageAudioPlaying] = useState(false);
@@ -102,7 +101,7 @@ export const MushafPageViewer = ({
       if (currentPage < 604) {
         const nextPage = currentPage + 1;
         setCurrentPage(nextPage);
-        setIsManualNavigation(true);
+        hasManuallyNavigatedRef.current = true;
         onPageChange?.(nextPage);
       }
     });
@@ -130,7 +129,7 @@ export const MushafPageViewer = ({
       } else if (currentPage < 604) {
         const nextPage = currentPage + 1;
         setCurrentPage(nextPage);
-        setIsManualNavigation(true);
+        hasManuallyNavigatedRef.current = true;
         onPageChange?.(nextPage);
         // Inline auto-play next page
         setTimeout(() => {
@@ -151,19 +150,25 @@ export const MushafPageViewer = ({
     return () => audio.removeEventListener('ended', handleEnded);
   }, [currentPage, onPageChange, mushafType, surahNumber]);
 
+  // Only reset page when the surah actually changes
   useEffect(() => {
-    if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage) {
+    if (prevSurahNumberRef.current !== surahNumber) {
+      // Surah changed - reset to initialPage or start page
+      prevSurahNumberRef.current = surahNumber;
+      hasManuallyNavigatedRef.current = false;
+      if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage) {
+        setCurrentPage(initialPage);
+        hasManuallyNavigatedRef.current = true;
+      } else {
+        setCurrentPage(surahStartPage);
+      }
+    } else if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage && !hasManuallyNavigatedRef.current) {
+      // Same surah but initialPage provided and no manual navigation yet
       setCurrentPage(initialPage);
-      setIsManualNavigation(true);
-    } else {
-      setCurrentPage(surahStartPage);
-      setIsManualNavigation(false);
+      hasManuallyNavigatedRef.current = true;
     }
+    // If user has manually navigated, never reset the page
   }, [surahNumber, surahStartPage, surahEndPage, initialPage]);
-
-  // Only removed: verse-to-page sync is now fully manual.
-  // The MushafPageViewer no longer auto-syncs to verse changes from audio,
-  // which was causing the page to jump back to page 1 when audio started.
 
   useEffect(() => {
     setIsLoading(true);
@@ -213,7 +218,7 @@ export const MushafPageViewer = ({
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setIsManualNavigation(true);
+      hasManuallyNavigatedRef.current = true;
       const newPage = currentPage - 1;
       setCurrentPage(newPage);
       onPageChange?.(newPage);
@@ -224,7 +229,7 @@ export const MushafPageViewer = ({
 
   const handleNextPage = () => {
     if (currentPage < 604) {
-      setIsManualNavigation(true);
+      hasManuallyNavigatedRef.current = true;
       const newPage = currentPage + 1;
       setCurrentPage(newPage);
       onPageChange?.(newPage);
