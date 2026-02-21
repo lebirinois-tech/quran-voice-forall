@@ -74,13 +74,13 @@ export const useQuranAudio = ({
 }: UseQuranAudioOptions) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentVerse, setCurrentVerse] = useState(1);
+  const [currentVerse, _setCurrentVerse] = useState(1);
   const [reciter, setReciter] = useState<ReciterId>(externalReciter);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [repeatSettings, setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
-  const [currentRepeatCount, setCurrentRepeatCount] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [repeatSettings, _setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
+  const [currentRepeatCount, _setCurrentRepeatCount] = useState(0);
+  const [playbackSpeed, _setPlaybackSpeed] = useState(1);
 
   // Sync reciter with external prop
   useEffect(() => {
@@ -89,19 +89,34 @@ export const useQuranAudio = ({
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playVerseRef = useRef<(verseNumber: number) => void>(() => {});
-  const currentVerseRef = useRef(currentVerse);
+  const currentVerseRef = useRef(1);
   const totalVersesRef = useRef(totalVerses);
-  const repeatSettingsRef = useRef(repeatSettings);
-  const currentRepeatCountRef = useRef(currentRepeatCount);
+  const repeatSettingsRef = useRef<RepeatSettings>({ mode: 'none', count: 1 });
+  const currentRepeatCountRef = useRef(0);
   const onVerseChangeRef = useRef(onVerseChange);
-  const playbackSpeedRef = useRef(playbackSpeed);
+  const playbackSpeedRef = useRef(1);
 
-  // Keep refs in sync
-  useEffect(() => { currentVerseRef.current = currentVerse; }, [currentVerse]);
+  // Wrappers that update BOTH state and ref synchronously
+  const setCurrentVerse = useCallback((v: number | ((prev: number) => number)) => {
+    _setCurrentVerse(prev => {
+      const next = typeof v === 'function' ? v(prev) : v;
+      currentVerseRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const setCurrentRepeatCount = useCallback((v: number | ((prev: number) => number)) => {
+    _setCurrentRepeatCount(prev => {
+      const next = typeof v === 'function' ? v(prev) : v;
+      currentRepeatCountRef.current = next;
+      return next;
+    });
+  }, []);
+
+  // Keep other refs in sync
   useEffect(() => { totalVersesRef.current = totalVerses; }, [totalVerses]);
-  useEffect(() => { repeatSettingsRef.current = repeatSettings; }, [repeatSettings]);
-  useEffect(() => { currentRepeatCountRef.current = currentRepeatCount; }, [currentRepeatCount]);
   useEffect(() => { onVerseChangeRef.current = onVerseChange; }, [onVerseChange]);
+  useEffect(() => { repeatSettingsRef.current = repeatSettings; }, [repeatSettings]);
   useEffect(() => { playbackSpeedRef.current = playbackSpeed; }, [playbackSpeed]);
 
   // Setup audio event handlers - only act if this audio is still the current one
@@ -363,7 +378,8 @@ export const useQuranAudio = ({
   }, []);
 
   const changeSpeed = useCallback((speed: number) => {
-    setPlaybackSpeed(speed);
+    _setPlaybackSpeed(speed);
+    playbackSpeedRef.current = speed;
     if (audioRef.current) {
       audioRef.current.playbackRate = speed;
     }
@@ -371,7 +387,9 @@ export const useQuranAudio = ({
   }, []);
 
   const setRepeatMode = useCallback((mode: RepeatMode, count: number = 1, rangeStart?: number, rangeEnd?: number) => {
-    setRepeatSettings({ mode, count, rangeStart, rangeEnd });
+    const newSettings = { mode, count, rangeStart, rangeEnd };
+    _setRepeatSettings(newSettings);
+    repeatSettingsRef.current = newSettings;
     setCurrentRepeatCount(0);
     
     if (mode === 'none') {
