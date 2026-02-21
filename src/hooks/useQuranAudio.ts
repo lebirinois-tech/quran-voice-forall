@@ -90,6 +90,7 @@ export const useQuranAudio = ({
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
+  const isResettingRef = useRef(false);
 
   // Create audio element once
   useEffect(() => {
@@ -114,6 +115,7 @@ export const useQuranAudio = ({
     });
     
     audio.addEventListener('error', (e) => {
+      if (isResettingRef.current) return; // Ignore errors during reset
       console.error('Audio error:', e);
       setIsLoading(false);
       setIsPlaying(false);
@@ -216,8 +218,10 @@ export const useQuranAudio = ({
       
       // Check if this is a Warsh reciter (use everyayah.com)
       // Reset audio element to clear any previous error state
+      isResettingRef.current = true;
       audioRef.current.removeAttribute('src');
       audioRef.current.load();
+      isResettingRef.current = false;
 
       if (reciterInfo.qiraat === 'warsh') {
         const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
