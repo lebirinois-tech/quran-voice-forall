@@ -182,8 +182,8 @@ export const VerseCard = ({
         isEvenPage 
           ? "bg-primary/5 dark:bg-primary/10" 
           : "bg-secondary/5 dark:bg-secondary/10",
-        isHighlighted && "verse-highlight ring-2 ring-primary/20",
-        isPlaying && "ring-2 ring-primary/40",
+        isPlaying && "verse-playing ring-2 ring-primary/40",
+        isHighlighted && !isPlaying && "verse-highlight ring-2 ring-primary/20",
         (textDisplayStyle === 'mushaf-hafs' || textDisplayStyle === 'mushaf-warsh') && "bg-ivory/50 dark:bg-card",
         "animate-fade-in"
       )}
