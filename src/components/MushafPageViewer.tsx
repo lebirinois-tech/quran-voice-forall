@@ -78,6 +78,13 @@ export const MushafPageViewer = ({
       : surahStartPage
   );
   const [isLoading, setIsLoading] = useState(true);
+
+  // Update currentPage when initialPage changes (e.g. from URL navigation)
+  useEffect(() => {
+    if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage) {
+      setCurrentPage(initialPage);
+    }
+  }, [initialPage, surahStartPage, surahEndPage]);
   const [imageError, setImageError] = useState(false);
   const [isManualNavigation, setIsManualNavigation] = useState(false);
   
