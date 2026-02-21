@@ -102,10 +102,11 @@ const SurahReader = () => {
         }
       }, 500);
     } else if (pageParam && !appSettings.textDisplayStyle.startsWith('mushaf-') && verses.length > 0) {
-      // In text modes, find the first verse on the target page and scroll to it
+      // In text modes, find the first verse on the target page using actual page data from API
       const targetPage = parseInt(pageParam);
       const targetVerse = verses.find(v => {
-        const versePage = getVersePage(num, v.number, verses.length);
+        // Use actual page from API data if available, fallback to calculated
+        const versePage = v.page ?? getVersePage(num, v.number, verses.length);
         return versePage >= targetPage;
       });
       if (targetVerse) {
@@ -113,8 +114,11 @@ const SurahReader = () => {
           const verseElement = document.getElementById(`verse-${targetVerse.number}`);
           if (verseElement) {
             verseElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Briefly highlight the verse
+            verseElement.classList.add('ring-2', 'ring-primary');
+            setTimeout(() => verseElement.classList.remove('ring-2', 'ring-primary'), 3000);
           }
-        }, 500);
+        }, 800);
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
