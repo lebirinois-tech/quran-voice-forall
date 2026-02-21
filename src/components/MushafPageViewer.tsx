@@ -91,67 +91,15 @@ export const MushafPageViewer = ({
 
   // Initialize page audio element
   useEffect(() => {
-    pageAudioRef.current = new Audio();
-    pageAudioRef.current.preload = 'auto';
-    
-    const audio = pageAudioRef.current;
-    audio.addEventListener('ended', () => {
-      setIsPageAudioPlaying(false);
-      // Auto-play next page
-      if (currentPage < 604) {
-        const nextPage = currentPage + 1;
-        setCurrentPage(nextPage);
-        hasManuallyNavigatedRef.current = true;
-        onPageChange?.(nextPage);
-      }
-    });
-    audio.addEventListener('error', () => {
-      // Only show error if audio actually has a source (not during reset transitions)
-      if (audio.src && audio.src !== '' && audio.src !== window.location.href) {
-        setIsPageAudioLoading(false);
-        setIsPageAudioPlaying(false);
-        toast.error('Audio de la page non disponible');
-      }
-    });
+    const audio = new Audio();
+    audio.preload = 'auto';
+    pageAudioRef.current = audio;
     
     return () => {
       audio.pause();
       audio.src = '';
     };
   }, []);
-
-  // Update audio ended handler when currentPage changes
-  useEffect(() => {
-    const audio = pageAudioRef.current;
-    if (!audio) return;
-    
-    const handleEnded = () => {
-      setIsPageAudioPlaying(false);
-      if (mushafType === 'qalun') {
-        toast.success('Fin de la récitation Qalun');
-      } else if (currentPage < 604) {
-        const nextPage = currentPage + 1;
-        setCurrentPage(nextPage);
-        hasManuallyNavigatedRef.current = true;
-        onPageChange?.(nextPage);
-        // Inline auto-play next page
-        setTimeout(() => {
-          if (pageAudioRef.current) {
-            const paddedPage = nextPage.toString().padStart(3, '0');
-            pageAudioRef.current.src = `https://everyayah.com/data/Alafasy_128kbps/PageMp3s/Page${paddedPage}.mp3`;
-            pageAudioRef.current.play().then(() => setIsPageAudioPlaying(true)).catch(() => {});
-          }
-        }, 500);
-      } else {
-        toast.success('Fin de la lecture par page');
-      }
-    };
-    
-    // Remove old and add new
-    audio.removeEventListener('ended', handleEnded);
-    audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
-  }, [currentPage, onPageChange, mushafType, surahNumber]);
 
   // Only reset page when the surah actually changes
   useEffect(() => {
@@ -194,20 +142,49 @@ export const MushafPageViewer = ({
   };
 
   const playPageAudio = useCallback(async (page: number) => {
-    if (!pageAudioRef.current) return;
     setIsPageAudioLoading(true);
     try {
-      // Reset audio element before changing source to prevent stale error events
-      pageAudioRef.current.pause();
-      pageAudioRef.current.removeAttribute('src');
-      pageAudioRef.current.load();
+      // Stop and discard old audio element to avoid corrupted state
+      if (pageAudioRef.current) {
+        pageAudioRef.current.pause();
+        pageAudioRef.current.src = '';
+      }
+
+      // Create a fresh audio element
+      const newAudio = new Audio();
+      newAudio.preload = 'auto';
+      
+      // Attach event listeners to the new element
+      newAudio.addEventListener('ended', () => {
+        setIsPageAudioPlaying(false);
+        if (mushafType === 'qalun') {
+          toast.success('Fin de la récitation Qalun');
+        } else if (page < 604) {
+          const nextPage = page + 1;
+          setCurrentPage(nextPage);
+          hasManuallyNavigatedRef.current = true;
+          onPageChange?.(nextPage);
+          setTimeout(() => playPageAudio(nextPage), 500);
+        } else {
+          toast.success('Fin de la lecture par page');
+        }
+      });
+      newAudio.addEventListener('error', () => {
+        if (newAudio.src && newAudio.src !== '' && newAudio.src !== window.location.href) {
+          setIsPageAudioLoading(false);
+          setIsPageAudioPlaying(false);
+          toast.error('Audio de la page non disponible');
+        }
+      });
+
+      pageAudioRef.current = newAudio;
 
       if (mushafType === 'qalun') {
-        pageAudioRef.current.src = getQalunSurahAudioUrl(surahNumber);
+        newAudio.src = getQalunSurahAudioUrl(surahNumber);
       } else {
-        pageAudioRef.current.src = getPageAudioUrl(page, mushafType);
+        newAudio.src = getPageAudioUrl(page, mushafType);
       }
-      await pageAudioRef.current.play();
+      await newAudio.play();
       setIsPageAudioPlaying(true);
     } catch (err) {
       console.error('Page audio error:', err);
@@ -215,7 +192,7 @@ export const MushafPageViewer = ({
     } finally {
       setIsPageAudioLoading(false);
     }
-  }, [mushafType, surahNumber]);
+  }, [mushafType, surahNumber, onPageChange]);
 
   const togglePageAudio = useCallback(() => {
     if (!pageAudioRef.current) return;
