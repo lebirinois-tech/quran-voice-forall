@@ -89,6 +89,7 @@ export const useQuranAudio = ({
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
+  const playVerseRef = useRef<(verseNumber: number) => void>(() => {});
 
   // Setup audio event handlers - only act if this audio is still the current one
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
@@ -139,42 +140,39 @@ export const useQuranAudio = ({
       autoPlayNextRef.current = false;
       
       const { mode, count, rangeStart, rangeEnd } = repeatSettings;
+      const play = (v: number) => setTimeout(() => playVerseRef.current(v), 300);
       
       // Handle repeat modes
       if (mode === 'verse') {
-        // Repeat current verse
         const shouldRepeat = count === 0 || currentRepeatCount < count - 1;
         if (shouldRepeat) {
           setCurrentRepeatCount(prev => prev + 1);
-          setTimeout(() => playVerse(currentVerse), 300);
+          play(currentVerse);
           return;
         } else {
           setCurrentRepeatCount(0);
-          // Move to next verse after repeat is done
           if (currentVerse < totalVerses) {
             const nextVerse = currentVerse + 1;
             setCurrentVerse(nextVerse);
             onVerseChange?.(nextVerse);
-            setTimeout(() => playVerse(nextVerse), 300);
+            play(nextVerse);
             return;
           }
         }
       } else if (mode === 'range' && rangeStart !== undefined && rangeEnd !== undefined) {
-        // Repeat range of verses
         if (currentVerse < rangeEnd) {
           const nextVerse = currentVerse + 1;
           setCurrentVerse(nextVerse);
           onVerseChange?.(nextVerse);
-          setTimeout(() => playVerse(nextVerse), 300);
+          play(nextVerse);
           return;
         } else {
-          // End of range, check if we should repeat
           const shouldRepeat = count === 0 || currentRepeatCount < count - 1;
           if (shouldRepeat) {
             setCurrentRepeatCount(prev => prev + 1);
             setCurrentVerse(rangeStart);
             onVerseChange?.(rangeStart);
-            setTimeout(() => playVerse(rangeStart), 300);
+            play(rangeStart);
             return;
           } else {
             setCurrentRepeatCount(0);
@@ -182,12 +180,12 @@ export const useQuranAudio = ({
           }
         }
       } else {
-        // Normal playback (no repeat or page mode continues normally)
+        // Normal playback
         if (currentVerse < totalVerses) {
           const nextVerse = currentVerse + 1;
           setCurrentVerse(nextVerse);
           onVerseChange?.(nextVerse);
-          setTimeout(() => playVerse(nextVerse), 300);
+          play(nextVerse);
         } else {
           toast.success('Fin de la sourate');
         }
@@ -280,6 +278,11 @@ export const useQuranAudio = ({
       setIsLoading(false);
     }
   }, [surahNumber, reciter, getAudioUrl, onVerseChange, playbackSpeed, setupAudioListeners, playAudioFromUrl]);
+
+  // Keep ref in sync so the auto-play effect always calls the latest version
+  useEffect(() => {
+    playVerseRef.current = playVerse;
+  }, [playVerse]);
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
