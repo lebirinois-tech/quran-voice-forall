@@ -114,9 +114,10 @@ export const useQuranAudio = ({
       autoPlayNextRef.current = true;
     });
     
-    audio.addEventListener('error', (e) => {
-      if (isResettingRef.current) return; // Ignore errors during reset
-      console.error('Audio error:', e);
+    audio.addEventListener('error', () => {
+      // Ignore errors when audio has no valid src (during reset or initial state)
+      if (!audio.src || audio.src === '' || audio.src === window.location.href) return;
+      console.error('Audio error for src:', audio.src);
       setIsLoading(false);
       setIsPlaying(false);
       toast.error('Erreur de chargement audio');
