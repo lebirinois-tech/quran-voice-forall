@@ -455,28 +455,30 @@ const SurahReader = () => {
         />
       </div>
 
-      {/* Audio Player */}
-      <AudioPlayer
-        isPlaying={quranAudio.isPlaying}
-        isLoading={quranAudio.isLoading}
-        currentVerse={quranAudio.currentVerse}
-        totalVerses={verses.length || 1}
-        progress={quranAudio.progress}
-        reciter={quranAudio.reciter}
-        surahNumber={num}
-        repeatSettings={quranAudio.repeatSettings}
-        currentRepeatCount={quranAudio.currentRepeatCount}
-        playbackSpeed={quranAudio.playbackSpeed}
-        onPlay={handlePlayRequest}
-        onPause={quranAudio.pause}
-        onNext={quranAudio.nextVerse}
-        onPrevious={quranAudio.previousVerse}
-        onReciterChange={appSettings.onReciterChange}
-        onSeek={quranAudio.seek}
-        onRepeatModeChange={quranAudio.setRepeatMode}
-        onSpeedChange={quranAudio.changeSpeed}
-        surahName={`${surah.name} - ${surah.nameArabic}`}
-      />
+      {/* Audio Player - hidden in Mushaf mode (MushafPageViewer has its own page audio) */}
+      {!isMushafMode && (
+        <AudioPlayer
+          isPlaying={quranAudio.isPlaying}
+          isLoading={quranAudio.isLoading}
+          currentVerse={quranAudio.currentVerse}
+          totalVerses={verses.length || 1}
+          progress={quranAudio.progress}
+          reciter={quranAudio.reciter}
+          surahNumber={num}
+          repeatSettings={quranAudio.repeatSettings}
+          currentRepeatCount={quranAudio.currentRepeatCount}
+          playbackSpeed={quranAudio.playbackSpeed}
+          onPlay={handlePlayRequest}
+          onPause={quranAudio.pause}
+          onNext={quranAudio.nextVerse}
+          onPrevious={quranAudio.previousVerse}
+          onReciterChange={appSettings.onReciterChange}
+          onSeek={quranAudio.seek}
+          onRepeatModeChange={quranAudio.setRepeatMode}
+          onSpeedChange={quranAudio.changeSpeed}
+          surahName={`${surah.name} - ${surah.nameArabic}`}
+        />
+      )}
     </div>
   );
 };
