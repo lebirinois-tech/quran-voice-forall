@@ -186,6 +186,8 @@ const Index = () => {
             isSupported={voiceCommands.isSupported}
             onToggle={voiceCommands.toggleListening}
             transcript={voiceCommands.transcript}
+            voiceLang={voiceCommands.voiceLang}
+            onLangChange={voiceCommands.setVoiceLang}
           />
           
           {!voiceCommands.isSupported && (
@@ -324,7 +326,7 @@ const Index = () => {
 
         {/* Voice Commands Help */}
         <section className="max-w-md mx-auto mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <VoiceCommandHelp />
+          <VoiceCommandHelp voiceLang={voiceCommands.voiceLang} />
         </section>
       </main>
 

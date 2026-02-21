@@ -493,6 +493,8 @@ const SurahReader = () => {
           isSupported={voiceCommands.isSupported}
           onToggle={voiceCommands.toggleListening}
           transcript={voiceCommands.transcript}
+          voiceLang={voiceCommands.voiceLang}
+          onLangChange={voiceCommands.setVoiceLang}
         />
       </div>
 
