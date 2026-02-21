@@ -79,12 +79,7 @@ export const MushafPageViewer = ({
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Update currentPage when initialPage changes (e.g. from URL navigation)
-  useEffect(() => {
-    if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage) {
-      setCurrentPage(initialPage);
-    }
-  }, [initialPage, surahStartPage, surahEndPage]);
+
   const [imageError, setImageError] = useState(false);
   const [isManualNavigation, setIsManualNavigation] = useState(false);
   
@@ -155,9 +150,13 @@ export const MushafPageViewer = ({
   }, [currentPage, onPageChange, mushafType, surahNumber]);
 
   useEffect(() => {
-    setCurrentPage(surahStartPage);
+    if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage) {
+      setCurrentPage(initialPage);
+    } else {
+      setCurrentPage(surahStartPage);
+    }
     setIsManualNavigation(false);
-  }, [surahNumber, surahStartPage]);
+  }, [surahNumber, surahStartPage, surahEndPage, initialPage]);
 
   useEffect(() => {
     if (!isManualNavigation && currentVerse > 0 && surah) {
