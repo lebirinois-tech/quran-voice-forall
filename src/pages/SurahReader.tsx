@@ -5,6 +5,7 @@ import { VerseCard } from '@/components/VerseCard';
 import { MushafPageViewer } from '@/components/MushafPageViewer';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
+import { TajweedLegend } from '@/components/TajweedLegend';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
@@ -349,7 +350,15 @@ const SurahReader = () => {
           </div>
         </div>
 
-        {/* Verses Content */}
+        {/* Tajweed Legend - shown for all colored Tajweed modes */}
+        {(appSettings.textDisplayStyle === 'tajweed' || 
+          appSettings.textDisplayStyle === 'warsh-tajweed' ||
+          appSettings.textDisplayStyle === 'mushaf-hafs' ||
+          appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
+          appSettings.textDisplayStyle === 'mushaf-qalun') && (
+          <TajweedLegend />
+        )}
+
         <div className="max-w-3xl mx-auto">
           {/* Bismillah - only show for text modes */}
           {surah.number !== 1 && surah.number !== 9 && 
