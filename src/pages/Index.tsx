@@ -70,10 +70,6 @@ const Index = () => {
       }
     }
     
-    // Auto-switch to mushaf mode when navigating by page
-    if (!appSettings.textDisplayStyle.startsWith('mushaf-')) {
-      appSettings.onTextDisplayStyleChange('mushaf-hafs');
-    }
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
