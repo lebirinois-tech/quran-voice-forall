@@ -93,32 +93,27 @@ const SurahReader = () => {
     const verseParam = searchParams.get('verse');
     const pageParam = searchParams.get('page');
     
+    const scrollToElement = (id: string, attempts = 0) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('ring-2', 'ring-primary');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-primary'), 3000);
+      } else if (attempts < 10) {
+        setTimeout(() => scrollToElement(id, attempts + 1), 300);
+      }
+    };
+    
     if (verseParam) {
-      const verseNum = parseInt(verseParam);
-      setTimeout(() => {
-        const verseElement = document.getElementById(`verse-${verseNum}`);
-        if (verseElement) {
-          verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 500);
+      scrollToElement(`verse-${parseInt(verseParam)}`);
     } else if (pageParam && !appSettings.textDisplayStyle.startsWith('mushaf-') && verses.length > 0) {
-      // In text modes, find the first verse on the target page using actual page data from API
       const targetPage = parseInt(pageParam);
       const targetVerse = verses.find(v => {
-        // Use actual page from API data if available, fallback to calculated
         const versePage = v.page ?? getVersePage(num, v.number, verses.length);
         return versePage >= targetPage;
       });
       if (targetVerse) {
-        setTimeout(() => {
-          const verseElement = document.getElementById(`verse-${targetVerse.number}`);
-          if (verseElement) {
-            verseElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Briefly highlight the verse
-            verseElement.classList.add('ring-2', 'ring-primary');
-            setTimeout(() => verseElement.classList.remove('ring-2', 'ring-primary'), 3000);
-          }
-        }, 800);
+        scrollToElement(`verse-${targetVerse.number}`);
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
