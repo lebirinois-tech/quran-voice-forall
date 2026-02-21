@@ -94,6 +94,7 @@ export const useQuranAudio = ({
   const repeatSettingsRef = useRef(repeatSettings);
   const currentRepeatCountRef = useRef(currentRepeatCount);
   const onVerseChangeRef = useRef(onVerseChange);
+  const playbackSpeedRef = useRef(playbackSpeed);
 
   // Keep refs in sync
   useEffect(() => { currentVerseRef.current = currentVerse; }, [currentVerse]);
@@ -101,6 +102,7 @@ export const useQuranAudio = ({
   useEffect(() => { repeatSettingsRef.current = repeatSettings; }, [repeatSettings]);
   useEffect(() => { currentRepeatCountRef.current = currentRepeatCount; }, [currentRepeatCount]);
   useEffect(() => { onVerseChangeRef.current = onVerseChange; }, [onVerseChange]);
+  useEffect(() => { playbackSpeedRef.current = playbackSpeed; }, [playbackSpeed]);
 
   // Setup audio event handlers - only act if this audio is still the current one
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
@@ -260,7 +262,7 @@ export const useQuranAudio = ({
       newAudio.preload = 'auto';
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
-      newAudio.playbackRate = playbackSpeed;
+      newAudio.playbackRate = playbackSpeedRef.current;
 
       // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, surahNumber, verseNumber);
@@ -268,7 +270,7 @@ export const useQuranAudio = ({
         await playAudioFromUrl(newAudio, cachedUrl);
         setIsPlaying(true);
         setCurrentVerse(verseNumber);
-        onVerseChange?.(verseNumber);
+        onVerseChangeRef.current?.(verseNumber);
         return;
       }
 
@@ -277,14 +279,14 @@ export const useQuranAudio = ({
       await playAudioFromUrl(newAudio, audioUrl);
       setIsPlaying(true);
       setCurrentVerse(verseNumber);
-      onVerseChange?.(verseNumber);
+      onVerseChangeRef.current?.(verseNumber);
     } catch (error) {
       console.error('Error loading audio:', error);
       toast.error('Impossible de charger l\'audio');
     } finally {
       setIsLoading(false);
     }
-  }, [surahNumber, reciter, getAudioUrl, onVerseChange, playbackSpeed, setupAudioListeners, playAudioFromUrl]);
+  }, [surahNumber, reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl]);
 
   // Keep ref in sync so the auto-play effect always calls the latest version
   useEffect(() => {
