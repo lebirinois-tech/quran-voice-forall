@@ -13,6 +13,7 @@ interface MushafPageViewerProps {
   totalVerses: number;
   currentVerse: number;
   mushafType: MushafType;
+  initialPage?: number;
   onPageChange?: (page: number) => void;
 }
 
@@ -62,6 +63,7 @@ export const MushafPageViewer = ({
   totalVerses,
   currentVerse,
   mushafType,
+  initialPage,
   onPageChange,
 }: MushafPageViewerProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
@@ -70,7 +72,11 @@ export const MushafPageViewer = ({
     [surahNumber]
   );
   
-  const [currentPage, setCurrentPage] = useState(surahStartPage);
+  const [currentPage, setCurrentPage] = useState(
+    initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage
+      ? initialPage
+      : surahStartPage
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [isManualNavigation, setIsManualNavigation] = useState(false);
