@@ -178,14 +178,29 @@ const SurahReader = () => {
 
   const handlePlayRequest = useCallback(() => {
     if (isMushafMode && currentPageVerseRange) {
-      // Play from first verse of current page, stop at last verse of page
       quranAudio.playVerse(currentPageVerseRange.first);
       quranAudio.setRepeatMode('range', 1, currentPageVerseRange.first, currentPageVerseRange.last);
     } else {
-      quranAudio.play();
+      // In text mode: detect first visible verse and start from there
+      if (!quranAudio.isPlaying && verses.length > 0) {
+        let firstVisible = quranAudio.currentVerse;
+        for (let i = 1; i <= verses.length; i++) {
+          const el = document.getElementById(`verse-${i}`);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top >= 0 && rect.top < window.innerHeight) {
+              firstVisible = i;
+              break;
+            }
+          }
+        }
+        quranAudio.playVerse(firstVisible);
+      } else {
+        quranAudio.play();
+      }
     }
     toast.success('Lecture démarrée');
-  }, [quranAudio, isMushafMode, currentPageVerseRange]);
+  }, [quranAudio, isMushafMode, currentPageVerseRange, verses.length]);
 
   const voiceCommands = useVoiceCommands({
     onPlay: handlePlayRequest,
