@@ -80,7 +80,7 @@ export const AudioPlayer = ({
   const handleDownloadCurrentVerse = async () => {
     setIsDownloading(true);
     try {
-      const edition = RECITERS[reciter].id;
+      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
       const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${currentVerse}/${edition}`);
       const data = await response.json();
       
@@ -91,7 +91,7 @@ export const AudioPlayer = ({
         
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Surah_${surahNumber}_Verset_${currentVerse}_${RECITERS[reciter].name}.mp3`;
+        link.download = `Surah_${surahNumber}_Verset_${currentVerse}_${RECITERS[reciter]?.name ?? reciter}.mp3`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -114,7 +114,7 @@ export const AudioPlayer = ({
     toast.info(`Téléchargement de la sourate ${surahNumber} en cours...`);
     
     try {
-      const edition = RECITERS[reciter].id;
+      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
       const data = await response.json();
       
@@ -131,7 +131,7 @@ export const AudioPlayer = ({
               
               const link = document.createElement('a');
               link.href = url;
-              link.download = `Surah_${surahNumber}_Verset_${ayah.numberInSurah}_${RECITERS[reciter].name}.mp3`;
+              link.download = `Surah_${surahNumber}_Verset_${ayah.numberInSurah}_${RECITERS[reciter]?.name ?? reciter}.mp3`;
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
@@ -475,7 +475,7 @@ export const AudioPlayer = ({
                   </Button>
                   <div className="pt-2 border-t border-border">
                     <p className="text-xs text-muted-foreground">
-                      Récitateur: {RECITERS[reciter].name}
+                      Récitateur: {RECITERS[reciter]?.name ?? reciter}
                     </p>
                   </div>
                 </div>

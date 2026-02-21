@@ -212,7 +212,7 @@ export const useQuranAudio = ({
     setIsLoading(true);
     
     try {
-      const reciterInfo = RECITERS[reciter];
+      const reciterInfo = RECITERS[reciter] ?? RECITERS['alafasy'];
       
       // Check if this is a Warsh reciter (use everyayah.com)
       if (reciterInfo.qiraat === 'warsh') {
@@ -318,7 +318,7 @@ export const useQuranAudio = ({
 
   const changeReciter = useCallback((newReciter: ReciterId) => {
     setReciter(newReciter);
-    toast.success(`Récitateur: ${RECITERS[newReciter].name}`);
+    toast.success(`Récitateur: ${RECITERS[newReciter]?.name ?? newReciter}`);
     // If currently playing, restart with new reciter
     if (isPlaying) {
       pause();

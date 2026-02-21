@@ -123,7 +123,7 @@ export const SettingsDialog = ({
     setDownloadProgress(0);
     
     try {
-      const edition = RECITERS[reciter].id;
+      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
       const data = await response.json();
       
@@ -140,7 +140,7 @@ export const SettingsDialog = ({
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${surahName}_Verset_${ayah.numberInSurah}_${RECITERS[reciter].name}.mp3`;
+            a.download = `${surahName}_Verset_${ayah.numberInSurah}_${RECITERS[reciter]?.name ?? reciter}.mp3`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -164,7 +164,7 @@ export const SettingsDialog = ({
 
   const handleOpenQuranDownloadLink = () => {
     // Open external link for full Quran download using correct QuranicAudio ID
-    const quranicAudioId = RECITERS[reciter].quranicAudioId || 7; // Default to Alafasy
+    const quranicAudioId = RECITERS[reciter]?.quranicAudioId || 7; // Default to Alafasy
     window.open(`https://quranicaudio.com/quran/${quranicAudioId}`, '_blank');
     toast.info('Redirection vers QuranicAudio pour le Quran complet');
   };
@@ -370,7 +370,7 @@ export const SettingsDialog = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Récitateur / القارئ: {RECITERS[reciter].name}
+              Récitateur / القارئ: {RECITERS[reciter]?.name ?? reciter}
             </p>
           </div>
         </div>
