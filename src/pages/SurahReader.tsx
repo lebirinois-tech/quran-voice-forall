@@ -441,25 +441,42 @@ const SurahReader = () => {
               {/* Verses */}
               {!isLoadingVerses && !error && (
                 <div className="space-y-4">
-                  {verses.map((verse) => (
-                    <VerseCard
-                      key={verse.number}
-                      id={`verse-${verse.number}`}
-                      verse={verse}
-                      surahNumber={surah.number}
-                      isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-                      isHighlighted={quranAudio.currentVerse === verse.number}
-                      isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
-                      reciter={appSettings.reciter}
-                      textDisplayStyle={appSettings.textDisplayStyle}
-                      fontSize={appSettings.fontSize}
-                      tajweedHtml={versesTajweed[verse.number]}
-                      warshText={warshVerses[verse.number]}
-                      onPlay={() => quranAudio.playVerse(verse.number)}
-                      onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
-                      isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
-                    />
-                  ))}
+                  {verses.map((verse, index) => {
+                    const versePage = verse.page ?? getVersePage(num, verse.number, verses.length);
+                    const prevVerse = index > 0 ? verses[index - 1] : null;
+                    const prevPage = prevVerse ? (prevVerse.page ?? getVersePage(num, prevVerse.number, verses.length)) : null;
+                    const isNewPage = prevPage !== null && versePage !== prevPage;
+
+                    return (
+                      <div key={verse.number}>
+                        {isNewPage && (
+                          <div className="flex items-center gap-3 my-6">
+                            <div className="flex-1 h-px bg-border" />
+                            <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                              صفحة {versePage} • Page {versePage}
+                            </span>
+                            <div className="flex-1 h-px bg-border" />
+                          </div>
+                        )}
+                        <VerseCard
+                          id={`verse-${verse.number}`}
+                          verse={verse}
+                          surahNumber={surah.number}
+                          isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
+                          isHighlighted={quranAudio.currentVerse === verse.number}
+                          isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
+                          reciter={appSettings.reciter}
+                          textDisplayStyle={appSettings.textDisplayStyle}
+                          fontSize={appSettings.fontSize}
+                          tajweedHtml={versesTajweed[verse.number]}
+                          warshText={warshVerses[verse.number]}
+                          onPlay={() => quranAudio.playVerse(verse.number)}
+                          onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
+                          isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </>
