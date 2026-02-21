@@ -152,10 +152,11 @@ export const MushafPageViewer = ({
   useEffect(() => {
     if (initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage) {
       setCurrentPage(initialPage);
+      setIsManualNavigation(true);
     } else {
       setCurrentPage(surahStartPage);
+      setIsManualNavigation(false);
     }
-    setIsManualNavigation(false);
   }, [surahNumber, surahStartPage, surahEndPage, initialPage]);
 
   useEffect(() => {
