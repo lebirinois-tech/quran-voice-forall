@@ -218,9 +218,9 @@ export const AudioPlayer = ({
                   <SelectValue placeholder="Récitateur" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(RECITERS).map(([key, { name }]) => (
+                  {Object.entries(RECITERS).map(([key, { name, nameAr }]) => (
                     <SelectItem key={key} value={key} className="text-xs">
-                      {name}
+                      {name} / {nameAr}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -473,9 +473,9 @@ export const AudioPlayer = ({
                     <Download className="h-4 w-4 mr-2" />
                     Sourate entière ({totalVerses} versets)
                   </Button>
-                  <div className="pt-2 border-t border-border">
+                   <div className="pt-2 border-t border-border">
                     <p className="text-xs text-muted-foreground">
-                      Récitateur: {RECITERS[reciter]?.name ?? reciter}
+                      Récitateur: {RECITERS[reciter]?.name ?? reciter} / {RECITERS[reciter]?.nameAr ?? ''}
                     </p>
                   </div>
                 </div>
