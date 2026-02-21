@@ -215,7 +215,7 @@ export const SettingsDialog = ({
                     onValueChange={(value) => onReciterChange(value as ReciterId)}
                     className="space-y-1"
                   >
-                    {recitersForQiraat.map(([key, { name }]) => (
+                    {recitersForQiraat.map(([key, { name, nameAr }]) => (
                       <div
                         key={key}
                         className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
@@ -225,7 +225,7 @@ export const SettingsDialog = ({
                           htmlFor={`reciter-${key}`}
                           className="flex-1 cursor-pointer text-foreground text-sm"
                         >
-                          {name}
+                          {name} / <span dir="rtl">{nameAr}</span>
                         </Label>
                         {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
                       </div>
@@ -370,7 +370,7 @@ export const SettingsDialog = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Récitateur / القارئ: {RECITERS[reciter]?.name ?? reciter}
+              Récitateur / القارئ: {RECITERS[reciter]?.name ?? reciter} / {RECITERS[reciter]?.nameAr ?? ''}
             </p>
           </div>
         </div>

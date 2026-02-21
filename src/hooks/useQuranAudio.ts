@@ -17,36 +17,35 @@ export type QiraatId = keyof typeof QIRAAT_LABELS;
 export interface ReciterInfo {
   id: string;
   name: string;
+  nameAr: string;
   qiraat: QiraatId;
 }
 
 export interface ReciterInfo {
   id: string;
   name: string;
+  nameAr: string;
   qiraat: QiraatId;
-  quranicAudioId?: number; // ID for quranicaudio.com download links
+  quranicAudioId?: number;
 }
 
 export const RECITERS: Record<string, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // HAFS (حفص عن عاصم) - The most widely used reading
   // ═══════════════════════════════════════════════════════════════════════════
-  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', qiraat: 'hafs', quranicAudioId: 7 },
-  husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', qiraat: 'hafs', quranicAudioId: 18 },
-  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', qiraat: 'hafs', quranicAudioId: 21 },
-  abdulbasit: { id: 'ar.abdulbasitmujawwad', name: 'Abdul Basit Abdul Samad', qiraat: 'hafs', quranicAudioId: 1 },
-  sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', qiraat: 'hafs', quranicAudioId: 10 },
-  shuraym: { id: 'ar.saulodshurem', name: 'Saud Al-Shuraym', qiraat: 'hafs', quranicAudioId: 11 },
-  mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', qiraat: 'hafs', quranicAudioId: 6 },
+  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', nameAr: 'مشاري راشد العفاسي', qiraat: 'hafs', quranicAudioId: 7 },
+  husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
+  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', nameAr: 'محمد صديق المنشاوي', qiraat: 'hafs', quranicAudioId: 21 },
+  abdulbasit: { id: 'ar.abdulbasitmujawwad', name: 'Abdul Basit Abdul Samad', nameAr: 'عبد الباسط عبد الصمد', qiraat: 'hafs', quranicAudioId: 1 },
+  sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', nameAr: 'عبد الرحمن السديس', qiraat: 'hafs', quranicAudioId: 10 },
+  shuraym: { id: 'ar.saulodshurem', name: 'Saud Al-Shuraym', nameAr: 'سعود الشريم', qiraat: 'hafs', quranicAudioId: 11 },
+  mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', nameAr: 'ماهر المعيقلي', qiraat: 'hafs', quranicAudioId: 6 },
   
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع) - Popular in North & West Africa
-  // Using everyayah.com which has proper Warsh recordings
-  // Available: Ibrahim Al-Dosary (complete), Yassin Al-Jazaery (complete)
-  // Note: Al-Husary Warsh is NOT available on everyayah.com
   // ═══════════════════════════════════════════════════════════════════════════
-  ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
-  yassinJazaeryWarsh: { id: 'warsh_yassin_jazaery', name: 'Yassin Al-Jazaery (Warsh)', qiraat: 'warsh', quranicAudioId: 35 },
+  ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
+  yassinJazaeryWarsh: { id: 'warsh_yassin_jazaery', name: 'Yassin Al-Jazaery (Warsh)', nameAr: 'ياسين الجزائري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
