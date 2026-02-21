@@ -12,7 +12,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { surahs, Surah, juzMapping, getVersePage } from '@/data/surahs';
+import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,7 @@ const SurahReader = () => {
   const { isAuthenticated } = useAuth();
   const { saveProgress, getSurahProgress } = useReadingProgress();
   const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
+  const [currentMushafPage, setCurrentMushafPage] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -164,10 +165,19 @@ const SurahReader = () => {
     }
   };
 
+  const isMushafMode = appSettings.textDisplayStyle.startsWith('mushaf-');
+
   const handlePlayRequest = useCallback(() => {
-    quranAudio.play();
+    // In Mushaf mode, start audio from the first verse of the current page
+    if (isMushafMode && currentMushafPage) {
+      const totalV = verses.length || surah?.versesCount || 1;
+      const firstVerse = getFirstVerseOfPage(num, currentMushafPage, totalV);
+      quranAudio.playVerse(firstVerse);
+    } else {
+      quranAudio.play();
+    }
     toast.success('Lecture démarrée');
-  }, [quranAudio]);
+  }, [quranAudio, isMushafMode, currentMushafPage, verses.length, surah, num]);
 
   const voiceCommands = useVoiceCommands({
     onPlay: handlePlayRequest,
@@ -360,6 +370,7 @@ const SurahReader = () => {
               surahNumber={num}
               totalVerses={verses.length || surah.versesCount}
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
+              onPageChange={setCurrentMushafPage}
               mushafType={
                 appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 
                 appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ? 'warsh-tajweed' :
