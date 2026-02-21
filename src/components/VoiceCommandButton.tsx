@@ -1,6 +1,7 @@
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, Globe } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import type { VoiceLang } from '@/hooks/useVoiceCommands';
 
 interface VoiceCommandButtonProps {
   isListening: boolean;
@@ -9,6 +10,8 @@ interface VoiceCommandButtonProps {
   isSupported: boolean;
   onToggle: () => void;
   transcript?: string;
+  voiceLang?: VoiceLang;
+  onLangChange?: (lang: VoiceLang) => void;
   className?: string;
 }
 
@@ -19,14 +22,27 @@ export const VoiceCommandButton = ({
   isSupported,
   onToggle,
   transcript,
+  voiceLang = 'fr',
+  onLangChange,
   className,
 }: VoiceCommandButtonProps) => {
-  if (!isSupported) {
-    return null;
-  }
+  if (!isSupported) return null;
 
   return (
     <div className={cn("flex flex-col items-center gap-2", className)}>
+      {/* Language Toggle */}
+      {onLangChange && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onLangChange(voiceLang === 'fr' ? 'ar' : 'fr')}
+          className="gap-2 rounded-full text-xs"
+        >
+          <Globe className="h-3.5 w-3.5" />
+          {voiceLang === 'fr' ? 'Français → العربية' : 'العربية → Français'}
+        </Button>
+      )}
+
       {/* Manual Trigger Button - hidden when continuous mode is active */}
       {!isContinuousMode && (
         <Button
@@ -70,12 +86,12 @@ export const VoiceCommandButton = ({
             isAwaitingCommand ? "text-primary-foreground font-medium" : "text-muted-foreground"
           )}>
             {isAwaitingCommand 
-              ? "Commande attendue..." 
+              ? (voiceLang === 'ar' ? "في انتظار الأمر..." : "Commande attendue...")
               : transcript 
                 ? transcript 
                 : isContinuousMode 
-                  ? "Dites 'Coran' + commande" 
-                  : "Écoute en cours..."}
+                  ? (voiceLang === 'ar' ? 'قل "قرآن" + الأمر' : "Dites 'Coran' + commande")
+                  : (voiceLang === 'ar' ? "جاري الاستماع..." : "Écoute en cours...")}
           </span>
         </div>
       )}
