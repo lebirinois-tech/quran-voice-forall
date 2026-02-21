@@ -88,8 +88,19 @@ export const useQuranAudio = ({
   }, [externalReciter]);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const autoPlayNextRef = useRef(false);
   const playVerseRef = useRef<(verseNumber: number) => void>(() => {});
+  const currentVerseRef = useRef(currentVerse);
+  const totalVersesRef = useRef(totalVerses);
+  const repeatSettingsRef = useRef(repeatSettings);
+  const currentRepeatCountRef = useRef(currentRepeatCount);
+  const onVerseChangeRef = useRef(onVerseChange);
+
+  // Keep refs in sync
+  useEffect(() => { currentVerseRef.current = currentVerse; }, [currentVerse]);
+  useEffect(() => { totalVersesRef.current = totalVerses; }, [totalVerses]);
+  useEffect(() => { repeatSettingsRef.current = repeatSettings; }, [repeatSettings]);
+  useEffect(() => { currentRepeatCountRef.current = currentRepeatCount; }, [currentRepeatCount]);
+  useEffect(() => { onVerseChangeRef.current = onVerseChange; }, [onVerseChange]);
 
   // Setup audio event handlers - only act if this audio is still the current one
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
@@ -108,7 +119,61 @@ export const useQuranAudio = ({
     audio.addEventListener('ended', () => {
       if (audio !== audioRef.current) return;
       setIsPlaying(false);
-      autoPlayNextRef.current = true;
+      // Handle auto-play directly here using refs for always-fresh values
+      const cv = currentVerseRef.current;
+      const tv = totalVersesRef.current;
+      const rs = repeatSettingsRef.current;
+      const rc = currentRepeatCountRef.current;
+      const { mode, count, rangeStart, rangeEnd } = rs;
+      const play = (v: number) => setTimeout(() => playVerseRef.current(v), 300);
+
+      if (mode === 'verse') {
+        const shouldRepeat = count === 0 || rc < count - 1;
+        if (shouldRepeat) {
+          setCurrentRepeatCount(prev => prev + 1);
+          play(cv);
+          return;
+        } else {
+          setCurrentRepeatCount(0);
+          if (cv < tv) {
+            const next = cv + 1;
+            setCurrentVerse(next);
+            onVerseChangeRef.current?.(next);
+            play(next);
+            return;
+          }
+        }
+      } else if (mode === 'range' && rangeStart !== undefined && rangeEnd !== undefined) {
+        if (cv < rangeEnd) {
+          const next = cv + 1;
+          setCurrentVerse(next);
+          onVerseChangeRef.current?.(next);
+          play(next);
+          return;
+        } else {
+          const shouldRepeat = count === 0 || rc < count - 1;
+          if (shouldRepeat) {
+            setCurrentRepeatCount(prev => prev + 1);
+            setCurrentVerse(rangeStart);
+            onVerseChangeRef.current?.(rangeStart);
+            play(rangeStart);
+            return;
+          } else {
+            setCurrentRepeatCount(0);
+            toast.success('Fin de la répétition');
+          }
+        }
+      } else {
+        // Normal playback
+        if (cv < tv) {
+          const next = cv + 1;
+          setCurrentVerse(next);
+          onVerseChangeRef.current?.(next);
+          play(next);
+        } else {
+          toast.success('Fin de la sourate');
+        }
+      }
     });
     
     audio.addEventListener('error', () => {
@@ -134,64 +199,6 @@ export const useQuranAudio = ({
     };
   }, [setupAudioListeners]);
 
-  // Handle auto-play next verse with repeat logic
-  useEffect(() => {
-    if (autoPlayNextRef.current && !isPlaying) {
-      autoPlayNextRef.current = false;
-      
-      const { mode, count, rangeStart, rangeEnd } = repeatSettings;
-      const play = (v: number) => setTimeout(() => playVerseRef.current(v), 300);
-      
-      // Handle repeat modes
-      if (mode === 'verse') {
-        const shouldRepeat = count === 0 || currentRepeatCount < count - 1;
-        if (shouldRepeat) {
-          setCurrentRepeatCount(prev => prev + 1);
-          play(currentVerse);
-          return;
-        } else {
-          setCurrentRepeatCount(0);
-          if (currentVerse < totalVerses) {
-            const nextVerse = currentVerse + 1;
-            setCurrentVerse(nextVerse);
-            onVerseChange?.(nextVerse);
-            play(nextVerse);
-            return;
-          }
-        }
-      } else if (mode === 'range' && rangeStart !== undefined && rangeEnd !== undefined) {
-        if (currentVerse < rangeEnd) {
-          const nextVerse = currentVerse + 1;
-          setCurrentVerse(nextVerse);
-          onVerseChange?.(nextVerse);
-          play(nextVerse);
-          return;
-        } else {
-          const shouldRepeat = count === 0 || currentRepeatCount < count - 1;
-          if (shouldRepeat) {
-            setCurrentRepeatCount(prev => prev + 1);
-            setCurrentVerse(rangeStart);
-            onVerseChange?.(rangeStart);
-            play(rangeStart);
-            return;
-          } else {
-            setCurrentRepeatCount(0);
-            toast.success('Fin de la répétition');
-          }
-        }
-      } else {
-        // Normal playback
-        if (currentVerse < totalVerses) {
-          const nextVerse = currentVerse + 1;
-          setCurrentVerse(nextVerse);
-          onVerseChange?.(nextVerse);
-          play(nextVerse);
-        } else {
-          toast.success('Fin de la sourate');
-        }
-      }
-    }
-  }, [isPlaying, currentVerse, totalVerses, onVerseChange, repeatSettings, currentRepeatCount]);
 
   // Helper to format verse number for everyayah.com (e.g., 001, 002, 123)
   const formatVerseNumber = (num: number) => num.toString().padStart(3, '0');
