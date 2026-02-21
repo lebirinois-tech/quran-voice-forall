@@ -136,7 +136,7 @@ const SurahReader = () => {
 
   const handleNavigateToPage = (pageNum: number) => {
     const targetSurah = getSurahForPage(pageNum);
-    navigate(`/surah/${targetSurah}`);
+    navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
 
@@ -343,6 +343,7 @@ const SurahReader = () => {
               surahNumber={num}
               totalVerses={verses.length || surah.versesCount}
               currentVerse={quranAudio.currentVerse}
+              initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               mushafType={
                 appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 
                 appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ? 'warsh-tajweed' :

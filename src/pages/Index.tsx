@@ -70,7 +70,7 @@ const Index = () => {
       }
     }
     
-    navigate(`/surah/${targetSurah}`);
+    navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
 
