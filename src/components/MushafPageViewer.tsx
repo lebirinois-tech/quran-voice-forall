@@ -81,7 +81,9 @@ export const MushafPageViewer = ({
 
 
   const [imageError, setImageError] = useState(false);
-  const [isManualNavigation, setIsManualNavigation] = useState(false);
+  const [isManualNavigation, setIsManualNavigation] = useState(
+    !!(initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage)
+  );
   
   // Page audio state
   const [isPageAudioPlaying, setIsPageAudioPlaying] = useState(false);

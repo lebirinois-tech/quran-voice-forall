@@ -344,6 +344,7 @@ const SurahReader = () => {
             appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
             appSettings.textDisplayStyle === 'mushaf-qalun') && (
             <MushafPageViewer
+              key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
               totalVerses={verses.length || surah.versesCount}
               currentVerse={quranAudio.currentVerse}
