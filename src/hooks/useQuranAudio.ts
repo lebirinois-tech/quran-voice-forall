@@ -91,24 +91,28 @@ export const useQuranAudio = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
 
-  // Setup audio event handlers
+  // Setup audio event handlers - only act if this audio is still the current one
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
     audio.addEventListener('timeupdate', () => {
+      if (audio !== audioRef.current) return;
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
     });
     
     audio.addEventListener('loadedmetadata', () => {
+      if (audio !== audioRef.current) return;
       setDuration(audio.duration);
     });
     
     audio.addEventListener('ended', () => {
+      if (audio !== audioRef.current) return;
       setIsPlaying(false);
       autoPlayNextRef.current = true;
     });
     
     audio.addEventListener('error', () => {
+      if (audio !== audioRef.current) return;
       if (!audio.src || audio.src === '' || audio.src === window.location.href) return;
       console.error('Audio error for src:', audio.src);
       setIsLoading(false);
