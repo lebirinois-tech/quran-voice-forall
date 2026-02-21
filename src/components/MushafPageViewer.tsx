@@ -106,9 +106,12 @@ export const MushafPageViewer = ({
       }
     });
     audio.addEventListener('error', () => {
-      setIsPageAudioLoading(false);
-      setIsPageAudioPlaying(false);
-      toast.error('Audio de la page non disponible');
+      // Only show error if audio actually has a source (not during reset transitions)
+      if (audio.src && audio.src !== '' && audio.src !== window.location.href) {
+        setIsPageAudioLoading(false);
+        setIsPageAudioPlaying(false);
+        toast.error('Audio de la page non disponible');
+      }
     });
     
     return () => {
@@ -194,11 +197,14 @@ export const MushafPageViewer = ({
     if (!pageAudioRef.current) return;
     setIsPageAudioLoading(true);
     try {
+      // Reset audio element before changing source to prevent stale error events
+      pageAudioRef.current.pause();
+      pageAudioRef.current.removeAttribute('src');
+      pageAudioRef.current.load();
+
       if (mushafType === 'qalun') {
-        // Qalun: play surah-level audio (no per-page Qalun audio exists)
         pageAudioRef.current.src = getQalunSurahAudioUrl(surahNumber);
       } else {
-        // Hafs/Warsh: play per-page audio
         pageAudioRef.current.src = getPageAudioUrl(page, mushafType);
       }
       await pageAudioRef.current.play();
