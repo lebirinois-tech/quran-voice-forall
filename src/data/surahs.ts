@@ -49,6 +49,16 @@ export const getVersePage = (surahNumber: number, verseNumber: number, totalVers
   return Math.min(Math.max(calculatedPage, startPage), nextSurahStart - 1);
 };
 
+// Reverse mapping: find the first verse on a given page for a surah
+export const getFirstVerseOfPage = (surahNumber: number, page: number, totalVerses: number): number => {
+  for (let v = 1; v <= totalVerses; v++) {
+    if (getVersePage(surahNumber, v, totalVerses) >= page) {
+      return v;
+    }
+  }
+  return 1;
+};
+
 // Juz (part) mapping - each Juz starts at [surahNumber, verseNumber]
 export const juzMapping: Record<number, { surah: number; verse: number; name: string }> = {
   1: { surah: 1, verse: 1, name: "Alif Lam Mim" },

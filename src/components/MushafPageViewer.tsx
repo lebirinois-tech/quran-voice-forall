@@ -170,6 +170,11 @@ export const MushafPageViewer = ({
     // If user has manually navigated, never reset the page
   }, [surahNumber, surahStartPage, surahEndPage, initialPage]);
 
+  // Report current page to parent whenever it changes
+  useEffect(() => {
+    onPageChange?.(currentPage);
+  }, [currentPage, onPageChange]);
+
   useEffect(() => {
     setIsLoading(true);
     setImageError(false);
