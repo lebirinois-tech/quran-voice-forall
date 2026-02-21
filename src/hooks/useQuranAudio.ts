@@ -210,9 +210,26 @@ export const useQuranAudio = ({
     return null;
   }, []);
 
+  const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const onCanPlay = () => {
+        audio.removeEventListener('canplay', onCanPlay);
+        audio.removeEventListener('error', onError);
+        audio.play().then(resolve).catch(reject);
+      };
+      const onError = () => {
+        audio.removeEventListener('canplay', onCanPlay);
+        audio.removeEventListener('error', onError);
+        reject(new Error('Audio load failed'));
+      };
+      audio.addEventListener('canplay', onCanPlay);
+      audio.addEventListener('error', onError);
+      audio.src = url;
+      audio.load();
+    });
+  }, []);
+
   const playVerse = useCallback(async (verseNumber: number) => {
-    if (!audioRef.current) return;
-    
     setIsLoading(true);
     
     try {
@@ -227,13 +244,12 @@ export const useQuranAudio = ({
       newAudio.preload = 'auto';
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
+      newAudio.playbackRate = playbackSpeed;
 
       if (reciterInfo.qiraat === 'warsh') {
         const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
         if (warshUrl) {
-          audioRef.current.src = warshUrl;
-          audioRef.current.playbackRate = playbackSpeed;
-          await audioRef.current.play();
+          await playAudioFromUrl(newAudio, warshUrl);
           setIsPlaying(true);
           setCurrentVerse(verseNumber);
           onVerseChange?.(verseNumber);
@@ -241,13 +257,10 @@ export const useQuranAudio = ({
         }
       }
       
-      // Default: use AlQuran.cloud API for Hafs reciters
-      // First check localStorage for cached audio URL (offline support)
+      // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, surahNumber, verseNumber);
       if (cachedUrl) {
-        audioRef.current.src = cachedUrl;
-        audioRef.current.playbackRate = playbackSpeed;
-        await audioRef.current.play();
+        await playAudioFromUrl(newAudio, cachedUrl);
         setIsPlaying(true);
         setCurrentVerse(verseNumber);
         onVerseChange?.(verseNumber);
@@ -259,9 +272,23 @@ export const useQuranAudio = ({
       const data = await response.json();
       
       if (data.code === 200 && data.data?.audio) {
-        audioRef.current.src = data.data.audio;
-        audioRef.current.playbackRate = playbackSpeed;
-        await audioRef.current.play();
+        try {
+          await playAudioFromUrl(newAudio, data.data.audio);
+        } catch {
+          // Retry with secondary audio URL if available
+          const secondaryUrls = data.data.audioSecondary;
+          if (secondaryUrls && secondaryUrls.length > 0) {
+            console.log('Primary audio failed, trying secondary URL...');
+            const retryAudio = new Audio();
+            retryAudio.preload = 'auto';
+            retryAudio.playbackRate = playbackSpeed;
+            setupAudioListeners(retryAudio);
+            audioRef.current = retryAudio;
+            await playAudioFromUrl(retryAudio, secondaryUrls[0]);
+          } else {
+            throw new Error('Audio not available');
+          }
+        }
         setIsPlaying(true);
         setCurrentVerse(verseNumber);
         onVerseChange?.(verseNumber);
@@ -274,7 +301,7 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [surahNumber, reciter, getWarshAudioUrl, onVerseChange, playbackSpeed]);
+  }, [surahNumber, reciter, getWarshAudioUrl, onVerseChange, playbackSpeed, setupAudioListeners, playAudioFromUrl]);
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
