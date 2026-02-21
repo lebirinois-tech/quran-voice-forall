@@ -69,17 +69,18 @@ const SurahReader = () => {
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
   const { warshVerses } = useWarshData(num, appSettings.textDisplayStyle === 'warsh-tajweed');
 
+  const handleVerseChange = useCallback((verseNum: number) => {
+    const verseElement = document.getElementById(`verse-${verseNum}`);
+    if (verseElement) {
+      verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
   const quranAudio = useQuranAudio({
     surahNumber: num,
     totalVerses: verses.length || 1,
     reciter: appSettings.reciter,
-    onVerseChange: (verseNum) => {
-      // Scroll to the verse
-      const verseElement = document.getElementById(`verse-${verseNum}`);
-      if (verseElement) {
-        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    },
+    onVerseChange: handleVerseChange,
   });
 
   // Fetch surah metadata
