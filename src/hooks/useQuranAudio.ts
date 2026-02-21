@@ -196,18 +196,28 @@ export const useQuranAudio = ({
   const formatVerseNumber = (num: number) => num.toString().padStart(3, '0');
   const formatSurahNumber = (num: number) => num.toString().padStart(3, '0');
 
-  const getWarshAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
-    // everyayah.com format: https://everyayah.com/data/[reciter]/SSSAAA.mp3
-    // SSS = surah number (001-114), AAA = ayah number (001-286)
+  // everyayah.com folder names for each reciter
+  const EVERYAYAH_FOLDERS: Record<string, string> = {
+    alafasy: 'Alafasy_128kbps',
+    husary: 'Husary_128kbps',
+    minshawi: 'Minshawy_Mujawwad_192kbps',
+    abdulbasit: 'Abdul_Basit_Mujawwad_128kbps',
+    sudais: 'Abdurrahmaan_As-Sudais_192kbps',
+    shuraym: 'Saood_Ash-Shuraym_128kbps',
+    mahermuaiqly: 'MauroAl_Muaiqely_128kbps',
+    ibrahimDosaryWarsh: 'warsh/warsh_ibrahim_aldosary_128kbps',
+    yassinJazaeryWarsh: 'Yassin_Al-Jazaery_64kbps',
+  };
+
+  const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
     const surahStr = formatSurahNumber(surah);
     const verseStr = formatVerseNumber(verse);
-    
-    if (reciterId === 'ibrahimDosaryWarsh') {
-      return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${surahStr}${verseStr}.mp3`;
-    } else if (reciterId === 'yassinJazaeryWarsh') {
-      return `https://everyayah.com/data/Yassin_Al-Jazaery_64kbps/${surahStr}${verseStr}.mp3`;
+    const folder = EVERYAYAH_FOLDERS[reciterId];
+    if (folder) {
+      return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
     }
-    return null;
+    // Fallback to Alafasy
+    return `https://everyayah.com/data/Alafasy_128kbps/${surahStr}${verseStr}.mp3`;
   }, []);
 
   const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string): Promise<void> => {
@@ -233,8 +243,6 @@ export const useQuranAudio = ({
     setIsLoading(true);
     
     try {
-      const reciterInfo = RECITERS[reciter] ?? RECITERS['alafasy'];
-      
       // Create a fresh audio element to avoid corrupted state
       if (audioRef.current) {
         audioRef.current.pause();
@@ -246,17 +254,6 @@ export const useQuranAudio = ({
       audioRef.current = newAudio;
       newAudio.playbackRate = playbackSpeed;
 
-      if (reciterInfo.qiraat === 'warsh') {
-        const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
-        if (warshUrl) {
-          await playAudioFromUrl(newAudio, warshUrl);
-          setIsPlaying(true);
-          setCurrentVerse(verseNumber);
-          onVerseChange?.(verseNumber);
-          return;
-        }
-      }
-      
       // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, surahNumber, verseNumber);
       if (cachedUrl) {
@@ -267,41 +264,19 @@ export const useQuranAudio = ({
         return;
       }
 
-      const edition = reciterInfo.id;
-      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/${edition}`);
-      const data = await response.json();
-      
-      if (data.code === 200 && data.data?.audio) {
-        try {
-          await playAudioFromUrl(newAudio, data.data.audio);
-        } catch {
-          // Retry with secondary audio URL if available
-          const secondaryUrls = data.data.audioSecondary;
-          if (secondaryUrls && secondaryUrls.length > 0) {
-            console.log('Primary audio failed, trying secondary URL...');
-            const retryAudio = new Audio();
-            retryAudio.preload = 'auto';
-            retryAudio.playbackRate = playbackSpeed;
-            setupAudioListeners(retryAudio);
-            audioRef.current = retryAudio;
-            await playAudioFromUrl(retryAudio, secondaryUrls[0]);
-          } else {
-            throw new Error('Audio not available');
-          }
-        }
-        setIsPlaying(true);
-        setCurrentVerse(verseNumber);
-        onVerseChange?.(verseNumber);
-      } else {
-        throw new Error('Audio not available');
-      }
+      // Use everyayah.com directly for all reciters (cdn.islamic.network is unreliable)
+      const audioUrl = getAudioUrl(surahNumber, verseNumber, reciter);
+      await playAudioFromUrl(newAudio, audioUrl);
+      setIsPlaying(true);
+      setCurrentVerse(verseNumber);
+      onVerseChange?.(verseNumber);
     } catch (error) {
       console.error('Error loading audio:', error);
       toast.error('Impossible de charger l\'audio');
     } finally {
       setIsLoading(false);
     }
-  }, [surahNumber, reciter, getWarshAudioUrl, onVerseChange, playbackSpeed, setupAudioListeners, playAudioFromUrl]);
+  }, [surahNumber, reciter, getAudioUrl, onVerseChange, playbackSpeed, setupAudioListeners, playAudioFromUrl]);
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
