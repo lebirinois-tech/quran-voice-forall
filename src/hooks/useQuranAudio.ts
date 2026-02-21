@@ -90,15 +90,9 @@ export const useQuranAudio = ({
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayNextRef = useRef(false);
-  const isResettingRef = useRef(false);
 
-  // Create audio element once
-  useEffect(() => {
-    audioRef.current = new Audio();
-    audioRef.current.preload = 'auto';
-    
-    const audio = audioRef.current;
-    
+  // Setup audio event handlers
+  const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
     audio.addEventListener('timeupdate', () => {
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
@@ -115,19 +109,26 @@ export const useQuranAudio = ({
     });
     
     audio.addEventListener('error', () => {
-      // Ignore errors when audio has no valid src (during reset or initial state)
       if (!audio.src || audio.src === '' || audio.src === window.location.href) return;
       console.error('Audio error for src:', audio.src);
       setIsLoading(false);
       setIsPlaying(false);
       toast.error('Erreur de chargement audio');
     });
+  }, []);
+
+  // Create initial audio element
+  useEffect(() => {
+    const audio = new Audio();
+    audio.preload = 'auto';
+    setupAudioListeners(audio);
+    audioRef.current = audio;
     
     return () => {
       audio.pause();
       audio.src = '';
     };
-  }, []);
+  }, [setupAudioListeners]);
 
   // Handle auto-play next verse with repeat logic
   useEffect(() => {
@@ -217,12 +218,15 @@ export const useQuranAudio = ({
     try {
       const reciterInfo = RECITERS[reciter] ?? RECITERS['alafasy'];
       
-      // Check if this is a Warsh reciter (use everyayah.com)
-      // Reset audio element to clear any previous error state
-      isResettingRef.current = true;
-      audioRef.current.removeAttribute('src');
-      audioRef.current.load();
-      isResettingRef.current = false;
+      // Create a fresh audio element to avoid corrupted state
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+      const newAudio = new Audio();
+      newAudio.preload = 'auto';
+      setupAudioListeners(newAudio);
+      audioRef.current = newAudio;
 
       if (reciterInfo.qiraat === 'warsh') {
         const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
