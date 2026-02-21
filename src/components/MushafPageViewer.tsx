@@ -161,12 +161,9 @@ export const MushafPageViewer = ({
     }
   }, [surahNumber, surahStartPage, surahEndPage, initialPage]);
 
-  useEffect(() => {
-    if (!isManualNavigation && currentVerse > 0 && surah) {
-      const versePage = getVersePage(surahNumber, currentVerse, surah.versesCount);
-      setCurrentPage(versePage);
-    }
-  }, [currentVerse, surahNumber, surah, isManualNavigation]);
+  // Only removed: verse-to-page sync is now fully manual.
+  // The MushafPageViewer no longer auto-syncs to verse changes from audio,
+  // which was causing the page to jump back to page 1 when audio started.
 
   useEffect(() => {
     setIsLoading(true);
