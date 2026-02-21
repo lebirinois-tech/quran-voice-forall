@@ -12,7 +12,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage } from '@/data/surahs';
+import { surahs, Surah, juzMapping, getVersePage } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -167,17 +167,24 @@ const SurahReader = () => {
 
   const isMushafMode = appSettings.textDisplayStyle.startsWith('mushaf-');
 
+  // Compute verse range for the current Mushaf page using real API page data
+  const currentPageVerseRange = useMemo(() => {
+    if (!isMushafMode || !currentMushafPage || verses.length === 0) return null;
+    const pageVerses = verses.filter(v => v.page === currentMushafPage);
+    if (pageVerses.length === 0) return null;
+    return { first: pageVerses[0].number, last: pageVerses[pageVerses.length - 1].number };
+  }, [isMushafMode, currentMushafPage, verses]);
+
   const handlePlayRequest = useCallback(() => {
-    // In Mushaf mode, start audio from the first verse of the current page
-    if (isMushafMode && currentMushafPage) {
-      const totalV = verses.length || surah?.versesCount || 1;
-      const firstVerse = getFirstVerseOfPage(num, currentMushafPage, totalV);
-      quranAudio.playVerse(firstVerse);
+    if (isMushafMode && currentPageVerseRange) {
+      // Play from first verse of current page, stop at last verse of page
+      quranAudio.playVerse(currentPageVerseRange.first);
+      quranAudio.setRepeatMode('range', 1, currentPageVerseRange.first, currentPageVerseRange.last);
     } else {
       quranAudio.play();
     }
     toast.success('Lecture démarrée');
-  }, [quranAudio, isMushafMode, currentMushafPage, verses.length, surah, num]);
+  }, [quranAudio, isMushafMode, currentPageVerseRange]);
 
   const voiceCommands = useVoiceCommands({
     onPlay: handlePlayRequest,
