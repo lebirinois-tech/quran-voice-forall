@@ -215,6 +215,10 @@ export const useQuranAudio = ({
       const reciterInfo = RECITERS[reciter] ?? RECITERS['alafasy'];
       
       // Check if this is a Warsh reciter (use everyayah.com)
+      // Reset audio element to clear any previous error state
+      audioRef.current.removeAttribute('src');
+      audioRef.current.load();
+
       if (reciterInfo.qiraat === 'warsh') {
         const warshUrl = getWarshAudioUrl(surahNumber, verseNumber, reciter);
         if (warshUrl) {
