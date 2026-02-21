@@ -12,7 +12,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { surahs, Surah, juzMapping } from '@/data/surahs';
+import { surahs, Surah, juzMapping, getVersePage } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -88,9 +88,11 @@ const SurahReader = () => {
     }
   }, [num]);
 
-  // Scroll to verse from URL param
+  // Scroll to verse from URL param (verse or page)
   useEffect(() => {
     const verseParam = searchParams.get('verse');
+    const pageParam = searchParams.get('page');
+    
     if (verseParam) {
       const verseNum = parseInt(verseParam);
       setTimeout(() => {
@@ -99,8 +101,23 @@ const SurahReader = () => {
           verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 500);
+    } else if (pageParam && !appSettings.textDisplayStyle.startsWith('mushaf-') && verses.length > 0) {
+      // In text modes, find the first verse on the target page and scroll to it
+      const targetPage = parseInt(pageParam);
+      const targetVerse = verses.find(v => {
+        const versePage = getVersePage(num, v.number, verses.length);
+        return versePage >= targetPage;
+      });
+      if (targetVerse) {
+        setTimeout(() => {
+          const verseElement = document.getElementById(`verse-${targetVerse.number}`);
+          if (verseElement) {
+            verseElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 500);
+      }
     }
-  }, [searchParams, verses]);
+  }, [searchParams, verses, appSettings.textDisplayStyle, num]);
 
   // Auto-save reading progress when verse changes
   useEffect(() => {
@@ -136,10 +153,6 @@ const SurahReader = () => {
 
   const handleNavigateToPage = (pageNum: number) => {
     const targetSurah = getSurahForPage(pageNum);
-    // Auto-switch to mushaf mode when navigating by page
-    if (!appSettings.textDisplayStyle.startsWith('mushaf-')) {
-      appSettings.onTextDisplayStyleChange('mushaf-hafs');
-    }
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
