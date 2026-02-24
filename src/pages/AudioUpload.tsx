@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { Upload, FileAudio, Loader2, ArrowLeft, X, Lock, KeyRound, FolderOpen, Users } from 'lucide-react';
+import { Upload, FileAudio, Loader2, ArrowLeft, X, Lock, KeyRound, FolderOpen, Users, ClipboardPaste } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 
@@ -17,6 +17,10 @@ const CATEGORIES = [
   { id: 'doua', label: '🤲 Doua / Invocation' },
   { id: 'autre', label: '📁 Autre' },
 ];
+
+type DirectoryPickerWindow = Window & {
+  showDirectoryPicker?: () => Promise<any>;
+};
 
 const AudioUpload = () => {
   const navigate = useNavigate();
@@ -34,7 +38,7 @@ const AudioUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploadedCount, setUploadedCount] = useState(0);
-  const [existingCollections, setExistingCollections] = useState<string[]>([]);
+  const [directoryPickerLoading, setDirectoryPickerLoading] = useState(false);
 
   const [accessCode, setAccessCode] = useState('');
   const [isVerified, setIsVerified] = useState(false);
@@ -73,11 +77,6 @@ const AudioUpload = () => {
       return unique as string[];
     },
     enabled: isVerified,
-  });
-
-  // Sync existing collections
-  useState(() => {
-    if (collectionsData) setExistingCollections(collectionsData);
   });
 
   if (!isAuthenticated) {
@@ -155,12 +154,11 @@ const AudioUpload = () => {
     return ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'wma', 'flac', 'opus', 'webm'].includes(ext);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputFiles = e.target.files;
-    if (!inputFiles || inputFiles.length === 0) return;
+  const processSelectedFiles = (pickedFiles: File[] | FileList, forcedFolderName?: string) => {
+    const inputFiles = Array.isArray(pickedFiles) ? pickedFiles : Array.from(pickedFiles);
+    if (inputFiles.length === 0) return;
 
-    const audioFiles = Array.from(inputFiles).filter(isAudioFile);
-
+    const audioFiles = inputFiles.filter(isAudioFile);
     if (audioFiles.length === 0) {
       toast.error('Aucun fichier audio trouvé. Formats supportés : MP3, WAV, M4A, AAC, OGG, FLAC');
       return;
@@ -179,20 +177,112 @@ const AudioUpload = () => {
       setTitle(validFiles[0].name.replace(/\.[^.]+$/, ''));
     }
 
-    // Auto-detect folder name as collection
-    const firstFile = inputFiles[0];
-    const relativePath = (firstFile as any).webkitRelativePath || '';
-    if (relativePath) {
-      const folderName = relativePath.split('/')[0];
-      if (folderName) {
-        setDetectedFolder(folderName);
-        if (!collection) {
-          setCollection(folderName);
-        }
-        toast.success(`${validFiles.length} fichiers audio du dossier "${folderName}"`);
+    let folderName = (forcedFolderName || '').trim();
+    if (!folderName) {
+      const relativePath = (inputFiles[0] as any).webkitRelativePath || '';
+      if (relativePath) {
+        folderName = relativePath.split('/')[0] || '';
       }
-    } else if (validFiles.length > 1) {
+    }
+
+    if (folderName) {
+      setDetectedFolder(folderName);
+      if (!collection) {
+        setCollection(folderName);
+      }
+      toast.success(`${validFiles.length} fichiers audio du dossier "${folderName}"`);
+      return;
+    }
+
+    if (validFiles.length > 1) {
       toast.success(`${validFiles.length} fichiers audio sélectionnés`);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputFiles = e.target.files;
+    if (!inputFiles || inputFiles.length === 0) return;
+    processSelectedFiles(inputFiles);
+  };
+
+  const collectAudioFilesFromDirectory = async (directoryHandle: any): Promise<File[]> => {
+    const collected: File[] = [];
+    for await (const entry of directoryHandle.values()) {
+      if (entry.kind === 'file') {
+        const file = await entry.getFile();
+        if (isAudioFile(file)) {
+          collected.push(file);
+        }
+        continue;
+      }
+
+      if (entry.kind === 'directory') {
+        const nestedFiles = await collectAudioFilesFromDirectory(entry);
+        collected.push(...nestedFiles);
+      }
+    }
+    return collected;
+  };
+
+  const handleDirectoryImport = async () => {
+    const showDirectoryPicker = (window as DirectoryPickerWindow).showDirectoryPicker;
+
+    if (typeof showDirectoryPicker === 'function') {
+      setDirectoryPickerLoading(true);
+      try {
+        const directoryHandle = await showDirectoryPicker();
+        const directoryAudioFiles = await collectAudioFilesFromDirectory(directoryHandle);
+
+        if (directoryAudioFiles.length === 0) {
+          toast.error('Aucun audio trouvé dans ce dossier');
+          return;
+        }
+
+        processSelectedFiles(directoryAudioFiles, directoryHandle.name);
+      } catch (error: any) {
+        if (error?.name !== 'AbortError') {
+          toast.error('Impossible de lire ce dossier. Essayez avec le bouton fichier.');
+        }
+      } finally {
+        setDirectoryPickerLoading(false);
+      }
+      return;
+    }
+
+    folderRef.current?.click();
+  };
+
+  const handlePasteFromClipboard = async () => {
+    if (!navigator.clipboard || typeof navigator.clipboard.read !== 'function') {
+      toast.error('Le collage d’audio n’est pas supporté sur ce navigateur');
+      return;
+    }
+
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      const clipboardFiles: File[] = [];
+
+      for (const item of clipboardItems) {
+        for (const type of item.types) {
+          if (!type.startsWith('audio/')) continue;
+
+          const blob = await item.getType(type);
+          const extension = type.split('/')[1] || 'mp3';
+          clipboardFiles.push(
+            new File([blob], `audio-copie-${Date.now()}-${clipboardFiles.length + 1}.${extension}`, { type })
+          );
+        }
+      }
+
+      if (clipboardFiles.length === 0) {
+        toast.error('Aucun audio trouvé dans le presse-papiers');
+        return;
+      }
+
+      processSelectedFiles(clipboardFiles);
+      toast.success(`${clipboardFiles.length} fichier(s) collé(s)`);
+    } catch {
+      toast.error('Impossible de coller. Autorisez le presse-papiers puis réessayez.');
     }
   };
 
@@ -316,15 +406,29 @@ const AudioUpload = () => {
                   className="w-full border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-2 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
                   <Upload className="h-7 w-7" />
-                  <span className="text-sm font-medium">Sélectionner un fichier audio</span>
+                  <span className="text-sm font-medium">Importer un fichier audio</span>
                   <span className="text-xs">MP3, WAV, M4A, AAC, OGG, FLAC — max 50 Mo</span>
                 </button>
+
                 <button
-                  onClick={() => folderRef.current?.click()}
+                  onClick={handleDirectoryImport}
+                  disabled={directoryPickerLoading}
+                  className="w-full border-2 border-dashed border-border rounded-xl p-4 flex items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-all disabled:opacity-70"
+                >
+                  {directoryPickerLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <FolderOpen className="h-5 w-5" />
+                  )}
+                  <span className="text-sm">Importer un dossier</span>
+                </button>
+
+                <button
+                  onClick={handlePasteFromClipboard}
                   className="w-full border-2 border-dashed border-border rounded-xl p-4 flex items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
-                  <FolderOpen className="h-5 w-5" />
-                  <span className="text-sm">Parcourir un dossier</span>
+                  <ClipboardPaste className="h-5 w-5" />
+                  <span className="text-sm">Coller un audio copié</span>
                 </button>
               </div>
             )}
