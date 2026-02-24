@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music, Upload } from 'lucide-react';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -339,6 +339,13 @@ const Index = () => {
               <Button variant="outline" className="gap-2">
                 <Music className="h-4 w-4" />
                 Bibliothèque Audio
+              </Button>
+            </Link>
+            {/* Add Content Button (protected by access code on the page) */}
+            <Link to="/audio-upload">
+              <Button variant="outline" className="gap-2">
+                <Upload className="h-4 w-4" />
+                Ajouter du contenu
               </Button>
             </Link>
             {/* Install Button */}
