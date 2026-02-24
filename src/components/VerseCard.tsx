@@ -8,6 +8,7 @@ import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { TafsirPanel } from './TafsirPanel';
+import { VerseRecorder } from './VerseRecorder';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
@@ -305,6 +306,13 @@ export const VerseCard = ({
       <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
         {verse.translation}
       </p>
+
+      {/* Verse Recorder */}
+      <VerseRecorder
+        surahNumber={surahNumber}
+        verseNumber={verse.number}
+        verseText={verse.text}
+      />
 
       {/* Tafsir Panel */}
       <TafsirPanel
