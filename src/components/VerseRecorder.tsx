@@ -36,8 +36,17 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [echoEnabled, setEchoEnabled] = useState(false);
+  const [echoPreset, setEchoPreset] = useState<string>('custom');
   const [echoIntensity, setEchoIntensity] = useState(50);
   const [saveFormat, setSaveFormat] = useState<'wav' | 'mp3'>('mp3');
+
+  const ECHO_PRESETS: Record<string, { label: string; delay: number; feedback: number; wet: number }> = {
+    karaoke: { label: '🎤 Karaoké', delay: 0.25, feedback: 0.5, wet: 0.7 },
+    mosque: { label: '🕌 Mosquée', delay: 0.55, feedback: 0.65, wet: 0.8 },
+    hall: { label: '🏛️ Salle', delay: 0.35, feedback: 0.4, wet: 0.5 },
+    light: { label: '💨 Léger', delay: 0.15, feedback: 0.25, wet: 0.3 },
+    custom: { label: '🎚️ Manuel', delay: 0, feedback: 0, wet: 0 },
+  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -111,15 +120,21 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       sourceNodeRef.current = source;
 
       if (echoEnabled) {
+        const preset = ECHO_PRESETS[echoPreset];
+        const isCustom = echoPreset === 'custom';
         const intensity = echoIntensity / 100;
+        const delayVal = isCustom ? 0.2 + intensity * 0.4 : preset.delay;
+        const feedbackVal = isCustom ? 0.3 + intensity * 0.45 : preset.feedback;
+        const wetVal = isCustom ? 0.3 + intensity * 0.6 : preset.wet;
+
         const delay = ctx.createDelay(1.0);
-        delay.delayTime.value = 0.2 + intensity * 0.4; // 0.2s - 0.6s
+        delay.delayTime.value = delayVal;
 
         const feedback = ctx.createGain();
-        feedback.gain.value = 0.3 + intensity * 0.45; // 0.3 - 0.75
+        feedback.gain.value = feedbackVal;
 
         const wetGain = ctx.createGain();
-        wetGain.gain.value = 0.3 + intensity * 0.6; // 0.3 - 0.9
+        wetGain.gain.value = wetVal;
 
         // Source -> destination (dry)
         source.connect(ctx.destination);
@@ -147,7 +162,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       console.error('Playback error:', err);
       toast.error("Erreur de lecture");
     }
-  }, [activeBlob, echoEnabled, echoIntensity, stopPlayback]);
+  }, [activeBlob, echoEnabled, echoIntensity, echoPreset, stopPlayback]);
 
   // Helper: render blob with echo effect using OfflineAudioContext
   const applyEchoToBlob = useCallback(async (blob: Blob): Promise<Blob> => {
@@ -157,9 +172,13 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
     await tempCtx.close();
 
     const sr = audioBuffer.sampleRate;
+    const preset = ECHO_PRESETS[echoPreset];
+    const isCustom = echoPreset === 'custom';
     const intensity = echoIntensity / 100;
-    const delayTime = 0.2 + intensity * 0.4;
-    const duration = audioBuffer.duration + delayTime * 4; // extra time for echo tail
+    const delayTime = isCustom ? 0.2 + intensity * 0.4 : preset.delay;
+    const feedbackVal = isCustom ? 0.3 + intensity * 0.45 : preset.feedback;
+    const wetVal = isCustom ? 0.3 + intensity * 0.6 : preset.wet;
+    const duration = audioBuffer.duration + delayTime * 4;
 
     const offline = new OfflineAudioContext(audioBuffer.numberOfChannels, Math.ceil(duration * sr), sr);
 
@@ -169,9 +188,9 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
     const delay = offline.createDelay(1.0);
     delay.delayTime.value = delayTime;
     const feedback = offline.createGain();
-    feedback.gain.value = 0.3 + intensity * 0.45;
+    feedback.gain.value = feedbackVal;
     const wetGain = offline.createGain();
-    wetGain.gain.value = 0.3 + intensity * 0.6;
+    wetGain.gain.value = wetVal;
 
     source.connect(offline.destination);
     source.connect(delay);
@@ -248,7 +267,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
 
       return new Blob([wavBuffer], { type: 'audio/wav' });
     }
-  }, [echoIntensity, saveFormat]);
+  }, [echoIntensity, echoPreset, saveFormat]);
 
   const handleSave = useCallback(async () => {
     if (!recordedBlob) return;
@@ -349,7 +368,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                   {isPlayingRecording ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
 
-                {/* Echo toggle + slider */}
+                {/* Echo toggle + presets */}
                 <div className="flex items-center gap-1.5">
                   <Switch id={`echo-${surahNumber}-${verseNumber}`} checked={echoEnabled} onCheckedChange={setEchoEnabled} className="scale-75" />
                   <Label htmlFor={`echo-${surahNumber}-${verseNumber}`} className="text-[11px] text-muted-foreground cursor-pointer">
@@ -358,16 +377,31 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                 </div>
 
                 {echoEnabled && (
-                  <div className="flex items-center gap-2 min-w-[100px]">
-                    <Slider
-                      value={[echoIntensity]}
-                      onValueChange={([v]) => setEchoIntensity(v)}
-                      min={10}
-                      max={100}
-                      step={5}
-                      className="w-20"
-                    />
-                    <span className="text-[10px] text-muted-foreground w-6">{echoIntensity}%</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select value={echoPreset} onValueChange={setEchoPreset}>
+                      <SelectTrigger className="h-7 w-[120px] text-[11px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ECHO_PRESETS).map(([key, p]) => (
+                          <SelectItem key={key} value={key} className="text-xs">{p.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {echoPreset === 'custom' && (
+                      <div className="flex items-center gap-2 min-w-[100px]">
+                        <Slider
+                          value={[echoIntensity]}
+                          onValueChange={([v]) => setEchoIntensity(v)}
+                          min={10}
+                          max={100}
+                          step={5}
+                          className="w-20"
+                        />
+                        <span className="text-[10px] text-muted-foreground w-6">{echoIntensity}%</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
