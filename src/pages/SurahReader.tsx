@@ -466,6 +466,7 @@ const SurahReader = () => {
                               verseNumber={firstVerseOfPage}
                               verseText={pageText}
                               label={`Mémorisation — Page ${versePage}`}
+                              reciter={appSettings.reciter}
                               onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
                             />
                           </div>
@@ -487,6 +488,7 @@ const SurahReader = () => {
                                 verseNumber={firstVerseOfPage}
                                 verseText={pageText}
                                 label={`Mémorisation — Page ${versePage}`}
+                                reciter={appSettings.reciter}
                                 onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
                               />
                             </div>

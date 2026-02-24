@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit } from 'lucide-react';
+import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { cn } from '@/lib/utils';
 import { useRecordingStorage } from '@/hooks/useRecordingStorage';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 
 interface VerseRecorderProps {
   surahNumber: number;
@@ -13,6 +14,8 @@ interface VerseRecorderProps {
   verseText: string;
   /** Label shown next to controls */
   label?: string;
+  /** Current reciter for echo mode */
+  reciter?: ReciterId;
   /** Called when recording state changes */
   onRecordingChange?: (isRecording: boolean) => void;
 }
@@ -23,7 +26,7 @@ interface ComparisonResult {
   details?: string;
 }
 
-export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange }: VerseRecorderProps) => {
+export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reciter = 'alafasy', onRecordingChange }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
@@ -31,6 +34,8 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [echoMode, setEchoMode] = useState(false);
+  const echoAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -44,11 +49,12 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      if (echoAudioRef.current) { echoAudioRef.current.pause(); echoAudioRef.current = null; }
       if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
     };
   }, []);
 
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (withEcho = false) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream, {
@@ -61,6 +67,8 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
         setRecordedBlob(blob);
         stream.getTracks().forEach(t => t.stop());
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+        // Stop echo audio if playing
+        if (echoAudioRef.current) { echoAudioRef.current.pause(); echoAudioRef.current = null; }
       };
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
@@ -70,13 +78,31 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       setRecordingDuration(0);
       setComparisonResult(null);
       timerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000);
+
+      // Play echo audio if requested
+      if (withEcho) {
+        try {
+          const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
+          const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/${edition}`);
+          const data = await res.json();
+          if (data.code === 200 && data.data?.audio) {
+            const echoAudio = new Audio(data.data.audio);
+            echoAudio.volume = 0.5;
+            echoAudioRef.current = echoAudio;
+            echoAudio.play().catch(() => {});
+          }
+        } catch {
+          // Echo failed silently, recording continues
+        }
+      }
     } catch {
       toast.error("Impossible d'accéder au microphone");
     }
-  }, []);
+  }, [reciter, surahNumber, verseNumber, onRecordingChange]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
+    if (echoAudioRef.current) { echoAudioRef.current.pause(); echoAudioRef.current = null; }
     setIsRecording(false);
     onRecordingChange?.(false);
   }, [onRecordingChange]);
@@ -159,7 +185,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
         </Button>
 
         {!isExpanded && !isRecording && (
-          <Button variant="outline" size="sm" onClick={() => { setIsExpanded(true); startRecording(); }} className="gap-1 text-xs ml-auto">
+          <Button variant="outline" size="sm" onClick={() => { setIsExpanded(true); startRecording(false); }} className="gap-1 text-xs ml-auto">
             <Mic className="h-3.5 w-3.5 text-destructive" />
             Enregistrer
           </Button>
@@ -178,10 +204,16 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
         <div className="space-y-2 pt-1">
           <div className="flex items-center gap-2 flex-wrap">
             {!activeBlob && (
-              <Button variant="outline" size="sm" onClick={startRecording} className="gap-1.5 text-xs">
-                <Mic className="h-3.5 w-3.5 text-destructive" />
-                Enregistrer ma récitation
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => startRecording(false)} className="gap-1.5 text-xs">
+                  <Mic className="h-3.5 w-3.5 text-destructive" />
+                  Enregistrer
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => startRecording(true)} className="gap-1.5 text-xs">
+                  <Volume2 className="h-3.5 w-3.5 text-primary" />
+                  Avec Écho
+                </Button>
+              </>
             )}
 
             {activeBlob && (
@@ -206,10 +238,16 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
 
-                <Button variant="outline" size="sm" onClick={startRecording} className="gap-1 text-xs ml-auto">
-                  <Mic className="h-3.5 w-3.5 text-destructive" />
-                  Réenregistrer
-                </Button>
+                <div className="flex gap-1 ml-auto">
+                  <Button variant="outline" size="sm" onClick={() => startRecording(false)} className="gap-1 text-xs">
+                    <Mic className="h-3.5 w-3.5 text-destructive" />
+                    Réenregistrer
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => startRecording(true)} className="gap-1 text-xs">
+                    <Volume2 className="h-3.5 w-3.5 text-primary" />
+                    Écho
+                  </Button>
+                </div>
               </>
             )}
           </div>
