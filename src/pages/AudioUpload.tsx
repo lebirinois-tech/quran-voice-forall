@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { Upload, FileAudio, Loader2, ArrowLeft, X, Lock, KeyRound } from 'lucide-react';
+import { Upload, FileAudio, Loader2, ArrowLeft, X, Lock, KeyRound, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORIES = [
@@ -22,6 +22,7 @@ const AudioUpload = () => {
   const { user, isAuthenticated } = useAuth();
   const appSettings = useAppSettings();
   const fileRef = useRef<HTMLInputElement>(null);
+  const folderRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -124,20 +125,43 @@ const AudioUpload = () => {
     );
   }
 
+  const isAudioFile = (f: File) => {
+    if (f.type.startsWith('audio/')) return true;
+    const ext = f.name.split('.').pop()?.toLowerCase() || '';
+    return ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'wma', 'flac', 'opus', 'webm'].includes(ext);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (!f.type.startsWith('audio/')) {
-      toast.error('Veuillez sélectionner un fichier audio');
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // If folder was selected, find first audio file
+    let selectedFile: File | null = null;
+    for (let i = 0; i < files.length; i++) {
+      if (isAudioFile(files[i])) {
+        selectedFile = files[i];
+        break;
+      }
+    }
+
+    if (!selectedFile) {
+      toast.error('Aucun fichier audio trouvé. Formats supportés : MP3, WAV, M4A, AAC, OGG, FLAC');
       return;
     }
-    if (f.size > 50 * 1024 * 1024) {
+    if (selectedFile.size > 50 * 1024 * 1024) {
       toast.error('Le fichier ne doit pas dépasser 50 Mo');
       return;
     }
-    setFile(f);
+    setFile(selectedFile);
     if (!title) {
-      setTitle(f.name.replace(/\.[^.]+$/, ''));
+      setTitle(selectedFile.name.replace(/\.[^.]+$/, ''));
+    }
+
+    if (files.length > 1) {
+      const audioCount = Array.from(files).filter(isAudioFile).length;
+      if (audioCount > 1) {
+        toast.info(`${audioCount} fichiers audio trouvés dans le dossier. Le premier a été sélectionné.`);
+      }
     }
   };
 
@@ -243,26 +267,44 @@ const AudioUpload = () => {
                     {(file.size / (1024 * 1024)).toFixed(1)} Mo
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ''; }}>
+                <Button variant="ghost" size="icon" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ''; if (folderRef.current) folderRef.current.value = ''; }}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             ) : (
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="w-full border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-3 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-all"
-              >
-                <Upload className="h-8 w-8" />
-                <span className="text-sm">Cliquez pour sélectionner un fichier audio</span>
-                <span className="text-xs">MP3, WAV, M4A — max 50 Mo</span>
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-2 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <Upload className="h-7 w-7" />
+                  <span className="text-sm font-medium">Sélectionner un fichier audio</span>
+                  <span className="text-xs">MP3, WAV, M4A, AAC, OGG, FLAC — max 50 Mo</span>
+                </button>
+                <button
+                  onClick={() => folderRef.current?.click()}
+                  className="w-full border-2 border-dashed border-border rounded-xl p-4 flex items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <FolderOpen className="h-5 w-5" />
+                  <span className="text-sm">Parcourir un dossier</span>
+                </button>
+              </div>
             )}
             <input
               ref={fileRef}
               type="file"
-              accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/m4a,audio/aac,audio/ogg,.mp3,.wav,.m4a,.aac,.ogg,.wma,.flac"
+              accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.wma,.flac,.opus"
               className="hidden"
               onChange={handleFileChange}
+            />
+            {/* @ts-ignore - webkitdirectory is not in React types */}
+            <input
+              ref={folderRef}
+              type="file"
+              accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.wma,.flac,.opus"
+              className="hidden"
+              onChange={handleFileChange}
+              {...{ webkitdirectory: '', directory: '' } as any}
             />
           </div>
 
