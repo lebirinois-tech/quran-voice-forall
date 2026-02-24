@@ -109,13 +109,13 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       if (echoEnabled) {
         // Echo effect: delay + feedback loop
         const delay = ctx.createDelay(1.0);
-        delay.delayTime.value = 0.3;
+        delay.delayTime.value = 0.35;
 
         const feedback = ctx.createGain();
-        feedback.gain.value = 0.4;
+        feedback.gain.value = 0.55;
 
         const wetGain = ctx.createGain();
-        wetGain.gain.value = 0.5;
+        wetGain.gain.value = 0.65;
 
         // Source -> destination (dry)
         source.connect(ctx.destination);
