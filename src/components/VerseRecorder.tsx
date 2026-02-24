@@ -13,6 +13,8 @@ interface VerseRecorderProps {
   verseText: string;
   /** Label shown next to controls */
   label?: string;
+  /** Called when recording state changes */
+  onRecordingChange?: (isRecording: boolean) => void;
 }
 
 interface ComparisonResult {
@@ -21,7 +23,7 @@ interface ComparisonResult {
   details?: string;
 }
 
-export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label }: VerseRecorderProps) => {
+export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
@@ -64,6 +66,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label }: Ve
       mediaRecorder.start();
       setIsRecording(true);
       setIsExpanded(true);
+      onRecordingChange?.(true);
       setRecordingDuration(0);
       setComparisonResult(null);
       timerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000);
@@ -75,7 +78,8 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label }: Ve
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
     setIsRecording(false);
-  }, []);
+    onRecordingChange?.(false);
+  }, [onRecordingChange]);
 
   const playRecording = useCallback(() => {
     if (!activeBlob) return;

@@ -61,6 +61,8 @@ interface VerseCardProps {
   onPlay?: () => void;
   onBookmark?: () => void;
   isBookmarked?: boolean;
+  /** Hide Arabic text and translation (for memorization mode) */
+  hideText?: boolean;
 }
 
 export const VerseCard = ({ 
@@ -78,7 +80,8 @@ export const VerseCard = ({
   pageNumber: propPageNumber,
   onPlay,
   onBookmark,
-  isBookmarked
+  isBookmarked,
+  hideText = false,
 }: VerseCardProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
@@ -279,7 +282,11 @@ export const VerseCard = ({
       </div>
 
       {/* Arabic Text */}
-      {textDisplayStyle === 'tajweed' && effectiveTajweedHtml ? (
+      {hideText ? (
+        <div className="mb-4 py-8 text-center rounded-lg bg-muted/30 border border-dashed border-border">
+          <p className="text-muted-foreground text-sm">🎤 Texte masqué — Mode mémorisation</p>
+        </div>
+      ) : textDisplayStyle === 'tajweed' && effectiveTajweedHtml ? (
         <p 
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
@@ -302,9 +309,11 @@ export const VerseCard = ({
       )}
 
       {/* Translation */}
-      <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
-        {verse.translation}
-      </p>
+      {hideText ? null : (
+        <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
+          {verse.translation}
+        </p>
+      )}
 
       {/* Tafsir Panel */}
       <TafsirPanel
