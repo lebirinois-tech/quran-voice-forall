@@ -1,12 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit, AudioLines } from 'lucide-react';
+import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 import { cn } from '@/lib/utils';
 import { useRecordingStorage } from '@/hooks/useRecordingStorage';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
+import { ReciterId } from '@/hooks/useQuranAudio';
 
 interface VerseRecorderProps {
   surahNumber: number;
@@ -23,60 +25,7 @@ interface ComparisonResult {
   details?: string;
 }
 
-/** Mix user recording with sheikh audio into a single WAV blob */
-async function mixWithEcho(userBlob: Blob, sheikhUrl: string, echoVolume = 0.4): Promise<Blob> {
-  const ctx = new AudioContext();
-  const userBuffer = await ctx.decodeAudioData(await userBlob.arrayBuffer());
-
-  const sheikhRes = await fetch(sheikhUrl);
-  const sheikhBuffer = await ctx.decodeAudioData(await sheikhRes.arrayBuffer());
-
-  const duration = Math.max(userBuffer.duration, sheikhBuffer.duration);
-  const sr = userBuffer.sampleRate;
-  const offline = new OfflineAudioContext(1, Math.ceil(duration * sr), sr);
-
-  const uSrc = offline.createBufferSource();
-  uSrc.buffer = userBuffer;
-  uSrc.connect(offline.destination);
-  uSrc.start(0);
-
-  const sSrc = offline.createBufferSource();
-  sSrc.buffer = sheikhBuffer;
-  const gain = offline.createGain();
-  gain.gain.value = echoVolume;
-  sSrc.connect(gain);
-  gain.connect(offline.destination);
-  sSrc.start(0);
-
-  const rendered = await offline.startRendering();
-  ctx.close();
-
-  // Encode WAV
-  const numCh = rendered.numberOfChannels;
-  const bps = 16;
-  const bytesPer = bps / 8;
-  const blockAlign = numCh * bytesPer;
-  const dataLen = rendered.length * blockAlign;
-  const buf = new ArrayBuffer(44 + dataLen);
-  const v = new DataView(buf);
-  const ws = (o: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-  ws(0, 'RIFF'); v.setUint32(4, 36 + dataLen, true); ws(8, 'WAVE');
-  ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
-  v.setUint16(22, numCh, true); v.setUint32(24, sr, true);
-  v.setUint32(28, sr * blockAlign, true); v.setUint16(32, blockAlign, true);
-  v.setUint16(34, bps, true); ws(36, 'data'); v.setUint32(40, dataLen, true);
-  let off = 44;
-  for (let i = 0; i < rendered.length; i++) {
-    for (let ch = 0; ch < numCh; ch++) {
-      const s = Math.max(-1, Math.min(1, rendered.getChannelData(ch)[i]));
-      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-      off += 2;
-    }
-  }
-  return new Blob([buf], { type: 'audio/wav' });
-}
-
-export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reciter = 'alafasy', onRecordingChange }: VerseRecorderProps) => {
+export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
@@ -84,12 +33,13 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isMixing, setIsMixing] = useState(false);
+  const [echoEnabled, setEchoEnabled] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
 
   const { savedRecording, saveRecording, deleteRecording } = useRecordingStorage(surahNumber, verseNumber);
   const activeBlob = recordedBlob || savedRecording;
@@ -97,7 +47,8 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(); } catch {} }
+      if (audioContextRef.current) { audioContextRef.current.close(); audioContextRef.current = null; }
       if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
     };
   }, []);
@@ -135,44 +86,64 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
     onRecordingChange?.(false);
   }, [onRecordingChange]);
 
-  const playRecording = useCallback(() => {
-    if (!activeBlob) return;
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    const url = URL.createObjectURL(activeBlob);
-    const audio = new Audio(url);
-    audioRef.current = audio;
-    audio.onended = () => { setIsPlayingRecording(false); URL.revokeObjectURL(url); };
-    audio.play();
-    setIsPlayingRecording(true);
-  }, [activeBlob]);
-
   const stopPlayback = useCallback(() => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(); } catch {} sourceNodeRef.current = null; }
+    if (audioContextRef.current) { audioContextRef.current.close(); audioContextRef.current = null; }
     setIsPlayingRecording(false);
   }, []);
 
-  /** Add sheikh echo to the current recording (post-recording) */
-  const handleAddEcho = useCallback(async () => {
+  const playRecording = useCallback(async () => {
     if (!activeBlob) return;
-    setIsMixing(true);
+    stopPlayback();
+
     try {
-      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
-      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/${edition}`);
-      const data = await res.json();
-      if (data.code !== 200 || !data.data?.audio) {
-        toast.error("Audio du sheikh indisponible");
-        return;
+      const ctx = new AudioContext();
+      audioContextRef.current = ctx;
+      const arrayBuffer = await activeBlob.arrayBuffer();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      sourceNodeRef.current = source;
+
+      if (echoEnabled) {
+        // Echo effect: delay + feedback loop
+        const delay = ctx.createDelay(1.0);
+        delay.delayTime.value = 0.3;
+
+        const feedback = ctx.createGain();
+        feedback.gain.value = 0.4;
+
+        const wetGain = ctx.createGain();
+        wetGain.gain.value = 0.5;
+
+        // Source -> destination (dry)
+        source.connect(ctx.destination);
+
+        // Source -> delay -> wetGain -> destination
+        source.connect(delay);
+        delay.connect(feedback);
+        feedback.connect(delay); // feedback loop
+        delay.connect(wetGain);
+        wetGain.connect(ctx.destination);
+      } else {
+        source.connect(ctx.destination);
       }
-      const mixed = await mixWithEcho(activeBlob, data.data.audio, 0.4);
-      setRecordedBlob(mixed);
-      toast.success("Voix du sheikh ajoutée à l'enregistrement");
+
+      source.onended = () => {
+        setIsPlayingRecording(false);
+        ctx.close();
+        audioContextRef.current = null;
+        sourceNodeRef.current = null;
+      };
+
+      source.start();
+      setIsPlayingRecording(true);
     } catch (err) {
-      console.error('Mix error:', err);
-      toast.error("Erreur lors du mixage");
-    } finally {
-      setIsMixing(false);
+      console.error('Playback error:', err);
+      toast.error("Erreur de lecture");
     }
-  }, [activeBlob, reciter, surahNumber, verseNumber]);
+  }, [activeBlob, echoEnabled, stopPlayback]);
 
   const handleSave = useCallback(async () => {
     if (!recordedBlob) return;
@@ -222,7 +193,6 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
 
   return (
     <div className="bg-card border border-border rounded-xl p-3 space-y-2">
-      {/* Header row */}
       <div className="flex items-center gap-2 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="gap-1.5 text-xs font-medium">
           <Mic className={cn("h-4 w-4", hasSaved ? "text-primary" : "text-muted-foreground")} />
@@ -245,7 +215,6 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
         )}
       </div>
 
-      {/* Expanded controls */}
       {isExpanded && !isRecording && (
         <div className="space-y-2 pt-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -262,11 +231,13 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
                   {isPlayingRecording ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
 
-                {/* Add Echo button */}
-                <Button variant="outline" size="sm" onClick={handleAddEcho} disabled={isMixing} className="gap-1.5 text-xs">
-                  {isMixing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <AudioLines className="h-3.5 w-3.5 text-primary" />}
-                  {isMixing ? 'Mixage…' : '+ Écho Sheikh'}
-                </Button>
+                {/* Echo toggle */}
+                <div className="flex items-center gap-1.5">
+                  <Switch id={`echo-${surahNumber}-${verseNumber}`} checked={echoEnabled} onCheckedChange={setEchoEnabled} className="scale-75" />
+                  <Label htmlFor={`echo-${surahNumber}-${verseNumber}`} className="text-[11px] text-muted-foreground cursor-pointer">
+                    Écho
+                  </Label>
+                </div>
 
                 {recordedBlob && (
                   <Button variant="ghost" size="sm" onClick={handleSave} className="gap-1 text-xs">
@@ -292,7 +263,6 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, reci
             )}
           </div>
 
-          {/* AI Comparison result */}
           {comparisonResult && (
             <div className="rounded-lg bg-muted/50 p-3 space-y-2 text-sm">
               <div className="flex items-center gap-2">
