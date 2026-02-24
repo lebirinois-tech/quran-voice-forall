@@ -10,22 +10,25 @@ import { supabase } from '@/integrations/supabase/client';
 interface VerseRecorderProps {
   surahNumber: number;
   verseNumber: number;
-  verseText: string; // Original Arabic text for comparison
+  verseText: string;
+  /** Label shown next to controls */
+  label?: string;
 }
 
 interface ComparisonResult {
-  score: number; // 0-100
+  score: number;
   feedback: string;
   details?: string;
 }
 
-export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseRecorderProps) => {
+export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -33,11 +36,8 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseReco
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { savedRecording, saveRecording, deleteRecording } = useRecordingStorage(surahNumber, verseNumber);
-
-  // Use saved recording if available and no new one recorded
   const activeBlob = recordedBlob || savedRecording;
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -49,9 +49,10 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseReco
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4' });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4',
+      });
       chunksRef.current = [];
-
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
@@ -59,13 +60,12 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseReco
         stream.getTracks().forEach(t => t.stop());
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
       };
-
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsRecording(true);
+      setIsExpanded(true);
       setRecordingDuration(0);
       setComparisonResult(null);
-
       timerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000);
     } catch {
       toast.error("Impossible d'accéder au microphone");
@@ -73,16 +73,13 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseReco
   }, []);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current?.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
+    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
     setIsRecording(false);
   }, []);
 
   const playRecording = useCallback(() => {
     if (!activeBlob) return;
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-
     const url = URL.createObjectURL(activeBlob);
     const audio = new Audio(url);
     audioRef.current = audio;
@@ -113,18 +110,15 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseReco
     if (!activeBlob) return;
     setIsComparing(true);
     try {
-      // Convert blob to base64
       const reader = new FileReader();
       const base64 = await new Promise<string>((resolve, reject) => {
         reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
         reader.onerror = reject;
         reader.readAsDataURL(activeBlob);
       });
-
       const { data, error } = await supabase.functions.invoke('compare-recitation', {
         body: { audioBase64: base64, mimeType: activeBlob.type, verseText, surahNumber, verseNumber },
       });
-
       if (error) throw error;
       setComparisonResult(data as ComparisonResult);
     } catch (err) {
@@ -138,71 +132,100 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText }: VerseReco
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500';
-    if (score >= 50) return 'text-yellow-500';
-    return 'text-red-500';
+    if (score >= 80) return 'text-green-600 dark:text-green-400';
+    if (score >= 50) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-destructive';
   };
 
+  const hasSaved = !!savedRecording && !recordedBlob;
+
   return (
-    <div className="mt-3 border-t border-border pt-3 space-y-3">
-      {/* Recording controls */}
+    <div className="bg-card border border-border rounded-xl p-3 space-y-2">
+      {/* Header row: toggle + quick record */}
       <div className="flex items-center gap-2 flex-wrap">
-        {!isRecording ? (
-          <Button variant="outline" size="sm" onClick={startRecording} className="gap-1.5">
-            <Mic className="h-4 w-4 text-red-500" />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="gap-1.5 text-xs font-medium"
+        >
+          <Mic className={cn("h-4 w-4", hasSaved ? "text-primary" : "text-muted-foreground")} />
+          {label || 'Mémorisation'}
+          {hasSaved && <span className="text-[10px] bg-primary/10 text-primary px-1.5 rounded-full">📁</span>}
+        </Button>
+
+        {!isExpanded && !isRecording && (
+          <Button variant="outline" size="sm" onClick={() => { setIsExpanded(true); startRecording(); }} className="gap-1 text-xs ml-auto">
+            <Mic className="h-3.5 w-3.5 text-destructive" />
             Enregistrer
           </Button>
-        ) : (
-          <Button variant="destructive" size="sm" onClick={stopRecording} className="gap-1.5 animate-pulse">
+        )}
+
+        {isRecording && (
+          <Button variant="destructive" size="sm" onClick={stopRecording} className="gap-1 text-xs ml-auto animate-pulse">
             <Square className="h-3 w-3" />
             Arrêter ({formatTime(recordingDuration)})
           </Button>
         )}
+      </div>
 
-        {activeBlob && !isRecording && (
-          <>
-            <Button variant="ghost" size="icon" onClick={isPlayingRecording ? stopPlayback : playRecording} className="h-8 w-8">
-              {isPlayingRecording ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-
-            {recordedBlob && (
-              <Button variant="ghost" size="sm" onClick={handleSave} className="gap-1 text-xs">
-                <Save className="h-3.5 w-3.5" />
-                Sauvegarder
+      {/* Expanded controls */}
+      {isExpanded && !isRecording && (
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            {!activeBlob && (
+              <Button variant="outline" size="sm" onClick={startRecording} className="gap-1.5 text-xs">
+                <Mic className="h-3.5 w-3.5 text-destructive" />
+                Enregistrer ma récitation
               </Button>
             )}
 
-            <Button variant="ghost" size="sm" onClick={handleCompare} disabled={isComparing} className="gap-1 text-xs">
-              {isComparing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <BrainCircuit className="h-3.5 w-3.5" />}
-              Comparer avec l'IA
-            </Button>
+            {activeBlob && (
+              <>
+                <Button variant="ghost" size="icon" onClick={isPlayingRecording ? stopPlayback : playRecording} className="h-8 w-8">
+                  {isPlayingRecording ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
 
-            <Button variant="ghost" size="icon" onClick={handleDelete} className="h-8 w-8 text-destructive hover:text-destructive">
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </>
-        )}
-      </div>
+                {recordedBlob && (
+                  <Button variant="ghost" size="sm" onClick={handleSave} className="gap-1 text-xs">
+                    <Save className="h-3.5 w-3.5" />
+                    Sauvegarder
+                  </Button>
+                )}
 
-      {/* Saved indicator */}
-      {savedRecording && !recordedBlob && (
-        <p className="text-xs text-muted-foreground">📁 Enregistrement sauvegardé disponible</p>
-      )}
+                <Button variant="ghost" size="sm" onClick={handleCompare} disabled={isComparing} className="gap-1 text-xs">
+                  {isComparing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <BrainCircuit className="h-3.5 w-3.5" />}
+                  Comparer IA
+                </Button>
 
-      {/* AI Comparison result */}
-      {comparisonResult && (
-        <div className="rounded-lg bg-muted/50 p-3 space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <BrainCircuit className="h-4 w-4 text-primary" />
-            <span className="font-medium">Résultat de la comparaison</span>
-            <span className={cn("font-bold text-lg ml-auto", getScoreColor(comparisonResult.score))}>
-              {comparisonResult.score}/100
-            </span>
+                <Button variant="ghost" size="icon" onClick={handleDelete} className="h-8 w-8 text-destructive hover:text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+
+                <Button variant="outline" size="sm" onClick={startRecording} className="gap-1 text-xs ml-auto">
+                  <Mic className="h-3.5 w-3.5 text-destructive" />
+                  Réenregistrer
+                </Button>
+              </>
+            )}
           </div>
-          <Progress value={comparisonResult.score} className="h-2" />
-          <p className="text-muted-foreground">{comparisonResult.feedback}</p>
-          {comparisonResult.details && (
-            <p className="text-xs text-muted-foreground/80">{comparisonResult.details}</p>
+
+          {/* AI Comparison result */}
+          {comparisonResult && (
+            <div className="rounded-lg bg-muted/50 p-3 space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <BrainCircuit className="h-4 w-4 text-primary" />
+                <span className="font-medium">Résultat</span>
+                <span className={cn("font-bold text-lg ml-auto", getScoreColor(comparisonResult.score))}>
+                  {comparisonResult.score}/100
+                </span>
+              </div>
+              <Progress value={comparisonResult.score} className="h-2" />
+              <p className="text-muted-foreground">{comparisonResult.feedback}</p>
+              {comparisonResult.details && (
+                <p className="text-xs text-muted-foreground/80">{comparisonResult.details}</p>
+              )}
+            </div>
           )}
         </div>
       )}
