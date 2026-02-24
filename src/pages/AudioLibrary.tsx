@@ -130,14 +130,12 @@ const AudioLibrary = () => {
               <p className="text-xs text-muted-foreground">المكتبة الصوتية</p>
             </div>
           </div>
-          {isAuthenticated && (
-            <Link to="/audio-upload">
-              <Button size="sm" className="gap-2">
-                <Upload className="h-4 w-4" />
-                Ajouter
-              </Button>
-            </Link>
-          )}
+          <Link to="/audio-upload">
+            <Button size="sm" className="gap-2">
+              <Upload className="h-4 w-4" />
+              Ajouter
+            </Button>
+          </Link>
         </div>
 
         {/* Category Tabs */}
