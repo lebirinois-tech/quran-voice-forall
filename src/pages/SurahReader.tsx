@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
+import { VerseRecorder } from '@/components/VerseRecorder';
 import { MushafPageViewer } from '@/components/MushafPageViewer';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
@@ -447,18 +448,48 @@ const SurahReader = () => {
                     const prevVerse = index > 0 ? verses[index - 1] : null;
                     const prevPage = prevVerse ? (prevVerse.page ?? getVersePage(num, prevVerse.number, verses.length)) : null;
                     const isNewPage = prevPage !== null && versePage !== prevPage;
+                    const isFirstVerse = index === 0;
+
+                    // Collect verse texts for this page for the recorder
+                    const pageVerses = verses.filter(v => (v.page ?? getVersePage(num, v.number, verses.length)) === versePage);
+                    const pageText = pageVerses.map(v => v.text).join(' ');
+                    const firstVerseOfPage = pageVerses[0]?.number ?? verse.number;
 
                     return (
                       <div key={verse.number}>
-                        {isNewPage && (
-                          <div className="flex items-center gap-3 my-6">
-                            <div className="flex-1 h-px bg-border" />
-                            <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                              صفحة {versePage} • Page {versePage}
-                            </span>
-                            <div className="flex-1 h-px bg-border" />
+                        {/* Recorder at start of first page */}
+                        {isFirstVerse && (
+                          <div className="mb-4">
+                            <VerseRecorder
+                              surahNumber={num}
+                              verseNumber={firstVerseOfPage}
+                              verseText={pageText}
+                              label={`Mémorisation — Page ${versePage}`}
+                            />
                           </div>
                         )}
+
+                        {/* Recorder at each new page */}
+                        {isNewPage && (
+                          <>
+                            <div className="flex items-center gap-3 my-6">
+                              <div className="flex-1 h-px bg-border" />
+                              <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                                صفحة {versePage} • Page {versePage}
+                              </span>
+                              <div className="flex-1 h-px bg-border" />
+                            </div>
+                            <div className="mb-4">
+                              <VerseRecorder
+                                surahNumber={num}
+                                verseNumber={firstVerseOfPage}
+                                verseText={pageText}
+                                label={`Mémorisation — Page ${versePage}`}
+                              />
+                            </div>
+                          </>
+                        )}
+
                         <VerseCard
                           id={`verse-${verse.number}`}
                           verse={verse}
