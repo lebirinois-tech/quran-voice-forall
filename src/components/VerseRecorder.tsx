@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit } from 'lucide-react';
+import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit, SaveAll } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import { Slider } from './ui/slider';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [echoEnabled, setEchoEnabled] = useState(false);
+  const [echoIntensity, setEchoIntensity] = useState(50); // 0-100
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -107,15 +109,15 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       sourceNodeRef.current = source;
 
       if (echoEnabled) {
-        // Echo effect: delay + feedback loop
+        const intensity = echoIntensity / 100;
         const delay = ctx.createDelay(1.0);
-        delay.delayTime.value = 0.35;
+        delay.delayTime.value = 0.2 + intensity * 0.4; // 0.2s - 0.6s
 
         const feedback = ctx.createGain();
-        feedback.gain.value = 0.55;
+        feedback.gain.value = 0.3 + intensity * 0.45; // 0.3 - 0.75
 
         const wetGain = ctx.createGain();
-        wetGain.gain.value = 0.65;
+        wetGain.gain.value = 0.3 + intensity * 0.6; // 0.3 - 0.9
 
         // Source -> destination (dry)
         source.connect(ctx.destination);
@@ -143,13 +145,93 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       console.error('Playback error:', err);
       toast.error("Erreur de lecture");
     }
-  }, [activeBlob, echoEnabled, stopPlayback]);
+  }, [activeBlob, echoEnabled, echoIntensity, stopPlayback]);
+
+  // Helper: render blob with echo effect using OfflineAudioContext
+  const applyEchoToBlob = useCallback(async (blob: Blob): Promise<Blob> => {
+    const arrayBuffer = await blob.arrayBuffer();
+    const tempCtx = new AudioContext();
+    const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
+    await tempCtx.close();
+
+    const sr = audioBuffer.sampleRate;
+    const intensity = echoIntensity / 100;
+    const delayTime = 0.2 + intensity * 0.4;
+    const duration = audioBuffer.duration + delayTime * 4; // extra time for echo tail
+
+    const offline = new OfflineAudioContext(audioBuffer.numberOfChannels, Math.ceil(duration * sr), sr);
+
+    const source = offline.createBufferSource();
+    source.buffer = audioBuffer;
+
+    const delay = offline.createDelay(1.0);
+    delay.delayTime.value = delayTime;
+    const feedback = offline.createGain();
+    feedback.gain.value = 0.3 + intensity * 0.45;
+    const wetGain = offline.createGain();
+    wetGain.gain.value = 0.3 + intensity * 0.6;
+
+    source.connect(offline.destination);
+    source.connect(delay);
+    delay.connect(feedback);
+    feedback.connect(delay);
+    delay.connect(wetGain);
+    wetGain.connect(offline.destination);
+
+    source.start();
+    const rendered = await offline.startRendering();
+
+    // Encode to WAV
+    const numCh = rendered.numberOfChannels;
+    const length = rendered.length;
+    const wavBuffer = new ArrayBuffer(44 + length * numCh * 2);
+    const view = new DataView(wavBuffer);
+    const writeStr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+    writeStr(0, 'RIFF');
+    view.setUint32(4, 36 + length * numCh * 2, true);
+    writeStr(8, 'WAVE');
+    writeStr(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numCh, true);
+    view.setUint32(24, sr, true);
+    view.setUint32(28, sr * numCh * 2, true);
+    view.setUint16(32, numCh * 2, true);
+    view.setUint16(34, 16, true);
+    writeStr(36, 'data');
+    view.setUint32(40, length * numCh * 2, true);
+
+    let offset = 44;
+    const channels = Array.from({ length: numCh }, (_, i) => rendered.getChannelData(i));
+    for (let i = 0; i < length; i++) {
+      for (let ch = 0; ch < numCh; ch++) {
+        const sample = Math.max(-1, Math.min(1, channels[ch][i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+        offset += 2;
+      }
+    }
+
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }, [echoIntensity]);
 
   const handleSave = useCallback(async () => {
     if (!recordedBlob) return;
     await saveRecording(recordedBlob);
-    toast.success('Enregistrement sauvegardé sur l\'appareil');
+    toast.success('Enregistrement sauvegardé');
   }, [recordedBlob, saveRecording]);
+
+  const handleSaveWithEcho = useCallback(async () => {
+    if (!activeBlob) return;
+    try {
+      const echoBlob = await applyEchoToBlob(activeBlob);
+      await saveRecording(echoBlob);
+      setRecordedBlob(null); // clear unsaved, now saved version has echo
+      toast.success('Sauvegardé avec écho');
+    } catch (err) {
+      console.error('Echo save error:', err);
+      toast.error("Erreur lors de l'application de l'écho");
+    }
+  }, [activeBlob, applyEchoToBlob, saveRecording]);
 
   const handleDelete = useCallback(async () => {
     await deleteRecording();
@@ -231,7 +313,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                   {isPlayingRecording ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
 
-                {/* Echo toggle */}
+                {/* Echo toggle + slider */}
                 <div className="flex items-center gap-1.5">
                   <Switch id={`echo-${surahNumber}-${verseNumber}`} checked={echoEnabled} onCheckedChange={setEchoEnabled} className="scale-75" />
                   <Label htmlFor={`echo-${surahNumber}-${verseNumber}`} className="text-[11px] text-muted-foreground cursor-pointer">
@@ -239,10 +321,31 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                   </Label>
                 </div>
 
+                {echoEnabled && (
+                  <div className="flex items-center gap-2 min-w-[100px]">
+                    <Slider
+                      value={[echoIntensity]}
+                      onValueChange={([v]) => setEchoIntensity(v)}
+                      min={10}
+                      max={100}
+                      step={5}
+                      className="w-20"
+                    />
+                    <span className="text-[10px] text-muted-foreground w-6">{echoIntensity}%</span>
+                  </div>
+                )}
+
                 {recordedBlob && (
                   <Button variant="ghost" size="sm" onClick={handleSave} className="gap-1 text-xs">
                     <Save className="h-3.5 w-3.5" />
                     Sauvegarder
+                  </Button>
+                )}
+
+                {activeBlob && echoEnabled && (
+                  <Button variant="ghost" size="sm" onClick={handleSaveWithEcho} className="gap-1 text-xs text-primary">
+                    <SaveAll className="h-3.5 w-3.5" />
+                    Sauver + Écho
                   </Button>
                 )}
 
