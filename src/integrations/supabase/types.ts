@@ -17,6 +17,7 @@ export type Database = {
       audio_downloads: {
         Row: {
           category: string
+          collection: string | null
           created_at: string
           description: string | null
           duration_seconds: number | null
@@ -29,6 +30,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          collection?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -41,6 +43,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          collection?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
