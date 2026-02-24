@@ -260,7 +260,7 @@ const AudioUpload = () => {
             <input
               ref={fileRef}
               type="file"
-              accept="audio/*"
+              accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/m4a,audio/aac,audio/ogg,.mp3,.wav,.m4a,.aac,.ogg,.wma,.flac"
               className="hidden"
               onChange={handleFileChange}
             />
