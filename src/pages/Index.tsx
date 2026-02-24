@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music } from 'lucide-react';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -334,6 +334,13 @@ const Index = () => {
       <footer className="bg-card border-t border-border py-6 mt-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            {/* Audio Library Button */}
+            <Link to="/audio-library">
+              <Button variant="outline" className="gap-2">
+                <Music className="h-4 w-4" />
+                Bibliothèque Audio
+              </Button>
+            </Link>
             {/* Install Button */}
             <Link to="/install">
               <Button variant="outline" className="gap-2">
