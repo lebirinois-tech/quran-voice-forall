@@ -54,6 +54,7 @@ const SurahReader = () => {
   const { saveProgress, getSurahProgress } = useReadingProgress();
   const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
   const [currentMushafPage, setCurrentMushafPage] = useState<number | null>(null);
+  const [recordingPage, setRecordingPage] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -465,6 +466,7 @@ const SurahReader = () => {
                               verseNumber={firstVerseOfPage}
                               verseText={pageText}
                               label={`Mémorisation — Page ${versePage}`}
+                              onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
                             />
                           </div>
                         )}
@@ -485,6 +487,7 @@ const SurahReader = () => {
                                 verseNumber={firstVerseOfPage}
                                 verseText={pageText}
                                 label={`Mémorisation — Page ${versePage}`}
+                                onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
                               />
                             </div>
                           </>
@@ -505,6 +508,7 @@ const SurahReader = () => {
                           onPlay={() => quranAudio.playVerse(verse.number)}
                           onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
                           isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
+                          hideText={recordingPage === versePage}
                         />
                       </div>
                     );
