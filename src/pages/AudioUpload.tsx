@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { Upload, FileAudio, Loader2, ArrowLeft, X, Lock, KeyRound, FolderOpen } from 'lucide-react';
+import { Upload, FileAudio, Loader2, ArrowLeft, X, Lock, KeyRound, FolderOpen, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 const CATEGORIES = [
   { id: 'recitation', label: '🎙️ Récitation coranique' },
@@ -27,10 +28,13 @@ const AudioUpload = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('recitation');
+  const [collection, setCollection] = useState('');
+  const [detectedFolder, setDetectedFolder] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploadedCount, setUploadedCount] = useState(0);
+  const [existingCollections, setExistingCollections] = useState<string[]>([]);
 
   const [accessCode, setAccessCode] = useState('');
   const [isVerified, setIsVerified] = useState(false);
@@ -56,6 +60,25 @@ const AudioUpload = () => {
       setIsVerifying(false);
     }
   };
+
+  // Fetch existing collections
+  const { data: collectionsData } = useQuery({
+    queryKey: ['audio-collections'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('audio_downloads')
+        .select('collection')
+        .not('collection', 'is', null);
+      const unique = [...new Set((data || []).map(d => (d as any).collection).filter(Boolean))];
+      return unique as string[];
+    },
+    enabled: isVerified,
+  });
+
+  // Sync existing collections
+  useState(() => {
+    if (collectionsData) setExistingCollections(collectionsData);
+  });
 
   if (!isAuthenticated) {
     return (
@@ -156,7 +179,19 @@ const AudioUpload = () => {
       setTitle(validFiles[0].name.replace(/\.[^.]+$/, ''));
     }
 
-    if (validFiles.length > 1) {
+    // Auto-detect folder name as collection
+    const firstFile = inputFiles[0];
+    const relativePath = (firstFile as any).webkitRelativePath || '';
+    if (relativePath) {
+      const folderName = relativePath.split('/')[0];
+      if (folderName) {
+        setDetectedFolder(folderName);
+        if (!collection) {
+          setCollection(folderName);
+        }
+        toast.success(`${validFiles.length} fichiers audio du dossier "${folderName}"`);
+      }
+    } else if (validFiles.length > 1) {
       toast.success(`${validFiles.length} fichiers audio sélectionnés`);
     }
   };
@@ -207,11 +242,12 @@ const AudioUpload = () => {
           title: fileTitle,
           description: description.trim() || null,
           category,
+          collection: collection.trim() || null,
           file_url: urlData.publicUrl,
           file_size: currentFile.size,
           duration_seconds: durationSeconds,
           uploaded_by: user.id,
-        });
+        } as any);
 
         setUploadedCount(i + 1);
         setProgress(Math.round(((i + 1) / files.length) * 100));
@@ -321,6 +357,30 @@ const AudioUpload = () => {
               onChange={e => setTitle(e.target.value)}
               className="bg-card"
             />
+          </div>
+
+          {/* Collection / Récitateur */}
+          <div>
+            <Label htmlFor="collection" className="text-sm font-medium mb-2 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Collection / Récitateur {detectedFolder && <span className="text-xs text-muted-foreground">(détecté : {detectedFolder})</span>}
+            </Label>
+            <Input
+              id="collection"
+              placeholder="Ex: Sheikh Mishary Rashid Al-Afasy"
+              value={collection}
+              onChange={e => setCollection(e.target.value)}
+              className="bg-card"
+              list="existing-collections"
+            />
+            {(collectionsData && collectionsData.length > 0) && (
+              <datalist id="existing-collections">
+                {collectionsData.map(c => <option key={c} value={c} />)}
+              </datalist>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Le nom du dossier importé est utilisé automatiquement
+            </p>
           </div>
 
           {/* Description */}
