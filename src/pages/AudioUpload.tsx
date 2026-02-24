@@ -27,9 +27,10 @@ const AudioUpload = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('recitation');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [uploadedCount, setUploadedCount] = useState(0);
 
   const [accessCode, setAccessCode] = useState('');
   const [isVerified, setIsVerified] = useState(false);
@@ -132,95 +133,91 @@ const AudioUpload = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const inputFiles = e.target.files;
+    if (!inputFiles || inputFiles.length === 0) return;
 
-    // If folder was selected, find first audio file
-    let selectedFile: File | null = null;
-    for (let i = 0; i < files.length; i++) {
-      if (isAudioFile(files[i])) {
-        selectedFile = files[i];
-        break;
-      }
-    }
+    const audioFiles = Array.from(inputFiles).filter(isAudioFile);
 
-    if (!selectedFile) {
+    if (audioFiles.length === 0) {
       toast.error('Aucun fichier audio trouvé. Formats supportés : MP3, WAV, M4A, AAC, OGG, FLAC');
       return;
     }
-    if (selectedFile.size > 50 * 1024 * 1024) {
-      toast.error('Le fichier ne doit pas dépasser 50 Mo');
-      return;
-    }
-    setFile(selectedFile);
-    if (!title) {
-      setTitle(selectedFile.name.replace(/\.[^.]+$/, ''));
+
+    const oversized = audioFiles.filter(f => f.size > 50 * 1024 * 1024);
+    if (oversized.length > 0) {
+      toast.error(`${oversized.length} fichier(s) dépassent 50 Mo et seront ignorés`);
     }
 
-    if (files.length > 1) {
-      const audioCount = Array.from(files).filter(isAudioFile).length;
-      if (audioCount > 1) {
-        toast.info(`${audioCount} fichiers audio trouvés dans le dossier. Le premier a été sélectionné.`);
-      }
+    const validFiles = audioFiles.filter(f => f.size <= 50 * 1024 * 1024);
+    if (validFiles.length === 0) return;
+
+    setFiles(validFiles);
+    if (!title && validFiles.length === 1) {
+      setTitle(validFiles[0].name.replace(/\.[^.]+$/, ''));
+    }
+
+    if (validFiles.length > 1) {
+      toast.success(`${validFiles.length} fichiers audio sélectionnés`);
     }
   };
 
   const handleUpload = async () => {
-    if (!file || !title.trim() || !user) return;
+    if (files.length === 0 || !user) return;
+    // For single file, title is required; for multi, use file names
+    if (files.length === 1 && !title.trim()) return;
 
     setIsUploading(true);
-    setProgress(10);
+    setProgress(0);
+    setUploadedCount(0);
 
     try {
-      // Upload to storage
-      const ext = file.name.split('.').pop() || 'mp3';
-      const fileName = `${Date.now()}_${crypto.randomUUID()}.${ext}`;
+      for (let i = 0; i < files.length; i++) {
+        const currentFile = files[i];
+        const fileTitle = files.length === 1 ? title.trim() : currentFile.name.replace(/\.[^.]+$/, '');
 
-      setProgress(30);
+        const ext = currentFile.name.split('.').pop() || 'mp3';
+        const fileName = `${Date.now()}_${crypto.randomUUID()}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('audio-downloads')
-        .upload(fileName, file, { contentType: file.type });
+        const { error: uploadError } = await supabase.storage
+          .from('audio-downloads')
+          .upload(fileName, currentFile, { contentType: currentFile.type });
 
-      if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error(`Upload error for ${currentFile.name}:`, uploadError);
+          toast.error(`Erreur pour "${currentFile.name}"`);
+          continue;
+        }
 
-      setProgress(70);
+        const { data: urlData } = supabase.storage
+          .from('audio-downloads')
+          .getPublicUrl(fileName);
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('audio-downloads')
-        .getPublicUrl(fileName);
+        let durationSeconds: number | null = null;
+        try {
+          const audio = new Audio();
+          audio.src = URL.createObjectURL(currentFile);
+          await new Promise<void>((resolve) => {
+            audio.onloadedmetadata = () => { durationSeconds = Math.round(audio.duration); resolve(); };
+            audio.onerror = () => resolve();
+            setTimeout(resolve, 3000);
+          });
+        } catch {}
 
-      // Get audio duration
-      let durationSeconds: number | null = null;
-      try {
-        const audio = new Audio();
-        audio.src = URL.createObjectURL(file);
-        await new Promise<void>((resolve) => {
-          audio.onloadedmetadata = () => {
-            durationSeconds = Math.round(audio.duration);
-            resolve();
-          };
-          audio.onerror = () => resolve();
-          setTimeout(resolve, 3000);
+        await supabase.from('audio_downloads').insert({
+          title: fileTitle,
+          description: description.trim() || null,
+          category,
+          file_url: urlData.publicUrl,
+          file_size: currentFile.size,
+          duration_seconds: durationSeconds,
+          uploaded_by: user.id,
         });
-      } catch {}
 
-      // Insert metadata
-      const { error: insertError } = await supabase.from('audio_downloads').insert({
-        title: title.trim(),
-        description: description.trim() || null,
-        category,
-        file_url: urlData.publicUrl,
-        file_size: file.size,
-        duration_seconds: durationSeconds,
-        uploaded_by: user.id,
-      });
+        setUploadedCount(i + 1);
+        setProgress(Math.round(((i + 1) / files.length) * 100));
+      }
 
-      if (insertError) throw insertError;
-
-      setProgress(100);
-      toast.success('Audio ajouté avec succès !');
+      toast.success(`${files.length > 1 ? `${files.length} audios ajoutés` : 'Audio ajouté'} avec succès !`);
       navigate('/audio-library');
     } catch (err: any) {
       console.error('Upload error:', err);
@@ -228,6 +225,7 @@ const AudioUpload = () => {
     } finally {
       setIsUploading(false);
       setProgress(0);
+      setUploadedCount(0);
     }
   };
 
@@ -258,17 +256,21 @@ const AudioUpload = () => {
           {/* File picker */}
           <div>
             <Label className="text-sm font-medium mb-2 block">Fichier audio</Label>
-            {file ? (
-              <div className="flex items-center gap-3 bg-card border border-border rounded-xl p-3">
-                <FileAudio className="h-5 w-5 text-primary flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-foreground">{file.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(file.size / (1024 * 1024)).toFixed(1)} Mo
-                  </p>
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ''; if (folderRef.current) folderRef.current.value = ''; }}>
-                  <X className="h-4 w-4" />
+            {files.length > 0 ? (
+              <div className="space-y-2">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-3 bg-card border border-border rounded-xl p-3">
+                    <FileAudio className="h-5 w-5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate text-foreground">{f.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(f.size / (1024 * 1024)).toFixed(1)} Mo
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => { setFiles([]); if (fileRef.current) fileRef.current.value = ''; if (folderRef.current) folderRef.current.value = ''; }}>
+                  <X className="h-4 w-4 mr-1" /> Retirer {files.length > 1 ? `les ${files.length} fichiers` : 'le fichier'}
                 </Button>
               </div>
             ) : (
@@ -295,6 +297,7 @@ const AudioUpload = () => {
               type="file"
               accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.wma,.flac,.opus"
               className="hidden"
+              multiple
               onChange={handleFileChange}
             />
             {/* @ts-ignore - webkitdirectory is not in React types */}
@@ -357,7 +360,9 @@ const AudioUpload = () => {
             <div className="bg-primary/10 rounded-xl p-4 flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">Upload en cours...</p>
+                <p className="text-sm font-medium text-foreground">
+                  Upload en cours... {files.length > 1 ? `(${uploadedCount}/${files.length})` : ''}
+                </p>
                 <div className="h-2 bg-muted rounded-full mt-2 overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-300"
@@ -371,7 +376,7 @@ const AudioUpload = () => {
           {/* Submit */}
           <Button
             onClick={handleUpload}
-            disabled={!file || !title.trim() || isUploading}
+            disabled={files.length === 0 || (files.length === 1 && !title.trim()) || isUploading}
             className="w-full gap-2"
             size="lg"
           >
@@ -383,7 +388,7 @@ const AudioUpload = () => {
             ) : (
               <>
                 <Upload className="h-4 w-4" />
-                Ajouter l'audio
+                {files.length > 1 ? `Ajouter ${files.length} audios` : 'Ajouter l\'audio'}
               </>
             )}
           </Button>
