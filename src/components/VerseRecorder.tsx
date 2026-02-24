@@ -5,6 +5,7 @@ import { Progress } from './ui/progress';
 import { Slider } from './ui/slider';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { cn } from '@/lib/utils';
 import { useRecordingStorage } from '@/hooks/useRecordingStorage';
 import { toast } from 'sonner';
@@ -35,7 +36,8 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [echoEnabled, setEchoEnabled] = useState(false);
-  const [echoIntensity, setEchoIntensity] = useState(50); // 0-100
+  const [echoIntensity, setEchoIntensity] = useState(50);
+  const [saveFormat, setSaveFormat] = useState<'wav' | 'mp3'>('mp3');
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -181,38 +183,72 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
     source.start();
     const rendered = await offline.startRendering();
 
-    // Encode to WAV
-    const numCh = rendered.numberOfChannels;
-    const length = rendered.length;
-    const wavBuffer = new ArrayBuffer(44 + length * numCh * 2);
-    const view = new DataView(wavBuffer);
-    const writeStr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
-    writeStr(0, 'RIFF');
-    view.setUint32(4, 36 + length * numCh * 2, true);
-    writeStr(8, 'WAVE');
-    writeStr(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, numCh, true);
-    view.setUint32(24, sr, true);
-    view.setUint32(28, sr * numCh * 2, true);
-    view.setUint16(32, numCh * 2, true);
-    view.setUint16(34, 16, true);
-    writeStr(36, 'data');
-    view.setUint32(40, length * numCh * 2, true);
+    // Encode based on selected format
+    if (saveFormat === 'mp3') {
+      const lamejs = await import('lamejs');
+      const numCh = rendered.numberOfChannels;
+      const samples = rendered.length;
+      const sampleRate = rendered.sampleRate;
+      const mp3encoder = new lamejs.Mp3Encoder(numCh, sampleRate, 128);
+      const mp3Data: BlobPart[] = [];
 
-    let offset = 44;
-    const channels = Array.from({ length: numCh }, (_, i) => rendered.getChannelData(i));
-    for (let i = 0; i < length; i++) {
-      for (let ch = 0; ch < numCh; ch++) {
-        const sample = Math.max(-1, Math.min(1, channels[ch][i]));
-        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
-        offset += 2;
+      const left = rendered.getChannelData(0);
+      const right = numCh > 1 ? rendered.getChannelData(1) : left;
+
+      const sampleBlockSize = 1152;
+      const leftInt = new Int16Array(samples);
+      const rightInt = new Int16Array(samples);
+      for (let i = 0; i < samples; i++) {
+        leftInt[i] = Math.max(-1, Math.min(1, left[i])) * (left[i] < 0 ? 0x8000 : 0x7FFF);
+        rightInt[i] = Math.max(-1, Math.min(1, right[i])) * (right[i] < 0 ? 0x8000 : 0x7FFF);
       }
-    }
 
-    return new Blob([wavBuffer], { type: 'audio/wav' });
-  }, [echoIntensity]);
+      for (let i = 0; i < samples; i += sampleBlockSize) {
+        const leftChunk = leftInt.subarray(i, i + sampleBlockSize);
+        const rightChunk = rightInt.subarray(i, i + sampleBlockSize);
+        const mp3buf = numCh > 1
+          ? mp3encoder.encodeBuffer(leftChunk, rightChunk)
+          : mp3encoder.encodeBuffer(leftChunk);
+        if (mp3buf.length > 0) mp3Data.push(new Uint8Array(mp3buf).buffer as ArrayBuffer);
+      }
+      const end = mp3encoder.flush();
+      if (end.length > 0) mp3Data.push(new Uint8Array(end).buffer as ArrayBuffer);
+
+      return new Blob(mp3Data, { type: 'audio/mp3' });
+    } else {
+      // WAV encoding
+      const numCh = rendered.numberOfChannels;
+      const length = rendered.length;
+      const wavBuffer = new ArrayBuffer(44 + length * numCh * 2);
+      const view = new DataView(wavBuffer);
+      const writeStr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + length * numCh * 2, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, numCh, true);
+      view.setUint32(24, sr, true);
+      view.setUint32(28, sr * numCh * 2, true);
+      view.setUint16(32, numCh * 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, 'data');
+      view.setUint32(40, length * numCh * 2, true);
+
+      let offset = 44;
+      const channels = Array.from({ length: numCh }, (_, i) => rendered.getChannelData(i));
+      for (let i = 0; i < length; i++) {
+        for (let ch = 0; ch < numCh; ch++) {
+          const sample = Math.max(-1, Math.min(1, channels[ch][i]));
+          view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+          offset += 2;
+        }
+      }
+
+      return new Blob([wavBuffer], { type: 'audio/wav' });
+    }
+  }, [echoIntensity, saveFormat]);
 
   const handleSave = useCallback(async () => {
     if (!recordedBlob) return;
@@ -343,10 +379,21 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                 )}
 
                 {activeBlob && echoEnabled && (
-                  <Button variant="ghost" size="sm" onClick={handleSaveWithEcho} className="gap-1 text-xs text-primary">
-                    <SaveAll className="h-3.5 w-3.5" />
-                    Sauver + Écho
-                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    <Select value={saveFormat} onValueChange={(v) => setSaveFormat(v as 'wav' | 'mp3')}>
+                      <SelectTrigger className="h-7 w-[70px] text-[11px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mp3">MP3</SelectItem>
+                        <SelectItem value="wav">WAV</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="ghost" size="sm" onClick={handleSaveWithEcho} className="gap-1 text-xs text-primary">
+                      <SaveAll className="h-3.5 w-3.5" />
+                      Sauver + Écho
+                    </Button>
+                  </div>
                 )}
 
                 <Button variant="ghost" size="sm" onClick={handleCompare} disabled={isComparing} className="gap-1 text-xs">
