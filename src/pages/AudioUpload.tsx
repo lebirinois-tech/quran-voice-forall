@@ -301,7 +301,8 @@ const AudioUpload = () => {
         const fileTitle = files.length === 1 ? title.trim() : currentFile.name.replace(/\.[^.]+$/, '');
 
         const ext = currentFile.name.split('.').pop() || 'mp3';
-        const fileName = `${Date.now()}_${crypto.randomUUID()}.${ext}`;
+        // Prefix with user id so storage RLS can enforce ownership on delete/update
+        const fileName = `${user.id}/${Date.now()}_${crypto.randomUUID()}.${ext}`;
 
         const { error: uploadError } = await supabase.storage
           .from('audio-downloads')
