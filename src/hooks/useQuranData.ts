@@ -191,7 +191,7 @@ export const useQuranData = (surahNumber: number) => {
           setVersesTajweed(tajweedMap);
 
           // Cache for offline use
-          saveSurahToCache(surahNumber, lang, combinedVerses, tajweedMap);
+          saveSurahToCache(surahNumber, lang, secondaryEdition, combinedVerses, tajweedMap);
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -199,7 +199,7 @@ export const useQuranData = (surahNumber: number) => {
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(surahNumber, lang);
+        const cached = loadSurahFromCache(surahNumber, lang, secondaryEdition);
         if (cached) {
           setVerses(cached.verses);
           setVersesTajweed(cached.tajweed);
@@ -214,7 +214,7 @@ export const useQuranData = (surahNumber: number) => {
     };
 
     fetchVerses();
-  }, [surahNumber, lang, translationEdition]);
+  }, [surahNumber, lang, translationEdition, secondaryEdition]);
 
   return { verses, versesTajweed, isLoading, error, isOffline };
 };
