@@ -14,6 +14,8 @@ const STORAGE_KEYS = {
 
 const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
 
+const DUAL_TRANSLATION_EVENT = 'quran-dual-translation-changed';
+
 export const useAppSettings = () => {
   const [reciter, setReciter] = useState<ReciterId>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RECITER);
@@ -37,6 +39,16 @@ export const useAppSettings = () => {
   const [showDualTranslation, setShowDualTranslation] = useState<boolean>(() => {
     return localStorage.getItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION) === 'true';
   });
+
+  // Sync this hook instance with changes coming from any other instance.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<boolean>).detail;
+      if (typeof detail === 'boolean') setShowDualTranslation(detail);
+    };
+    window.addEventListener(DUAL_TRANSLATION_EVENT, handler);
+    return () => window.removeEventListener(DUAL_TRANSLATION_EVENT, handler);
+  }, []);
 
   // Apply background color to document
   useEffect(() => {
@@ -67,6 +79,10 @@ export const useAppSettings = () => {
   const handleShowDualTranslationChange = useCallback((value: boolean) => {
     setShowDualTranslation(value);
     localStorage.setItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION, String(value));
+    // Broadcast so all useAppSettings() instances stay in sync.
+    window.dispatchEvent(
+      new CustomEvent(DUAL_TRANSLATION_EVENT, { detail: value }),
+    );
   }, []);
 
   return {
