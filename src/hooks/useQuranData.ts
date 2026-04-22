@@ -126,17 +126,17 @@ export const useQuranData = (
 ) => {
   const { i18n } = useTranslation();
   const lang = (i18n.language || 'fr').split('-')[0];
-  const translationEdition = showDualTranslation
-    ? lang === 'ar'
-      ? 'ar.muyassar'
-      : 'fr.hamidullah'
-    : getTranslationEdition(lang);
-  // In dual mode, always display English under French for non-Arabic UI.
-  const secondaryEdition: string | null = showDualTranslation
-    ? lang === 'ar'
-      ? 'en.sahih'
-      : 'en.sahih'
-    : null;
+  // Primary translation always matches the UI language.
+  const translationEdition = getTranslationEdition(lang);
+  // In dual mode, add a secondary translation in a *different* language.
+  // - UI in FR → secondary = EN
+  // - UI in EN → secondary = FR
+  // - UI in AR → secondary = EN
+  const secondaryEdition: string | null = !showDualTranslation
+    ? null
+    : lang === 'en'
+      ? 'fr.hamidullah'
+      : 'en.sahih';
 
   const [verses, setVerses] = useState<Verse[]>([]);
   const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
