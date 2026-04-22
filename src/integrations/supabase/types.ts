@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowed_uploaders: {
+        Row: {
+          granted_at: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audio_downloads: {
         Row: {
           category: string
