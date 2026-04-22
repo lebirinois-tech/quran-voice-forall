@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { useTranslation } from 'react-i18next';
+import { useAppSettings } from './useAppSettings';
 
 // Map app language to AlQuran Cloud translation edition.
 const TRANSLATION_EDITIONS: Record<string, string> = {
@@ -103,6 +104,15 @@ export const useQuranData = (surahNumber: number) => {
   const { i18n } = useTranslation();
   const lang = (i18n.language || 'fr').split('-')[0];
   const translationEdition = getTranslationEdition(lang);
+  const { showDualTranslation } = useAppSettings();
+  // Secondary translation: pair FR<->EN; for AR primary, use EN as secondary.
+  const secondaryEdition: string | null = showDualTranslation
+    ? lang === 'fr'
+      ? 'en.sahih'
+      : lang === 'en'
+        ? 'fr.hamidullah'
+        : 'en.sahih'
+    : null;
 
   const [verses, setVerses] = useState<Verse[]>([]);
   const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
@@ -117,22 +127,35 @@ export const useQuranData = (surahNumber: number) => {
       setIsOffline(false);
 
       try {
-        // Fetch Uthmanic Arabic text, Tajweed text, and French translation
-        const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
+        // Fetch Uthmanic Arabic text, Tajweed text, primary translation,
+        // and (optionally) a secondary translation for dual display.
+        const requests = [
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${translationEdition}`),
-        ]);
-
-        const arabicData: QuranApiResponse = await arabicResponse.json();
-        const tajweedData: QuranApiResponse = await tajweedResponse.json();
-        const translationData: QuranApiResponse = await translationResponse.json();
+        ];
+        if (secondaryEdition) {
+          requests.push(
+            fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${secondaryEdition}`),
+          );
+        }
+        const responses = await Promise.all(requests);
+        const arabicData: QuranApiResponse = await responses[0].json();
+        const tajweedData: QuranApiResponse = await responses[1].json();
+        const translationData: QuranApiResponse = await responses[2].json();
+        const translation2Data: QuranApiResponse | null = responses[3]
+          ? await responses[3].json()
+          : null;
 
         if (arabicData.code === 200 && translationData.code === 200) {
           const combinedVerses: Verse[] = arabicData.data.ayahs.map((ayah, index) => ({
             number: ayah.numberInSurah,
             text: ayah.text,
             translation: translationData.data.ayahs[index]?.text || '',
+            translation2:
+              translation2Data?.code === 200
+                ? translation2Data.data.ayahs[index]?.text || ''
+                : undefined,
             page: ayah.page,
           }));
 
