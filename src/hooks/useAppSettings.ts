@@ -37,7 +37,10 @@ export const useAppSettings = () => {
   });
 
   const [showDualTranslation, setShowDualTranslation] = useState<boolean>(() => {
-    return localStorage.getItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION) === 'true';
+    // Default ON: show Arabic + primary translation + secondary translation
+    // (e.g. FR + EN). The user can still disable it from Settings.
+    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION);
+    return saved === null ? true : saved === 'true';
   });
 
   // Sync this hook instance with changes coming from any other instance.
