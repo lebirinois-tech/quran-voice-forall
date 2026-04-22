@@ -1,6 +1,15 @@
 import { useState, useCallback } from 'react';
 import { surahs } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { useTranslation } from 'react-i18next';
+
+const TRANSLATION_EDITIONS: Record<string, string> = {
+  fr: 'fr.hamidullah',
+  en: 'en.sahih',
+  ar: 'ar.muyassar',
+};
+const getTranslationEdition = (lang: string): string =>
+  TRANSLATION_EDITIONS[(lang || 'fr').split('-')[0]] || TRANSLATION_EDITIONS.fr;
 
 const CACHE_KEY_PREFIX = 'quran-offline-';
 const TEXT_CACHE_STATUS = 'quran-text-cache-status';
@@ -53,6 +62,9 @@ const parseTajweedText = (text: string): string => {
 };
 
 export const useTextCache = () => {
+  const { i18n } = useTranslation();
+  const lang = (i18n.language || 'fr').split('-')[0];
+  const translationEdition = getTranslationEdition(lang);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadingSurah, setDownloadingSurah] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
@@ -68,7 +80,7 @@ export const useTextCache = () => {
       const [arabicRes, tajweedRes, translationRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
         fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
+        fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${translationEdition}`),
       ]);
 
       const [arabicData, tajweedData, translationData] = await Promise.all([
@@ -90,7 +102,7 @@ export const useTextCache = () => {
           });
         }
 
-        localStorage.setItem(`${CACHE_KEY_PREFIX}${surahNumber}`, JSON.stringify({
+        localStorage.setItem(`${CACHE_KEY_PREFIX}${surahNumber}-${lang}`, JSON.stringify({
           verses, tajweed, timestamp: Date.now(),
         }));
 
@@ -107,7 +119,7 @@ export const useTextCache = () => {
       setDownloadingSurah(null);
       setProgress(0);
     }
-  }, []);
+  }, [lang, translationEdition]);
 
   const downloadAllText = useCallback(async () => {
     for (let s = 1; s <= 114; s++) {

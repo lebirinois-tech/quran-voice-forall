@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { useTranslation } from 'react-i18next';
+
+// Map app language to AlQuran Cloud translation edition.
+const TRANSLATION_EDITIONS: Record<string, string> = {
+  fr: 'fr.hamidullah',
+  en: 'en.sahih',
+  ar: 'ar.muyassar',
+};
+
+const getTranslationEdition = (lang: string): string => {
+  const code = (lang || 'fr').split('-')[0];
+  return TRANSLATION_EDITIONS[code] || TRANSLATION_EDITIONS.fr;
+};
 
 interface QuranApiVerse {
   number: number;
@@ -18,7 +31,8 @@ interface QuranApiResponse {
 
 // Local storage keys for offline cache
 const CACHE_KEY_PREFIX = 'quran-offline-';
-const getCacheKey = (surahNumber: number) => `${CACHE_KEY_PREFIX}${surahNumber}`;
+const getCacheKey = (surahNumber: number, lang: string) =>
+  `${CACHE_KEY_PREFIX}${surahNumber}-${lang}`;
 
 interface CachedSurahData {
   verses: Verse[];
@@ -26,19 +40,30 @@ interface CachedSurahData {
   timestamp: number;
 }
 
-const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) => {
+const saveSurahToCache = (
+  surahNumber: number,
+  lang: string,
+  verses: Verse[],
+  tajweed: Record<number, string>,
+) => {
   try {
     const data: CachedSurahData = { verses, tajweed, timestamp: Date.now() };
-    localStorage.setItem(getCacheKey(surahNumber), JSON.stringify(data));
+    localStorage.setItem(getCacheKey(surahNumber, lang), JSON.stringify(data));
   } catch (e) {
     // localStorage might be full, silently fail
     console.warn('Could not cache surah data:', e);
   }
 };
 
-const loadSurahFromCache = (surahNumber: number): CachedSurahData | null => {
+const loadSurahFromCache = (
+  surahNumber: number,
+  lang: string,
+): CachedSurahData | null => {
   try {
-    const raw = localStorage.getItem(getCacheKey(surahNumber));
+    // Try language-specific cache first, fall back to legacy key.
+    const raw =
+      localStorage.getItem(getCacheKey(surahNumber, lang)) ||
+      localStorage.getItem(`${CACHE_KEY_PREFIX}${surahNumber}`);
     if (!raw) return null;
     return JSON.parse(raw) as CachedSurahData;
   } catch {
@@ -75,6 +100,10 @@ const parseTajweedText = (text: string): string => {
 };
 
 export const useQuranData = (surahNumber: number) => {
+  const { i18n } = useTranslation();
+  const lang = (i18n.language || 'fr').split('-')[0];
+  const translationEdition = getTranslationEdition(lang);
+
   const [verses, setVerses] = useState<Verse[]>([]);
   const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +121,7 @@ export const useQuranData = (surahNumber: number) => {
         const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
+          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${translationEdition}`),
         ]);
 
         const arabicData: QuranApiResponse = await arabicResponse.json();
@@ -118,7 +147,7 @@ export const useQuranData = (surahNumber: number) => {
           setVersesTajweed(tajweedMap);
 
           // Cache for offline use
-          saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
+          saveSurahToCache(surahNumber, lang, combinedVerses, tajweedMap);
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -126,7 +155,7 @@ export const useQuranData = (surahNumber: number) => {
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(surahNumber);
+        const cached = loadSurahFromCache(surahNumber, lang);
         if (cached) {
           setVerses(cached.verses);
           setVersesTajweed(cached.tajweed);
@@ -141,7 +170,7 @@ export const useQuranData = (surahNumber: number) => {
     };
 
     fetchVerses();
-  }, [surahNumber]);
+  }, [surahNumber, lang, translationEdition]);
 
   return { verses, versesTajweed, isLoading, error, isOffline };
 };
