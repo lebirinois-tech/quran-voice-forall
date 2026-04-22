@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   BACKGROUND_COLOR: 'quran-background-color',
   TEXT_DISPLAY_STYLE: 'quran-text-display-style',
   FONT_SIZE: 'quran-font-size',
+  SHOW_DUAL_TRANSLATION: 'quran-show-dual-translation',
 };
 
 const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
@@ -31,6 +32,10 @@ export const useAppSettings = () => {
   const [fontSize, setFontSize] = useState<FontSize>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.FONT_SIZE);
     return (saved as FontSize) || 'medium';
+  });
+
+  const [showDualTranslation, setShowDualTranslation] = useState<boolean>(() => {
+    return localStorage.getItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION) === 'true';
   });
 
   // Apply background color to document
@@ -59,14 +64,21 @@ export const useAppSettings = () => {
     localStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
   }, []);
 
+  const handleShowDualTranslationChange = useCallback((value: boolean) => {
+    setShowDualTranslation(value);
+    localStorage.setItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION, String(value));
+  }, []);
+
   return {
     reciter,
     backgroundColor,
     textDisplayStyle,
     fontSize,
+    showDualTranslation,
     onReciterChange: handleReciterChange,
     onBackgroundColorChange: handleBackgroundColorChange,
     onTextDisplayStyleChange: handleTextDisplayStyleChange,
     onFontSizeChange: handleFontSizeChange,
+    onShowDualTranslationChange: handleShowDualTranslationChange,
   };
 };
