@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,13 +10,15 @@ import { toast } from 'sonner';
 import { Mail, Lock, User, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { z } from 'zod';
 
-const emailSchema = z.string().email('Email invalide');
-const passwordSchema = z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères');
-const displayNameSchema = z.string().min(2, 'Le nom doit contenir au moins 2 caractères').optional();
-
 const Auth = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { signIn, signUp, isAuthenticated, loading } = useAuth();
+
+  const emailSchema = z.string().email(t('auth.invalidEmail'));
+  const passwordSchema = z.string().min(6, t('auth.passwordTooShort'));
+  const displayNameSchema = z.string().min(2, t('auth.nameTooShort')).optional();
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,30 +69,30 @@ const Auth = () => {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('Email ou mot de passe incorrect');
+            toast.error(t('auth.invalidCredentials'));
           } else if (error.message.includes('Email not confirmed')) {
-            toast.error('Veuillez confirmer votre email avant de vous connecter');
+            toast.error(t('auth.emailNotConfirmed'));
           } else {
             toast.error(error.message);
           }
           return;
         }
-        toast.success('Connexion réussie !');
+        toast.success(t('auth.loginSuccess'));
         navigate('/');
       } else {
         const { error } = await signUp(email, password, displayName || undefined);
         if (error) {
           if (error.message.includes('User already registered')) {
-            toast.error('Cet email est déjà utilisé');
+            toast.error(t('auth.emailUsed'));
           } else {
             toast.error(error.message);
           }
           return;
         }
-        toast.success('Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
+        toast.success(t('auth.accountCreated'));
       }
     } catch (error) {
-      toast.error('Une erreur est survenue');
+      toast.error(t('auth.error'));
     } finally {
       setSubmitting(false);
     }
@@ -113,10 +116,10 @@ const Auth = () => {
             <BookOpen className="h-10 w-10 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            {isLogin ? 'Connexion' : 'Créer un compte'}
+            {isLogin ? t('auth.login') : t('auth.signup')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+            {isLogin ? t('auth.loginAr') : t('auth.signupAr')}
           </p>
         </div>
 
@@ -125,12 +128,12 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="displayName" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                Nom d'affichage
+                {t('auth.displayName')}
               </Label>
               <Input
                 id="displayName"
                 type="text"
-                placeholder="Votre nom"
+                placeholder={t('auth.yourName')}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className={errors.displayName ? 'border-destructive' : ''}
@@ -144,7 +147,7 @@ const Auth = () => {
           <div className="space-y-2">
             <Label htmlFor="email" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              Email
+              {t('auth.email')}
             </Label>
             <Input
               id="email"
@@ -163,7 +166,7 @@ const Auth = () => {
           <div className="space-y-2">
             <Label htmlFor="password" className="flex items-center gap-2">
               <Lock className="h-4 w-4" />
-              Mot de passe
+              {t('auth.password')}
             </Label>
             <div className="relative">
               <Input
@@ -196,16 +199,16 @@ const Auth = () => {
             {submitting ? (
               <span className="flex items-center gap-2">
                 <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                {isLogin ? 'Connexion...' : 'Inscription...'}
+                {isLogin ? t('auth.loggingIn') : t('auth.signingUp')}
               </span>
             ) : (
-              isLogin ? 'Se connecter' : 'Créer mon compte'
+              isLogin ? t('auth.loginButton') : t('auth.signupButton')
             )}
           </Button>
 
           <div className="text-center pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              {isLogin ? "Pas encore de compte ?" : "Déjà inscrit ?"}
+              {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
             </p>
             <button
               type="button"
@@ -215,13 +218,13 @@ const Auth = () => {
               }}
               className="text-primary hover:underline font-medium"
             >
-              {isLogin ? "Créer un compte" : "Se connecter"}
+              {isLogin ? t('auth.createAccount') : t('auth.loginButton')}
             </button>
           </div>
         </form>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          En vous inscrivant, vous pouvez sauvegarder votre progression de lecture du Coran
+          {t('auth.hint')}
         </p>
       </main>
     </div>

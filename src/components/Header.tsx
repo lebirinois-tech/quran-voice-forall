@@ -1,9 +1,14 @@
-import { BookOpen, Home, Accessibility, Radio, Podcast } from 'lucide-react';
+import { BookOpen, Home, Accessibility, Radio, Podcast, Download } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from './SettingsDialog';
 import { ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
+import { usePwaInstall } from '@/contexts/PwaInstallContext';
+import { useNavigate } from 'react-router-dom';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -38,6 +43,29 @@ export const Header = ({
   fontSize = 'medium',
   onFontSizeChange,
 }: HeaderProps) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isInstalled, deferredPrompt, install } = usePwaInstall();
+  const fallbackSettings = useAppSettings();
+
+  // Always show settings: fall back to internal settings hook if no callbacks were provided.
+  const effectiveReciter = onReciterChange ? reciter : fallbackSettings.reciter;
+  const effectiveBackgroundColor = onBackgroundColorChange ? backgroundColor : fallbackSettings.backgroundColor;
+  const effectiveTextDisplayStyle = onTextDisplayStyleChange ? textDisplayStyle : fallbackSettings.textDisplayStyle;
+  const effectiveFontSize = onFontSizeChange ? fontSize : fallbackSettings.fontSize;
+  const handleReciterChange = onReciterChange ?? fallbackSettings.onReciterChange;
+  const handleBackgroundColorChange = onBackgroundColorChange ?? fallbackSettings.onBackgroundColorChange;
+  const handleTextDisplayStyleChange = onTextDisplayStyleChange ?? fallbackSettings.onTextDisplayStyleChange;
+  const handleFontSizeChange = onFontSizeChange ?? fallbackSettings.onFontSizeChange;
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      await install();
+    } else {
+      navigate('/install');
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
       <div className="container mx-auto px-4 py-4">
@@ -50,7 +78,7 @@ export const Header = ({
                 size="icon"
                 onClick={onBack}
                 className="text-primary-foreground hover:bg-primary-foreground/10"
-                aria-label="Retour à l'accueil"
+                aria-label={t('common.home')}
               >
                 <Home className="h-5 w-5" />
               </Button>
@@ -62,28 +90,39 @@ export const Header = ({
             
             <div>
               <h1 className="text-lg md:text-xl font-bold text-primary-foreground">
-                Quran Accès Pour Tous
+                {t('common.appName')}
               </h1>
               <p className="text-xs text-primary-foreground/70 hidden sm:block">
-                Le Coran accessible à tous
+                {t('common.appTagline')}
               </p>
             </div>
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-2">
-            {onReciterChange && onBackgroundColorChange && onTextDisplayStyleChange && onFontSizeChange && (
-              <SettingsDialog
-                reciter={reciter}
-                onReciterChange={onReciterChange}
-                backgroundColor={backgroundColor}
-                onBackgroundColorChange={onBackgroundColorChange}
-                textDisplayStyle={textDisplayStyle}
-                onTextDisplayStyleChange={onTextDisplayStyleChange}
-                fontSize={fontSize}
-                onFontSizeChange={onFontSizeChange}
-              />
+          <div className="flex items-center gap-1 sm:gap-2">
+            <LanguageSwitcher />
+            {!isInstalled && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleInstall}
+                className="text-primary-foreground hover:bg-primary-foreground/10 gap-1.5"
+                aria-label={t('common.installApp')}
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('common.install')}</span>
+              </Button>
             )}
+            <SettingsDialog
+              reciter={effectiveReciter}
+              onReciterChange={handleReciterChange}
+              backgroundColor={effectiveBackgroundColor}
+              onBackgroundColorChange={handleBackgroundColorChange}
+              textDisplayStyle={effectiveTextDisplayStyle}
+              onTextDisplayStyleChange={handleTextDisplayStyleChange}
+              fontSize={effectiveFontSize}
+              onFontSizeChange={handleFontSizeChange}
+            />
             {onToggleContinuous && (
               <Button
                 variant="ghost"
@@ -93,7 +132,7 @@ export const Header = ({
                   "text-primary-foreground hover:bg-primary-foreground/10",
                   isContinuousMode && "bg-primary-foreground/20 ring-2 ring-primary-foreground/50"
                 )}
-                aria-label={isContinuousMode ? "Désactiver le mode mains libres" : "Activer le mode mains libres"}
+                aria-label={isContinuousMode ? t('header.handsFreeOn') : t('header.handsFreeOff')}
                 aria-pressed={isContinuousMode}
               >
                 {isContinuousMode ? (
@@ -111,7 +150,7 @@ export const Header = ({
                 "text-primary-foreground hover:bg-primary-foreground/10",
                 isAccessibilityMode && "bg-primary-foreground/20"
               )}
-              aria-label="Mode accessibilité"
+              aria-label={t('header.accessibilityMode')}
               aria-pressed={isAccessibilityMode}
             >
               <Accessibility className="h-5 w-5" />
