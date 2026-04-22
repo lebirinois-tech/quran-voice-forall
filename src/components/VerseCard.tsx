@@ -349,14 +349,54 @@ export const VerseCard = ({
       {/* Translation */}
       {hideText ? null : (
         <>
-          <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
-            {verse.translation}
-          </p>
-          {verse.translation2 && (
-            <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4 mt-4">
-              {verse.translation2}
-            </p>
-          )}
+          {(() => {
+            const primaryLang = detectLang(verse.translation);
+            return (
+              <div className="border-t border-border pt-4 flex items-start gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleSpeakTranslation(verse.translation, primaryLang)}
+                  className="rounded-full hover:bg-primary/10 shrink-0 h-8 w-8 mt-0.5"
+                  aria-label={`Écouter la traduction (${primaryLang === 'fr' ? 'français' : 'anglais'})`}
+                  title={`🔊 ${primaryLang === 'fr' ? 'Français' : 'English'}`}
+                >
+                  {speakingLang === primaryLang ? (
+                    <VolumeX className="h-4 w-4 text-primary animate-pulse" />
+                  ) : (
+                    <Volume2 className="h-4 w-4 text-primary" />
+                  )}
+                </Button>
+                <p className="text-muted-foreground text-base leading-relaxed flex-1">
+                  {verse.translation}
+                </p>
+              </div>
+            );
+          })()}
+          {verse.translation2 && (() => {
+            const secondaryLang = detectLang(verse.translation2);
+            return (
+              <div className="border-t border-border pt-4 mt-4 flex items-start gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleSpeakTranslation(verse.translation2!, secondaryLang)}
+                  className="rounded-full hover:bg-primary/10 shrink-0 h-8 w-8 mt-0.5"
+                  aria-label={`Écouter la traduction (${secondaryLang === 'fr' ? 'français' : 'anglais'})`}
+                  title={`🔊 ${secondaryLang === 'fr' ? 'Français' : 'English'}`}
+                >
+                  {speakingLang === secondaryLang ? (
+                    <VolumeX className="h-4 w-4 text-primary animate-pulse" />
+                  ) : (
+                    <Volume2 className="h-4 w-4 text-primary" />
+                  )}
+                </Button>
+                <p className="text-muted-foreground text-base leading-relaxed flex-1">
+                  {verse.translation2}
+                </p>
+              </div>
+            );
+          })()}
         </>
       )}
 
