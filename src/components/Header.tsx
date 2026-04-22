@@ -25,6 +25,8 @@ interface HeaderProps {
   onTextDisplayStyleChange?: (style: TextDisplayStyle) => void;
   fontSize?: FontSize;
   onFontSizeChange?: (size: FontSize) => void;
+  showDualTranslation?: boolean;
+  onShowDualTranslationChange?: (value: boolean) => void;
 }
 
 export const Header = ({ 
@@ -42,6 +44,8 @@ export const Header = ({
   onTextDisplayStyleChange,
   fontSize = 'medium',
   onFontSizeChange,
+  showDualTranslation,
+  onShowDualTranslationChange,
 }: HeaderProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -53,10 +57,15 @@ export const Header = ({
   const effectiveBackgroundColor = onBackgroundColorChange ? backgroundColor : fallbackSettings.backgroundColor;
   const effectiveTextDisplayStyle = onTextDisplayStyleChange ? textDisplayStyle : fallbackSettings.textDisplayStyle;
   const effectiveFontSize = onFontSizeChange ? fontSize : fallbackSettings.fontSize;
+  const effectiveShowDualTranslation = onShowDualTranslationChange
+    ? (showDualTranslation ?? fallbackSettings.showDualTranslation)
+    : fallbackSettings.showDualTranslation;
   const handleReciterChange = onReciterChange ?? fallbackSettings.onReciterChange;
   const handleBackgroundColorChange = onBackgroundColorChange ?? fallbackSettings.onBackgroundColorChange;
   const handleTextDisplayStyleChange = onTextDisplayStyleChange ?? fallbackSettings.onTextDisplayStyleChange;
   const handleFontSizeChange = onFontSizeChange ?? fallbackSettings.onFontSizeChange;
+  const handleShowDualTranslationChange =
+    onShowDualTranslationChange ?? fallbackSettings.onShowDualTranslationChange;
 
   const handleInstall = async () => {
     if (deferredPrompt) {
@@ -122,8 +131,8 @@ export const Header = ({
               onTextDisplayStyleChange={handleTextDisplayStyleChange}
               fontSize={effectiveFontSize}
               onFontSizeChange={handleFontSizeChange}
-              showDualTranslation={fallbackSettings.showDualTranslation}
-              onShowDualTranslationChange={fallbackSettings.onShowDualTranslationChange}
+              showDualTranslation={effectiveShowDualTranslation}
+              onShowDualTranslationChange={handleShowDualTranslationChange}
             />
             {onToggleContinuous && (
               <Button

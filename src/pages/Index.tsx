@@ -113,6 +113,10 @@ const Index = () => {
         onBackgroundColorChange={appSettings.onBackgroundColorChange}
         textDisplayStyle={appSettings.textDisplayStyle}
         onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+        fontSize={appSettings.fontSize}
+        onFontSizeChange={appSettings.onFontSizeChange}
+        showDualTranslation={appSettings.showDualTranslation}
+        onShowDualTranslationChange={appSettings.onShowDualTranslationChange}
       />
 
       <main className="container mx-auto px-4 py-6">
