@@ -195,52 +195,6 @@ export const SettingsDialog = ({
         </DialogHeader>
         
         <div className="space-y-4 py-2">
-          {/* Reciter Selection by Qira'at */}
-          <div className="space-y-2">
-            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
-              <Volume2 className="h-3.5 w-3.5 text-primary" />
-              Récitateur / القارئ
-            </Label>
-            
-            {/* Group reciters by Qira'at */}
-            {Object.entries(QIRAAT_LABELS).map(([qiraatKey, qiraatLabel]) => {
-              const recitersForQiraat = Object.entries(RECITERS).filter(
-                ([_, info]) => info.qiraat === qiraatKey
-              );
-              
-              if (recitersForQiraat.length === 0) return null;
-              
-              return (
-                <div key={qiraatKey} className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground px-1 pt-1">
-                    {qiraatLabel}
-                  </p>
-                  <RadioGroup
-                    value={reciter}
-                    onValueChange={(value) => onReciterChange(value as ReciterId)}
-                    className="space-y-1"
-                  >
-                    {recitersForQiraat.map(([key, { name, nameAr }]) => (
-                      <div
-                        key={key}
-                        className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <RadioGroupItem value={key} id={`reciter-${key}`} className="h-3.5 w-3.5" />
-                        <Label
-                          htmlFor={`reciter-${key}`}
-                          className="flex-1 cursor-pointer text-foreground text-sm"
-                        >
-                          {name} / <span dir="rtl">{nameAr}</span>
-                        </Label>
-                        {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              );
-            })}
-          </div>
-
           {/* Text Display Style */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
@@ -319,6 +273,52 @@ export const SettingsDialog = ({
                 onCheckedChange={onShowDualTranslationChange}
               />
             </div>
+          </div>
+
+          {/* Reciter Selection by Qira'at */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <Volume2 className="h-3.5 w-3.5 text-primary" />
+              Récitateur / القارئ
+            </Label>
+            
+            {/* Group reciters by Qira'at */}
+            {Object.entries(QIRAAT_LABELS).map(([qiraatKey, qiraatLabel]) => {
+              const recitersForQiraat = Object.entries(RECITERS).filter(
+                ([_, info]) => info.qiraat === qiraatKey
+              );
+              
+              if (recitersForQiraat.length === 0) return null;
+              
+              return (
+                <div key={qiraatKey} className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground px-1 pt-1">
+                    {qiraatLabel}
+                  </p>
+                  <RadioGroup
+                    value={reciter}
+                    onValueChange={(value) => onReciterChange(value as ReciterId)}
+                    className="space-y-1"
+                  >
+                    {recitersForQiraat.map(([key, { name, nameAr }]) => (
+                      <div
+                        key={key}
+                        className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <RadioGroupItem value={key} id={`reciter-${key}`} className="h-3.5 w-3.5" />
+                        <Label
+                          htmlFor={`reciter-${key}`}
+                          className="flex-1 cursor-pointer text-foreground text-sm"
+                        >
+                          {name} / <span dir="rtl">{nameAr}</span>
+                        </Label>
+                        {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              );
+            })}
           </div>
 
           {/* Background Color */}
