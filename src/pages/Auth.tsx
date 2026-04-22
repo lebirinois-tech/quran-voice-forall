@@ -73,7 +73,8 @@ const Auth = () => {
           } else if (error.message.includes('Email not confirmed')) {
             toast.error(t('auth.emailNotConfirmed'));
           } else {
-            toast.error(error.message);
+            console.error('Sign-in error:', error);
+            toast.error(t('auth.error'));
           }
           return;
         }
@@ -85,7 +86,8 @@ const Auth = () => {
           if (error.message.includes('User already registered')) {
             toast.error(t('auth.emailUsed'));
           } else {
-            toast.error(error.message);
+            console.error('Sign-up error:', error);
+            toast.error(t('auth.error'));
           }
           return;
         }
