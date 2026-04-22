@@ -122,6 +122,8 @@ export const Header = ({
               onTextDisplayStyleChange={handleTextDisplayStyleChange}
               fontSize={effectiveFontSize}
               onFontSizeChange={handleFontSizeChange}
+              showDualTranslation={fallbackSettings.showDualTranslation}
+              onShowDualTranslationChange={fallbackSettings.onShowDualTranslationChange}
             />
             {onToggleContinuous && (
               <Button

@@ -302,6 +302,25 @@ export const SettingsDialog = ({
             </div>
           </div>
 
+          {/* Dual Translation Toggle */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex-1 pr-3">
+                <Label htmlFor="dual-translation" className="text-foreground text-sm font-semibold cursor-pointer">
+                  🌍 Double traduction / ترجمة مزدوجة
+                </Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Afficher FR + EN sous chaque verset
+                </p>
+              </div>
+              <Switch
+                id="dual-translation"
+                checked={showDualTranslation}
+                onCheckedChange={onShowDualTranslationChange}
+              />
+            </div>
+          </div>
+
           {/* Background Color */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
