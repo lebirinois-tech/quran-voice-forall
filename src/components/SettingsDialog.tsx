@@ -10,6 +10,7 @@ import {
 } from './ui/dialog';
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Switch } from './ui/switch';
 import { RECITERS, QIRAAT_LABELS, ReciterId, QiraatId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { AudioCacheSettings } from './AudioCacheSettings';
@@ -24,6 +25,8 @@ interface SettingsDialogProps {
   onTextDisplayStyleChange: (style: TextDisplayStyle) => void;
   fontSize: FontSize;
   onFontSizeChange: (size: FontSize) => void;
+  showDualTranslation: boolean;
+  onShowDualTranslationChange: (value: boolean) => void;
 }
 
 const BACKGROUND_COLORS = [
@@ -102,6 +105,8 @@ export const SettingsDialog = ({
   onTextDisplayStyleChange,
   fontSize,
   onFontSizeChange,
+  showDualTranslation,
+  onShowDualTranslationChange,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
@@ -294,6 +299,25 @@ export const SettingsDialog = ({
                   </span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Dual Translation Toggle */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex-1 pr-3">
+                <Label htmlFor="dual-translation" className="text-foreground text-sm font-semibold cursor-pointer">
+                  🌍 Double traduction / ترجمة مزدوجة
+                </Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Afficher FR + EN sous chaque verset
+                </p>
+              </div>
+              <Switch
+                id="dual-translation"
+                checked={showDualTranslation}
+                onCheckedChange={onShowDualTranslationChange}
+              />
             </div>
           </div>
 

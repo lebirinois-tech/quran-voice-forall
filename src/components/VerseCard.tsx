@@ -310,9 +310,16 @@ export const VerseCard = ({
 
       {/* Translation */}
       {hideText ? null : (
-        <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
-          {verse.translation}
-        </p>
+        <>
+          <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
+            {verse.translation}
+          </p>
+          {verse.translation2 && (
+            <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4 mt-4">
+              {verse.translation2}
+            </p>
+          )}
+        </>
       )}
 
       {/* Tafsir Panel */}
