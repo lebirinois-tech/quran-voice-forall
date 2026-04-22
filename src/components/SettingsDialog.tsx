@@ -10,6 +10,7 @@ import {
 } from './ui/dialog';
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Switch } from './ui/switch';
 import { RECITERS, QIRAAT_LABELS, ReciterId, QiraatId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { AudioCacheSettings } from './AudioCacheSettings';
@@ -24,6 +25,8 @@ interface SettingsDialogProps {
   onTextDisplayStyleChange: (style: TextDisplayStyle) => void;
   fontSize: FontSize;
   onFontSizeChange: (size: FontSize) => void;
+  showDualTranslation: boolean;
+  onShowDualTranslationChange: (value: boolean) => void;
 }
 
 const BACKGROUND_COLORS = [
@@ -102,6 +105,8 @@ export const SettingsDialog = ({
   onTextDisplayStyleChange,
   fontSize,
   onFontSizeChange,
+  showDualTranslation,
+  onShowDualTranslationChange,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
