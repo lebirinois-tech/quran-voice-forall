@@ -100,6 +100,10 @@ const parseTajweedText = (text: string): string => {
 };
 
 export const useQuranData = (surahNumber: number) => {
+  const { i18n } = useTranslation();
+  const lang = (i18n.language || 'fr').split('-')[0];
+  const translationEdition = getTranslationEdition(lang);
+
   const [verses, setVerses] = useState<Verse[]>([]);
   const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -117,7 +121,7 @@ export const useQuranData = (surahNumber: number) => {
         const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
+          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${translationEdition}`),
         ]);
 
         const arabicData: QuranApiResponse = await arabicResponse.json();
@@ -143,7 +147,7 @@ export const useQuranData = (surahNumber: number) => {
           setVersesTajweed(tajweedMap);
 
           // Cache for offline use
-          saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
+          saveSurahToCache(surahNumber, lang, combinedVerses, tajweedMap);
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -151,7 +155,7 @@ export const useQuranData = (surahNumber: number) => {
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(surahNumber);
+        const cached = loadSurahFromCache(surahNumber, lang);
         if (cached) {
           setVerses(cached.verses);
           setVersesTajweed(cached.tajweed);
@@ -166,7 +170,7 @@ export const useQuranData = (surahNumber: number) => {
     };
 
     fetchVerses();
-  }, [surahNumber]);
+  }, [surahNumber, lang, translationEdition]);
 
   return { verses, versesTajweed, isLoading, error, isOffline };
 };
