@@ -68,7 +68,10 @@ const SurahReader = () => {
   }, []);
 
   // Fetch verses with Tajweed from API
-  const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
+  const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(
+    num,
+    appSettings.showDualTranslation,
+  );
   const { warshVerses } = useWarshData(num, appSettings.textDisplayStyle === 'warsh-tajweed');
 
   const handleVerseChange = useCallback((verseNum: number) => {

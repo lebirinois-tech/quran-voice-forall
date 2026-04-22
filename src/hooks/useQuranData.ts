@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { useTranslation } from 'react-i18next';
-import { useAppSettings } from './useAppSettings';
 
 // Map app language to AlQuran Cloud translation edition.
 const TRANSLATION_EDITIONS: Record<string, string> = {
@@ -121,11 +120,13 @@ const parseTajweedText = (text: string): string => {
   return result;
 };
 
-export const useQuranData = (surahNumber: number) => {
+export const useQuranData = (
+  surahNumber: number,
+  showDualTranslation = false,
+) => {
   const { i18n } = useTranslation();
   const lang = (i18n.language || 'fr').split('-')[0];
   const translationEdition = getTranslationEdition(lang);
-  const { showDualTranslation } = useAppSettings();
   // Secondary translation: pair FR<->EN; for AR primary, use EN as secondary.
   const secondaryEdition: string | null = showDualTranslation
     ? lang === 'fr'
