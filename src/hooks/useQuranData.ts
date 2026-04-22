@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { useTranslation } from 'react-i18next';
+
+// Map app language to AlQuran Cloud translation edition.
+const TRANSLATION_EDITIONS: Record<string, string> = {
+  fr: 'fr.hamidullah',
+  en: 'en.sahih',
+  ar: 'ar.muyassar',
+};
+
+const getTranslationEdition = (lang: string): string => {
+  const code = (lang || 'fr').split('-')[0];
+  return TRANSLATION_EDITIONS[code] || TRANSLATION_EDITIONS.fr;
+};
 
 interface QuranApiVerse {
   number: number;
@@ -18,7 +31,8 @@ interface QuranApiResponse {
 
 // Local storage keys for offline cache
 const CACHE_KEY_PREFIX = 'quran-offline-';
-const getCacheKey = (surahNumber: number) => `${CACHE_KEY_PREFIX}${surahNumber}`;
+const getCacheKey = (surahNumber: number, lang: string) =>
+  `${CACHE_KEY_PREFIX}${surahNumber}-${lang}`;
 
 interface CachedSurahData {
   verses: Verse[];
@@ -26,19 +40,30 @@ interface CachedSurahData {
   timestamp: number;
 }
 
-const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) => {
+const saveSurahToCache = (
+  surahNumber: number,
+  lang: string,
+  verses: Verse[],
+  tajweed: Record<number, string>,
+) => {
   try {
     const data: CachedSurahData = { verses, tajweed, timestamp: Date.now() };
-    localStorage.setItem(getCacheKey(surahNumber), JSON.stringify(data));
+    localStorage.setItem(getCacheKey(surahNumber, lang), JSON.stringify(data));
   } catch (e) {
     // localStorage might be full, silently fail
     console.warn('Could not cache surah data:', e);
   }
 };
 
-const loadSurahFromCache = (surahNumber: number): CachedSurahData | null => {
+const loadSurahFromCache = (
+  surahNumber: number,
+  lang: string,
+): CachedSurahData | null => {
   try {
-    const raw = localStorage.getItem(getCacheKey(surahNumber));
+    // Try language-specific cache first, fall back to legacy key.
+    const raw =
+      localStorage.getItem(getCacheKey(surahNumber, lang)) ||
+      localStorage.getItem(`${CACHE_KEY_PREFIX}${surahNumber}`);
     if (!raw) return null;
     return JSON.parse(raw) as CachedSurahData;
   } catch {
