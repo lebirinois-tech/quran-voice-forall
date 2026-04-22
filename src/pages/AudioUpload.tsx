@@ -98,21 +98,6 @@ const AudioUpload = () => {
               Retour à la bibliothèque
             </Button>
           </div>
-            <Button
-              onClick={handleVerifyCode}
-              disabled={!accessCode.trim() || isVerifying}
-              className="w-full"
-            >
-              {isVerifying ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Vérification...
-                </span>
-              ) : (
-                'Vérifier le code'
-              )}
-            </Button>
-          </div>
         </main>
       </div>
     );
