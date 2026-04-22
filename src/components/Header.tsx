@@ -8,6 +8,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { useNavigate } from 'react-router-dom';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -45,6 +46,17 @@ export const Header = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isInstalled, deferredPrompt, install } = usePwaInstall();
+  const fallbackSettings = useAppSettings();
+
+  // Always show settings: fall back to internal settings hook if no callbacks were provided.
+  const effectiveReciter = onReciterChange ? reciter : fallbackSettings.reciter;
+  const effectiveBackgroundColor = onBackgroundColorChange ? backgroundColor : fallbackSettings.backgroundColor;
+  const effectiveTextDisplayStyle = onTextDisplayStyleChange ? textDisplayStyle : fallbackSettings.textDisplayStyle;
+  const effectiveFontSize = onFontSizeChange ? fontSize : fallbackSettings.fontSize;
+  const handleReciterChange = onReciterChange ?? fallbackSettings.onReciterChange;
+  const handleBackgroundColorChange = onBackgroundColorChange ?? fallbackSettings.onBackgroundColorChange;
+  const handleTextDisplayStyleChange = onTextDisplayStyleChange ?? fallbackSettings.onTextDisplayStyleChange;
+  const handleFontSizeChange = onFontSizeChange ?? fallbackSettings.onFontSizeChange;
 
   const handleInstall = async () => {
     if (deferredPrompt) {
@@ -101,18 +113,16 @@ export const Header = ({
                 <span className="hidden sm:inline">{t('common.install')}</span>
               </Button>
             )}
-            {onReciterChange && onBackgroundColorChange && onTextDisplayStyleChange && onFontSizeChange && (
-              <SettingsDialog
-                reciter={reciter}
-                onReciterChange={onReciterChange}
-                backgroundColor={backgroundColor}
-                onBackgroundColorChange={onBackgroundColorChange}
-                textDisplayStyle={textDisplayStyle}
-                onTextDisplayStyleChange={onTextDisplayStyleChange}
-                fontSize={fontSize}
-                onFontSizeChange={onFontSizeChange}
-              />
-            )}
+            <SettingsDialog
+              reciter={effectiveReciter}
+              onReciterChange={handleReciterChange}
+              backgroundColor={effectiveBackgroundColor}
+              onBackgroundColorChange={handleBackgroundColorChange}
+              textDisplayStyle={effectiveTextDisplayStyle}
+              onTextDisplayStyleChange={handleTextDisplayStyleChange}
+              fontSize={effectiveFontSize}
+              onFontSizeChange={handleFontSizeChange}
+            />
             {onToggleContinuous && (
               <Button
                 variant="ghost"
