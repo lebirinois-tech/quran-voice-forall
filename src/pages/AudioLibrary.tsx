@@ -46,7 +46,7 @@ const formatDuration = (seconds: number | null) => {
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isOwner } = useAuth();
   const appSettings = useAppSettings();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<AudioCategory>('all');
@@ -150,12 +150,14 @@ const AudioLibrary = () => {
               <p className="text-xs text-muted-foreground">المكتبة الصوتية</p>
             </div>
           </div>
-          <Link to="/audio-upload">
-            <Button size="sm" className="gap-2">
-              <Upload className="h-4 w-4" />
-              Ajouter
-            </Button>
-          </Link>
+          {isOwner && (
+            <Link to="/audio-upload">
+              <Button size="sm" className="gap-2">
+                <Upload className="h-4 w-4" />
+                Ajouter
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Category Tabs */}
@@ -227,7 +229,7 @@ const AudioLibrary = () => {
           <div className="text-center py-16">
             <FileAudio className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground">Aucun audio disponible</p>
-            {isAuthenticated && (
+            {isOwner && (
               <Link to="/audio-upload">
                 <Button variant="outline" className="mt-4 gap-2">
                   <Upload className="h-4 w-4" />
