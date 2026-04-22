@@ -44,17 +44,26 @@ interface CachedSurahData {
   verses: Verse[];
   tajweed: Record<number, string>;
   timestamp: number;
+  translationEdition?: string;
+  secondaryEdition?: string | null;
 }
 
 const saveSurahToCache = (
   surahNumber: number,
   lang: string,
   secondaryEdition: string | null,
+  translationEdition: string,
   verses: Verse[],
   tajweed: Record<number, string>,
 ) => {
   try {
-    const data: CachedSurahData = { verses, tajweed, timestamp: Date.now() };
+    const data: CachedSurahData = {
+      verses,
+      tajweed,
+      timestamp: Date.now(),
+      translationEdition,
+      secondaryEdition,
+    };
     localStorage.setItem(
       getCacheKey(surahNumber, lang, secondaryEdition),
       JSON.stringify(data),
@@ -68,6 +77,7 @@ const saveSurahToCache = (
 const loadSurahFromCache = (
   surahNumber: number,
   lang: string,
+  translationEdition: string,
   secondaryEdition: string | null,
 ): CachedSurahData | null => {
   try {
@@ -78,6 +88,15 @@ const loadSurahFromCache = (
       localStorage.getItem(`${CACHE_KEY_PREFIX}${surahNumber}`);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CachedSurahData;
+    if (
+      parsed.translationEdition &&
+      parsed.translationEdition !== translationEdition
+    ) {
+      return null;
+    }
+    if ((parsed.secondaryEdition ?? null) !== secondaryEdition) {
+      return null;
+    }
     // If the user wants dual translation but cached data doesn't have it,
     // ignore the cache to force a fresh fetch.
     if (secondaryEdition) {
@@ -85,6 +104,15 @@ const loadSurahFromCache = (
         (v) => typeof v.translation2 === 'string' && v.translation2.length > 0,
       );
       if (!hasSecondary) return null;
+      const duplicatedSecondaryCount = parsed.verses.filter(
+        (v) =>
+          typeof v.translation2 === 'string' &&
+          v.translation2.trim().length > 0 &&
+          v.translation2.trim() === v.translation.trim(),
+      ).length;
+      if (duplicatedSecondaryCount > Math.max(1, parsed.verses.length * 0.5)) {
+        return null;
+      }
     }
     return parsed;
   } catch {
@@ -194,7 +222,14 @@ export const useQuranData = (
           setVersesTajweed(tajweedMap);
 
           // Cache for offline use
-          saveSurahToCache(surahNumber, lang, secondaryEdition, combinedVerses, tajweedMap);
+          saveSurahToCache(
+            surahNumber,
+            lang,
+            secondaryEdition,
+            translationEdition,
+            combinedVerses,
+            tajweedMap,
+          );
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -202,7 +237,12 @@ export const useQuranData = (
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(surahNumber, lang, secondaryEdition);
+        const cached = loadSurahFromCache(
+          surahNumber,
+          lang,
+          translationEdition,
+          secondaryEdition,
+        );
         if (cached) {
           setVerses(cached.verses);
           setVersesTajweed(cached.tajweed);
