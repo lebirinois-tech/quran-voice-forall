@@ -1,13 +1,14 @@
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2 } from 'lucide-react';
+import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2, Volume2, VolumeX } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TafsirPanel } from './TafsirPanel';
+import { speakTranslation, stopSpeech, isSpeechSupported, TranslationLang } from '@/lib/translationSpeech';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
@@ -87,6 +88,43 @@ export const VerseCard = ({
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
+  const [speakingLang, setSpeakingLang] = useState<TranslationLang | null>(null);
+
+  // Stop speech when component unmounts
+  useEffect(() => {
+    return () => {
+      if (speakingLang) stopSpeech();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Detect language of the primary translation based on script heuristic
+  const detectLang = (text: string): TranslationLang => {
+    // Simple heuristic: French has more accented chars, English has none
+    return /[àâçéèêëîïôûùüÿœæ]/i.test(text) ? 'fr' : 'en';
+  };
+
+  const handleSpeakTranslation = (text: string, lang: TranslationLang) => {
+    if (!isSpeechSupported()) {
+      toast.error('Lecture vocale non supportée par ce navigateur');
+      return;
+    }
+    if (speakingLang === lang) {
+      stopSpeech();
+      setSpeakingLang(null);
+      return;
+    }
+    setSpeakingLang(lang);
+    speakTranslation({
+      text,
+      lang,
+      onEnd: () => setSpeakingLang(null),
+      onError: () => {
+        setSpeakingLang(null);
+        toast.error('Erreur de lecture vocale');
+      },
+    });
+  };
   
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
