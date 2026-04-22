@@ -56,6 +56,8 @@ export const useAuth = () => {
     return { error };
   }, []);
 
+  const isOwner = !!user?.email && user.email.toLowerCase() === 'lebirinois@gmail.com';
+
   return {
     user,
     session,
@@ -63,6 +65,7 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    isOwner
   };
 };

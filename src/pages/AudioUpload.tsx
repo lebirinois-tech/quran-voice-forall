@@ -24,7 +24,7 @@ type DirectoryPickerWindow = Window & {
 
 const AudioUpload = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isOwner } = useAuth();
   const appSettings = useAppSettings();
   const fileRef = useRef<HTMLInputElement>(null);
   const folderRef = useRef<HTMLInputElement>(null);
@@ -40,30 +40,7 @@ const AudioUpload = () => {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [directoryPickerLoading, setDirectoryPickerLoading] = useState(false);
 
-  const [accessCode, setAccessCode] = useState('');
-  const [isVerified, setIsVerified] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-
-  const handleVerifyCode = async () => {
-    if (!accessCode.trim()) return;
-    setIsVerifying(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-upload-code', {
-        body: { code: accessCode.trim() },
-      });
-      if (error) throw error;
-      if (data?.valid) {
-        setIsVerified(true);
-        toast.success('Code vérifié ! Vous pouvez ajouter du contenu.');
-      } else {
-        toast.error('Code d\'accès incorrect');
-      }
-    } catch {
-      toast.error('Erreur lors de la vérification');
-    } finally {
-      setIsVerifying(false);
-    }
-  };
+  const isVerified = isOwner;
 
   // Fetch existing collections
   const { data: collectionsData } = useQuery({
@@ -107,40 +84,18 @@ const AudioUpload = () => {
             <div className="w-20 h-20 mx-auto mb-4 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
               <Lock className="h-10 w-10 text-primary-foreground" />
             </div>
-            <h1 className="text-xl font-bold text-foreground mb-2">Accès protégé</h1>
+            <h1 className="text-xl font-bold text-foreground mb-2">Accès réservé</h1>
             <p className="text-sm text-muted-foreground">
-              Entrez le code d'accès pour ajouter du contenu au site
+              Seul le propriétaire de l'application peut ajouter ou supprimer du contenu.
             </p>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4 animate-scale-in">
-            <div className="space-y-2">
-              <Label htmlFor="accessCode" className="flex items-center gap-2">
-                <KeyRound className="h-4 w-4" />
-                Code d'accès
-              </Label>
-              <Input
-                id="accessCode"
-                type="password"
-                placeholder="••••••••"
-                value={accessCode}
-                onChange={e => setAccessCode(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleVerifyCode()}
-              />
-            </div>
-            <Button
-              onClick={handleVerifyCode}
-              disabled={!accessCode.trim() || isVerifying}
-              className="w-full"
-            >
-              {isVerifying ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Vérification...
-                </span>
-              ) : (
-                'Vérifier le code'
-              )}
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4 animate-scale-in text-center">
+            <p className="text-sm text-muted-foreground">
+              Connecté en tant que <span className="font-medium text-foreground">{user?.email}</span>
+            </p>
+            <Button onClick={() => navigate('/audio-library')} className="w-full">
+              Retour à la bibliothèque
             </Button>
           </div>
         </main>
