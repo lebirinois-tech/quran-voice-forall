@@ -397,9 +397,41 @@ export const VerseCard = ({
 
       {/* Translation */}
       {hideText ? null : (
-        <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
-          {verse.translation}
-        </p>
+        <div className="border-t border-border pt-4">
+          <p className="text-muted-foreground text-base leading-relaxed">
+            {ttsLang === 'en' && enTranslation ? enTranslation : verse.translation}
+          </p>
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <Select value={ttsLang} onValueChange={(v) => handleLangChange(v as 'fr' | 'en')}>
+              <SelectTrigger className="h-8 w-[130px] rounded-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="en">🇬🇧 English</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant={isSpeaking ? "secondary" : "outline"}
+              size="sm"
+              onClick={handleSpeak}
+              disabled={isLoadingEn}
+              className="rounded-full h-8 text-xs gap-1.5"
+              aria-label={isSpeaking ? "Arrêter la lecture" : "Écouter la traduction"}
+            >
+              {isLoadingEn ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : isSpeaking ? (
+                <Square className="h-3.5 w-3.5" />
+              ) : (
+                <Volume2 className="h-3.5 w-3.5" />
+              )}
+              {isSpeaking
+                ? (ttsLang === 'fr' ? 'Arrêter' : 'Stop')
+                : (ttsLang === 'fr' ? 'Écouter' : 'Listen')}
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Tafsir Panel */}
