@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun } from 'lucide-react';
@@ -9,6 +9,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
+  const hasRedirectedRef = useRef(false);
 
   const openApp = () => {
     // In some installed-PWA desktop contexts, client-side navigation can appear to do nothing.
@@ -19,7 +20,17 @@ const Landing = () => {
   useEffect(() => {
     // If the PWA launches on the marketing landing (e.g. old cached start_url),
     // immediately send users to the actual app experience.
-    if (isInstalled) openApp();
+    // Only auto-redirect when the app is launched in standalone mode
+    // (avoids redirect loops in the regular browser tab where isInstalled may be true).
+    if (hasRedirectedRef.current) return;
+    const isStandalone =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      // iOS Safari
+      (window.navigator as any).standalone === true;
+    if (isInstalled && isStandalone) {
+      hasRedirectedRef.current = true;
+      openApp();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInstalled]);
 
