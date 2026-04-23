@@ -22,7 +22,9 @@ const getHafsPageUrl = (page: number): string => {
 };
 
 const getWarshPageUrl = (page: number): string => {
-  return `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`;
+  // jsDelivr CDN of QuranHub/quran-pages-images — faster than raw.githubusercontent.com
+  // and avoids GitHub's sandbox CSP that can block <img> embedding in some browsers.
+  return `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`;
 };
 
 const getWarshTajweedPageUrl = (page: number): string => {
