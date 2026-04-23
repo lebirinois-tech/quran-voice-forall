@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
@@ -85,6 +85,10 @@ const SurahReader = () => {
     onVerseChange: handleVerseChange,
   });
 
+  // Stable ref to access latest quranAudio inside effects without re-running them
+  const quranAudioRef = useRef(quranAudio);
+  useEffect(() => { quranAudioRef.current = quranAudio; }, [quranAudio]);
+
   // Fetch surah metadata
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
@@ -119,6 +123,10 @@ const SurahReader = () => {
       });
       if (targetVerse) {
         scrollToElement(`verse-${targetVerse.number}`);
+        // Auto-start audio playback from the first verse of the requested page
+        setTimeout(() => {
+          quranAudioRef.current?.playVerse(targetVerse.number);
+        }, 500);
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
