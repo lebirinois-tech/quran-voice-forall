@@ -123,10 +123,15 @@ const SurahReader = () => {
       });
       if (targetVerse) {
         scrollToElement(`verse-${targetVerse.number}`);
-        // Auto-start audio playback from the first verse of the requested page
-        setTimeout(() => {
-          quranAudioRef.current?.playVerse(targetVerse.number);
-        }, 500);
+        // Auto-start audio playback only if the user explicitly requested it
+        // via the "Go" button (gesture pre-unlocked the audio context).
+        const intent = sessionStorage.getItem('autoplayPage');
+        if (intent && parseInt(intent) === targetPage) {
+          sessionStorage.removeItem('autoplayPage');
+          setTimeout(() => {
+            quranAudioRef.current?.playVerse(targetVerse.number);
+          }, 400);
+        }
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
@@ -165,6 +170,20 @@ const SurahReader = () => {
 
   const handleNavigateToPage = (pageNum: number) => {
     const targetSurah = getSurahForPage(pageNum);
+    // Pre-unlock the HTMLAudioElement within the user gesture so autoplay
+    // is allowed once the page loads and we call .play() asynchronously.
+    try {
+      const a = new Audio();
+      a.muted = true;
+      // Tiny silent wav data URI to satisfy the gesture requirement
+      a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+      const p = a.play();
+      if (p && typeof p.then === 'function') {
+        p.catch(() => {/* ignore */}).finally(() => { a.pause(); a.src = ''; });
+      }
+    } catch { /* ignore */ }
+    // Remember user intent to auto-play once verses are loaded
+    sessionStorage.setItem('autoplayPage', String(pageNum));
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
