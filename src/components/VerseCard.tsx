@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { useTtsLang } from '@/hooks/useTtsLang';
+import { useEnglishTranslation } from '@/hooks/useEnglishTranslation';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import { TafsirPanel } from './TafsirPanel';
@@ -90,31 +91,13 @@ export const VerseCard = ({
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
   const [ttsLang] = useTtsLang();
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [enTranslation, setEnTranslation] = useState<string | null>(null);
-  const [isLoadingEn, setIsLoadingEn] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Auto-fetch English translation whenever EN is selected so it shows under the French text.
-  useEffect(() => {
-    if (ttsLang !== 'en' || hideText) return;
-    let cancelled = false;
-    setIsLoadingEn(true);
-    fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (cancelled) return;
-        if (data?.code === 200 && data.data?.text) {
-          setEnTranslation(data.data.text);
-        }
-      })
-      .catch((e) => console.error('English translation fetch failed', e))
-      .finally(() => {
-        if (!cancelled) setIsLoadingEn(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [ttsLang, surahNumber, verse.number, hideText]);
+  const {
+    text: enTranslation,
+    isLoading: isLoadingEn,
+    error: enError,
+  } = useEnglishTranslation(surahNumber, verse.number, ttsLang === 'en' && !hideText);
 
   useEffect(() => {
     return () => {
