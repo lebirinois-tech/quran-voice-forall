@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export type VoiceLang = 'fr' | 'ar';
+export type VoiceLang = 'fr' | 'en' | 'ar';
 
 const VOICE_LANG_KEY = 'quran_voice_lang';
 
@@ -162,13 +162,18 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
 
   const WAKE_WORDS_FR = ['coran', 'quran', 'ok coran', 'hey coran'];
   const WAKE_WORDS_AR = ['قرآن', 'يا قرآن', 'القرآن'];
+  const WAKE_WORDS_EN = ['quran', 'koran', 'ok quran', 'hey quran'];
 
   const getWakeWords = useCallback(() => {
-    return voiceLang === 'ar' ? WAKE_WORDS_AR : WAKE_WORDS_FR;
+    if (voiceLang === 'ar') return WAKE_WORDS_AR;
+    if (voiceLang === 'en') return WAKE_WORDS_EN;
+    return WAKE_WORDS_FR;
   }, [voiceLang]);
 
   const getRecognitionLang = useCallback(() => {
-    return voiceLang === 'ar' ? 'ar-SA' : 'fr-FR';
+    if (voiceLang === 'ar') return 'ar-SA';
+    if (voiceLang === 'en') return 'en-US';
+    return 'fr-FR';
   }, [voiceLang]);
 
   useEffect(() => {
@@ -381,10 +386,112 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
     return null;
   }, [options]);
 
+  // ── English command processing ──
+  const processCommandEn = useCallback((text: string): string | null => {
+    const t = text.toLowerCase().trim();
+
+    if (t.includes('home') || t.includes('back') || t.includes('return')) {
+      options.onGoHome?.(); return 'Going home';
+    }
+    if (t.includes('play') || t.includes('start') || t.includes('read')) {
+      options.onPlay?.(); return 'Playback started';
+    }
+    if (t.includes('pause') || t.includes('stop')) {
+      options.onPause?.(); return 'Paused';
+    }
+    if (t.includes('next') || t.includes('forward')) {
+      options.onNextVerse?.(); return 'Next verse';
+    }
+    if (t.includes('previous') || t.includes('back verse') || t.includes('prior')) {
+      options.onPreviousVerse?.(); return 'Previous verse';
+    }
+
+    const englishNumbers: Record<string, number> = {
+      'one': 1, 'first': 1, 'two': 2, 'second': 2, 'three': 3, 'third': 3,
+      'four': 4, 'fourth': 4, 'five': 5, 'fifth': 5, 'six': 6, 'sixth': 6,
+      'seven': 7, 'seventh': 7, 'eight': 8, 'eighth': 8, 'nine': 9, 'ninth': 9,
+      'ten': 10, 'eleven': 11, 'twelve': 12,
+    };
+
+    const surahNamesEn: Record<string, number> = {
+      'fatiha': 1, 'al fatiha': 1, 'opening': 1,
+      'baqarah': 2, 'al baqarah': 2, 'cow': 2,
+      'yasin': 36, 'ya sin': 36,
+      'rahman': 55, 'ar rahman': 55,
+      'mulk': 67, 'al mulk': 67, 'kingdom': 67,
+      'ikhlas': 112, 'al ikhlas': 112, 'sincerity': 112,
+      'falaq': 113, 'al falaq': 113, 'daybreak': 113,
+      'nas': 114, 'an nas': 114, 'mankind': 114,
+    };
+
+    if (t.includes('surah') || t.includes('sura') || t.includes('chapter') || t.includes('go to')) {
+      const numberMatch = t.match(/\d+/);
+      if (numberMatch) {
+        const n = parseInt(numberMatch[0]);
+        if (n >= 1 && n <= 114) { options.onNavigateToSurah?.(n); return `Going to surah ${n}`; }
+      }
+      for (const [word, n] of Object.entries(englishNumbers)) {
+        if (t.includes(word)) { options.onNavigateToSurah?.(n); return `Going to surah ${n}`; }
+      }
+      for (const [name, n] of Object.entries(surahNamesEn)) {
+        if (t.includes(name)) { options.onNavigateToSurah?.(n); return `Going to ${name}`; }
+      }
+    }
+
+    if (t.includes('page')) {
+      const pageMatch = t.match(/page\s*(\d+)/);
+      if (pageMatch) {
+        const n = parseInt(pageMatch[1]);
+        if (n >= 1 && n <= 604) { options.onNavigateToPage?.(n); return `Going to page ${n}`; }
+      }
+    }
+
+    if (t.includes('juz') || t.includes('part')) {
+      const juzMatch = t.match(/\d+/);
+      if (juzMatch) {
+        const n = parseInt(juzMatch[0]);
+        if (n >= 1 && n <= 30) { options.onNavigateToJuz?.(n); return `Going to Juz ${n}`; }
+      }
+    }
+
+    if (t.includes('verse') && !t.includes('repeat')) {
+      const m = t.match(/verse\s*(\d+)/);
+      if (m) { const n = parseInt(m[1]); options.onReadVerse?.(n); return `Reading verse ${n}`; }
+    }
+
+    if (t.includes('stop repeat') || t.includes('stop repetition') || t.includes('cancel repeat')) {
+      options.onStopRepeat?.(); return 'Repetition stopped';
+    }
+
+    if (t.includes('repeat') || t.includes('loop')) {
+      const rangeMatch = t.match(/verses?\s*(\d+)\s*(?:to|through|until)\s*(\d+)/);
+      if (rangeMatch) {
+        const start = parseInt(rangeMatch[1]), end = parseInt(rangeMatch[2]);
+        let count = 3;
+        if (t.includes('infinite') || t.includes('forever') || t.includes('endless')) count = 0;
+        else { const cm = t.match(/(\d+)\s*times?/); if (cm) count = parseInt(cm[1]); }
+        options.onRepeatRange?.(start, end, count);
+        return `Repeating verses ${start} to ${end} (${count === 0 ? '∞' : count + 'x'})`;
+      }
+      let repeatCount = 3;
+      if (t.includes('infinite') || t.includes('forever') || t.includes('endless')) repeatCount = 0;
+      else {
+        const cm = t.match(/(\d+)\s*times?/);
+        if (cm) repeatCount = parseInt(cm[1]);
+      }
+      options.onRepeatVerse?.(repeatCount);
+      return `Repeating current verse (${repeatCount === 0 ? '∞' : repeatCount + 'x'})`;
+    }
+
+    return null;
+  }, [options]);
+
   const processCommand = useCallback((text: string) => {
     setLastCommand(text.toLowerCase().trim());
-    return voiceLang === 'ar' ? processCommandAr(text) : processCommandFr(text);
-  }, [voiceLang, processCommandAr, processCommandFr]);
+    if (voiceLang === 'ar') return processCommandAr(text);
+    if (voiceLang === 'en') return processCommandEn(text);
+    return processCommandFr(text);
+  }, [voiceLang, processCommandAr, processCommandFr, processCommandEn]);
 
   const containsWakeWord = useCallback((text: string) => {
     const lower = text.toLowerCase().trim();
@@ -410,13 +517,14 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
       setIsAwaitingCommand(true);
       if (commandTimeoutRef.current) clearTimeout(commandTimeoutRef.current);
       commandTimeoutRef.current = setTimeout(() => setIsAwaitingCommand(false), 5000);
-      return voiceLang === 'ar' ? 'جاري الاستماع...' : 'Écoute...';
+      return voiceLang === 'ar' ? 'جاري الاستماع...' : voiceLang === 'en' ? 'Listening...' : 'Écoute...';
     }
 
     // Direct commands without wake word
     const directFr = ['jouer', 'play', 'pause', 'stop', 'suivant', 'précédent', 'arrêter'];
     const directAr = ['تشغيل', 'توقف', 'إيقاف', 'التالي', 'السابق', 'شغل'];
-    const directCmds = voiceLang === 'ar' ? directAr : directFr;
+    const directEn = ['play', 'pause', 'stop', 'next', 'previous', 'home'];
+    const directCmds = voiceLang === 'ar' ? directAr : voiceLang === 'en' ? directEn : directFr;
     if (directCmds.some(cmd => lower.includes(cmd))) return processCommand(text);
 
     return null;

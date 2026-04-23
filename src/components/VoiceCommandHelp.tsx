@@ -36,7 +36,22 @@ export const VoiceCommandHelp = ({ voiceLang = 'fr' }: VoiceCommandHelpProps) =>
     { icon: Layers, command: '"جزء [رقم]"', description: 'انتقل إلى جزء' },
   ];
 
-  const commands = voiceLang === 'ar' ? commandsAr : commandsFr;
+  const commandsEn = [
+    { icon: Radio, command: '"Quran" + command', description: 'Hands-free mode' },
+    { icon: Play, command: '"Play" / "Start"', description: 'Start playback' },
+    { icon: Pause, command: '"Pause" / "Stop"', description: 'Pause playback' },
+    { icon: ArrowRight, command: '"Next"', description: 'Next verse' },
+    { icon: ArrowLeft, command: '"Previous"', description: 'Previous verse' },
+    { icon: Repeat1, command: '"Repeat 3/5 times"', description: 'Repeat verse' },
+    { icon: Repeat, command: '"Repeat verses 1 to 5"', description: 'Repeat a range' },
+    { icon: Pause, command: '"Stop repeat"', description: 'Disable repetition' },
+    { icon: Home, command: '"Home" / "Back"', description: 'Return home' },
+    { icon: BookOpen, command: '"Surah [name/number]"', description: 'Go to surah' },
+    { icon: FileText, command: '"Page [number]"', description: 'Go to page' },
+    { icon: Layers, command: '"Juz [number]"', description: 'Go to Juz' },
+  ];
+
+  const commands = voiceLang === 'ar' ? commandsAr : voiceLang === 'en' ? commandsEn : commandsFr;
   const isAr = voiceLang === 'ar';
 
   return (
@@ -47,10 +62,10 @@ export const VoiceCommandHelp = ({ voiceLang = 'fr' }: VoiceCommandHelpProps) =>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">
-            {isAr ? 'الأوامر الصوتية' : 'Commandes Vocales'}
+            {isAr ? 'الأوامر الصوتية' : voiceLang === 'en' ? 'Voice Commands' : 'Commandes Vocales'}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {isAr ? 'قل "قرآن" ثم الأمر' : 'Dites "Coran" puis la commande'}
+            {isAr ? 'قل "قرآن" ثم الأمر' : voiceLang === 'en' ? 'Say "Quran" then the command' : 'Dites "Coran" puis la commande'}
           </p>
         </div>
       </div>
