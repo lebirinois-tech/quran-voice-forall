@@ -264,7 +264,7 @@ export const useQuranAudio = ({
     });
   }, []);
 
-  const playVerse = useCallback(async (verseNumber: number) => {
+  const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
     setIsLoading(true);
     
     try {
@@ -280,7 +280,7 @@ export const useQuranAudio = ({
       newAudio.playbackRate = playbackSpeedRef.current;
 
       // Check localStorage for cached audio URL (offline support)
-      const cachedUrl = getCachedAudioUrl(reciter, surahNumber, verseNumber);
+      const cachedUrl = getCachedAudioUrl(reciter, targetSurah, verseNumber);
       if (cachedUrl) {
         await playAudioFromUrl(newAudio, cachedUrl);
         setIsPlaying(true);
@@ -290,7 +290,7 @@ export const useQuranAudio = ({
       }
 
       // Use everyayah.com directly for all reciters (cdn.islamic.network is unreliable)
-      const audioUrl = getAudioUrl(surahNumber, verseNumber, reciter);
+      const audioUrl = getAudioUrl(targetSurah, verseNumber, reciter);
       await playAudioFromUrl(newAudio, audioUrl);
       setIsPlaying(true);
       setCurrentVerse(verseNumber);
@@ -301,7 +301,11 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [surahNumber, reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl]);
+  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl]);
+
+  const playVerse = useCallback(async (verseNumber: number) => {
+    await playVerseAt(surahNumber, verseNumber);
+  }, [playVerseAt, surahNumber]);
 
   // Keep ref in sync so the auto-play effect always calls the latest version
   useEffect(() => {
@@ -426,6 +430,7 @@ export const useQuranAudio = ({
     previousVerse,
     goToVerse,
     playVerse,
+    playVerseAt,
     changeReciter,
     seek,
     setCurrentVerse,
