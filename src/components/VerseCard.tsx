@@ -145,10 +145,7 @@ export const VerseCard = ({
     textDisplayStyle === 'tajweed'
       ? sanitizeTajweedHtml(tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined) || '')
       : undefined;
-  const shouldUsePlainArabicFallback =
-    textDisplayStyle === 'tajweed' &&
-    !!effectiveTajweedHtml &&
-    hasFragmentedArabicShaping(effectiveTajweedHtml);
+  const shouldUsePlainArabicFallback = textDisplayStyle === 'tajweed';
 
   const handleDownload = async () => {
     setIsDownloading(true);

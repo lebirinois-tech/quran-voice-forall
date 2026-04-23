@@ -122,11 +122,9 @@ const loadSurahFromCache = (
   secondaryEdition: string | null,
 ): CachedSurahData | null => {
   try {
-    // Try the most specific cache (lang + secondary), then lang-only, then legacy.
-    const raw =
-      localStorage.getItem(getCacheKey(surahNumber, lang, secondaryEdition)) ||
-      localStorage.getItem(getCacheKey(surahNumber, lang, null)) ||
-      localStorage.getItem(`${CACHE_KEY_PREFIX}${surahNumber}`);
+    const raw = localStorage.getItem(
+      getCacheKey(surahNumber, lang, secondaryEdition),
+    );
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CachedSurahData;
     if (
@@ -149,7 +147,8 @@ const loadSurahFromCache = (
         (v) =>
           typeof v.translation2 === 'string' &&
           v.translation2.trim().length > 0 &&
-          v.translation2.trim() === v.translation.trim(),
+          normalizeTranslationText(v.translation2) ===
+            normalizeTranslationText(v.translation),
       ).length;
       if (duplicatedSecondaryCount > Math.max(1, parsed.verses.length * 0.5)) {
         return null;
@@ -222,17 +221,15 @@ export const useQuranData = (
       try {
         // Fetch Uthmanic Arabic text, Tajweed text, primary translation,
         // and (optionally) a secondary translation for dual display.
-        const requests = [
+        const [arabicResponse, tajweedResponse, translationData] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${translationEdition}`),
-        ];
-        const responses = await Promise.all(requests);
-        const arabicData: QuranApiResponse = await responses[0].json();
-        const tajweedData: QuranApiResponse = await responses[1].json();
-        const translationData: QuranApiResponse = await responses[2].json();
+          fetchSurahEdition(surahNumber, translationEdition, true),
+        ]);
+        const arabicData: QuranApiResponse = await arabicResponse.json();
+        const tajweedData: QuranApiResponse = await tajweedResponse.json();
         let translation2Data: QuranApiResponse | null = secondaryEdition
-          ? await fetchSurahEdition(surahNumber, secondaryEdition)
+          ? await fetchSurahEdition(surahNumber, secondaryEdition, true)
           : null;
 
         if (secondaryEdition && isDuplicateTranslationPayload(translationData, translation2Data)) {
