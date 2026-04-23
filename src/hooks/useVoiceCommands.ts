@@ -162,13 +162,18 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
 
   const WAKE_WORDS_FR = ['coran', 'quran', 'ok coran', 'hey coran'];
   const WAKE_WORDS_AR = ['قرآن', 'يا قرآن', 'القرآن'];
+  const WAKE_WORDS_EN = ['quran', 'koran', 'ok quran', 'hey quran'];
 
   const getWakeWords = useCallback(() => {
-    return voiceLang === 'ar' ? WAKE_WORDS_AR : WAKE_WORDS_FR;
+    if (voiceLang === 'ar') return WAKE_WORDS_AR;
+    if (voiceLang === 'en') return WAKE_WORDS_EN;
+    return WAKE_WORDS_FR;
   }, [voiceLang]);
 
   const getRecognitionLang = useCallback(() => {
-    return voiceLang === 'ar' ? 'ar-SA' : 'fr-FR';
+    if (voiceLang === 'ar') return 'ar-SA';
+    if (voiceLang === 'en') return 'en-US';
+    return 'fr-FR';
   }, [voiceLang]);
 
   useEffect(() => {
