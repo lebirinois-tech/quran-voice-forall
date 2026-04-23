@@ -123,10 +123,15 @@ const SurahReader = () => {
       });
       if (targetVerse) {
         scrollToElement(`verse-${targetVerse.number}`);
-        // Auto-start audio playback from the first verse of the requested page
-        setTimeout(() => {
-          quranAudioRef.current?.playVerse(targetVerse.number);
-        }, 500);
+        // Auto-start audio playback only if the user explicitly requested it
+        // via the "Go" button (gesture pre-unlocked the audio context).
+        const intent = sessionStorage.getItem('autoplayPage');
+        if (intent && parseInt(intent) === targetPage) {
+          sessionStorage.removeItem('autoplayPage');
+          setTimeout(() => {
+            quranAudioRef.current?.playVerse(targetVerse.number);
+          }, 400);
+        }
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
