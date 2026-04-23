@@ -54,7 +54,6 @@ const SurahReader = () => {
   const { saveProgress, getSurahProgress } = useReadingProgress();
   const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
   const [currentMushafPage, setCurrentMushafPage] = useState<number | null>(null);
-  const [recordingPage, setRecordingPage] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -520,9 +519,6 @@ const SurahReader = () => {
                               verseText={pageText}
                               label={`Mémorisation — Page ${pageNum}`}
                               reciter={appSettings.reciter}
-                              onRecordingChange={(recording) =>
-                                setRecordingPage(recording ? pageNum : null)
-                              }
                             />
 
                             {pageVerses.map((verse) => (
@@ -542,7 +538,8 @@ const SurahReader = () => {
                                 onPlay={() => quranAudio.playVerse(verse.number)}
                                 onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
                                 isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
-                                hideText={recordingPage === pageNum}
+                                /* Le texte du verset coranique reste toujours visible,
+                                   même pendant et après l'enregistrement. */
                               />
                             ))}
                           </div>
