@@ -94,6 +94,28 @@ export const VerseCard = ({
   const [isLoadingEn, setIsLoadingEn] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
+  // Auto-fetch English translation whenever EN is selected so it shows under the French text.
+  useEffect(() => {
+    if (ttsLang !== 'en' || enTranslation || isLoadingEn || hideText) return;
+    let cancelled = false;
+    setIsLoadingEn(true);
+    fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.code === 200 && data.data?.text) {
+          setEnTranslation(data.data.text);
+        }
+      })
+      .catch((e) => console.error('English translation fetch failed', e))
+      .finally(() => {
+        if (!cancelled) setIsLoadingEn(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ttsLang, surahNumber, verse.number, enTranslation, isLoadingEn, hideText]);
+
   useEffect(() => {
     return () => {
       if (utteranceRef.current && 'speechSynthesis' in window) {
@@ -426,9 +448,24 @@ export const VerseCard = ({
       {/* Translation */}
       {hideText ? null : (
         <div className="border-t border-border pt-4">
+          {/* French translation (always visible) */}
           <p className="text-muted-foreground text-base leading-relaxed">
-            {ttsLang === 'en' && enTranslation ? enTranslation : verse.translation}
+            <span className="text-xs font-semibold text-primary mr-2">FR</span>
+            {verse.translation}
           </p>
+
+          {/* English translation (shown when EN selected) */}
+          {ttsLang === 'en' && (
+            <p className="text-muted-foreground text-base leading-relaxed mt-3 italic">
+              <span className="text-xs font-semibold text-primary mr-2 not-italic">EN</span>
+              {enTranslation
+                ? enTranslation
+                : isLoadingEn
+                  ? 'Loading English translation…'
+                  : 'English translation unavailable'}
+            </p>
+          )}
+
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <Button
               variant={isSpeaking ? "secondary" : "outline"}
