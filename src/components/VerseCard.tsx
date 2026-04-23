@@ -93,12 +93,13 @@ export const VerseCard = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [speakingLang, setSpeakingLang] = useState<'fr' | 'en' | null>(null);
+  const [showEnglish, setShowEnglish] = useState(false);
 
   const {
     text: enTranslation,
     isLoading: isLoadingEn,
     error: enError,
-  } = useEnglishTranslation(surahNumber, verse.number, !hideText);
+  } = useEnglishTranslation(surahNumber, verse.number, !hideText && (showEnglish || ttsLang === 'en'));
 
   useEffect(() => {
     return () => {
