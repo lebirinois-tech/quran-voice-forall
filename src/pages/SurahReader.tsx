@@ -54,7 +54,6 @@ const SurahReader = () => {
   const { saveProgress, getSurahProgress } = useReadingProgress();
   const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
   const [currentMushafPage, setCurrentMushafPage] = useState<number | null>(null);
-  const [recordingPage, setRecordingPage] = useState<number | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
