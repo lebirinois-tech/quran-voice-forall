@@ -92,6 +92,7 @@ export const VerseCard = ({
   const [ttsLang] = useTtsLang();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [speakingLang, setSpeakingLang] = useState<'fr' | 'en' | null>(null);
 
   const {
     text: enTranslation,
@@ -143,7 +144,7 @@ export const VerseCard = ({
     return male || langVoices[0] || null;
   };
 
-  const handleSpeak = async () => {
+  const handleSpeak = async (lang: 'fr' | 'en' = ttsLang) => {
     if (!('speechSynthesis' in window)) {
       toast.error('Synthèse vocale non supportée');
       return;
@@ -152,19 +153,20 @@ export const VerseCard = ({
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      setSpeakingLang(null);
       return;
     }
 
     const utterance = new SpeechSynthesisUtterance('');
-    utterance.lang = ttsLang === 'fr' ? 'fr-FR' : 'en-US';
+    utterance.lang = lang === 'fr' ? 'fr-FR' : 'en-US';
     utterance.pitch = 0.9;
     utterance.rate = 0.95;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onend = () => { setIsSpeaking(false); setSpeakingLang(null); };
+    utterance.onerror = () => { setIsSpeaking(false); setSpeakingLang(null); };
 
     let textToSpeak = verse.translation;
 
-    if (ttsLang === 'en') {
+    if (lang === 'en') {
       if (enTranslation) {
         textToSpeak = enTranslation;
       } else {
@@ -177,10 +179,11 @@ export const VerseCard = ({
 
     window.speechSynthesis.cancel();
     await ensureVoices();
-    const voice = pickMaleVoice(ttsLang);
+    const voice = pickMaleVoice(lang);
     if (voice) utterance.voice = voice;
     utteranceRef.current = utterance;
     setIsSpeaking(true);
+    setSpeakingLang(lang);
     window.speechSynthesis.speak(utterance);
   };
 
@@ -436,23 +439,36 @@ export const VerseCard = ({
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <Button
-              variant={isSpeaking ? "secondary" : "outline"}
+              variant={isSpeaking && speakingLang === 'fr' ? "secondary" : "outline"}
               size="sm"
-              onClick={handleSpeak}
-              disabled={isLoadingEn}
+              onClick={() => handleSpeak('fr')}
               className="rounded-full h-8 text-xs gap-1.5"
-              aria-label={isSpeaking ? "Arrêter la lecture" : "Écouter la traduction"}
+              aria-label={isSpeaking && speakingLang === 'fr' ? "Arrêter la lecture française" : "Écouter la traduction française (voix masculine)"}
             >
-              {isLoadingEn ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : isSpeaking ? (
+              {isSpeaking && speakingLang === 'fr' ? (
                 <Square className="h-3.5 w-3.5" />
               ) : (
                 <Volume2 className="h-3.5 w-3.5" />
               )}
-              {isSpeaking
-                ? (ttsLang === 'fr' ? 'Arrêter' : 'Stop')
-                : (ttsLang === 'fr' ? 'Écouter' : 'Listen')}
+              {isSpeaking && speakingLang === 'fr' ? '🇫🇷 Arrêter' : '🇫🇷 Écouter'}
+            </Button>
+
+            <Button
+              variant={isSpeaking && speakingLang === 'en' ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => handleSpeak('en')}
+              disabled={isLoadingEn || (!enTranslation && ttsLang !== 'en')}
+              className="rounded-full h-8 text-xs gap-1.5"
+              aria-label={isSpeaking && speakingLang === 'en' ? "Stop English playback" : "Listen to English translation (male voice)"}
+            >
+              {isLoadingEn ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : isSpeaking && speakingLang === 'en' ? (
+                <Square className="h-3.5 w-3.5" />
+              ) : (
+                <Volume2 className="h-3.5 w-3.5" />
+              )}
+              {isSpeaking && speakingLang === 'en' ? '🇬🇧 Stop' : '🇬🇧 Listen'}
             </Button>
           </div>
         </div>
