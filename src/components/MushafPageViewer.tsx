@@ -17,23 +17,21 @@ interface MushafPageViewerProps {
 }
 
 // Page image sources
-const getHafsPageUrl = (page: number): string => {
-  return `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`;
-};
-
-const getWarshPageUrl = (page: number): string => {
-  // jsDelivr CDN of QuranHub/quran-pages-images — faster than raw.githubusercontent.com
-  // and avoids GitHub's sandbox CSP that can block <img> embedding in some browsers.
-  return `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`;
-};
-
-const getWarshTajweedPageUrl = (page: number): string => {
-  return `https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`;
-};
-
-const getQalunPageUrl = (page: number): string => {
-  // Use EasyQuran Warsh Tajweed pages (same Nafi' base reading as Qalun)
-  return `https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`;
+const getPageUrls = (page: number, mushafType: MushafType): string[] => {
+  switch (mushafType) {
+    case 'hafs':
+      return [`https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`];
+    case 'warsh-tajweed':
+      return [`https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`];
+    case 'qalun':
+      return [`https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`];
+    case 'warsh':
+    default:
+      return [
+        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
+        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
+      ];
+  }
 };
 
 // Page audio from everyayah.com
@@ -80,6 +78,8 @@ export const MushafPageViewer = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const [imageError, setImageError] = useState(false);
+  const [imageSrc, setImageSrc] = useState('');
+  const [imageSourceIndex, setImageSourceIndex] = useState(0);
   // Use a ref to track manual navigation - survives re-renders without triggering effects
   const hasManuallyNavigatedRef = useRef(
     !!(initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage)
@@ -131,17 +131,9 @@ export const MushafPageViewer = ({
   useEffect(() => {
     setIsLoading(true);
     setImageError(false);
+    setImageSourceIndex(0);
+    setImageSrc(getPageUrls(currentPage, mushafType)[0] ?? '');
   }, [currentPage, mushafType]);
-
-  const getPageUrl = (page: number): string => {
-    switch (mushafType) {
-      case 'hafs': return getHafsPageUrl(page);
-      case 'warsh-tajweed': return getWarshTajweedPageUrl(page);
-      case 'qalun': return getQalunPageUrl(page);
-      case 'warsh':
-      default: return getWarshPageUrl(page);
-    }
-  };
 
   const playPageAudio = useCallback(async (page: number) => {
     setIsPageAudioLoading(true);
@@ -228,7 +220,20 @@ export const MushafPageViewer = ({
   };
 
   const handleImageLoad = () => { setIsLoading(false); setImageError(false); };
-  const handleImageError = () => { setIsLoading(false); setImageError(true); };
+  const handleImageError = () => {
+    const sources = getPageUrls(currentPage, mushafType);
+    const nextIndex = imageSourceIndex + 1;
+
+    if (nextIndex < sources.length) {
+      setImageSourceIndex(nextIndex);
+      setImageSrc(sources[nextIndex]);
+      setIsLoading(true);
+      return;
+    }
+
+    setIsLoading(false);
+    setImageError(true);
+  };
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -290,12 +295,13 @@ export const MushafPageViewer = ({
               </div>
             ) : (
               <img
-                src={getPageUrl(currentPage)}
+                src={imageSrc}
                 alt={`Page ${currentPage} - ${mushafType}`}
                 className={cn(
                   "w-full h-full object-contain transition-opacity duration-300",
                   isLoading ? "opacity-0" : "opacity-100"
                 )}
+                referrerPolicy="no-referrer"
                 onLoad={handleImageLoad}
                 onError={handleImageError}
               />
