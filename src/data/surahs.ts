@@ -59,6 +59,24 @@ export const getFirstVerseOfPage = (surahNumber: number, page: number, totalVers
   return 1;
 };
 
+// Find which Juz (1-30) contains a given (surah, verse)
+export const getJuzForVerse = (surahNumber: number, verseNumber: number): number => {
+  let currentJuz = 1;
+  for (let j = 1; j <= 30; j++) {
+    const start = juzMapping[j];
+    if (!start) continue;
+    if (
+      start.surah < surahNumber ||
+      (start.surah === surahNumber && start.verse <= verseNumber)
+    ) {
+      currentJuz = j;
+    } else {
+      break;
+    }
+  }
+  return currentJuz;
+};
+
 // Juz (part) mapping - each Juz starts at [surahNumber, verseNumber]
 export const juzMapping: Record<number, { surah: number; verse: number; name: string }> = {
   1: { surah: 1, verse: 1, name: "Alif Lam Mim" },

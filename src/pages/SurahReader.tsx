@@ -14,7 +14,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage } from '@/data/surahs';
+import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -464,6 +464,7 @@ const SurahReader = () => {
                       const lastVerseOfPage = pageVerses[pageVerses.length - 1].number;
                       const pageText = pageVerses.map((v) => v.text).join(' ');
                       const isEvenPage = pageNum % 2 === 0;
+                      const juzNum = getJuzForVerse(num, firstVerseOfPage);
 
                       return (
                         <section
@@ -481,6 +482,10 @@ const SurahReader = () => {
                             >
                               <span className="font-semibold text-foreground truncate">
                                 {surah.name}
+                              </span>
+                              <span aria-hidden="true">›</span>
+                              <span className="whitespace-nowrap">
+                                Juz <span className="font-semibold text-foreground">{juzNum}</span>
                               </span>
                               <span aria-hidden="true">›</span>
                               <span className="whitespace-nowrap">
