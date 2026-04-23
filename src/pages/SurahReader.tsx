@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
@@ -14,7 +14,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { surahs, Surah, juzMapping, getVersePage } from '@/data/surahs';
+import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -85,10 +85,6 @@ const SurahReader = () => {
     onVerseChange: handleVerseChange,
   });
 
-  // Stable ref to access latest quranAudio inside effects without re-running them
-  const quranAudioRef = useRef(quranAudio);
-  useEffect(() => { quranAudioRef.current = quranAudio; }, [quranAudio]);
-
   // Fetch surah metadata
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
@@ -123,15 +119,6 @@ const SurahReader = () => {
       });
       if (targetVerse) {
         scrollToElement(`verse-${targetVerse.number}`);
-        // Auto-start audio playback only if the user explicitly requested it
-        // via the "Go" button (gesture pre-unlocked the audio context).
-        const intent = sessionStorage.getItem('autoplayPage');
-        if (intent && parseInt(intent) === targetPage) {
-          sessionStorage.removeItem('autoplayPage');
-          setTimeout(() => {
-            quranAudioRef.current?.playVerse(targetVerse.number);
-          }, 400);
-        }
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
@@ -170,20 +157,12 @@ const SurahReader = () => {
 
   const handleNavigateToPage = (pageNum: number) => {
     const targetSurah = getSurahForPage(pageNum);
-    // Pre-unlock the HTMLAudioElement within the user gesture so autoplay
-    // is allowed once the page loads and we call .play() asynchronously.
-    try {
-      const a = new Audio();
-      a.muted = true;
-      // Tiny silent wav data URI to satisfy the gesture requirement
-      a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-      const p = a.play();
-      if (p && typeof p.then === 'function') {
-        p.catch(() => {/* ignore */}).finally(() => { a.pause(); a.src = ''; });
-      }
-    } catch { /* ignore */ }
-    // Remember user intent to auto-play once verses are loaded
-    sessionStorage.setItem('autoplayPage', String(pageNum));
+    const targetSurahMeta = surahs.find((s) => s.number === targetSurah);
+    const targetVerse = targetSurahMeta
+      ? getFirstVerseOfPage(targetSurah, pageNum, targetSurahMeta.versesCount)
+      : 1;
+
+    quranAudio.playVerseAt(targetSurah, targetVerse);
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
