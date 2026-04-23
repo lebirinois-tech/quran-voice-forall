@@ -88,6 +88,92 @@ export const VerseCard = ({
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
+  const [ttsLang, setTtsLang] = useState<'fr' | 'en'>(() => {
+    return (localStorage.getItem('verse-tts-lang') as 'fr' | 'en') || 'fr';
+  });
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [enTranslation, setEnTranslation] = useState<string | null>(null);
+  const [isLoadingEn, setIsLoadingEn] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (utteranceRef.current) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const pickMaleVoice = (lang: 'fr' | 'en'): SpeechSynthesisVoice | null => {
+    const voices = window.speechSynthesis.getVoices();
+    const langPrefix = lang === 'fr' ? 'fr' : 'en';
+    const langVoices = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
+    // Prefer voices with "male" or known male names
+    const maleHints = ['male', 'homme', 'thomas', 'daniel', 'paul', 'henri', 'nicolas', 'alex', 'fred', 'george', 'james', 'david', 'mark'];
+    const male = langVoices.find(v => maleHints.some(h => v.name.toLowerCase().includes(h)));
+    return male || langVoices[0] || null;
+  };
+
+  const handleSpeak = async () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    let textToSpeak = verse.translation;
+
+    if (ttsLang === 'en') {
+      if (enTranslation) {
+        textToSpeak = enTranslation;
+      } else {
+        setIsLoadingEn(true);
+        try {
+          const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`);
+          const data = await res.json();
+          if (data.code === 200 && data.data?.text) {
+            textToSpeak = data.data.text;
+            setEnTranslation(data.data.text);
+          } else {
+            throw new Error('No English translation');
+          }
+        } catch (e) {
+          console.error('English translation fetch failed', e);
+          toast.error('Traduction anglaise indisponible');
+          setIsLoadingEn(false);
+          return;
+        }
+        setIsLoadingEn(false);
+      }
+    }
+
+    if (!('speechSynthesis' in window)) {
+      toast.error('Synthèse vocale non supportée');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = ttsLang === 'fr' ? 'fr-FR' : 'en-US';
+    const voice = pickMaleVoice(ttsLang);
+    if (voice) utterance.voice = voice;
+    utterance.pitch = 0.9;
+    utterance.rate = 0.95;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    utteranceRef.current = utterance;
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleLangChange = (lang: 'fr' | 'en') => {
+    setTtsLang(lang);
+    localStorage.setItem('verse-tts-lang', lang);
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
   
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
