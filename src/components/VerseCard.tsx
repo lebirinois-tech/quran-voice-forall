@@ -239,30 +239,39 @@ export const VerseCard = ({
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const edition = RECITERS[reciter].id;
-      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/${edition}`);
-      const data = await response.json();
-      
-      if (data.code === 200 && data.data?.audio) {
-        const audioResponse = await fetch(data.data.audio);
-        const blob = await audioResponse.blob();
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${surah?.name || 'Surah'}_${surahNumber}_Verset_${verse.number}_${RECITERS[reciter].name}.mp3`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        toast.success('Téléchargement terminé');
-      } else {
-        throw new Error('Audio non disponible');
-      }
+      // everyayah.com folder mapping (same source as playback)
+      const EVERYAYAH_FOLDERS: Record<string, string> = {
+        alafasy: 'Alafasy_128kbps',
+        husary: 'Husary_128kbps',
+        minshawi: 'Minshawy_Murattal_128kbps',
+        sudais: 'Abdurrahmaan_As-Sudais_192kbps',
+        shuraim: 'Saood_ash-Shuraym_128kbps',
+        ghamdi: 'Ghamadi_40kbps',
+        ajmi: 'ahmed_ibn_ali_al_ajamy_128kbps',
+        muaiqly: 'Maher_AlMuaiqly_64kbps',
+      };
+      const folder = EVERYAYAH_FOLDERS[reciter] || EVERYAYAH_FOLDERS.alafasy;
+      const surahStr = String(surahNumber).padStart(3, '0');
+      const verseStr = String(verse.number).padStart(3, '0');
+      const audioUrl = `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
+
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) throw new Error(`HTTP ${audioResponse.status}`);
+      const blob = await audioResponse.blob();
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${surah?.englishName || 'Surah'}_${surahNumber}_Verset_${verse.number}_${RECITERS[reciter]?.name || reciter}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      toast.success('Téléchargement terminé');
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Erreur lors du téléchargement');
+      toast.error('Erreur lors du téléchargement audio');
     } finally {
       setIsDownloading(false);
     }
