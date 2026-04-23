@@ -151,9 +151,19 @@ serve(async (req) => {
 
     // Download a batch of pages
     if (action === "download-batch") {
-      const start = parseInt(body.startPage) || 1;
-      const end = Math.min(parseInt(body.endPage) || start + 9, 604);
-      
+      const rawStart = parseInt(body.startPage);
+      const rawEnd = parseInt(body.endPage);
+      const start = Math.max(1, Math.min(604, Number.isFinite(rawStart) ? rawStart : 1));
+      const end = Math.max(start, Math.min(604, Number.isFinite(rawEnd) ? rawEnd : start + 9));
+
+      const MAX_BATCH = 20;
+      if (end - start + 1 > MAX_BATCH) {
+        return new Response(
+          JSON.stringify({ error: `Batch too large (max ${MAX_BATCH} pages per request)` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const results = [];
       for (let p = start; p <= end; p++) {
         try {
