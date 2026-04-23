@@ -291,21 +291,9 @@
   font-size: inherit;
   direction: rtl;
   line-height: 2.5;
-  color: hsl(var(--foreground));
-  /* Keep arabic shaping (letter joining) intact across coloured spans */
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "liga", "calt", "rlig";
-  -webkit-font-feature-settings: "liga", "calt", "rlig";
 }
 
-/* Inner coloured spans must NOT break arabic letter joining.
-   Setting them to inline with no isolation lets the browser shape
-   neighbouring letters (e.g. ا ل ف) as a single connected word. */
-.tajweed-text span {
-  display: inline;
-  unicode-bidi: inherit;
-  font: inherit;
-  text-rendering: inherit;
-  font-feature-settings: inherit;
-  -webkit-font-feature-settings: inherit;
+/* Base text color - ensure non-tajweed text is visible */
+.tajweed-text {
+  color: hsl(var(--foreground));
 }

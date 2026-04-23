@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,15 +9,13 @@ import { toast } from 'sonner';
 import { Mail, Lock, User, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { z } from 'zod';
 
+const emailSchema = z.string().email('Email invalide');
+const passwordSchema = z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères');
+const displayNameSchema = z.string().min(2, 'Le nom doit contenir au moins 2 caractères').optional();
+
 const Auth = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { signIn, signUp, isAuthenticated, loading } = useAuth();
-
-  const emailSchema = z.string().email(t('auth.invalidEmail'));
-  const passwordSchema = z.string().min(6, t('auth.passwordTooShort'));
-  const displayNameSchema = z.string().min(2, t('auth.nameTooShort')).optional();
-
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,32 +66,30 @@ const Auth = () => {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error(t('auth.invalidCredentials'));
+            toast.error('Email ou mot de passe incorrect');
           } else if (error.message.includes('Email not confirmed')) {
-            toast.error(t('auth.emailNotConfirmed'));
+            toast.error('Veuillez confirmer votre email avant de vous connecter');
           } else {
-            console.error('Sign-in error:', error);
-            toast.error(t('auth.error'));
+            toast.error(error.message);
           }
           return;
         }
-        toast.success(t('auth.loginSuccess'));
+        toast.success('Connexion réussie !');
         navigate('/');
       } else {
         const { error } = await signUp(email, password, displayName || undefined);
         if (error) {
           if (error.message.includes('User already registered')) {
-            toast.error(t('auth.emailUsed'));
+            toast.error('Cet email est déjà utilisé');
           } else {
-            console.error('Sign-up error:', error);
-            toast.error(t('auth.error'));
+            toast.error(error.message);
           }
           return;
         }
-        toast.success(t('auth.accountCreated'));
+        toast.success('Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
       }
     } catch (error) {
-      toast.error(t('auth.error'));
+      toast.error('Une erreur est survenue');
     } finally {
       setSubmitting(false);
     }
@@ -118,10 +113,10 @@ const Auth = () => {
             <BookOpen className="h-10 w-10 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            {isLogin ? t('auth.login') : t('auth.signup')}
+            {isLogin ? 'Connexion' : 'Créer un compte'}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isLogin ? t('auth.loginAr') : t('auth.signupAr')}
+            {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
           </p>
         </div>
 
@@ -130,12 +125,12 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="displayName" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                {t('auth.displayName')}
+                Nom d'affichage
               </Label>
               <Input
                 id="displayName"
                 type="text"
-                placeholder={t('auth.yourName')}
+                placeholder="Votre nom"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className={errors.displayName ? 'border-destructive' : ''}
@@ -149,7 +144,7 @@ const Auth = () => {
           <div className="space-y-2">
             <Label htmlFor="email" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              {t('auth.email')}
+              Email
             </Label>
             <Input
               id="email"
@@ -168,7 +163,7 @@ const Auth = () => {
           <div className="space-y-2">
             <Label htmlFor="password" className="flex items-center gap-2">
               <Lock className="h-4 w-4" />
-              {t('auth.password')}
+              Mot de passe
             </Label>
             <div className="relative">
               <Input
@@ -201,16 +196,16 @@ const Auth = () => {
             {submitting ? (
               <span className="flex items-center gap-2">
                 <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                {isLogin ? t('auth.loggingIn') : t('auth.signingUp')}
+                {isLogin ? 'Connexion...' : 'Inscription...'}
               </span>
             ) : (
-              isLogin ? t('auth.loginButton') : t('auth.signupButton')
+              isLogin ? 'Se connecter' : 'Créer mon compte'
             )}
           </Button>
 
           <div className="text-center pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
+              {isLogin ? "Pas encore de compte ?" : "Déjà inscrit ?"}
             </p>
             <button
               type="button"
@@ -220,13 +215,13 @@ const Auth = () => {
               }}
               className="text-primary hover:underline font-medium"
             >
-              {isLogin ? t('auth.createAccount') : t('auth.loginButton')}
+              {isLogin ? "Créer un compte" : "Se connecter"}
             </button>
           </div>
         </form>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          {t('auth.hint')}
+          En vous inscrivant, vous pouvez sauvegarder votre progression de lecture du Coran
         </p>
       </main>
     </div>

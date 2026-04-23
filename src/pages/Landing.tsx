@@ -4,14 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
-import { useTranslation } from 'react-i18next';
-import { Header } from '@/components/Header';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
-  const { t } = useTranslation();
 
   const openApp = () => {
     // In some installed-PWA desktop contexts, client-side navigation can appear to do nothing.
@@ -34,33 +31,30 @@ const Landing = () => {
   const features = [
     {
       icon: BookOpen,
-      title: t('landing.feature1Title'),
+      title: 'Coran Complet',
       titleAr: 'القرآن الكامل',
-      description: t('landing.feature1Desc')
+      description: '114 sourates avec texte arabe et traduction française'
     },
     {
       icon: Mic,
-      title: t('landing.feature2Title'),
+      title: 'Commandes Vocales',
       titleAr: 'الأوامر الصوتية',
-      description: t('landing.feature2Desc')
+      description: 'Navigation mains-libres pour une accessibilité totale'
     },
     {
       icon: Volume2,
-      title: t('landing.feature3Title'),
+      title: 'Récitation Audio',
       titleAr: 'التلاوة الصوتية',
-      description: t('landing.feature3Desc')
+      description: 'Écoutez les récitations par des récitateurs renommés'
     }
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Settings, Language and Install at the top from launch */}
-      <Header />
-
       {/* Theme Toggle */}
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="fixed bottom-4 right-4 z-50 p-2 rounded-full bg-card border border-border shadow-lg"
+        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-card border border-border shadow-lg"
         aria-label="Toggle theme"
       >
         {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -80,15 +74,16 @@ const Landing = () => {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-in">
-              {t('landing.title')}
+              Apprenons le Coran
             </h1>
             
             <p className="text-2xl md:text-3xl font-arabic text-primary mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              {t('landing.subtitle')}
+              القرآن الكريم للجميع
             </p>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              {t('landing.description')}
+              Application coranique accessible avec commandes vocales, 
+              récitation audio et mode hors-ligne.
             </p>
 
             {/* CTA Buttons */}
@@ -100,7 +95,7 @@ const Landing = () => {
                   className="gap-2 text-lg px-8 py-6"
                 >
                   <BookOpen className="h-5 w-5" />
-                  {t('common.openApp')}
+                  Ouvrir l'Application
                 </Button>
               ) : (
                 <>
@@ -110,7 +105,7 @@ const Landing = () => {
                     className="gap-2 text-lg px-8 py-6 shadow-lg"
                   >
                     <Download className="h-5 w-5" />
-                    {t('landing.installFree')}
+                    Installer Gratuitement
                   </Button>
                   <Button 
                     onClick={openApp}
@@ -118,7 +113,7 @@ const Landing = () => {
                     size="lg" 
                     className="gap-2 text-lg px-8 py-6"
                   >
-                    {t('landing.tryOnline')}
+                    Essayer en Ligne
                   </Button>
                 </>
               )}
@@ -144,7 +139,7 @@ const Landing = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
-            {t('landing.features')}
+            Fonctionnalités
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -170,10 +165,10 @@ const Landing = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-4">
-            {t('landing.downloadTitle')}
+            Télécharger l'Application
           </h2>
           <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-            {t('landing.downloadDesc')}
+            Installez l'application sur votre appareil pour un accès rapide et hors-ligne
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -184,7 +179,7 @@ const Landing = () => {
                   <Monitor className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">{t('landing.desktop')}</h3>
+                  <h3 className="font-semibold text-foreground">Ordinateur</h3>
                   <p className="text-sm text-muted-foreground">Windows / Mac / Linux</p>
                 </div>
               </div>
@@ -207,7 +202,7 @@ const Landing = () => {
                 variant="outline" 
                 className="w-full"
               >
-                {t('landing.detailedInstructions')}
+                Instructions détaillées
               </Button>
             </div>
 
@@ -218,7 +213,7 @@ const Landing = () => {
                   <Smartphone className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">{t('landing.android')}</h3>
+                  <h3 className="font-semibold text-foreground">Android</h3>
                   <p className="text-sm text-muted-foreground">Chrome</p>
                 </div>
               </div>
@@ -241,7 +236,7 @@ const Landing = () => {
                 className="w-full gap-2"
               >
                 <Download className="h-4 w-4" />
-                {t('common.install')}
+                Installer
               </Button>
             </div>
 
@@ -252,7 +247,7 @@ const Landing = () => {
                   <Apple className="h-6 w-6 text-gray-700 dark:text-gray-300" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">{t('landing.ios')}</h3>
+                  <h3 className="font-semibold text-foreground">iPhone / iPad</h3>
                   <p className="text-sm text-muted-foreground">Safari</p>
                 </div>
               </div>
@@ -275,7 +270,7 @@ const Landing = () => {
                 variant="outline" 
                 className="w-full"
               >
-                {t('landing.detailedInstructions')}
+                Instructions détaillées
               </Button>
             </div>
           </div>
@@ -288,19 +283,19 @@ const Landing = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto text-center">
             <div>
               <span className="text-2xl">📴</span>
-              <p className="text-sm font-medium text-foreground mt-2">{t('landing.offline')}</p>
+              <p className="text-sm font-medium text-foreground mt-2">Mode Hors-ligne</p>
             </div>
             <div>
               <span className="text-2xl">⚡</span>
-              <p className="text-sm font-medium text-foreground mt-2">{t('landing.fastLoad')}</p>
+              <p className="text-sm font-medium text-foreground mt-2">Chargement Rapide</p>
             </div>
             <div>
               <span className="text-2xl">🆓</span>
-              <p className="text-sm font-medium text-foreground mt-2">{t('landing.free')}</p>
+              <p className="text-sm font-medium text-foreground mt-2">100% Gratuit</p>
             </div>
             <div>
               <span className="text-2xl">🔒</span>
-              <p className="text-sm font-medium text-foreground mt-2">{t('landing.secure')}</p>
+              <p className="text-sm font-medium text-foreground mt-2">Sécurisé</p>
             </div>
           </div>
         </div>
@@ -310,7 +305,7 @@ const Landing = () => {
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground text-sm">
-            {t('landing.footer')}
+            © 2024 Apprenons le Coran - Application accessible pour tous
           </p>
           <p className="text-primary font-arabic mt-2">
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ

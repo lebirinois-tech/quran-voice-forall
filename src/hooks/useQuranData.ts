@@ -1,19 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { useTranslation } from 'react-i18next';
-
-// Map app language to AlQuran Cloud translation edition.
-const TRANSLATION_EDITIONS: Record<string, string> = {
-  fr: 'fr.hamidullah',
-  en: 'en.sahih',
-  ar: 'ar.muyassar',
-};
-
-const getTranslationEdition = (lang: string): string => {
-  const code = (lang || 'fr').split('-')[0];
-  return TRANSLATION_EDITIONS[code] || TRANSLATION_EDITIONS.fr;
-};
 
 interface QuranApiVerse {
   number: number;
@@ -29,132 +16,31 @@ interface QuranApiResponse {
   };
 }
 
-const normalizeTranslationText = (text: string | undefined): string =>
-  (text || '').replace(/\s+/g, ' ').trim().toLowerCase();
-
-const isDuplicateTranslationPayload = (
-  primary: QuranApiResponse,
-  secondary: QuranApiResponse | null,
-): boolean => {
-  if (!secondary || primary.code !== 200 || secondary.code !== 200) return false;
-
-  const sampleSize = Math.min(
-    primary.data.ayahs.length,
-    secondary.data.ayahs.length,
-  );
-  if (sampleSize === 0) return false;
-
-  const duplicatedCount = primary.data.ayahs.reduce((count, ayah, index) => {
-    return (
-      count +
-      Number(
-        normalizeTranslationText(ayah.text) ===
-          normalizeTranslationText(secondary.data.ayahs[index]?.text),
-      )
-    );
-  }, 0);
-
-  return duplicatedCount > Math.max(1, sampleSize * 0.5);
-};
-
-const fetchSurahEdition = async (
-  surahNumber: number,
-  edition: string,
-  bustCache = false,
-): Promise<QuranApiResponse> => {
-  const cacheBust = bustCache ? `?_=${Date.now()}` : '';
-  const response = await fetch(
-    `https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}${cacheBust}`,
-    { cache: bustCache ? 'reload' : 'default' },
-  );
-  return response.json();
-};
-
 // Local storage keys for offline cache
 const CACHE_KEY_PREFIX = 'quran-offline-';
-const getCacheKey = (
-  surahNumber: number,
-  lang: string,
-  secondaryEdition: string | null,
-) =>
-  `${CACHE_KEY_PREFIX}${surahNumber}-${lang}${
-    secondaryEdition ? `-${secondaryEdition}` : ''
-  }`;
+const getCacheKey = (surahNumber: number) => `${CACHE_KEY_PREFIX}${surahNumber}`;
 
 interface CachedSurahData {
   verses: Verse[];
   tajweed: Record<number, string>;
   timestamp: number;
-  translationEdition?: string;
-  secondaryEdition?: string | null;
 }
 
-const saveSurahToCache = (
-  surahNumber: number,
-  lang: string,
-  secondaryEdition: string | null,
-  translationEdition: string,
-  verses: Verse[],
-  tajweed: Record<number, string>,
-) => {
+const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) => {
   try {
-    const data: CachedSurahData = {
-      verses,
-      tajweed,
-      timestamp: Date.now(),
-      translationEdition,
-      secondaryEdition,
-    };
-    localStorage.setItem(
-      getCacheKey(surahNumber, lang, secondaryEdition),
-      JSON.stringify(data),
-    );
+    const data: CachedSurahData = { verses, tajweed, timestamp: Date.now() };
+    localStorage.setItem(getCacheKey(surahNumber), JSON.stringify(data));
   } catch (e) {
     // localStorage might be full, silently fail
     console.warn('Could not cache surah data:', e);
   }
 };
 
-const loadSurahFromCache = (
-  surahNumber: number,
-  lang: string,
-  translationEdition: string,
-  secondaryEdition: string | null,
-): CachedSurahData | null => {
+const loadSurahFromCache = (surahNumber: number): CachedSurahData | null => {
   try {
-    const raw = localStorage.getItem(
-      getCacheKey(surahNumber, lang, secondaryEdition),
-    );
+    const raw = localStorage.getItem(getCacheKey(surahNumber));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as CachedSurahData;
-    if (
-      parsed.translationEdition &&
-      parsed.translationEdition !== translationEdition
-    ) {
-      return null;
-    }
-    if ((parsed.secondaryEdition ?? null) !== secondaryEdition) {
-      return null;
-    }
-    // If the user wants dual translation but cached data doesn't have it,
-    // ignore the cache to force a fresh fetch.
-    if (secondaryEdition) {
-      const hasSecondary = parsed.verses.some(
-        (v) => typeof v.translation2 === 'string' && v.translation2.length > 0,
-      );
-      if (!hasSecondary) return null;
-      const duplicatedSecondaryCount = parsed.verses.filter(
-        (v) =>
-          typeof v.translation2 === 'string' &&
-          v.translation2.trim().length > 0 &&
-          normalizeTranslationText(v.translation2) ===
-            normalizeTranslationText(v.translation),
-      ).length;
-      if (duplicatedSecondaryCount > Math.max(1, parsed.verses.length * 0.5)) {
-        return null;
-      }
-    }
-    return parsed;
+    return JSON.parse(raw) as CachedSurahData;
   } catch {
     return null;
   }
@@ -188,24 +74,7 @@ const parseTajweedText = (text: string): string => {
   return result;
 };
 
-export const useQuranData = (
-  surahNumber: number,
-  showDualTranslation = false,
-) => {
-  const { i18n } = useTranslation();
-  const lang = (i18n.language || 'fr').split('-')[0];
-  // Primary translation always matches the UI language.
-  const translationEdition = getTranslationEdition(lang);
-  // In dual mode, add a secondary translation in a *different* language.
-  // - UI in FR → secondary = EN
-  // - UI in EN → secondary = FR
-  // - UI in AR → secondary = EN
-  const secondaryEdition: string | null = !showDualTranslation
-    ? null
-    : lang === 'en'
-      ? 'fr.hamidullah'
-      : 'en.sahih';
-
+export const useQuranData = (surahNumber: number) => {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -219,42 +88,22 @@ export const useQuranData = (
       setIsOffline(false);
 
       try {
-        // Fetch Uthmanic Arabic text, Tajweed text, primary translation,
-        // and (optionally) a secondary translation for dual display.
-        const [arabicResponse, tajweedResponse, translationData] = await Promise.all([
+        // Fetch Uthmanic Arabic text, Tajweed text, and French translation
+        const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-          fetchSurahEdition(surahNumber, translationEdition, true),
+          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
         ]);
+
         const arabicData: QuranApiResponse = await arabicResponse.json();
         const tajweedData: QuranApiResponse = await tajweedResponse.json();
-        let translation2Data: QuranApiResponse | null = secondaryEdition
-          ? await fetchSurahEdition(surahNumber, secondaryEdition, true)
-          : null;
-
-        if (secondaryEdition && isDuplicateTranslationPayload(translationData, translation2Data)) {
-          translation2Data = await fetchSurahEdition(surahNumber, secondaryEdition, true);
-        }
-
-        if (isDuplicateTranslationPayload(translationData, translation2Data)) {
-          translation2Data = null;
-        }
+        const translationData: QuranApiResponse = await translationResponse.json();
 
         if (arabicData.code === 200 && translationData.code === 200) {
           const combinedVerses: Verse[] = arabicData.data.ayahs.map((ayah, index) => ({
             number: ayah.numberInSurah,
             text: ayah.text,
             translation: translationData.data.ayahs[index]?.text || '',
-            translation2:
-              translation2Data?.code === 200
-                ? (() => {
-                    const secondaryText = translation2Data.data.ayahs[index]?.text || '';
-                    return normalizeTranslationText(secondaryText) !==
-                      normalizeTranslationText(translationData.data.ayahs[index]?.text)
-                      ? secondaryText
-                      : undefined;
-                  })()
-                : undefined,
             page: ayah.page,
           }));
 
@@ -269,14 +118,7 @@ export const useQuranData = (
           setVersesTajweed(tajweedMap);
 
           // Cache for offline use
-          saveSurahToCache(
-            surahNumber,
-            lang,
-            secondaryEdition,
-            translationEdition,
-            combinedVerses,
-            tajweedMap,
-          );
+          saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -284,12 +126,7 @@ export const useQuranData = (
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(
-          surahNumber,
-          lang,
-          translationEdition,
-          secondaryEdition,
-        );
+        const cached = loadSurahFromCache(surahNumber);
         if (cached) {
           setVerses(cached.verses);
           setVersesTajweed(cached.tajweed);
@@ -304,7 +141,7 @@ export const useQuranData = (
     };
 
     fetchVerses();
-  }, [surahNumber, lang, translationEdition, secondaryEdition]);
+  }, [surahNumber]);
 
   return { verses, versesTajweed, isLoading, error, isOffline };
 };

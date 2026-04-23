@@ -9,12 +9,9 @@ const STORAGE_KEYS = {
   BACKGROUND_COLOR: 'quran-background-color',
   TEXT_DISPLAY_STYLE: 'quran-text-display-style',
   FONT_SIZE: 'quran-font-size',
-  SHOW_DUAL_TRANSLATION: 'quran-show-dual-translation',
 };
 
 const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
-
-const DUAL_TRANSLATION_EVENT = 'quran-dual-translation-changed';
 
 export const useAppSettings = () => {
   const [reciter, setReciter] = useState<ReciterId>(() => {
@@ -35,23 +32,6 @@ export const useAppSettings = () => {
     const saved = localStorage.getItem(STORAGE_KEYS.FONT_SIZE);
     return (saved as FontSize) || 'medium';
   });
-
-  const [showDualTranslation, setShowDualTranslation] = useState<boolean>(() => {
-    // Default ON: show Arabic + primary translation + secondary translation
-    // (e.g. FR + EN). The user can still disable it from Settings.
-    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION);
-    return saved === null ? true : saved === 'true';
-  });
-
-  // Sync this hook instance with changes coming from any other instance.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<boolean>).detail;
-      if (typeof detail === 'boolean') setShowDualTranslation(detail);
-    };
-    window.addEventListener(DUAL_TRANSLATION_EVENT, handler);
-    return () => window.removeEventListener(DUAL_TRANSLATION_EVENT, handler);
-  }, []);
 
   // Apply background color to document
   useEffect(() => {
@@ -79,25 +59,14 @@ export const useAppSettings = () => {
     localStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
   }, []);
 
-  const handleShowDualTranslationChange = useCallback((value: boolean) => {
-    setShowDualTranslation(value);
-    localStorage.setItem(STORAGE_KEYS.SHOW_DUAL_TRANSLATION, String(value));
-    // Broadcast so all useAppSettings() instances stay in sync.
-    window.dispatchEvent(
-      new CustomEvent(DUAL_TRANSLATION_EVENT, { detail: value }),
-    );
-  }, []);
-
   return {
     reciter,
     backgroundColor,
     textDisplayStyle,
     fontSize,
-    showDualTranslation,
     onReciterChange: handleReciterChange,
     onBackgroundColorChange: handleBackgroundColorChange,
     onTextDisplayStyleChange: handleTextDisplayStyleChange,
     onFontSizeChange: handleFontSizeChange,
-    onShowDualTranslationChange: handleShowDualTranslationChange,
   };
 };

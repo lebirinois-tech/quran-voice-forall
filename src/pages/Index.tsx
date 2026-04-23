@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Header } from '@/components/Header';
 import { SurahCard } from '@/components/SurahCard';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
@@ -11,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music, Upload } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music } from 'lucide-react';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,6 @@ import { cn } from '@/lib/utils';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [pageNumber, setPageNumber] = useState('');
   const [juzNumber, setJuzNumber] = useState('');
@@ -38,9 +36,9 @@ const Index = () => {
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
-      toast.error(t('index.logoutError'));
+      toast.error('Erreur lors de la déconnexion');
     } else {
-      toast.success(t('index.logoutSuccess'));
+      toast.success('Déconnexion réussie');
     }
   };
 
@@ -49,12 +47,12 @@ const Index = () => {
 
   const handleNavigateToSurah = (surahNumber: number) => {
     navigate(`/surah/${surahNumber}`);
-    toast.success(t('index.openingSurah', { n: surahNumber }));
+    toast.success(`Ouverture de la sourate ${surahNumber}`);
   };
 
   const handleNavigateToPage = (pageNum: number) => {
     if (pageNum < 1 || pageNum > 604) {
-      toast.error(t('index.invalidPage'));
+      toast.error('Numéro de page invalide (1-604)');
       return;
     }
     
@@ -73,16 +71,16 @@ const Index = () => {
     }
     
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
-    toast.success(t('index.navToPage', { page: pageNum, surah: targetSurah }));
+    toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
 
   const handleNavigateToJuz = (juzNum: number) => {
     const juz = juzMapping[juzNum];
     if (juz) {
       navigate(`/surah/${juz.surah}`);
-      toast.success(t('index.navToJuz', { n: juzNum, name: juz.name }));
+      toast.success(`Navigation vers Juz ${juzNum} - ${juz.name}`);
     } else {
-      toast.error(t('index.invalidJuz'));
+      toast.error('Numéro de Juz invalide (1-30)');
     }
   };
 
@@ -113,10 +111,6 @@ const Index = () => {
         onBackgroundColorChange={appSettings.onBackgroundColorChange}
         textDisplayStyle={appSettings.textDisplayStyle}
         onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
-        fontSize={appSettings.fontSize}
-        onFontSizeChange={appSettings.onFontSizeChange}
-        showDualTranslation={appSettings.showDualTranslation}
-        onShowDualTranslationChange={appSettings.onShowDualTranslationChange}
       />
 
       <main className="container mx-auto px-4 py-6">
@@ -132,14 +126,14 @@ const Index = () => {
               </span>
               <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
                 <LogOut className="h-4 w-4" />
-                {t('index.logout')}
+                Déconnexion
               </Button>
             </div>
           ) : (
             <Link to="/auth">
               <Button variant="default" size="sm" className="gap-2">
                 <LogIn className="h-4 w-4" />
-                {t('index.login')}
+                Connexion
               </Button>
             </Link>
           )}
@@ -155,9 +149,9 @@ const Index = () => {
                     <History className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t('index.continueReading')}</p>
+                    <p className="text-sm text-muted-foreground">Reprendre la lecture</p>
                     <p className="font-semibold text-foreground">
-                      {lastReadSurah.name} - {t('index.verse')} {lastRead.verse_number}
+                      {lastReadSurah.name} - Verset {lastRead.verse_number}
                     </p>
                   </div>
                 </div>
@@ -165,7 +159,7 @@ const Index = () => {
                   onClick={() => navigate(`/surah/${lastRead.surah_number}?verse=${lastRead.verse_number}`)}
                   size="sm"
                 >
-                  {t('index.continueButton')}
+                  Continuer
                 </Button>
               </div>
             </div>
@@ -178,10 +172,10 @@ const Index = () => {
             <BookOpen className="h-12 w-12 text-primary" />
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            {t('index.welcome')}
+            Bienvenue dans le Saint Coran
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto">
-            {t('index.welcomeDesc')}
+            Lisez, écoutez et mémorisez le Coran avec des commandes vocales pour une accessibilité totale
           </p>
         </section>
 
@@ -198,7 +192,7 @@ const Index = () => {
           
           {!voiceCommands.isSupported && (
             <p className="text-sm text-muted-foreground text-center">
-              {t('index.voiceNotSupported')}
+              Les commandes vocales ne sont pas supportées par votre navigateur
             </p>
           )}
         </section>
@@ -210,7 +204,7 @@ const Index = () => {
             <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{t('index.goToPage')}</span>
+                <span className="text-sm font-medium text-foreground">Aller à la page</span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -221,7 +215,7 @@ const Index = () => {
                   value={pageNumber}
                   onChange={(e) => setPageNumber(e.target.value)}
                   className="h-10 text-base bg-background"
-                  aria-label={t('index.goToPage')}
+                  aria-label="Numéro de page"
                 />
                 <Button 
                   onClick={() => {
@@ -231,7 +225,7 @@ const Index = () => {
                   size="sm"
                   className="px-4"
                 >
-                  {t('index.go')}
+                  Go
                 </Button>
               </div>
             </div>
@@ -240,7 +234,7 @@ const Index = () => {
             <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Layers className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{t('index.goToJuz')}</span>
+                <span className="text-sm font-medium text-foreground">Aller au Juz</span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -251,7 +245,7 @@ const Index = () => {
                   value={juzNumber}
                   onChange={(e) => setJuzNumber(e.target.value)}
                   className="h-10 text-base bg-background"
-                  aria-label={t('index.goToJuz')}
+                  aria-label="Numéro de Juz"
                 />
                 <Button 
                   onClick={() => {
@@ -261,7 +255,7 @@ const Index = () => {
                   size="sm"
                   className="px-4"
                 >
-                  {t('index.go')}
+                  Go
                 </Button>
               </div>
             </div>
@@ -274,11 +268,11 @@ const Index = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={t('index.searchSurah')}
+              placeholder="Rechercher une sourate..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12 text-base bg-card border-border focus-accessible"
-              aria-label={t('index.searchSurah')}
+              aria-label="Rechercher une sourate"
             />
           </div>
         </section>
@@ -287,22 +281,22 @@ const Index = () => {
         <section className="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto animate-fade-in" style={{ animationDelay: '0.15s' }}>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
             <p className="text-2xl font-bold text-primary">114</p>
-            <p className="text-xs text-muted-foreground">{t('index.surahs')}</p>
+            <p className="text-xs text-muted-foreground">Sourates</p>
           </div>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
             <p className="text-2xl font-bold text-secondary">6236</p>
-            <p className="text-xs text-muted-foreground">{t('index.verses')}</p>
+            <p className="text-xs text-muted-foreground">Versets</p>
           </div>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
             <p className="text-2xl font-bold text-primary">604</p>
-            <p className="text-xs text-muted-foreground">{t('index.pages')}</p>
+            <p className="text-xs text-muted-foreground">Pages</p>
           </div>
         </section>
 
         {/* Surah List */}
         <section className="mb-8">
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <span className="gold-underline">{t('index.surahList')}</span>
+            <span className="gold-underline">Liste des Sourates</span>
             <span className="text-sm font-normal text-muted-foreground">
               ({filteredSurahs.length})
             </span>
@@ -325,7 +319,7 @@ const Index = () => {
 
           {filteredSurahs.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">{t('index.noSurahFound')}</p>
+              <p className="text-muted-foreground">Aucune sourate trouvée</p>
             </div>
           )}
         </section>
@@ -344,21 +338,14 @@ const Index = () => {
             <Link to="/audio-library">
               <Button variant="outline" className="gap-2">
                 <Music className="h-4 w-4" />
-                {t('index.audioLibrary')}
-              </Button>
-            </Link>
-            {/* Add Content Button (protected by access code on the page) */}
-            <Link to="/audio-upload">
-              <Button variant="outline" className="gap-2">
-                <Upload className="h-4 w-4" />
-                {t('index.addContent')}
+                Bibliothèque Audio
               </Button>
             </Link>
             {/* Install Button */}
             <Link to="/install">
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                {t('common.installApp')}
+                Installer l'application
               </Button>
             </Link>
             {/* Update Check Button */}
@@ -369,7 +356,7 @@ const Index = () => {
               disabled={isChecking}
             >
               <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
-              {isChecking ? t('index.checking') : t('index.checkUpdate')}
+              {isChecking ? 'Vérification...' : 'Rechercher une mise à jour'}
             </Button>
           </div>
           

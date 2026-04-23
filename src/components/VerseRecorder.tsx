@@ -1,11 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit, SaveAll } from 'lucide-react';
+import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
-import { Slider } from './ui/slider';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { cn } from '@/lib/utils';
 import { useRecordingStorage } from '@/hooks/useRecordingStorage';
 import { toast } from 'sonner';
@@ -36,17 +34,6 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [echoEnabled, setEchoEnabled] = useState(false);
-  const [echoPreset, setEchoPreset] = useState<string>('custom');
-  const [echoIntensity, setEchoIntensity] = useState(50);
-  const [saveFormat, setSaveFormat] = useState<'wav' | 'mp3'>('mp3');
-
-  const ECHO_PRESETS: Record<string, { label: string; delay: number; feedback: number; wet: number }> = {
-    karaoke: { label: '🎤 Karaoké', delay: 0.25, feedback: 0.5, wet: 0.7 },
-    mosque: { label: '🕌 Mosquée', delay: 0.55, feedback: 0.65, wet: 0.8 },
-    hall: { label: '🏛️ Salle', delay: 0.35, feedback: 0.4, wet: 0.5 },
-    light: { label: '💨 Léger', delay: 0.15, feedback: 0.25, wet: 0.3 },
-    custom: { label: '🎚️ Manuel', delay: 0, feedback: 0, wet: 0 },
-  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -120,21 +107,15 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       sourceNodeRef.current = source;
 
       if (echoEnabled) {
-        const preset = ECHO_PRESETS[echoPreset];
-        const isCustom = echoPreset === 'custom';
-        const intensity = echoIntensity / 100;
-        const delayVal = isCustom ? 0.2 + intensity * 0.4 : preset.delay;
-        const feedbackVal = isCustom ? 0.3 + intensity * 0.45 : preset.feedback;
-        const wetVal = isCustom ? 0.3 + intensity * 0.6 : preset.wet;
-
+        // Echo effect: delay + feedback loop
         const delay = ctx.createDelay(1.0);
-        delay.delayTime.value = delayVal;
+        delay.delayTime.value = 0.35;
 
         const feedback = ctx.createGain();
-        feedback.gain.value = feedbackVal;
+        feedback.gain.value = 0.55;
 
         const wetGain = ctx.createGain();
-        wetGain.gain.value = wetVal;
+        wetGain.gain.value = 0.65;
 
         // Source -> destination (dry)
         source.connect(ctx.destination);
@@ -162,131 +143,13 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       console.error('Playback error:', err);
       toast.error("Erreur de lecture");
     }
-  }, [activeBlob, echoEnabled, echoIntensity, echoPreset, stopPlayback]);
-
-  // Helper: render blob with echo effect using OfflineAudioContext
-  const applyEchoToBlob = useCallback(async (blob: Blob): Promise<Blob> => {
-    const arrayBuffer = await blob.arrayBuffer();
-    const tempCtx = new AudioContext();
-    const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
-    await tempCtx.close();
-
-    const sr = audioBuffer.sampleRate;
-    const preset = ECHO_PRESETS[echoPreset];
-    const isCustom = echoPreset === 'custom';
-    const intensity = echoIntensity / 100;
-    const delayTime = isCustom ? 0.2 + intensity * 0.4 : preset.delay;
-    const feedbackVal = isCustom ? 0.3 + intensity * 0.45 : preset.feedback;
-    const wetVal = isCustom ? 0.3 + intensity * 0.6 : preset.wet;
-    const duration = audioBuffer.duration + delayTime * 4;
-
-    const offline = new OfflineAudioContext(audioBuffer.numberOfChannels, Math.ceil(duration * sr), sr);
-
-    const source = offline.createBufferSource();
-    source.buffer = audioBuffer;
-
-    const delay = offline.createDelay(1.0);
-    delay.delayTime.value = delayTime;
-    const feedback = offline.createGain();
-    feedback.gain.value = feedbackVal;
-    const wetGain = offline.createGain();
-    wetGain.gain.value = wetVal;
-
-    source.connect(offline.destination);
-    source.connect(delay);
-    delay.connect(feedback);
-    feedback.connect(delay);
-    delay.connect(wetGain);
-    wetGain.connect(offline.destination);
-
-    source.start();
-    const rendered = await offline.startRendering();
-
-    // Encode based on selected format
-    if (saveFormat === 'mp3') {
-      const lamejs = await import('lamejs');
-      const numCh = rendered.numberOfChannels;
-      const samples = rendered.length;
-      const sampleRate = rendered.sampleRate;
-      const mp3encoder = new lamejs.Mp3Encoder(numCh, sampleRate, 128);
-      const mp3Data: BlobPart[] = [];
-
-      const left = rendered.getChannelData(0);
-      const right = numCh > 1 ? rendered.getChannelData(1) : left;
-
-      const sampleBlockSize = 1152;
-      const leftInt = new Int16Array(samples);
-      const rightInt = new Int16Array(samples);
-      for (let i = 0; i < samples; i++) {
-        leftInt[i] = Math.max(-1, Math.min(1, left[i])) * (left[i] < 0 ? 0x8000 : 0x7FFF);
-        rightInt[i] = Math.max(-1, Math.min(1, right[i])) * (right[i] < 0 ? 0x8000 : 0x7FFF);
-      }
-
-      for (let i = 0; i < samples; i += sampleBlockSize) {
-        const leftChunk = leftInt.subarray(i, i + sampleBlockSize);
-        const rightChunk = rightInt.subarray(i, i + sampleBlockSize);
-        const mp3buf = numCh > 1
-          ? mp3encoder.encodeBuffer(leftChunk, rightChunk)
-          : mp3encoder.encodeBuffer(leftChunk);
-        if (mp3buf.length > 0) mp3Data.push(new Uint8Array(mp3buf).buffer as ArrayBuffer);
-      }
-      const end = mp3encoder.flush();
-      if (end.length > 0) mp3Data.push(new Uint8Array(end).buffer as ArrayBuffer);
-
-      return new Blob(mp3Data, { type: 'audio/mp3' });
-    } else {
-      // WAV encoding
-      const numCh = rendered.numberOfChannels;
-      const length = rendered.length;
-      const wavBuffer = new ArrayBuffer(44 + length * numCh * 2);
-      const view = new DataView(wavBuffer);
-      const writeStr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
-      writeStr(0, 'RIFF');
-      view.setUint32(4, 36 + length * numCh * 2, true);
-      writeStr(8, 'WAVE');
-      writeStr(12, 'fmt ');
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, numCh, true);
-      view.setUint32(24, sr, true);
-      view.setUint32(28, sr * numCh * 2, true);
-      view.setUint16(32, numCh * 2, true);
-      view.setUint16(34, 16, true);
-      writeStr(36, 'data');
-      view.setUint32(40, length * numCh * 2, true);
-
-      let offset = 44;
-      const channels = Array.from({ length: numCh }, (_, i) => rendered.getChannelData(i));
-      for (let i = 0; i < length; i++) {
-        for (let ch = 0; ch < numCh; ch++) {
-          const sample = Math.max(-1, Math.min(1, channels[ch][i]));
-          view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
-          offset += 2;
-        }
-      }
-
-      return new Blob([wavBuffer], { type: 'audio/wav' });
-    }
-  }, [echoIntensity, echoPreset, saveFormat]);
+  }, [activeBlob, echoEnabled, stopPlayback]);
 
   const handleSave = useCallback(async () => {
     if (!recordedBlob) return;
     await saveRecording(recordedBlob);
-    toast.success('Enregistrement sauvegardé');
+    toast.success('Enregistrement sauvegardé sur l\'appareil');
   }, [recordedBlob, saveRecording]);
-
-  const handleSaveWithEcho = useCallback(async () => {
-    if (!activeBlob) return;
-    try {
-      const echoBlob = await applyEchoToBlob(activeBlob);
-      await saveRecording(echoBlob);
-      setRecordedBlob(null); // clear unsaved, now saved version has echo
-      toast.success('Sauvegardé avec écho');
-    } catch (err) {
-      console.error('Echo save error:', err);
-      toast.error("Erreur lors de l'application de l'écho");
-    }
-  }, [activeBlob, applyEchoToBlob, saveRecording]);
 
   const handleDelete = useCallback(async () => {
     await deleteRecording();
@@ -368,7 +231,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                   {isPlayingRecording ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
 
-                {/* Echo toggle + presets */}
+                {/* Echo toggle */}
                 <div className="flex items-center gap-1.5">
                   <Switch id={`echo-${surahNumber}-${verseNumber}`} checked={echoEnabled} onCheckedChange={setEchoEnabled} className="scale-75" />
                   <Label htmlFor={`echo-${surahNumber}-${verseNumber}`} className="text-[11px] text-muted-foreground cursor-pointer">
@@ -376,58 +239,11 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
                   </Label>
                 </div>
 
-                {echoEnabled && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Select value={echoPreset} onValueChange={setEchoPreset}>
-                      <SelectTrigger className="h-7 w-[120px] text-[11px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(ECHO_PRESETS).map(([key, p]) => (
-                          <SelectItem key={key} value={key} className="text-xs">{p.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {echoPreset === 'custom' && (
-                      <div className="flex items-center gap-2 min-w-[100px]">
-                        <Slider
-                          value={[echoIntensity]}
-                          onValueChange={([v]) => setEchoIntensity(v)}
-                          min={10}
-                          max={100}
-                          step={5}
-                          className="w-20"
-                        />
-                        <span className="text-[10px] text-muted-foreground w-6">{echoIntensity}%</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 {recordedBlob && (
                   <Button variant="ghost" size="sm" onClick={handleSave} className="gap-1 text-xs">
                     <Save className="h-3.5 w-3.5" />
                     Sauvegarder
                   </Button>
-                )}
-
-                {activeBlob && echoEnabled && (
-                  <div className="flex items-center gap-1.5">
-                    <Select value={saveFormat} onValueChange={(v) => setSaveFormat(v as 'wav' | 'mp3')}>
-                      <SelectTrigger className="h-7 w-[70px] text-[11px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mp3">MP3</SelectItem>
-                        <SelectItem value="wav">WAV</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="ghost" size="sm" onClick={handleSaveWithEcho} className="gap-1 text-xs text-primary">
-                      <SaveAll className="h-3.5 w-3.5" />
-                      Sauver + Écho
-                    </Button>
-                  </div>
                 )}
 
                 <Button variant="ghost" size="sm" onClick={handleCompare} disabled={isComparing} className="gap-1 text-xs">

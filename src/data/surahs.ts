@@ -11,8 +11,6 @@ export interface Verse {
   number: number;
   text: string;
   translation: string;
-  /** Optional secondary translation (e.g., English when primary is French). */
-  translation2?: string;
   page?: number;
 }
 

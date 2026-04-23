@@ -7,7 +7,7 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { Download, Search, Music, Upload, Play, Pause, Clock, FileAudio, ArrowLeft, FolderOpen, ChevronDown, ChevronRight } from 'lucide-react';
+import { Download, Search, Music, Upload, Play, Pause, Clock, FileAudio, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AudioCategory = 'all' | 'recitation' | 'cours' | 'doua' | 'autre';
@@ -24,7 +24,6 @@ interface AudioItem {
   title: string;
   description: string | null;
   category: string;
-  collection: string | null;
   file_url: string;
   file_size: number | null;
   duration_seconds: number | null;
@@ -46,12 +45,10 @@ const formatDuration = (seconds: number | null) => {
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isOwner } = useAuth();
+  const { isAuthenticated } = useAuth();
   const appSettings = useAppSettings();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<AudioCategory>('all');
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
-  const [expandedCollections, setExpandedCollections] = useState<Set<string>>(new Set());
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [audioEl] = useState(() => new Audio());
 
@@ -70,25 +67,8 @@ const AudioLibrary = () => {
 
   const filtered = audios.filter(a =>
     a.title.toLowerCase().includes(search.toLowerCase()) ||
-    (a.description || '').toLowerCase().includes(search.toLowerCase()) ||
-    (a.collection || '').toLowerCase().includes(search.toLowerCase())
+    (a.description || '').toLowerCase().includes(search.toLowerCase())
   );
-
-  // Get unique collections
-  const collections = [...new Set(filtered.map(a => a.collection).filter(Boolean))] as string[];
-
-  // Group items
-  const collectionItems = selectedCollection
-    ? filtered.filter(a => a.collection === selectedCollection)
-    : filtered;
-
-  const toggleCollection = (name: string) => {
-    setExpandedCollections(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name); else next.add(name);
-      return next;
-    });
-  };
 
   const handlePlay = (item: AudioItem) => {
     if (playingId === item.id) {
@@ -150,7 +130,7 @@ const AudioLibrary = () => {
               <p className="text-xs text-muted-foreground">المكتبة الصوتية</p>
             </div>
           </div>
-          {isOwner && (
+          {isAuthenticated && (
             <Link to="/audio-upload">
               <Button size="sm" className="gap-2">
                 <Upload className="h-4 w-4" />
@@ -188,36 +168,6 @@ const AudioLibrary = () => {
           />
         </div>
 
-        {/* Collections */}
-        {collections.length > 0 && !search && (
-          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-            <button
-              onClick={() => setSelectedCollection(null)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1 ${
-                !selectedCollection
-                  ? 'bg-secondary text-secondary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
-            >
-              📂 Toutes
-            </button>
-            {collections.map(col => (
-              <button
-                key={col}
-                onClick={() => setSelectedCollection(selectedCollection === col ? null : col)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1 ${
-                  selectedCollection === col
-                    ? 'bg-secondary text-secondary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                <FolderOpen className="h-3 w-3" />
-                {col}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* List */}
         {isLoading ? (
           <div className="space-y-3">
@@ -225,11 +175,11 @@ const AudioLibrary = () => {
               <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />
             ))}
           </div>
-        ) : collectionItems.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <FileAudio className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground">Aucun audio disponible</p>
-            {isOwner && (
+            {isAuthenticated && (
               <Link to="/audio-upload">
                 <Button variant="outline" className="mt-4 gap-2">
                   <Upload className="h-4 w-4" />
@@ -240,7 +190,7 @@ const AudioLibrary = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {collectionItems.map(item => (
+            {filtered.map(item => (
               <div
                 key={item.id}
                 className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 card-hover"
@@ -260,16 +210,10 @@ const AudioLibrary = () => {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground text-sm truncate">{item.title}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                     <span className="px-1.5 py-0.5 bg-muted rounded text-[10px]">
                       {CATEGORY_LABELS[item.category] || item.category}
                     </span>
-                    {item.collection && (
-                      <span className="px-1.5 py-0.5 bg-secondary/50 rounded text-[10px] flex items-center gap-0.5">
-                        <FolderOpen className="h-2.5 w-2.5" />
-                        {item.collection}
-                      </span>
-                    )}
                     {item.duration_seconds && (
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />

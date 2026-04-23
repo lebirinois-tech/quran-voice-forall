@@ -14,25 +14,9 @@ export type Database = {
   }
   public: {
     Tables: {
-      allowed_uploaders: {
-        Row: {
-          granted_at: string
-          user_id: string
-        }
-        Insert: {
-          granted_at?: string
-          user_id: string
-        }
-        Update: {
-          granted_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       audio_downloads: {
         Row: {
           category: string
-          collection: string | null
           created_at: string
           description: string | null
           duration_seconds: number | null
@@ -45,7 +29,6 @@ export type Database = {
         }
         Insert: {
           category?: string
-          collection?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -58,7 +41,6 @@ export type Database = {
         }
         Update: {
           category?: string
-          collection?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -127,7 +109,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_app_owner: { Args: never; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
