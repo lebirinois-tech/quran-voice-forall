@@ -85,6 +85,10 @@ const SurahReader = () => {
     onVerseChange: handleVerseChange,
   });
 
+  // Stable ref to access latest quranAudio inside effects without re-running them
+  const quranAudioRef = useRef(quranAudio);
+  useEffect(() => { quranAudioRef.current = quranAudio; }, [quranAudio]);
+
   // Fetch surah metadata
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
