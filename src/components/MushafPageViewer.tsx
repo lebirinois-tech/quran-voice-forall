@@ -25,23 +25,19 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   switch (mushafType) {
     case 'hafs':
       return [
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/hafs/${page}.jpg`,
-        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/hafs/${page}.jpg`,
         `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`,
       ];
     case 'warsh-tajweed':
+      // No reliable colored Warsh source available — fall back to plain Warsh pages
       return [
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh-tajweed/${page}.jpg`,
-        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh-tajweed/${page}.jpg`,
-        `https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`,
+        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
+        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
       ];
     case 'qalun':
+      // No reliable Qalun image source — fall back to plain Warsh (same Nafi' base reading)
       return [
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/qalun/${page}.jpg`,
-        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/qalun/${page}.jpg`,
-        // Fallback to Warsh-Tajweed (same Nafi' base reading)
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh-tajweed/${page}.jpg`,
-        `https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`,
+        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
+        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
       ];
     case 'warsh':
     default:
