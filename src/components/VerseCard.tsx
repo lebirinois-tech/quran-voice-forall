@@ -96,11 +96,37 @@ export const VerseCard = ({
 
   useEffect(() => {
     return () => {
-      if (utteranceRef.current) {
+      if (utteranceRef.current && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
     };
   }, []);
+
+  const ensureVoices = async (): Promise<SpeechSynthesisVoice[]> => {
+    const synth = window.speechSynthesis;
+    const existing = synth.getVoices();
+
+    if (existing.length > 0) {
+      return existing;
+    }
+
+    return new Promise((resolve) => {
+      let settled = false;
+
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        synth.removeEventListener('voiceschanged', handleVoicesChanged);
+        resolve(synth.getVoices());
+      };
+
+      const handleVoicesChanged = () => finish();
+      const timeoutId = window.setTimeout(finish, 700);
+
+      synth.addEventListener('voiceschanged', handleVoicesChanged);
+    });
+  };
 
   const pickMaleVoice = (lang: 'fr' | 'en'): SpeechSynthesisVoice | null => {
     const voices = window.speechSynthesis.getVoices();
@@ -113,11 +139,23 @@ export const VerseCard = ({
   };
 
   const handleSpeak = async () => {
+    if (!('speechSynthesis' in window)) {
+      toast.error('Synthèse vocale non supportée');
+      return;
+    }
+
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       return;
     }
+
+    const utterance = new SpeechSynthesisUtterance('');
+    utterance.lang = ttsLang === 'fr' ? 'fr-FR' : 'en-US';
+    utterance.pitch = 0.9;
+    utterance.rate = 0.95;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
 
     let textToSpeak = verse.translation;
 
@@ -145,20 +183,12 @@ export const VerseCard = ({
       }
     }
 
-    if (!('speechSynthesis' in window)) {
-      toast.error('Synthèse vocale non supportée');
-      return;
-    }
+    utterance.text = textToSpeak;
 
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = ttsLang === 'fr' ? 'fr-FR' : 'en-US';
+    await ensureVoices();
     const voice = pickMaleVoice(ttsLang);
     if (voice) utterance.voice = voice;
-    utterance.pitch = 0.9;
-    utterance.rate = 0.95;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
     utteranceRef.current = utterance;
     setIsSpeaking(true);
     window.speechSynthesis.speak(utterance);
