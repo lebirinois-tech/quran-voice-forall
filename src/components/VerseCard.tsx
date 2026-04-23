@@ -1,12 +1,13 @@
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2 } from 'lucide-react';
+import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2, Volume2, Square } from 'lucide-react';
 import { Button } from './ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TafsirPanel } from './TafsirPanel';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
@@ -87,6 +88,92 @@ export const VerseCard = ({
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
+  const [ttsLang, setTtsLang] = useState<'fr' | 'en'>(() => {
+    return (localStorage.getItem('verse-tts-lang') as 'fr' | 'en') || 'fr';
+  });
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [enTranslation, setEnTranslation] = useState<string | null>(null);
+  const [isLoadingEn, setIsLoadingEn] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (utteranceRef.current) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const pickMaleVoice = (lang: 'fr' | 'en'): SpeechSynthesisVoice | null => {
+    const voices = window.speechSynthesis.getVoices();
+    const langPrefix = lang === 'fr' ? 'fr' : 'en';
+    const langVoices = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
+    // Prefer voices with "male" or known male names
+    const maleHints = ['male', 'homme', 'thomas', 'daniel', 'paul', 'henri', 'nicolas', 'alex', 'fred', 'george', 'james', 'david', 'mark'];
+    const male = langVoices.find(v => maleHints.some(h => v.name.toLowerCase().includes(h)));
+    return male || langVoices[0] || null;
+  };
+
+  const handleSpeak = async () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    let textToSpeak = verse.translation;
+
+    if (ttsLang === 'en') {
+      if (enTranslation) {
+        textToSpeak = enTranslation;
+      } else {
+        setIsLoadingEn(true);
+        try {
+          const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`);
+          const data = await res.json();
+          if (data.code === 200 && data.data?.text) {
+            textToSpeak = data.data.text;
+            setEnTranslation(data.data.text);
+          } else {
+            throw new Error('No English translation');
+          }
+        } catch (e) {
+          console.error('English translation fetch failed', e);
+          toast.error('Traduction anglaise indisponible');
+          setIsLoadingEn(false);
+          return;
+        }
+        setIsLoadingEn(false);
+      }
+    }
+
+    if (!('speechSynthesis' in window)) {
+      toast.error('Synthèse vocale non supportée');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = ttsLang === 'fr' ? 'fr-FR' : 'en-US';
+    const voice = pickMaleVoice(ttsLang);
+    if (voice) utterance.voice = voice;
+    utterance.pitch = 0.9;
+    utterance.rate = 0.95;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    utteranceRef.current = utterance;
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleLangChange = (lang: 'fr' | 'en') => {
+    setTtsLang(lang);
+    localStorage.setItem('verse-tts-lang', lang);
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
   
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
@@ -310,9 +397,41 @@ export const VerseCard = ({
 
       {/* Translation */}
       {hideText ? null : (
-        <p className="text-muted-foreground text-base leading-relaxed border-t border-border pt-4">
-          {verse.translation}
-        </p>
+        <div className="border-t border-border pt-4">
+          <p className="text-muted-foreground text-base leading-relaxed">
+            {ttsLang === 'en' && enTranslation ? enTranslation : verse.translation}
+          </p>
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <Select value={ttsLang} onValueChange={(v) => handleLangChange(v as 'fr' | 'en')}>
+              <SelectTrigger className="h-8 w-[130px] rounded-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                <SelectItem value="en">🇬🇧 English</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant={isSpeaking ? "secondary" : "outline"}
+              size="sm"
+              onClick={handleSpeak}
+              disabled={isLoadingEn}
+              className="rounded-full h-8 text-xs gap-1.5"
+              aria-label={isSpeaking ? "Arrêter la lecture" : "Écouter la traduction"}
+            >
+              {isLoadingEn ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : isSpeaking ? (
+                <Square className="h-3.5 w-3.5" />
+              ) : (
+                <Volume2 className="h-3.5 w-3.5" />
+              )}
+              {isSpeaking
+                ? (ttsLang === 'fr' ? 'Arrêter' : 'Stop')
+                : (ttsLang === 'fr' ? 'Écouter' : 'Listen')}
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Tafsir Panel */}
