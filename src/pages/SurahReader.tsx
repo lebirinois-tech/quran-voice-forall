@@ -121,7 +121,7 @@ const SurahReader = () => {
         scrollToElement(`verse-${targetVerse.number}`);
         // Auto-start audio playback from the first verse of the requested page
         setTimeout(() => {
-          quranAudio.playVerse(targetVerse.number);
+          quranAudioRef.current?.playVerse(targetVerse.number);
         }, 500);
       }
     }
