@@ -281,9 +281,42 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               <div className="font-arabic text-xl leading-loose text-foreground text-right" dir="rtl">
                 {tafsirText}
               </div>
+
+              {/* Translation buttons */}
+              <div className="mt-4 pt-4 border-t border-border/50 flex flex-wrap gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => translateTafsir('fr')}
+                  disabled={translatingFr}
+                  className="gap-2"
+                >
+                  {translatingFr ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                  <span>🇫🇷 {tafsirFr ? 'Retraduire' : 'Traduire en français'}</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => translateTafsir('en')}
+                  disabled={translatingEn}
+                  className="gap-2"
+                >
+                  {translatingEn ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                  <span>🇬🇧 {tafsirEn ? 'Retranslate' : 'Translate to English'}</span>
+                </Button>
+              </div>
+
               {tafsirFr && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Traduction française</p>
+                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Tafsir traduit en français</p>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="fr">
                     {tafsirFr}
                   </p>
@@ -291,7 +324,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               )}
               {tafsirEn && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 English translation</p>
+                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 Tafsir translated to English</p>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="en">
                     {tafsirEn}
                   </p>
