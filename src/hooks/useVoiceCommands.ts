@@ -517,13 +517,14 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
       setIsAwaitingCommand(true);
       if (commandTimeoutRef.current) clearTimeout(commandTimeoutRef.current);
       commandTimeoutRef.current = setTimeout(() => setIsAwaitingCommand(false), 5000);
-      return voiceLang === 'ar' ? 'جاري الاستماع...' : 'Écoute...';
+      return voiceLang === 'ar' ? 'جاري الاستماع...' : voiceLang === 'en' ? 'Listening...' : 'Écoute...';
     }
 
     // Direct commands without wake word
     const directFr = ['jouer', 'play', 'pause', 'stop', 'suivant', 'précédent', 'arrêter'];
     const directAr = ['تشغيل', 'توقف', 'إيقاف', 'التالي', 'السابق', 'شغل'];
-    const directCmds = voiceLang === 'ar' ? directAr : directFr;
+    const directEn = ['play', 'pause', 'stop', 'next', 'previous', 'home'];
+    const directCmds = voiceLang === 'ar' ? directAr : voiceLang === 'en' ? directEn : directFr;
     if (directCmds.some(cmd => lower.includes(cmd))) return processCommand(text);
 
     return null;
