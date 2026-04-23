@@ -542,7 +542,8 @@ const SurahReader = () => {
                                 onPlay={() => quranAudio.playVerse(verse.number)}
                                 onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
                                 isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
-                                hideText={recordingPage === pageNum}
+                                /* Le texte du verset coranique reste toujours visible,
+                                   même pendant et après l'enregistrement. */
                               />
                             ))}
                           </div>
