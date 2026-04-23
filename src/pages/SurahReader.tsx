@@ -14,7 +14,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage } from '@/data/surahs';
+import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play } from 'lucide-react';
 import { Input } from '@/components/ui/input';
