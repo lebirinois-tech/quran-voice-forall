@@ -35,11 +35,15 @@ export const VoiceCommandButton = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onLangChange(voiceLang === 'fr' ? 'ar' : 'fr')}
+          onClick={() => onLangChange(voiceLang === 'fr' ? 'en' : voiceLang === 'en' ? 'ar' : 'fr')}
           className="gap-2 rounded-full text-xs"
         >
           <Globe className="h-3.5 w-3.5" />
-          {voiceLang === 'fr' ? 'Français → العربية' : 'العربية → Français'}
+          {voiceLang === 'fr'
+            ? 'Français → English'
+            : voiceLang === 'en'
+              ? 'English → العربية'
+              : 'العربية → Français'}
         </Button>
       )}
 
@@ -86,12 +90,12 @@ export const VoiceCommandButton = ({
             isAwaitingCommand ? "text-primary-foreground font-medium" : "text-muted-foreground"
           )}>
             {isAwaitingCommand 
-              ? (voiceLang === 'ar' ? "في انتظار الأمر..." : "Commande attendue...")
+              ? (voiceLang === 'ar' ? "في انتظار الأمر..." : voiceLang === 'en' ? "Awaiting command..." : "Commande attendue...")
               : transcript 
                 ? transcript 
                 : isContinuousMode 
-                  ? (voiceLang === 'ar' ? 'قل "قرآن" + الأمر' : "Dites 'Coran' + commande")
-                  : (voiceLang === 'ar' ? "جاري الاستماع..." : "Écoute en cours...")}
+                  ? (voiceLang === 'ar' ? 'قل "قرآن" + الأمر' : voiceLang === 'en' ? 'Say "Quran" + command' : "Dites 'Coran' + commande")
+                  : (voiceLang === 'ar' ? "جاري الاستماع..." : voiceLang === 'en' ? "Listening..." : "Écoute en cours...")}
           </span>
         </div>
       )}
