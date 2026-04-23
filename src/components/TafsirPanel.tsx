@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { BookOpen, Volume2, VolumeX, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Volume2, VolumeX, Loader2, ChevronDown, ChevronUp, Languages } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { getCachedTafsir, saveTafsirToCache } from '@/hooks/useTafsirCache';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface TafsirPanelProps {
   surahNumber: number;
@@ -36,6 +38,8 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirFr, setTafsirFr] = useState<string | null>(null);
   const [tafsirEn, setTafsirEn] = useState<string | null>(null);
+  const [translatingFr, setTranslatingFr] = useState(false);
+  const [translatingEn, setTranslatingEn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,37 +109,41 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
       }
     }
 
-    // Fetch French translation (Hamidullah)
-    const frCached = getCachedTranslation(FR_CACHE_PREFIX, surahNumber, verseNumber);
-    if (frCached) {
-      setTafsirFr(frCached);
-    } else {
-      try {
-        const r = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/fr.hamidullah`);
-        const d = await r.json();
-        if (d.code === 200 && d.data?.text) {
-          setTafsirFr(d.data.text);
-          saveTranslationToCache(FR_CACHE_PREFIX, surahNumber, verseNumber, d.data.text);
-        }
-      } catch (e) { console.warn('FR translation fetch failed:', e); }
-    }
-
-    // Fetch English translation (Saheeh International)
-    const enCached = getCachedTranslation(EN_CACHE_PREFIX, surahNumber, verseNumber);
-    if (enCached) {
-      setTafsirEn(enCached);
-    } else {
-      try {
-        const r = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/en.sahih`);
-        const d = await r.json();
-        if (d.code === 200 && d.data?.text) {
-          setTafsirEn(d.data.text);
-          saveTranslationToCache(EN_CACHE_PREFIX, surahNumber, verseNumber, d.data.text);
-        }
-      } catch (e) { console.warn('EN translation fetch failed:', e); }
-    }
+    // Load any previously translated tafsir from cache (no auto-fetch)
+    setTafsirFr(getCachedTranslation(FR_CACHE_PREFIX, surahNumber, verseNumber));
+    setTafsirEn(getCachedTranslation(EN_CACHE_PREFIX, surahNumber, verseNumber));
 
     setIsLoading(false);
+  };
+
+  const translateTafsir = async (lang: 'fr' | 'en') => {
+    if (!tafsirText) return;
+    const setLoading = lang === 'fr' ? setTranslatingFr : setTranslatingEn;
+    const setText = lang === 'fr' ? setTafsirFr : setTafsirEn;
+    const prefix = lang === 'fr' ? FR_CACHE_PREFIX : EN_CACHE_PREFIX;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-tafsir', {
+        body: { text: tafsirText, targetLang: lang },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const translation = data?.translation as string | undefined;
+      if (translation) {
+        setText(translation);
+        saveTranslationToCache(prefix, surahNumber, verseNumber, translation);
+      } else {
+        throw new Error('Empty translation');
+      }
+    } catch (e: any) {
+      console.error('Translation error:', e);
+      toast.error(lang === 'fr' ? 'Échec de la traduction' : 'Translation failed', {
+        description: e?.message || String(e),
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const speakTafsir = useCallback(async () => {
@@ -273,9 +281,42 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               <div className="font-arabic text-xl leading-loose text-foreground text-right" dir="rtl">
                 {tafsirText}
               </div>
+
+              {/* Translation buttons */}
+              <div className="mt-4 pt-4 border-t border-border/50 flex flex-wrap gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => translateTafsir('fr')}
+                  disabled={translatingFr}
+                  className="gap-2"
+                >
+                  {translatingFr ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                  <span>🇫🇷 {tafsirFr ? 'Retraduire' : 'Traduire en français'}</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => translateTafsir('en')}
+                  disabled={translatingEn}
+                  className="gap-2"
+                >
+                  {translatingEn ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                  <span>🇬🇧 {tafsirEn ? 'Retranslate' : 'Translate to English'}</span>
+                </Button>
+              </div>
+
               {tafsirFr && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Traduction française</p>
+                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Tafsir traduit en français</p>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="fr">
                     {tafsirFr}
                   </p>
@@ -283,7 +324,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               )}
               {tafsirEn && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 English translation</p>
+                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 Tafsir translated to English</p>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="en">
                     {tafsirEn}
                   </p>
