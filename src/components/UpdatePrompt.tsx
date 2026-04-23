@@ -48,10 +48,8 @@ export const useUpdateCheck = () => {
 };
 
 export const UpdatePrompt = () => {
-  const [showPrompt, setShowPrompt] = useState(false);
-  
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, r) {
@@ -84,49 +82,18 @@ export const UpdatePrompt = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Mise à jour totalement automatique : dès qu'une nouvelle version est prête,
+  // on l'applique et on recharge l'app sans interaction utilisateur.
   useEffect(() => {
-    if (needRefresh) setShowPrompt(true);
-  }, [needRefresh]);
+    if (!needRefresh) return;
+    (async () => {
+      try {
+        await updateServiceWorker(true);
+      } catch (err) {
+        console.error('Auto update failed:', err);
+      }
+    })();
+  }, [needRefresh, updateServiceWorker]);
 
-  const handleUpdate = async () => {
-    await updateServiceWorker(true);
-    setShowPrompt(false);
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    setNeedRefresh(false);
-  };
-
-  if (!showPrompt) return null;
-
-  return (
-    <div className={cn(
-      "fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50",
-      "bg-card border border-primary/20 rounded-xl shadow-lg p-4",
-      "animate-slide-in-bottom"
-    )}>
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <RefreshCw className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground text-sm">Mise à jour disponible ✨</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Une nouvelle version de l'application est prête.
-          </p>
-          <div className="flex items-center gap-2 mt-3">
-            <Button onClick={handleUpdate} size="sm" className="gap-2">
-              <RefreshCw className="h-3.5 w-3.5" />
-              Mettre à jour
-            </Button>
-            <Button onClick={handleDismiss} variant="ghost" size="sm">Plus tard</Button>
-          </div>
-        </div>
-        <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={handleDismiss} aria-label="Fermer">
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
+  return null;
 };
