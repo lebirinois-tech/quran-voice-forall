@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export type VoiceLang = 'fr' | 'ar';
+export type VoiceLang = 'fr' | 'en' | 'ar';
 
 const VOICE_LANG_KEY = 'quran_voice_lang';
 
