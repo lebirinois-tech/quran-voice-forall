@@ -1,5 +1,6 @@
 import { Mic, MicOff, Globe } from 'lucide-react';
 import { Button } from './ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { cn } from '@/lib/utils';
 import type { VoiceLang } from '@/hooks/useVoiceCommands';
 
@@ -30,21 +31,21 @@ export const VoiceCommandButton = ({
 
   return (
     <div className={cn("flex flex-col items-center gap-2", className)}>
-      {/* Language Toggle */}
+      {/* Language Selector */}
       {onLangChange && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onLangChange(voiceLang === 'fr' ? 'en' : voiceLang === 'en' ? 'ar' : 'fr')}
-          className="gap-2 rounded-full text-xs"
-        >
-          <Globe className="h-3.5 w-3.5" />
-          {voiceLang === 'fr'
-            ? 'Français → English'
-            : voiceLang === 'en'
-              ? 'English → العربية'
-              : 'العربية → Français'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+          <Select value={voiceLang} onValueChange={(v) => onLangChange(v as VoiceLang)}>
+            <SelectTrigger className="h-8 w-[140px] rounded-full text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fr">Français</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="ar">العربية</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
       {/* Manual Trigger Button - hidden when continuous mode is active */}
