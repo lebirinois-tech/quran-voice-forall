@@ -119,6 +119,10 @@ const SurahReader = () => {
       });
       if (targetVerse) {
         scrollToElement(`verse-${targetVerse.number}`);
+        // Auto-start audio playback from the first verse of the requested page
+        setTimeout(() => {
+          quranAudio.playVerse(targetVerse.number);
+        }, 500);
       }
     }
   }, [searchParams, verses, appSettings.textDisplayStyle, num]);
