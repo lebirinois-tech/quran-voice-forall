@@ -98,7 +98,7 @@ export const VerseCard = ({
     text: enTranslation,
     isLoading: isLoadingEn,
     error: enError,
-  } = useEnglishTranslation(surahNumber, verse.number, ttsLang === 'en' && !hideText);
+  } = useEnglishTranslation(surahNumber, verse.number, !hideText);
 
   useEffect(() => {
     return () => {
