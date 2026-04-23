@@ -487,11 +487,11 @@ export const VerseCard = ({
               variant={isSpeaking && speakingLang === 'en' ? "secondary" : "outline"}
               size="sm"
               onClick={() => handleSpeak('en')}
-              disabled={isLoadingEn || (!enTranslation && ttsLang !== 'en')}
+              disabled={isSpeaking && speakingLang === 'fr'}
               className="rounded-full h-8 text-xs gap-1.5"
               aria-label={isSpeaking && speakingLang === 'en' ? "Stop English playback" : "Listen to English translation (male voice)"}
             >
-              {isLoadingEn ? (
+              {isLoadingEn && !enTranslation ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : isSpeaking && speakingLang === 'en' ? (
                 <Square className="h-3.5 w-3.5" />
