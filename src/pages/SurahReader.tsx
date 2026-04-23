@@ -449,105 +449,107 @@ const SurahReader = () => {
 
               {/* Verses */}
               {!isLoadingVerses && !error && (
-                <div className="space-y-4">
-                  {verses.map((verse, index) => {
-                    const versePage = verse.page ?? getVersePage(num, verse.number, verses.length);
-                    const prevVerse = index > 0 ? verses[index - 1] : null;
-                    const prevPage = prevVerse ? (prevVerse.page ?? getVersePage(num, prevVerse.number, verses.length)) : null;
-                    const isNewPage = prevPage !== null && versePage !== prevPage;
-                    const isFirstVerse = index === 0;
+                <div className="space-y-6">
+                  {(() => {
+                    // Group verses by page
+                    const pagesMap = new Map<number, typeof verses>();
+                    verses.forEach((v) => {
+                      const p = v.page ?? getVersePage(num, v.number, verses.length);
+                      if (!pagesMap.has(p)) pagesMap.set(p, []);
+                      pagesMap.get(p)!.push(v);
+                    });
+                    const pageGroups = Array.from(pagesMap.entries()).sort(([a], [b]) => a - b);
 
-                    // Collect verse texts for this page for the recorder
-                    const pageVerses = verses.filter(v => (v.page ?? getVersePage(num, v.number, verses.length)) === versePage);
-                    const pageText = pageVerses.map(v => v.text).join(' ');
-                    const firstVerseOfPage = pageVerses[0]?.number ?? verse.number;
+                    return pageGroups.map(([pageNum, pageVerses]) => {
+                      const firstVerseOfPage = pageVerses[0].number;
+                      const lastVerseOfPage = pageVerses[pageVerses.length - 1].number;
+                      const pageText = pageVerses.map((v) => v.text).join(' ');
+                      const isEvenPage = pageNum % 2 === 0;
 
-                    return (
-                      <div key={verse.number}>
-                        {/* Recorder at start of first page */}
-                        {isFirstVerse && (
-                          <>
-                            <div className="flex items-center gap-3 mb-3">
-                              <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                                صفحة {versePage} • Page {versePage}
+                      return (
+                        <section
+                          key={pageNum}
+                          aria-label={`Page ${pageNum}`}
+                          className={`rounded-2xl border border-border overflow-hidden shadow-sm ${
+                            isEvenPage ? 'bg-card' : 'bg-muted/30'
+                          }`}
+                        >
+                          {/* Page header — sticky breadcrumb + play button */}
+                          <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-background/85 backdrop-blur border-b border-border">
+                            <nav
+                              aria-label="Chemin"
+                              className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0"
+                            >
+                              <span className="font-semibold text-foreground truncate">
+                                {surah.name}
                               </span>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => quranAudio.playVerse(firstVerseOfPage)}
-                                className="h-8 gap-1.5 rounded-full"
-                                aria-label={`Lire la page ${versePage} depuis le verset ${firstVerseOfPage}`}
-                              >
-                                <Play className="h-3.5 w-3.5" />
-                                <span className="text-xs">Lire la page</span>
-                              </Button>
-                            </div>
-                            <div className="mb-4">
-                              <VerseRecorder
+                              <span aria-hidden="true">›</span>
+                              <span className="whitespace-nowrap">
+                                Page <span className="font-semibold text-foreground">{pageNum}</span>/604
+                              </span>
+                              <span aria-hidden="true">·</span>
+                              <span className="whitespace-nowrap">
+                                Versets{' '}
+                                <span className="font-semibold text-foreground">
+                                  {firstVerseOfPage}
+                                  {firstVerseOfPage !== lastVerseOfPage ? `–${lastVerseOfPage}` : ''}
+                                </span>
+                              </span>
+                              <span className="hidden sm:inline" aria-hidden="true">·</span>
+                              <span className="hidden sm:inline whitespace-nowrap font-amiri" dir="rtl">
+                                صفحة {pageNum}
+                              </span>
+                            </nav>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => quranAudio.playVerse(firstVerseOfPage)}
+                              className="h-8 gap-1.5 rounded-full shrink-0"
+                              aria-label={`Lire la page ${pageNum} depuis le verset ${firstVerseOfPage}`}
+                            >
+                              <Play className="h-3.5 w-3.5" />
+                              <span className="text-xs">Lire la page</span>
+                            </Button>
+                          </header>
+
+                          {/* Page body */}
+                          <div className="p-3 sm:p-4 space-y-4">
+                            <VerseRecorder
                               surahNumber={num}
                               verseNumber={firstVerseOfPage}
                               verseText={pageText}
-                              label={`Mémorisation — Page ${versePage}`}
+                              label={`Mémorisation — Page ${pageNum}`}
                               reciter={appSettings.reciter}
-                              onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
+                              onRecordingChange={(recording) =>
+                                setRecordingPage(recording ? pageNum : null)
+                              }
                             />
-                            </div>
-                          </>
-                        )}
 
-                        {/* Recorder at each new page */}
-                        {isNewPage && (
-                          <>
-                            <div className="flex items-center gap-3 my-6">
-                              <div className="flex-1 h-px bg-border" />
-                              <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                                صفحة {versePage} • Page {versePage}
-                              </span>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => quranAudio.playVerse(firstVerseOfPage)}
-                                className="h-8 gap-1.5 rounded-full"
-                                aria-label={`Lire la page ${versePage} depuis le verset ${firstVerseOfPage}`}
-                              >
-                                <Play className="h-3.5 w-3.5" />
-                                <span className="text-xs">Lire la page</span>
-                              </Button>
-                              <div className="flex-1 h-px bg-border" />
-                            </div>
-                            <div className="mb-4">
-                              <VerseRecorder
-                                surahNumber={num}
-                                verseNumber={firstVerseOfPage}
-                                verseText={pageText}
-                                label={`Mémorisation — Page ${versePage}`}
+                            {pageVerses.map((verse) => (
+                              <VerseCard
+                                key={verse.number}
+                                id={`verse-${verse.number}`}
+                                verse={verse}
+                                surahNumber={surah.number}
+                                isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
+                                isHighlighted={quranAudio.currentVerse === verse.number}
+                                isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
                                 reciter={appSettings.reciter}
-                                onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
+                                textDisplayStyle={appSettings.textDisplayStyle}
+                                fontSize={appSettings.fontSize}
+                                tajweedHtml={versesTajweed[verse.number]}
+                                warshText={warshVerses[verse.number]}
+                                onPlay={() => quranAudio.playVerse(verse.number)}
+                                onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
+                                isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
+                                hideText={recordingPage === pageNum}
                               />
-                            </div>
-                          </>
-                        )}
-
-                        <VerseCard
-                          id={`verse-${verse.number}`}
-                          verse={verse}
-                          surahNumber={surah.number}
-                          isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-                          isHighlighted={quranAudio.currentVerse === verse.number}
-                          isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
-                          reciter={appSettings.reciter}
-                          textDisplayStyle={appSettings.textDisplayStyle}
-                          fontSize={appSettings.fontSize}
-                          tajweedHtml={versesTajweed[verse.number]}
-                          warshText={warshVerses[verse.number]}
-                          onPlay={() => quranAudio.playVerse(verse.number)}
-                          onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
-                          isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
-                          hideText={recordingPage === versePage}
-                        />
-                      </div>
-                    );
-                  })}
+                            ))}
+                          </div>
+                        </section>
+                      );
+                    });
+                  })()}
                 </div>
               )}
             </>
