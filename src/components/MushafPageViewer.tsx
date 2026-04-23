@@ -16,15 +16,29 @@ interface MushafPageViewerProps {
   onPageChange?: (page: number) => void;
 }
 
-// Page image sources
+// Page image sources — multiple fallbacks per type
+// jsDelivr CDN of QuranHub/quran-pages-images is the most reliable source
+const padPage3 = (n: number) => n.toString().padStart(3, '0');
+
 const getPageUrls = (page: number, mushafType: MushafType): string[] => {
+  const padded = padPage3(page);
   switch (mushafType) {
     case 'hafs':
-      return [`https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`];
+      return [
+        `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`,
+      ];
     case 'warsh-tajweed':
-      return [`https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`];
+      // No reliable colored Warsh source available — fall back to plain Warsh pages
+      return [
+        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
+        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
+      ];
     case 'qalun':
-      return [`https://easyquran.com/wp-content/uploads/2022/10/${page}-scaled.jpg`];
+      // No reliable Qalun image source — fall back to plain Warsh (same Nafi' base reading)
+      return [
+        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
+        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
+      ];
     case 'warsh':
     default:
       return [
@@ -241,9 +255,9 @@ export const MushafPageViewer = ({
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="text-sm text-muted-foreground">
           {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
-          {mushafType === 'warsh-tajweed' && '🎨 Mushaf Warsh Tajweed'}
+          {mushafType === 'warsh-tajweed' && '🎨 Mushaf Warsh (Tajweed coloré indispo en image)'}
           {mushafType === 'warsh' && '📜 Mushaf Warsh'}
-          {mushafType === 'qalun' && '📗 Mushaf Qalun (Nafi\')'}
+          {mushafType === 'qalun' && '📗 Mushaf Qalun (affichage Warsh — même lecture de Nafi\')'}
         </div>
         <div className="flex items-center gap-2">
           {/* Page Audio Button */}
@@ -325,9 +339,9 @@ export const MushafPageViewer = ({
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
         <p className="text-xs text-center text-muted-foreground">
           {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré (lecture standard)'}
-          {mushafType === 'warsh-tajweed' && '🎨 Warsh avec Tajweed coloré (lecture maghrébine)'}
+          {mushafType === 'warsh-tajweed' && '📜 Pages Warsh affichées (le Tajweed coloré n\'est pas disponible en image — utilisez le mode texte « Warsh Tajweed » pour les couleurs)'}
           {mushafType === 'warsh' && '📜 Warsh - Script authentique maghrébin (sans couleurs Tajweed)'}
-          {mushafType === 'qalun' && '📗 Qalun - Pages Tajweed de la lecture de Nafi\' (Warsh Tajweed)'}
+          {mushafType === 'qalun' && '📗 Qalun (lecture de Nafi\') — pages Warsh affichées par défaut'}
         </p>
       </div>
     </div>
