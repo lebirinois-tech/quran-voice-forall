@@ -16,7 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, Surah, juzMapping, getVersePage } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers } from 'lucide-react';
+import { Loader2, FileText, Layers, Play } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -460,8 +460,24 @@ const SurahReader = () => {
                       <div key={verse.number}>
                         {/* Recorder at start of first page */}
                         {isFirstVerse && (
-                          <div className="mb-4">
-                            <VerseRecorder
+                          <>
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                                صفحة {versePage} • Page {versePage}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => quranAudio.playVerse(firstVerseOfPage)}
+                                className="h-8 gap-1.5 rounded-full"
+                                aria-label={`Lire la page ${versePage} depuis le verset ${firstVerseOfPage}`}
+                              >
+                                <Play className="h-3.5 w-3.5" />
+                                <span className="text-xs">Lire la page</span>
+                              </Button>
+                            </div>
+                            <div className="mb-4">
+                              <VerseRecorder
                               surahNumber={num}
                               verseNumber={firstVerseOfPage}
                               verseText={pageText}
@@ -469,7 +485,8 @@ const SurahReader = () => {
                               reciter={appSettings.reciter}
                               onRecordingChange={(recording) => setRecordingPage(recording ? versePage : null)}
                             />
-                          </div>
+                            </div>
+                          </>
                         )}
 
                         {/* Recorder at each new page */}
@@ -480,6 +497,16 @@ const SurahReader = () => {
                               <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
                                 صفحة {versePage} • Page {versePage}
                               </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => quranAudio.playVerse(firstVerseOfPage)}
+                                className="h-8 gap-1.5 rounded-full"
+                                aria-label={`Lire la page ${versePage} depuis le verset ${firstVerseOfPage}`}
+                              >
+                                <Play className="h-3.5 w-3.5" />
+                                <span className="text-xs">Lire la page</span>
+                              </Button>
                               <div className="flex-1 h-px bg-border" />
                             </div>
                             <div className="mb-4">
