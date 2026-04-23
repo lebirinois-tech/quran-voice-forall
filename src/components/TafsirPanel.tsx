@@ -68,7 +68,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
   // Stop speech when panel closes
   useEffect(() => {
-    if (!isOpen && isSpeaking) {
+    if (!isOpen && speakingLang) {
       stopSpeaking();
     }
   }, [isOpen]);
@@ -275,10 +275,10 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={toggleSpeech}
-                  className={cn("gap-2", isSpeaking && "bg-primary/10 border-primary")}
+                  onClick={() => toggleSpeech('ar', tafsirText)}
+                  className={cn("gap-2", speakingLang === 'ar' && "bg-primary/10 border-primary")}
                 >
-                  {isSpeaking ? (
+                  {speakingLang === 'ar' ? (
                     <><VolumeX className="h-4 w-4" /><span>إيقاف / Arrêter</span></>
                   ) : (
                     <><Volume2 className="h-4 w-4" /><span>استماع / Écouter</span></>
