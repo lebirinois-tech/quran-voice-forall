@@ -17,6 +17,7 @@ import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, Surah, juzMapping, getVersePage } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
