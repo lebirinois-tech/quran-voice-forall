@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.25.76";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const RequestSchema = z.object({
+  action: z.enum(["check-status", "download-page", "download-batch"]),
+  page: z.union([z.number().int(), z.string()]).optional(),
+  startPage: z.union([z.number().int(), z.string()]).optional(),
+  endPage: z.union([z.number().int(), z.string()]).optional(),
+});
 
 // EasyQuran Tajweed Mushaf source
 const getMushafPageUrl = (page: number): string => {
@@ -36,25 +44,33 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    const { data: { user }, error: authError } = await userSupabase.auth.getUser();
-    if (authError || !user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userSupabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const body = await req.json();
-    const { page, action } = body;
-
-    // Validate action against whitelist
-    const VALID_ACTIONS = ['check-status', 'download-page', 'download-batch'];
-    if (!action || !VALID_ACTIONS.includes(action)) {
+    const userEmail = String(claimsData.claims.email ?? '').toLowerCase();
+    if (userEmail !== 'lebirinois@gmail.com') {
       return new Response(
-        JSON.stringify({ error: 'Invalid action. Must be one of: check-status, download-page, download-batch' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const parsedBody = RequestSchema.safeParse(await req.json());
+    if (!parsedBody.success) {
+      return new Response(
+        JSON.stringify({ error: parsedBody.error.flatten().fieldErrors }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const body = parsedBody.data;
+    const { page, action } = body;
 
     // Use service role for storage operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -151,8 +167,15 @@ serve(async (req) => {
 
     // Download a batch of pages
     if (action === "download-batch") {
-      const start = parseInt(body.startPage) || 1;
-      const end = Math.min(parseInt(body.endPage) || start + 9, 604);
+      const start = Math.max(1, parseInt(String(body.startPage ?? 1), 10) || 1);
+      const end = Math.min(parseInt(String(body.endPage ?? start + 9), 10) || start + 9, 604);
+
+      if (end < start || end - start > 10) {
+        return new Response(
+          JSON.stringify({ error: "Invalid batch range" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       
       const results = [];
       for (let p = start; p <= end; p++) {
