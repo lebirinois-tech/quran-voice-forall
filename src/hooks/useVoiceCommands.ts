@@ -388,8 +388,10 @@ export const useVoiceCommands = (options: VoiceCommandsOptions) => {
 
   const processCommand = useCallback((text: string) => {
     setLastCommand(text.toLowerCase().trim());
-    return voiceLang === 'ar' ? processCommandAr(text) : processCommandFr(text);
-  }, [voiceLang, processCommandAr, processCommandFr]);
+    if (voiceLang === 'ar') return processCommandAr(text);
+    if (voiceLang === 'en') return processCommandEn(text);
+    return processCommandFr(text);
+  }, [voiceLang, processCommandAr, processCommandFr, processCommandEn]);
 
   const containsWakeWord = useCallback((text: string) => {
     const lower = text.toLowerCase().trim();
