@@ -18,13 +18,27 @@ import AudioUpload from "./pages/AudioUpload";
 
 const queryClient = new QueryClient();
 
+const isPreviewRuntime = (() => {
+  if (typeof window === "undefined") return false;
+
+  const previewHost =
+    window.location.hostname.includes("id-preview--") ||
+    window.location.hostname.includes("lovableproject.com");
+
+  try {
+    return previewHost || window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" />
-        <UpdatePrompt />
+        {!isPreviewRuntime && <UpdatePrompt />}
         <PwaInstallProvider>
           <BrowserRouter>
             <Routes>
