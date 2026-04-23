@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
+import { useIsOwner } from '@/hooks/useIsOwner';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +45,7 @@ const formatDuration = (seconds: number | null) => {
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isOwner } = useIsOwner();
   const appSettings = useAppSettings();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<AudioCategory>('all');
@@ -130,7 +130,7 @@ const AudioLibrary = () => {
               <p className="text-xs text-muted-foreground">المكتبة الصوتية</p>
             </div>
           </div>
-          {isAuthenticated && (
+          {isOwner && (
             <Link to="/audio-upload">
               <Button size="sm" className="gap-2">
                 <Upload className="h-4 w-4" />
@@ -179,7 +179,7 @@ const AudioLibrary = () => {
           <div className="text-center py-16">
             <FileAudio className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground">Aucun audio disponible</p>
-            {isAuthenticated && (
+            {isOwner && (
               <Link to="/audio-upload">
                 <Button variant="outline" className="mt-4 gap-2">
                   <Upload className="h-4 w-4" />
