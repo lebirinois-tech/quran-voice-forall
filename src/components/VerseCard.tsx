@@ -96,7 +96,7 @@ export const VerseCard = ({
 
   // Auto-fetch English translation whenever EN is selected so it shows under the French text.
   useEffect(() => {
-    if (ttsLang !== 'en' || enTranslation || isLoadingEn || hideText) return;
+    if (ttsLang !== 'en' || hideText) return;
     let cancelled = false;
     setIsLoadingEn(true);
     fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`)
@@ -114,7 +114,7 @@ export const VerseCard = ({
     return () => {
       cancelled = true;
     };
-  }, [ttsLang, surahNumber, verse.number, enTranslation, isLoadingEn, hideText]);
+  }, [ttsLang, surahNumber, verse.number, hideText]);
 
   useEffect(() => {
     return () => {
