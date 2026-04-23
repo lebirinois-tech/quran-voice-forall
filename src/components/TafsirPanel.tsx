@@ -41,7 +41,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
   const [translatingFr, setTranslatingFr] = useState(false);
   const [translatingEn, setTranslatingEn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingLang, setSpeakingLang] = useState<'ar' | 'fr' | 'en' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const speakSessionIdRef = useRef(0);
@@ -68,7 +68,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
   // Stop speech when panel closes
   useEffect(() => {
-    if (!isOpen && isSpeaking) {
+    if (!isOpen && speakingLang) {
       stopSpeaking();
     }
   }, [isOpen]);
@@ -146,8 +146,8 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     }
   };
 
-  const speakTafsir = useCallback(async () => {
-    if (!tafsirText || !('speechSynthesis' in window)) return;
+  const speakTafsir = useCallback(async (lang: 'ar' | 'fr' | 'en', textToSpeak: string) => {
+    if (!textToSpeak || !('speechSynthesis' in window)) return;
 
     const sessionId = ++speakSessionIdRef.current;
 
@@ -194,43 +194,50 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
       const voices = await ensureVoices();
       if (sessionId !== speakSessionIdRef.current) { notifyTtsEnd(); return; }
 
-      const arabicVoice = voices.find(
-        (v) => v.lang?.toLowerCase().startsWith('ar') || v.name?.toLowerCase().includes('arab')
-      );
+      const pickVoice = (target: 'ar' | 'fr' | 'en') => {
+        const prefix = target;
+        return voices.find((v) => v.lang?.toLowerCase().startsWith(prefix))
+          || voices.find((v) => v.name?.toLowerCase().includes(
+            target === 'ar' ? 'arab' : target === 'fr' ? 'french' : 'english'
+          ));
+      };
+      const chosenVoice = pickVoice(lang);
 
-      const chunks = splitText(tafsirText);
+      const chunks = splitText(textToSpeak);
       let idx = 0;
       const speakNext = () => {
         if (sessionId !== speakSessionIdRef.current) return;
-        if (idx >= chunks.length) { setIsSpeaking(false); notifyTtsEnd(); return; }
+        if (idx >= chunks.length) { setSpeakingLang(null); notifyTtsEnd(); return; }
 
         const u = new SpeechSynthesisUtterance(chunks[idx++]);
         u.rate = 0.9; u.pitch = 1; u.volume = 1;
-        if (arabicVoice) { u.voice = arabicVoice; u.lang = arabicVoice.lang; }
-        else { u.lang = 'ar'; }
+        if (chosenVoice) { u.voice = chosenVoice; u.lang = chosenVoice.lang; }
+        else { u.lang = lang; }
 
-        u.onstart = () => setIsSpeaking(true);
+        u.onstart = () => setSpeakingLang(lang);
         u.onend = () => speakNext();
-        u.onerror = (event) => { console.error('Speech error:', event.error); setIsSpeaking(false); notifyTtsEnd(); };
+        u.onerror = (event) => { console.error('Speech error:', event.error); setSpeakingLang(null); notifyTtsEnd(); };
         synth.speak(u);
       };
       speakNext();
     } catch (e) {
       console.error('Speech synthesis failed:', e);
-      setIsSpeaking(false);
+      setSpeakingLang(null);
       notifyTtsEnd();
     }
-  }, [tafsirText, notifyTtsStart, notifyTtsEnd]);
+  }, [notifyTtsStart, notifyTtsEnd]);
 
   const stopSpeaking = useCallback(() => {
     speakSessionIdRef.current += 1;
     window.speechSynthesis.cancel();
-    setIsSpeaking(false);
+    setSpeakingLang(null);
     notifyTtsEnd();
   }, [notifyTtsEnd]);
 
-  const toggleSpeech = () => {
-    if (isSpeaking) { stopSpeaking(); } else { speakTafsir(); }
+  const toggleSpeech = (lang: 'ar' | 'fr' | 'en', text: string | null) => {
+    if (speakingLang === lang) { stopSpeaking(); return; }
+    if (speakingLang) { stopSpeaking(); }
+    if (text) speakTafsir(lang, text);
   };
 
   return (
@@ -268,10 +275,10 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={toggleSpeech}
-                  className={cn("gap-2", isSpeaking && "bg-primary/10 border-primary")}
+                  onClick={() => toggleSpeech('ar', tafsirText)}
+                  className={cn("gap-2", speakingLang === 'ar' && "bg-primary/10 border-primary")}
                 >
-                  {isSpeaking ? (
+                  {speakingLang === 'ar' ? (
                     <><VolumeX className="h-4 w-4" /><span>إيقاف / Arrêter</span></>
                   ) : (
                     <><Volume2 className="h-4 w-4" /><span>استماع / Écouter</span></>
@@ -316,7 +323,21 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
               {tafsirFr && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Tafsir traduit en français</p>
+                  <div className="flex items-center justify-between mb-2 gap-2">
+                    <p className="text-xs font-semibold text-primary">🇫🇷 Tafsir traduit en français</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleSpeech('fr', tafsirFr)}
+                      className={cn("gap-2 h-8", speakingLang === 'fr' && "bg-primary/10 border-primary")}
+                    >
+                      {speakingLang === 'fr' ? (
+                        <><VolumeX className="h-4 w-4" /><span className="text-xs">Arrêter</span></>
+                      ) : (
+                        <><Volume2 className="h-4 w-4" /><span className="text-xs">Écouter</span></>
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="fr">
                     {tafsirFr}
                   </p>
@@ -324,7 +345,21 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               )}
               {tafsirEn && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 Tafsir translated to English</p>
+                  <div className="flex items-center justify-between mb-2 gap-2">
+                    <p className="text-xs font-semibold text-primary">🇬🇧 Tafsir translated to English</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleSpeech('en', tafsirEn)}
+                      className={cn("gap-2 h-8", speakingLang === 'en' && "bg-primary/10 border-primary")}
+                    >
+                      {speakingLang === 'en' ? (
+                        <><VolumeX className="h-4 w-4" /><span className="text-xs">Stop</span></>
+                      ) : (
+                        <><Volume2 className="h-4 w-4" /><span className="text-xs">Listen</span></>
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="en">
                     {tafsirEn}
                   </p>
