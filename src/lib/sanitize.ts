@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
 
-const HEX_COLOR_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+const HEX_COLOR_PATTERN = /#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})/i;
 
 /**
  * Sanitize Tajweed HTML to prevent XSS attacks.
@@ -15,29 +15,17 @@ export const sanitizeTajweedHtml = (html: string): string => {
     RETURN_DOM_FRAGMENT: false,
   });
 
-  const doc = new DOMParser().parseFromString(`<div>${sanitized}</div>`, 'text/html');
-  const container = doc.body.firstElementChild;
-
-  if (!container) {
-    return '';
-  }
-
-  container.querySelectorAll('span').forEach((span) => {
-    const color = span.style.color?.trim() ?? '';
-
-    Array.from(span.attributes).forEach((attribute) => {
-      if (attribute.name !== 'style') {
-        span.removeAttribute(attribute.name);
-      }
-    });
-
-    if (!color || span.style.length !== 1 || !HEX_COLOR_PATTERN.test(color)) {
-      span.removeAttribute('style');
-      return;
+  return sanitized.replace(/<span\b([^>]*)>/gi, (_match, rawAttributes: string) => {
+    const styleMatch = rawAttributes.match(/\sstyle\s*=\s*["']([^"']*)["']/i);
+    if (!styleMatch) {
+      return '<span>';
     }
 
-    span.setAttribute('style', `color: ${color};`);
-  });
+    const colorMatch = styleMatch[1].match(/^\s*color\s*:\s*(#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8}))\s*;?\s*$/i);
+    if (!colorMatch || !HEX_COLOR_PATTERN.test(colorMatch[1])) {
+      return '<span>';
+    }
 
-  return container.innerHTML;
+    return `<span style="color: ${colorMatch[1]};">`;
+  });
 };
