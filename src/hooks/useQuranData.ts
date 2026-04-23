@@ -221,15 +221,13 @@ export const useQuranData = (
       try {
         // Fetch Uthmanic Arabic text, Tajweed text, primary translation,
         // and (optionally) a secondary translation for dual display.
-        const requests = [
+        const [arabicResponse, tajweedResponse, translationData] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
           fetchSurahEdition(surahNumber, translationEdition, true),
-        ];
-        const responses = await Promise.all(requests);
-        const arabicData: QuranApiResponse = await responses[0].json();
-        const tajweedData: QuranApiResponse = await responses[1].json();
-        const translationData: QuranApiResponse = responses[2] as QuranApiResponse;
+        ]);
+        const arabicData: QuranApiResponse = await arabicResponse.json();
+        const tajweedData: QuranApiResponse = await tajweedResponse.json();
         let translation2Data: QuranApiResponse | null = secondaryEdition
           ? await fetchSurahEdition(surahNumber, secondaryEdition, true)
           : null;
