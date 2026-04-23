@@ -273,6 +273,22 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               <div className="font-arabic text-xl leading-loose text-foreground text-right" dir="rtl">
                 {tafsirText}
               </div>
+              {tafsirFr && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Traduction française</p>
+                  <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="fr">
+                    {tafsirFr}
+                  </p>
+                </div>
+              )}
+              {tafsirEn && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 English translation</p>
+                  <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="en">
+                    {tafsirEn}
+                  </p>
+                </div>
+              )}
               <p className="text-xs text-muted-foreground mt-4 text-center">
                 المصدر: تفسير الميسر / Source: Tafsir Al-Muyassar
               </p>
