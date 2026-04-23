@@ -3,9 +3,9 @@ import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2, Volume2, Square } from 'lucide-react';
 import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
+import { useTtsLang } from '@/hooks/useTtsLang';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import { TafsirPanel } from './TafsirPanel';
@@ -88,9 +88,7 @@ export const VerseCard = ({
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
-  const [ttsLang, setTtsLang] = useState<'fr' | 'en'>(() => {
-    return (localStorage.getItem('verse-tts-lang') as 'fr' | 'en') || 'fr';
-  });
+  const [ttsLang] = useTtsLang();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [enTranslation, setEnTranslation] = useState<string | null>(null);
   const [isLoadingEn, setIsLoadingEn] = useState(false);
@@ -166,14 +164,14 @@ export const VerseCard = ({
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleLangChange = (lang: 'fr' | 'en') => {
-    setTtsLang(lang);
-    localStorage.setItem('verse-tts-lang', lang);
+  // Stop speaking if language changes mid-playback
+  useEffect(() => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ttsLang]);
   
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
@@ -402,15 +400,6 @@ export const VerseCard = ({
             {ttsLang === 'en' && enTranslation ? enTranslation : verse.translation}
           </p>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <Select value={ttsLang} onValueChange={(v) => handleLangChange(v as 'fr' | 'en')}>
-              <SelectTrigger className="h-8 w-[130px] rounded-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                <SelectItem value="en">🇬🇧 English</SelectItem>
-              </SelectContent>
-            </Select>
             <Button
               variant={isSpeaking ? "secondary" : "outline"}
               size="sm"
