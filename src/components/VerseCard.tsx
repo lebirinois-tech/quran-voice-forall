@@ -46,6 +46,17 @@ const parseTajweedFallback = (text: string): string => {
   return html;
 };
 
+const hasFragmentedArabicShaping = (html: string): boolean => {
+  const fragments = html.match(/<span[^>]*>(.*?)<\/span>/g) || [];
+  const shortArabicFragments = fragments.filter((fragment) => {
+    const plainText = fragment.replace(/<[^>]+>/g, '').trim();
+    const arabicOnly = plainText.replace(/[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g, '');
+    return arabicOnly.length > 0 && arabicOnly.length <= 2;
+  }).length;
+
+  return shortArabicFragments > 2;
+};
+
 interface VerseCardProps {
   id?: string;
   verse: Verse;
@@ -134,6 +145,10 @@ export const VerseCard = ({
     textDisplayStyle === 'tajweed'
       ? sanitizeTajweedHtml(tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined) || '')
       : undefined;
+  const shouldUsePlainArabicFallback =
+    textDisplayStyle === 'tajweed' &&
+    !!effectiveTajweedHtml &&
+    hasFragmentedArabicShaping(effectiveTajweedHtml);
 
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -324,7 +339,7 @@ export const VerseCard = ({
         <div className="mb-4 py-8 text-center rounded-lg bg-muted/30 border border-dashed border-border">
           <p className="text-muted-foreground text-sm">🎤 Texte masqué — Mode mémorisation</p>
         </div>
-      ) : textDisplayStyle === 'tajweed' && effectiveTajweedHtml ? (
+      ) : textDisplayStyle === 'tajweed' && effectiveTajweedHtml && !shouldUsePlainArabicFallback ? (
         <p 
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
