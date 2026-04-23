@@ -464,6 +464,7 @@ const SurahReader = () => {
                       const lastVerseOfPage = pageVerses[pageVerses.length - 1].number;
                       const pageText = pageVerses.map((v) => v.text).join(' ');
                       const isEvenPage = pageNum % 2 === 0;
+                      const juzNum = getJuzForVerse(num, firstVerseOfPage);
 
                       return (
                         <section
@@ -481,6 +482,10 @@ const SurahReader = () => {
                             >
                               <span className="font-semibold text-foreground truncate">
                                 {surah.name}
+                              </span>
+                              <span aria-hidden="true">›</span>
+                              <span className="whitespace-nowrap">
+                                Juz <span className="font-semibold text-foreground">{juzNum}</span>
                               </span>
                               <span aria-hidden="true">›</span>
                               <span className="whitespace-nowrap">
