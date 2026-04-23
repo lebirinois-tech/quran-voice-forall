@@ -400,15 +400,6 @@ export const VerseCard = ({
             {ttsLang === 'en' && enTranslation ? enTranslation : verse.translation}
           </p>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <Select value={ttsLang} onValueChange={(v) => handleLangChange(v as 'fr' | 'en')}>
-              <SelectTrigger className="h-8 w-[130px] rounded-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                <SelectItem value="en">🇬🇧 English</SelectItem>
-              </SelectContent>
-            </Select>
             <Button
               variant={isSpeaking ? "secondary" : "outline"}
               size="sm"
