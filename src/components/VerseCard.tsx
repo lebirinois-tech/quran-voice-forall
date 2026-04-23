@@ -88,9 +88,7 @@ export const VerseCard = ({
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
-  const [ttsLang, setTtsLang] = useState<'fr' | 'en'>(() => {
-    return (localStorage.getItem('verse-tts-lang') as 'fr' | 'en') || 'fr';
-  });
+  const [ttsLang] = useTtsLang();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [enTranslation, setEnTranslation] = useState<string | null>(null);
   const [isLoadingEn, setIsLoadingEn] = useState(false);
@@ -166,14 +164,14 @@ export const VerseCard = ({
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleLangChange = (lang: 'fr' | 'en') => {
-    setTtsLang(lang);
-    localStorage.setItem('verse-tts-lang', lang);
+  // Stop speaking if language changes mid-playback
+  useEffect(() => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ttsLang]);
   
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
