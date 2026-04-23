@@ -29,6 +29,47 @@ interface QuranApiResponse {
   };
 }
 
+const normalizeTranslationText = (text: string | undefined): string =>
+  (text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+const isDuplicateTranslationPayload = (
+  primary: QuranApiResponse,
+  secondary: QuranApiResponse | null,
+): boolean => {
+  if (!secondary || primary.code !== 200 || secondary.code !== 200) return false;
+
+  const sampleSize = Math.min(
+    primary.data.ayahs.length,
+    secondary.data.ayahs.length,
+  );
+  if (sampleSize === 0) return false;
+
+  const duplicatedCount = primary.data.ayahs.reduce((count, ayah, index) => {
+    return (
+      count +
+      Number(
+        normalizeTranslationText(ayah.text) ===
+          normalizeTranslationText(secondary.data.ayahs[index]?.text),
+      )
+    );
+  }, 0);
+
+  return duplicatedCount > Math.max(1, sampleSize * 0.5);
+};
+
+const fetchSurahEdition = async (
+  surahNumber: number,
+  edition: string,
+  bustCache = false,
+): Promise<QuranApiResponse> => {
+  const cacheBust = bustCache ? `?_=${Date.now()}` : '';
+  const response = await fetch(
+    `https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}${cacheBust}`,
+    { cache: bustCache ? 'reload' : 'default' },
+  );
+  return response.json();
+};
+
 // Local storage keys for offline cache
 const CACHE_KEY_PREFIX = 'quran-offline-';
 const getCacheKey = (
@@ -186,18 +227,21 @@ export const useQuranData = (
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${translationEdition}`),
         ];
-        if (secondaryEdition) {
-          requests.push(
-            fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${secondaryEdition}`),
-          );
-        }
         const responses = await Promise.all(requests);
         const arabicData: QuranApiResponse = await responses[0].json();
         const tajweedData: QuranApiResponse = await responses[1].json();
         const translationData: QuranApiResponse = await responses[2].json();
-        const translation2Data: QuranApiResponse | null = responses[3]
-          ? await responses[3].json()
+        let translation2Data: QuranApiResponse | null = secondaryEdition
+          ? await fetchSurahEdition(surahNumber, secondaryEdition)
           : null;
+
+        if (secondaryEdition && isDuplicateTranslationPayload(translationData, translation2Data)) {
+          translation2Data = await fetchSurahEdition(surahNumber, secondaryEdition, true);
+        }
+
+        if (isDuplicateTranslationPayload(translationData, translation2Data)) {
+          translation2Data = null;
+        }
 
         if (arabicData.code === 200 && translationData.code === 200) {
           const combinedVerses: Verse[] = arabicData.data.ayahs.map((ayah, index) => ({
@@ -206,7 +250,13 @@ export const useQuranData = (
             translation: translationData.data.ayahs[index]?.text || '',
             translation2:
               translation2Data?.code === 200
-                ? translation2Data.data.ayahs[index]?.text || ''
+                ? (() => {
+                    const secondaryText = translation2Data.data.ayahs[index]?.text || '';
+                    return normalizeTranslationText(secondaryText) !==
+                      normalizeTranslationText(translationData.data.ayahs[index]?.text)
+                      ? secondaryText
+                      : undefined;
+                  })()
                 : undefined,
             page: ayah.page,
           }));
