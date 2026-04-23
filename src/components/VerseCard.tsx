@@ -93,12 +93,13 @@ export const VerseCard = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [speakingLang, setSpeakingLang] = useState<'fr' | 'en' | null>(null);
+  const [showEnglish, setShowEnglish] = useState(false);
 
   const {
     text: enTranslation,
     isLoading: isLoadingEn,
     error: enError,
-  } = useEnglishTranslation(surahNumber, verse.number, !hideText);
+  } = useEnglishTranslation(surahNumber, verse.number, !hideText && (showEnglish || ttsLang === 'en'));
 
   useEffect(() => {
     return () => {
@@ -456,7 +457,7 @@ export const VerseCard = ({
           </p>
 
           {/* English translation (shown when EN selected) */}
-          {ttsLang === 'en' && (
+          {(showEnglish || ttsLang === 'en') && (
             <p className="text-muted-foreground text-base leading-relaxed mt-3 italic">
               <span className="text-xs font-semibold text-primary mr-2 not-italic">EN</span>
               {enTranslation
@@ -468,6 +469,21 @@ export const VerseCard = ({
           )}
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <Button
+              variant={showEnglish ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setShowEnglish((v) => !v)}
+              className="rounded-full h-8 text-xs gap-1.5"
+              aria-label={showEnglish ? "Masquer la traduction anglaise" : "Afficher la traduction anglaise"}
+            >
+              {isLoadingEn && showEnglish && !enTranslation ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <FileText className="h-3.5 w-3.5" />
+              )}
+              {showEnglish ? '🇬🇧 Masquer EN' : '🇬🇧 Traduire EN'}
+            </Button>
+
             <Button
               variant={isSpeaking && speakingLang === 'fr' ? "secondary" : "outline"}
               size="sm"
