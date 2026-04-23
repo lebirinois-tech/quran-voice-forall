@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useIsOwner } from '@/hooks/useIsOwner';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { Download, Search, Music, Upload, Play, Pause, Clock, FileAudio, ArrowLeft } from 'lucide-react';
+import { Download, Search, Music, Upload, Play, Pause, Clock, FileAudio, ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 type AudioCategory = 'all' | 'recitation' | 'cours' | 'doua' | 'autre';
 
@@ -47,10 +58,12 @@ const AudioLibrary = () => {
   const navigate = useNavigate();
   const { isOwner } = useIsOwner();
   const appSettings = useAppSettings();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<AudioCategory>('all');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [audioEl] = useState(() => new Audio());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { data: audios = [], isLoading } = useQuery({
     queryKey: ['audio-downloads', category],
@@ -95,6 +108,41 @@ const AudioLibrary = () => {
       toast.success('Téléchargement lancé !');
     } catch {
       toast.error('Erreur lors du téléchargement');
+    }
+  };
+
+  const handleDelete = async (item: AudioItem) => {
+    setDeletingId(item.id);
+    try {
+      // Best-effort: remove the storage object first (path = last URL segment)
+      try {
+        const url = new URL(item.file_url);
+        const marker = '/audio-downloads/';
+        const idx = url.pathname.indexOf(marker);
+        if (idx !== -1) {
+          const objectPath = decodeURIComponent(url.pathname.slice(idx + marker.length));
+          await supabase.storage.from('audio-downloads').remove([objectPath]);
+        }
+      } catch {
+        // Ignore storage errors — we still want to remove the metadata row
+      }
+
+      const { error } = await supabase.from('audio_downloads').delete().eq('id', item.id);
+      if (error) throw error;
+
+      // Stop playback if we just deleted the playing track
+      if (playingId === item.id) {
+        audioEl.pause();
+        setPlayingId(null);
+      }
+
+      toast.success('Audio supprimé');
+      queryClient.invalidateQueries({ queryKey: ['audio-downloads'] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+      toast.error(msg);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -235,9 +283,49 @@ const AudioLibrary = () => {
                   size="icon"
                   onClick={() => handleDownload(item)}
                   className="flex-shrink-0"
+                  aria-label="Télécharger"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
+
+                {/* Delete (owner only) */}
+                {isOwner && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        disabled={deletingId === item.id}
+                        aria-label="Supprimer cet audio"
+                      >
+                        {deletingId === item.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer cet audio ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          « {item.title} » sera définitivement supprimé de la bibliothèque
+                          et du stockage. Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(item)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             ))}
           </div>
