@@ -323,7 +323,21 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
               {tafsirFr && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇫🇷 Tafsir traduit en français</p>
+                  <div className="flex items-center justify-between mb-2 gap-2">
+                    <p className="text-xs font-semibold text-primary">🇫🇷 Tafsir traduit en français</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleSpeech('fr', tafsirFr)}
+                      className={cn("gap-2 h-8", speakingLang === 'fr' && "bg-primary/10 border-primary")}
+                    >
+                      {speakingLang === 'fr' ? (
+                        <><VolumeX className="h-4 w-4" /><span className="text-xs">Arrêter</span></>
+                      ) : (
+                        <><Volume2 className="h-4 w-4" /><span className="text-xs">Écouter</span></>
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="fr">
                     {tafsirFr}
                   </p>
@@ -331,7 +345,21 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
               )}
               {tafsirEn && (
                 <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs font-semibold text-primary mb-2">🇬🇧 Tafsir translated to English</p>
+                  <div className="flex items-center justify-between mb-2 gap-2">
+                    <p className="text-xs font-semibold text-primary">🇬🇧 Tafsir translated to English</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleSpeech('en', tafsirEn)}
+                      className={cn("gap-2 h-8", speakingLang === 'en' && "bg-primary/10 border-primary")}
+                    >
+                      {speakingLang === 'en' ? (
+                        <><VolumeX className="h-4 w-4" /><span className="text-xs">Stop</span></>
+                      ) : (
+                        <><Volume2 className="h-4 w-4" /><span className="text-xs">Listen</span></>
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-base leading-relaxed text-foreground" dir="ltr" lang="en">
                     {tafsirEn}
                   </p>
