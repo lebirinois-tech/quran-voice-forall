@@ -11,8 +11,31 @@ interface TafsirPanelProps {
   onToggle: () => void;
 }
 
+const FR_CACHE_PREFIX = 'quran-tafsir-fr-';
+const EN_CACHE_PREFIX = 'quran-tafsir-en-';
+
+const getCachedTranslation = (prefix: string, surah: number, verse: number): string | null => {
+  try {
+    const raw = localStorage.getItem(`${prefix}${surah}`);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as Record<number, string>;
+    return data[verse] || null;
+  } catch { return null; }
+};
+
+const saveTranslationToCache = (prefix: string, surah: number, verse: number, text: string) => {
+  try {
+    const key = `${prefix}${surah}`;
+    const existing = JSON.parse(localStorage.getItem(key) || '{}');
+    existing[verse] = text;
+    localStorage.setItem(key, JSON.stringify(existing));
+  } catch { /* ignore quota */ }
+};
+
 export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: TafsirPanelProps) => {
   const [tafsirText, setTafsirText] = useState<string | null>(null);
+  const [tafsirFr, setTafsirFr] = useState<string | null>(null);
+  const [tafsirEn, setTafsirEn] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,39 +77,65 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     const cached = getCachedTafsir(surahNumber, verseNumber);
     if (cached) {
       setTafsirText(cached);
-      setIsLoading(false);
-      return;
-    }
-    
-    try {
-      const response = await fetch(
-        `https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/ar.muyassar`
-      );
-      const data = await response.json();
-      
-      if (data.code === 200 && data.data?.text) {
-        setTafsirText(data.data.text);
-        // Save to cache for offline use
-        saveTafsirToCache(surahNumber, verseNumber, data.data.text);
-      } else {
-        const fallbackResponse = await fetch(
-          `https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/ar.jalalayn`
+    } else {
+      try {
+        const response = await fetch(
+          `https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/ar.muyassar`
         );
-        const fallbackData = await fallbackResponse.json();
-        
-        if (fallbackData.code === 200 && fallbackData.data?.text) {
-          setTafsirText(fallbackData.data.text);
-          saveTafsirToCache(surahNumber, verseNumber, fallbackData.data.text);
+        const data = await response.json();
+
+        if (data.code === 200 && data.data?.text) {
+          setTafsirText(data.data.text);
+          saveTafsirToCache(surahNumber, verseNumber, data.data.text);
         } else {
-          throw new Error('التفسير غير متوفر');
+          const fallbackResponse = await fetch(
+            `https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/ar.jalalayn`
+          );
+          const fallbackData = await fallbackResponse.json();
+          if (fallbackData.code === 200 && fallbackData.data?.text) {
+            setTafsirText(fallbackData.data.text);
+            saveTafsirToCache(surahNumber, verseNumber, fallbackData.data.text);
+          } else {
+            throw new Error('التفسير غير متوفر');
+          }
         }
+      } catch (err) {
+        console.error('Tafsir fetch error:', err);
+        setError('التفسير غير متوفر حالياً / Tafsir non disponible');
       }
-    } catch (err) {
-      console.error('Tafsir fetch error:', err);
-      setError('التفسير غير متوفر حالياً / Tafsir non disponible');
-    } finally {
-      setIsLoading(false);
     }
+
+    // Fetch French translation (Hamidullah)
+    const frCached = getCachedTranslation(FR_CACHE_PREFIX, surahNumber, verseNumber);
+    if (frCached) {
+      setTafsirFr(frCached);
+    } else {
+      try {
+        const r = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/fr.hamidullah`);
+        const d = await r.json();
+        if (d.code === 200 && d.data?.text) {
+          setTafsirFr(d.data.text);
+          saveTranslationToCache(FR_CACHE_PREFIX, surahNumber, verseNumber, d.data.text);
+        }
+      } catch (e) { console.warn('FR translation fetch failed:', e); }
+    }
+
+    // Fetch English translation (Saheeh International)
+    const enCached = getCachedTranslation(EN_CACHE_PREFIX, surahNumber, verseNumber);
+    if (enCached) {
+      setTafsirEn(enCached);
+    } else {
+      try {
+        const r = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/en.sahih`);
+        const d = await r.json();
+        if (d.code === 200 && d.data?.text) {
+          setTafsirEn(d.data.text);
+          saveTranslationToCache(EN_CACHE_PREFIX, surahNumber, verseNumber, d.data.text);
+        }
+      } catch (e) { console.warn('EN translation fetch failed:', e); }
+    }
+
+    setIsLoading(false);
   };
 
   const speakTafsir = useCallback(async () => {
