@@ -168,23 +168,8 @@ export const VerseCard = ({
       if (enTranslation) {
         textToSpeak = enTranslation;
       } else {
-        setIsLoadingEn(true);
-        try {
-          const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`);
-          const data = await res.json();
-          if (data.code === 200 && data.data?.text) {
-            textToSpeak = data.data.text;
-            setEnTranslation(data.data.text);
-          } else {
-            throw new Error('No English translation');
-          }
-        } catch (e) {
-          console.error('English translation fetch failed', e);
-          toast.error('Traduction anglaise indisponible');
-          setIsLoadingEn(false);
-          return;
-        }
-        setIsLoadingEn(false);
+        toast.error('Traduction anglaise indisponible');
+        return;
       }
     }
 
