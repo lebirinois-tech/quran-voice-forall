@@ -98,7 +98,7 @@ export const VerseCard = ({
     text: enTranslation,
     isLoading: isLoadingEn,
     error: enError,
-  } = useEnglishTranslation(surahNumber, verse.number, ttsLang === 'en' && !hideText);
+  } = useEnglishTranslation(surahNumber, verse.number, !hideText);
 
   useEffect(() => {
     return () => {
@@ -157,34 +157,64 @@ export const VerseCard = ({
       return;
     }
 
+    // CRITICAL: create the utterance synchronously inside the user gesture.
+    // Awaiting before `new SpeechSynthesisUtterance(...)` breaks autoplay
+    // on installed PWAs (iOS/Android/desktop).
     const utterance = new SpeechSynthesisUtterance('');
     utterance.lang = lang === 'fr' ? 'fr-FR' : 'en-US';
     utterance.pitch = 0.9;
     utterance.rate = 0.95;
     utterance.onend = () => { setIsSpeaking(false); setSpeakingLang(null); };
-    utterance.onerror = () => { setIsSpeaking(false); setSpeakingLang(null); };
+    utterance.onerror = (e) => {
+      console.error('TTS error', e);
+      setIsSpeaking(false);
+      setSpeakingLang(null);
+    };
 
-    let textToSpeak = verse.translation;
+    // Try to set voice synchronously (works if voices already loaded — common case).
+    const syncVoice = pickMaleVoice(lang);
+    if (syncVoice) utterance.voice = syncVoice;
 
-    if (lang === 'en') {
-      if (enTranslation) {
-        textToSpeak = enTranslation;
-      } else {
-        toast.error('Traduction anglaise indisponible');
-        return;
-      }
+    utteranceRef.current = utterance;
+    window.speechSynthesis.cancel();
+
+    const speakNow = (textToSpeak: string) => {
+      utterance.text = textToSpeak;
+      setIsSpeaking(true);
+      setSpeakingLang(lang);
+      window.speechSynthesis.speak(utterance);
+    };
+
+    if (lang === 'fr') {
+      speakNow(verse.translation);
+      return;
     }
 
-    utterance.text = textToSpeak;
+    // English path
+    if (enTranslation) {
+      speakNow(enTranslation);
+      return;
+    }
 
-    window.speechSynthesis.cancel();
-    await ensureVoices();
-    const voice = pickMaleVoice(lang);
-    if (voice) utterance.voice = voice;
-    utteranceRef.current = utterance;
-    setIsSpeaking(true);
-    setSpeakingLang(lang);
-    window.speechSynthesis.speak(utterance);
+    // English not yet loaded — fetch on demand, then speak.
+    // The utterance was created in the gesture context, so speak() should still
+    // work in most browsers (Chrome/Edge/Firefox). On strict iOS Safari this may
+    // require a second tap; we surface a hint.
+    try {
+      setIsSpeaking(true);
+      setSpeakingLang(lang);
+      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${verse.number}/en.sahih`);
+      const data = await res.json();
+      const fetched = data?.data?.text as string | undefined;
+      if (!fetched) throw new Error('No English text');
+      utterance.text = fetched;
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.error('English TTS load failed', err);
+      setIsSpeaking(false);
+      setSpeakingLang(null);
+      toast.error('Traduction anglaise indisponible — réessayez');
+    }
   };
 
   // Stop speaking if language changes mid-playback
@@ -457,11 +487,11 @@ export const VerseCard = ({
               variant={isSpeaking && speakingLang === 'en' ? "secondary" : "outline"}
               size="sm"
               onClick={() => handleSpeak('en')}
-              disabled={isLoadingEn || (!enTranslation && ttsLang !== 'en')}
+              disabled={isSpeaking && speakingLang === 'fr'}
               className="rounded-full h-8 text-xs gap-1.5"
               aria-label={isSpeaking && speakingLang === 'en' ? "Stop English playback" : "Listen to English translation (male voice)"}
             >
-              {isLoadingEn ? (
+              {isLoadingEn && !enTranslation ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : isSpeaking && speakingLang === 'en' ? (
                 <Square className="h-3.5 w-3.5" />
