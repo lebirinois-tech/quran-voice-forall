@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOwner } from '@/hooks/useIsOwner';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ const CATEGORIES = [
 const AudioUpload = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { isOwner, loading: ownerLoading } = useIsOwner();
   const appSettings = useAppSettings();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -36,6 +38,31 @@ const AudioUpload = () => {
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Vous devez être connecté pour ajouter des audios</p>
           <Button onClick={() => navigate('/auth')}>Se connecter</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (ownerLoading) {
+    return (
+      <div className="min-h-screen pattern-islamic flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isOwner) {
+    return (
+      <div className="min-h-screen pattern-islamic flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <p className="text-foreground font-medium mb-2">Accès réservé</p>
+          <p className="text-muted-foreground text-sm mb-4">
+            Seul le propriétaire de l'application peut ajouter, modifier ou supprimer des audios.
+          </p>
+          <Button variant="outline" onClick={() => navigate('/audio-library')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour à la bibliothèque
+          </Button>
         </div>
       </div>
     );
