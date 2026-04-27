@@ -164,7 +164,8 @@ export const VerseCard = ({
     const utterance = new SpeechSynthesisUtterance('');
     utterance.lang = lang === 'fr' ? 'fr-FR' : 'en-US';
     utterance.pitch = 0.9;
-    utterance.rate = 0.95;
+    // English TTS voices tend to read faster than French — slow down EN a bit more
+    utterance.rate = lang === 'en' ? 0.8 : 0.95;
     utterance.onend = () => { setIsSpeaking(false); setSpeakingLang(null); };
     utterance.onerror = (e) => {
       console.error('TTS error', e);
