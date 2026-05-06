@@ -120,6 +120,37 @@ const schedulePlaybackSpeed = (
   });
 };
 
+const createManagedAudioElement = () => {
+  const audio = typeof document !== 'undefined'
+    ? document.createElement('audio')
+    : new Audio();
+
+  audio.preload = 'auto';
+  audio.crossOrigin = 'anonymous';
+
+  // Android/installed PWAs are more reliable when the media element is attached
+  // to the DOM instead of being only an off-DOM `new Audio()` instance.
+  if (typeof document !== 'undefined') {
+    audio.dataset.quranAudioPlayer = 'true';
+    audio.style.display = 'none';
+    document.body.appendChild(audio);
+  }
+
+  return audio;
+};
+
+const disposeManagedAudioElement = (audio: HTMLAudioElement | null) => {
+  if (!audio) return;
+  try {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+    audio.remove();
+  } catch (error) {
+    console.warn('Impossible de nettoyer l’audio:', error);
+  }
+};
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
@@ -317,17 +348,17 @@ export const useQuranAudio = ({
 
   // Create initial audio element
   useEffect(() => {
-    const audio = new Audio();
-    audio.preload = 'auto';
+    const audio = createManagedAudioElement();
     setupAudioListeners(audio);
     audioRef.current = audio;
+    syncPlaybackSpeed(audio);
     
     return () => {
       stopSpeedEnforcer();
-      audio.pause();
-      audio.src = '';
+      disposeManagedAudioElement(audio);
+      if (audioRef.current === audio) audioRef.current = null;
     };
-  }, [setupAudioListeners, stopSpeedEnforcer]);
+  }, [setupAudioListeners, stopSpeedEnforcer, syncPlaybackSpeed]);
 
 
   // Helper to format verse number for everyayah.com (e.g., 001, 002, 123)
@@ -395,11 +426,9 @@ export const useQuranAudio = ({
       // Create a fresh audio element to avoid corrupted state
       if (audioRef.current) {
         stopSpeedEnforcer();
-        audioRef.current.pause();
-        audioRef.current.src = '';
+        disposeManagedAudioElement(audioRef.current);
       }
-      const newAudio = new Audio();
-      newAudio.preload = 'auto';
+      const newAudio = createManagedAudioElement();
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
       syncPlaybackSpeed(newAudio);
