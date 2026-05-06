@@ -91,6 +91,19 @@ const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   }
 };
 
+const schedulePlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
+  if (!audio) return;
+  const normalizedSpeed = normalizePlaybackSpeed(speed);
+  applyPlaybackSpeed(audio, normalizedSpeed);
+
+  if (typeof window === 'undefined') return;
+
+  window.requestAnimationFrame(() => applyPlaybackSpeed(audio, normalizedSpeed));
+  [50, 250, 1000].forEach((delay) => {
+    window.setTimeout(() => applyPlaybackSpeed(audio, normalizedSpeed), delay);
+  });
+};
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
@@ -148,6 +161,9 @@ export const useQuranAudio = ({
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
     audio.addEventListener('timeupdate', () => {
       if (audio !== audioRef.current) return;
+      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
+        schedulePlaybackSpeed(audio, playbackSpeedRef.current);
+      }
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
@@ -155,24 +171,31 @@ export const useQuranAudio = ({
     
     audio.addEventListener('loadedmetadata', () => {
       if (audio !== audioRef.current) return;
-      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+      schedulePlaybackSpeed(audio, playbackSpeedRef.current);
       setDuration(audio.duration);
+    });
+
+    ['loadeddata', 'canplay', 'canplaythrough', 'durationchange'].forEach((eventName) => {
+      audio.addEventListener(eventName, () => {
+        if (audio !== audioRef.current) return;
+        schedulePlaybackSpeed(audio, playbackSpeedRef.current);
+      });
     });
 
     audio.addEventListener('play', () => {
       if (audio !== audioRef.current) return;
-      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+      schedulePlaybackSpeed(audio, playbackSpeedRef.current);
     });
 
     audio.addEventListener('playing', () => {
       if (audio !== audioRef.current) return;
-      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+      schedulePlaybackSpeed(audio, playbackSpeedRef.current);
     });
 
     audio.addEventListener('ratechange', () => {
       if (audio !== audioRef.current) return;
       if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
-        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+        schedulePlaybackSpeed(audio, playbackSpeedRef.current);
       }
     });
     
@@ -294,9 +317,9 @@ export const useQuranAudio = ({
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
         // Re-apply playback rate AFTER load (some browsers reset it on load)
-        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+        schedulePlaybackSpeed(audio, playbackSpeedRef.current);
         audio.play().then(() => {
-          applyPlaybackSpeed(audio, playbackSpeedRef.current);
+          schedulePlaybackSpeed(audio, playbackSpeedRef.current);
           resolve();
         }).catch(reject);
       };
@@ -325,7 +348,7 @@ export const useQuranAudio = ({
       newAudio.preload = 'auto';
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
-      applyPlaybackSpeed(newAudio, playbackSpeedRef.current);
+      schedulePlaybackSpeed(newAudio, playbackSpeedRef.current);
 
       // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, targetSurah, verseNumber);
@@ -362,9 +385,9 @@ export const useQuranAudio = ({
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
-      applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+      schedulePlaybackSpeed(audioRef.current, playbackSpeedRef.current);
       audioRef.current.play().then(() => {
-        applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+        schedulePlaybackSpeed(audioRef.current, playbackSpeedRef.current);
       }).catch((error) => {
         console.error('Error playing audio:', error);
         setIsPlaying(false);
@@ -440,7 +463,7 @@ export const useQuranAudio = ({
     const nextSpeed = normalizePlaybackSpeed(speed);
     _setPlaybackSpeed(nextSpeed);
     playbackSpeedRef.current = nextSpeed;
-    applyPlaybackSpeed(audioRef.current, nextSpeed);
+    schedulePlaybackSpeed(audioRef.current, nextSpeed);
     toast.success(`Vitesse: ${nextSpeed}x`);
   }, []);
 
