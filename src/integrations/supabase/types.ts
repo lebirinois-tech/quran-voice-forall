@@ -127,7 +127,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_audio_uploader: { Args: { _audio_id: string }; Returns: string }
       is_app_owner: { Args: never; Returns: boolean }
     }
     Enums: {
