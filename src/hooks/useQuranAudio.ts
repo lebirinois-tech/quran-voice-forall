@@ -71,6 +71,18 @@ const normalizePlaybackSpeed = (speed: number) => {
   return Math.min(2, Math.max(0.5, speed));
 };
 
+const PLAYBACK_SPEED_STORAGE_KEY = 'quran-audio-playback-speed';
+
+const readSavedPlaybackSpeed = () => {
+  if (typeof window === 'undefined') return 1;
+  return normalizePlaybackSpeed(Number(window.localStorage.getItem(PLAYBACK_SPEED_STORAGE_KEY)));
+};
+
+const savePlaybackSpeed = (speed: number) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(PLAYBACK_SPEED_STORAGE_KEY, String(normalizePlaybackSpeed(speed)));
+};
+
 const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   if (!audio) return;
   const normalizedSpeed = normalizePlaybackSpeed(speed);
@@ -122,7 +134,7 @@ export const useQuranAudio = ({
   const [duration, setDuration] = useState(0);
   const [repeatSettings, _setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
   const [currentRepeatCount, _setCurrentRepeatCount] = useState(0);
-  const [playbackSpeed, _setPlaybackSpeed] = useState(1);
+  const [playbackSpeed, _setPlaybackSpeed] = useState(readSavedPlaybackSpeed);
 
   // Sync reciter with external prop
   useEffect(() => {
@@ -136,7 +148,7 @@ export const useQuranAudio = ({
   const repeatSettingsRef = useRef<RepeatSettings>({ mode: 'none', count: 1 });
   const currentRepeatCountRef = useRef(0);
   const onVerseChangeRef = useRef(onVerseChange);
-  const playbackSpeedRef = useRef(1);
+  const playbackSpeedRef = useRef(readSavedPlaybackSpeed());
   const speedEnforcerRef = useRef<number | null>(null);
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
