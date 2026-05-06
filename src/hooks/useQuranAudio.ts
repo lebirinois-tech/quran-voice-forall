@@ -360,6 +360,7 @@ export const useQuranAudio = ({
 
   const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string): Promise<void> => {
     return new Promise((resolve, reject) => {
+      syncPlaybackSpeed(audio);
       const onCanPlay = () => {
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
@@ -378,10 +379,14 @@ export const useQuranAudio = ({
       };
       audio.addEventListener('canplay', onCanPlay);
       audio.addEventListener('error', onError);
+      audio.defaultPlaybackRate = playbackSpeedRef.current;
+      audio.playbackRate = playbackSpeedRef.current;
       audio.src = url;
+      syncPlaybackSpeed(audio);
       audio.load();
+      syncPlaybackSpeed(audio);
     });
-  }, []);
+  }, [startSpeedEnforcer, syncPlaybackSpeed]);
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
     setIsLoading(true);
@@ -514,6 +519,7 @@ export const useQuranAudio = ({
     const nextSpeed = normalizePlaybackSpeed(speed);
     _setPlaybackSpeed(nextSpeed);
     playbackSpeedRef.current = nextSpeed;
+    savePlaybackSpeed(nextSpeed);
     syncPlaybackSpeed(audioRef.current);
     toast.success(`Vitesse: ${nextSpeed}x`);
   }, [syncPlaybackSpeed]);
