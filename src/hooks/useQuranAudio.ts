@@ -66,6 +66,30 @@ interface UseQuranAudioOptions {
   onVerseChange?: (verseNumber: number) => void;
 }
 
+const normalizePlaybackSpeed = (speed: number) => {
+  if (!Number.isFinite(speed)) return 1;
+  return Math.min(2, Math.max(0.5, speed));
+};
+
+const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
+  if (!audio) return;
+  const normalizedSpeed = normalizePlaybackSpeed(speed);
+  try {
+    audio.defaultPlaybackRate = normalizedSpeed;
+    audio.playbackRate = normalizedSpeed;
+    audio.preservesPitch = true;
+
+    const vendorAudio = audio as HTMLAudioElement & {
+      webkitPreservesPitch?: boolean;
+      mozPreservesPitch?: boolean;
+    };
+    vendorAudio.webkitPreservesPitch = true;
+    vendorAudio.mozPreservesPitch = true;
+  } catch (error) {
+    console.warn('Impossible de modifier la vitesse audio:', error);
+  }
+};
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
@@ -130,7 +154,25 @@ export const useQuranAudio = ({
     
     audio.addEventListener('loadedmetadata', () => {
       if (audio !== audioRef.current) return;
+      applyPlaybackSpeed(audio, playbackSpeedRef.current);
       setDuration(audio.duration);
+    });
+
+    audio.addEventListener('play', () => {
+      if (audio !== audioRef.current) return;
+      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+    });
+
+    audio.addEventListener('playing', () => {
+      if (audio !== audioRef.current) return;
+      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+    });
+
+    audio.addEventListener('ratechange', () => {
+      if (audio !== audioRef.current) return;
+      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
+        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+      }
     });
     
     audio.addEventListener('ended', () => {
