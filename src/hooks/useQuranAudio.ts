@@ -425,6 +425,7 @@ export const useQuranAudio = ({
       syncPlaybackSpeed(audioRef.current);
       audioRef.current.play().then(() => {
         syncPlaybackSpeed(audioRef.current);
+        startSpeedEnforcer(audioRef.current);
       }).catch((error) => {
         console.error('Error playing audio:', error);
         setIsPlaying(false);
@@ -438,10 +439,11 @@ export const useQuranAudio = ({
 
   const pause = useCallback(() => {
     if (audioRef.current) {
+      stopSpeedEnforcer();
       audioRef.current.pause();
       setIsPlaying(false);
     }
-  }, []);
+  }, [stopSpeedEnforcer]);
 
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
