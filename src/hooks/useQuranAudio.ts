@@ -66,6 +66,31 @@ interface UseQuranAudioOptions {
   onVerseChange?: (verseNumber: number) => void;
 }
 
+const normalizePlaybackSpeed = (speed: number) => {
+  if (!Number.isFinite(speed)) return 1;
+  return Math.min(2, Math.max(0.5, speed));
+};
+
+const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
+  if (!audio) return;
+  const normalizedSpeed = normalizePlaybackSpeed(speed);
+  try {
+    audio.defaultPlaybackRate = normalizedSpeed;
+    audio.playbackRate = normalizedSpeed;
+
+    const vendorAudio = audio as HTMLAudioElement & {
+      preservesPitch?: boolean;
+      webkitPreservesPitch?: boolean;
+      mozPreservesPitch?: boolean;
+    };
+    vendorAudio.preservesPitch = true;
+    vendorAudio.webkitPreservesPitch = true;
+    vendorAudio.mozPreservesPitch = true;
+  } catch (error) {
+    console.warn('Impossible de modifier la vitesse audio:', error);
+  }
+};
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
@@ -130,7 +155,25 @@ export const useQuranAudio = ({
     
     audio.addEventListener('loadedmetadata', () => {
       if (audio !== audioRef.current) return;
+      applyPlaybackSpeed(audio, playbackSpeedRef.current);
       setDuration(audio.duration);
+    });
+
+    audio.addEventListener('play', () => {
+      if (audio !== audioRef.current) return;
+      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+    });
+
+    audio.addEventListener('playing', () => {
+      if (audio !== audioRef.current) return;
+      applyPlaybackSpeed(audio, playbackSpeedRef.current);
+    });
+
+    audio.addEventListener('ratechange', () => {
+      if (audio !== audioRef.current) return;
+      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
+        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+      }
     });
     
     audio.addEventListener('ended', () => {
@@ -251,8 +294,11 @@ export const useQuranAudio = ({
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
         // Re-apply playback rate AFTER load (some browsers reset it on load)
-        try { audio.playbackRate = playbackSpeedRef.current; } catch {}
-        audio.play().then(resolve).catch(reject);
+        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+        audio.play().then(() => {
+          applyPlaybackSpeed(audio, playbackSpeedRef.current);
+          resolve();
+        }).catch(reject);
       };
       const onError = () => {
         audio.removeEventListener('canplay', onCanPlay);
@@ -279,7 +325,7 @@ export const useQuranAudio = ({
       newAudio.preload = 'auto';
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
-      newAudio.playbackRate = playbackSpeedRef.current;
+      applyPlaybackSpeed(newAudio, playbackSpeedRef.current);
 
       // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, targetSurah, verseNumber);
@@ -316,7 +362,14 @@ export const useQuranAudio = ({
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
-      audioRef.current.play();
+      applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+      audioRef.current.play().then(() => {
+        applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+      }).catch((error) => {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+        toast.error('Impossible de lancer l\'audio');
+      });
       setIsPlaying(true);
     } else {
       playVerse(currentVerse);
@@ -384,16 +437,11 @@ export const useQuranAudio = ({
   }, []);
 
   const changeSpeed = useCallback((speed: number) => {
-    _setPlaybackSpeed(speed);
-    playbackSpeedRef.current = speed;
-    const a = audioRef.current;
-    if (a) {
-      try {
-        a.playbackRate = speed;
-        a.defaultPlaybackRate = speed;
-      } catch {}
-    }
-    toast.success(`Vitesse: ${speed}x`);
+    const nextSpeed = normalizePlaybackSpeed(speed);
+    _setPlaybackSpeed(nextSpeed);
+    playbackSpeedRef.current = nextSpeed;
+    applyPlaybackSpeed(audioRef.current, nextSpeed);
+    toast.success(`Vitesse: ${nextSpeed}x`);
   }, []);
 
   const setRepeatMode = useCallback((mode: RepeatMode, count: number = 1, rangeStart?: number, rangeEnd?: number) => {
