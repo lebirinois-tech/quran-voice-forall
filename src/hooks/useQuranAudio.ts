@@ -141,7 +141,7 @@ export const useQuranAudio = ({
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
     schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
-  }, []);
+  }, [startSpeedEnforcer, syncPlaybackSpeed]);
 
   const stopSpeedEnforcer = useCallback(() => {
     if (speedEnforcerRef.current !== null) {
@@ -409,7 +409,7 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl]);
+  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed]);
 
   const playVerse = useCallback(async (verseNumber: number) => {
     await playVerseAt(surahNumber, verseNumber);
@@ -435,7 +435,7 @@ export const useQuranAudio = ({
     } else {
       playVerse(currentVerse);
     }
-  }, [currentVerse, playVerse]);
+  }, [currentVerse, playVerse, startSpeedEnforcer, syncPlaybackSpeed]);
 
   const pause = useCallback(() => {
     if (audioRef.current) {
@@ -504,7 +504,7 @@ export const useQuranAudio = ({
     playbackSpeedRef.current = nextSpeed;
     syncPlaybackSpeed(audioRef.current);
     toast.success(`Vitesse: ${nextSpeed}x`);
-  }, []);
+  }, [syncPlaybackSpeed]);
 
   const setRepeatMode = useCallback((mode: RepeatMode, count: number = 1, rangeStart?: number, rangeEnd?: number) => {
     const newSettings = { mode, count, rangeStart, rangeEnd };
