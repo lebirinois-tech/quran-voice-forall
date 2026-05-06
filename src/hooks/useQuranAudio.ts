@@ -137,10 +137,32 @@ export const useQuranAudio = ({
   const currentRepeatCountRef = useRef(0);
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(1);
+  const speedEnforcerRef = useRef<number | null>(null);
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
     schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
   }, []);
+
+  const stopSpeedEnforcer = useCallback(() => {
+    if (speedEnforcerRef.current !== null) {
+      window.clearInterval(speedEnforcerRef.current);
+      speedEnforcerRef.current = null;
+    }
+  }, []);
+
+  const startSpeedEnforcer = useCallback((audio: HTMLAudioElement | null) => {
+    if (!audio || typeof window === 'undefined') return;
+    stopSpeedEnforcer();
+    speedEnforcerRef.current = window.setInterval(() => {
+      if (audio !== audioRef.current || audio.paused || audio.ended) {
+        stopSpeedEnforcer();
+        return;
+      }
+      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
+        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+      }
+    }, 200);
+  }, [stopSpeedEnforcer]);
 
   // Wrappers that update BOTH state and ref synchronously
   const setCurrentVerse = useCallback((v: number | ((prev: number) => number)) => {
@@ -193,11 +215,13 @@ export const useQuranAudio = ({
     audio.addEventListener('play', () => {
       if (audio !== audioRef.current) return;
       syncPlaybackSpeed(audio);
+      startSpeedEnforcer(audio);
     });
 
     audio.addEventListener('playing', () => {
       if (audio !== audioRef.current) return;
       syncPlaybackSpeed(audio);
+      startSpeedEnforcer(audio);
     });
 
     audio.addEventListener('ratechange', () => {
@@ -209,6 +233,7 @@ export const useQuranAudio = ({
     
     audio.addEventListener('ended', () => {
       if (audio !== audioRef.current) return;
+      stopSpeedEnforcer();
       setIsPlaying(false);
       // Handle auto-play directly here using refs for always-fresh values
       const cv = currentVerseRef.current;
@@ -270,12 +295,13 @@ export const useQuranAudio = ({
     audio.addEventListener('error', () => {
       if (audio !== audioRef.current) return;
       if (!audio.src || audio.src === '' || audio.src === window.location.href) return;
+      stopSpeedEnforcer();
       console.error('Audio error for src:', audio.src);
       setIsLoading(false);
       setIsPlaying(false);
       toast.error('Erreur de chargement audio');
     });
-  }, []);
+  }, [startSpeedEnforcer, stopSpeedEnforcer, syncPlaybackSpeed]);
 
   // Create initial audio element
   useEffect(() => {
