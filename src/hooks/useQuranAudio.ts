@@ -77,12 +77,13 @@ const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   try {
     audio.defaultPlaybackRate = normalizedSpeed;
     audio.playbackRate = normalizedSpeed;
-    audio.preservesPitch = true;
 
     const vendorAudio = audio as HTMLAudioElement & {
+      preservesPitch?: boolean;
       webkitPreservesPitch?: boolean;
       mozPreservesPitch?: boolean;
     };
+    vendorAudio.preservesPitch = true;
     vendorAudio.webkitPreservesPitch = true;
     vendorAudio.mozPreservesPitch = true;
   } catch (error) {
