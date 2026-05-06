@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_audio_uploader(uuid) FROM PUBLIC, anon, authenticated;

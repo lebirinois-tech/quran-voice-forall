@@ -68,7 +68,10 @@ const AudioLibrary = () => {
   const { data: audios = [], isLoading } = useQuery({
     queryKey: ['audio-downloads', category],
     queryFn: async () => {
-      let query = supabase.from('audio_downloads').select('*').order('created_at', { ascending: false });
+      let query = supabase
+        .from('audio_downloads')
+        .select('id, title, description, category, file_url, file_size, duration_seconds, created_at, collection')
+        .order('created_at', { ascending: false });
       if (category !== 'all') {
         query = query.eq('category', category);
       }
