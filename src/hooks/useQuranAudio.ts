@@ -141,7 +141,7 @@ export const useQuranAudio = ({
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
     schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
-  }, [startSpeedEnforcer, syncPlaybackSpeed]);
+  }, []);
 
   const stopSpeedEnforcer = useCallback(() => {
     if (speedEnforcerRef.current !== null) {
