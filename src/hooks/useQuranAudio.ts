@@ -91,16 +91,20 @@ const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   }
 };
 
-const schedulePlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
+const schedulePlaybackSpeed = (
+  audio: HTMLAudioElement | null,
+  speed: number,
+  getLatestSpeed?: () => number
+) => {
   if (!audio) return;
-  const normalizedSpeed = normalizePlaybackSpeed(speed);
-  applyPlaybackSpeed(audio, normalizedSpeed);
+  const getSpeed = () => normalizePlaybackSpeed(getLatestSpeed?.() ?? speed);
+  applyPlaybackSpeed(audio, getSpeed());
 
   if (typeof window === 'undefined') return;
 
-  window.requestAnimationFrame(() => applyPlaybackSpeed(audio, normalizedSpeed));
+  window.requestAnimationFrame(() => applyPlaybackSpeed(audio, getSpeed()));
   [50, 250, 1000].forEach((delay) => {
-    window.setTimeout(() => applyPlaybackSpeed(audio, normalizedSpeed), delay);
+    window.setTimeout(() => applyPlaybackSpeed(audio, getSpeed()), delay);
   });
 };
 
@@ -133,6 +137,10 @@ export const useQuranAudio = ({
   const currentRepeatCountRef = useRef(0);
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(1);
+
+  const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
+    schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
+  }, []);
 
   // Wrappers that update BOTH state and ref synchronously
   const setCurrentVerse = useCallback((v: number | ((prev: number) => number)) => {
