@@ -293,8 +293,11 @@ export const useQuranAudio = ({
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
         // Re-apply playback rate AFTER load (some browsers reset it on load)
-        try { audio.playbackRate = playbackSpeedRef.current; } catch {}
-        audio.play().then(resolve).catch(reject);
+        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+        audio.play().then(() => {
+          applyPlaybackSpeed(audio, playbackSpeedRef.current);
+          resolve();
+        }).catch(reject);
       };
       const onError = () => {
         audio.removeEventListener('canplay', onCanPlay);
@@ -321,7 +324,7 @@ export const useQuranAudio = ({
       newAudio.preload = 'auto';
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
-      newAudio.playbackRate = playbackSpeedRef.current;
+      applyPlaybackSpeed(newAudio, playbackSpeedRef.current);
 
       // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, targetSurah, verseNumber);
@@ -358,7 +361,14 @@ export const useQuranAudio = ({
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
-      audioRef.current.play();
+      applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+      audioRef.current.play().then(() => {
+        applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+      }).catch((error) => {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+        toast.error('Impossible de lancer l\'audio');
+      });
       setIsPlaying(true);
     } else {
       playVerse(currentVerse);
@@ -426,16 +436,11 @@ export const useQuranAudio = ({
   }, []);
 
   const changeSpeed = useCallback((speed: number) => {
-    _setPlaybackSpeed(speed);
-    playbackSpeedRef.current = speed;
-    const a = audioRef.current;
-    if (a) {
-      try {
-        a.playbackRate = speed;
-        a.defaultPlaybackRate = speed;
-      } catch {}
-    }
-    toast.success(`Vitesse: ${speed}x`);
+    const nextSpeed = normalizePlaybackSpeed(speed);
+    _setPlaybackSpeed(nextSpeed);
+    playbackSpeedRef.current = nextSpeed;
+    applyPlaybackSpeed(audioRef.current, nextSpeed);
+    toast.success(`Vitesse: ${nextSpeed}x`);
   }, []);
 
   const setRepeatMode = useCallback((mode: RepeatMode, count: number = 1, rangeStart?: number, rangeEnd?: number) => {
