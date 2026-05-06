@@ -348,17 +348,17 @@ export const useQuranAudio = ({
 
   // Create initial audio element
   useEffect(() => {
-    const audio = new Audio();
-    audio.preload = 'auto';
+    const audio = createManagedAudioElement();
     setupAudioListeners(audio);
     audioRef.current = audio;
+    syncPlaybackSpeed(audio);
     
     return () => {
       stopSpeedEnforcer();
-      audio.pause();
-      audio.src = '';
+      disposeManagedAudioElement(audio);
+      if (audioRef.current === audio) audioRef.current = null;
     };
-  }, [setupAudioListeners, stopSpeedEnforcer]);
+  }, [setupAudioListeners, stopSpeedEnforcer, syncPlaybackSpeed]);
 
 
   // Helper to format verse number for everyayah.com (e.g., 001, 002, 123)
@@ -426,11 +426,9 @@ export const useQuranAudio = ({
       // Create a fresh audio element to avoid corrupted state
       if (audioRef.current) {
         stopSpeedEnforcer();
-        audioRef.current.pause();
-        audioRef.current.src = '';
+        disposeManagedAudioElement(audioRef.current);
       }
-      const newAudio = new Audio();
-      newAudio.preload = 'auto';
+      const newAudio = createManagedAudioElement();
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
       syncPlaybackSpeed(newAudio);
