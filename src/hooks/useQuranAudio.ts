@@ -120,6 +120,37 @@ const schedulePlaybackSpeed = (
   });
 };
 
+const createManagedAudioElement = () => {
+  const audio = typeof document !== 'undefined'
+    ? document.createElement('audio')
+    : new Audio();
+
+  audio.preload = 'auto';
+  audio.crossOrigin = 'anonymous';
+
+  // Android/installed PWAs are more reliable when the media element is attached
+  // to the DOM instead of being only an off-DOM `new Audio()` instance.
+  if (typeof document !== 'undefined') {
+    audio.dataset.quranAudioPlayer = 'true';
+    audio.style.display = 'none';
+    document.body.appendChild(audio);
+  }
+
+  return audio;
+};
+
+const disposeManagedAudioElement = (audio: HTMLAudioElement | null) => {
+  if (!audio) return;
+  try {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+    audio.remove();
+  } catch (error) {
+    console.warn('Impossible de nettoyer l’audio:', error);
+  }
+};
+
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
