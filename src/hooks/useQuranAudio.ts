@@ -317,9 +317,9 @@ export const useQuranAudio = ({
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
         // Re-apply playback rate AFTER load (some browsers reset it on load)
-        applyPlaybackSpeed(audio, playbackSpeedRef.current);
+        schedulePlaybackSpeed(audio, playbackSpeedRef.current);
         audio.play().then(() => {
-          applyPlaybackSpeed(audio, playbackSpeedRef.current);
+          schedulePlaybackSpeed(audio, playbackSpeedRef.current);
           resolve();
         }).catch(reject);
       };
@@ -348,7 +348,7 @@ export const useQuranAudio = ({
       newAudio.preload = 'auto';
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
-      applyPlaybackSpeed(newAudio, playbackSpeedRef.current);
+      schedulePlaybackSpeed(newAudio, playbackSpeedRef.current);
 
       // Check localStorage for cached audio URL (offline support)
       const cachedUrl = getCachedAudioUrl(reciter, targetSurah, verseNumber);
@@ -385,9 +385,9 @@ export const useQuranAudio = ({
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
-      applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+      schedulePlaybackSpeed(audioRef.current, playbackSpeedRef.current);
       audioRef.current.play().then(() => {
-        applyPlaybackSpeed(audioRef.current, playbackSpeedRef.current);
+        schedulePlaybackSpeed(audioRef.current, playbackSpeedRef.current);
       }).catch((error) => {
         console.error('Error playing audio:', error);
         setIsPlaying(false);
@@ -463,7 +463,7 @@ export const useQuranAudio = ({
     const nextSpeed = normalizePlaybackSpeed(speed);
     _setPlaybackSpeed(nextSpeed);
     playbackSpeedRef.current = nextSpeed;
-    applyPlaybackSpeed(audioRef.current, nextSpeed);
+    schedulePlaybackSpeed(audioRef.current, nextSpeed);
     toast.success(`Vitesse: ${nextSpeed}x`);
   }, []);
 
