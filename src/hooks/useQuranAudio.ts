@@ -250,6 +250,8 @@ export const useQuranAudio = ({
       const onCanPlay = () => {
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
+        // Re-apply playback rate AFTER load (some browsers reset it on load)
+        try { audio.playbackRate = playbackSpeedRef.current; } catch {}
         audio.play().then(resolve).catch(reject);
       };
       const onError = () => {
@@ -384,8 +386,12 @@ export const useQuranAudio = ({
   const changeSpeed = useCallback((speed: number) => {
     _setPlaybackSpeed(speed);
     playbackSpeedRef.current = speed;
-    if (audioRef.current) {
-      audioRef.current.playbackRate = speed;
+    const a = audioRef.current;
+    if (a) {
+      try {
+        a.playbackRate = speed;
+        a.defaultPlaybackRate = speed;
+      } catch {}
     }
     toast.success(`Vitesse: ${speed}x`);
   }, []);
