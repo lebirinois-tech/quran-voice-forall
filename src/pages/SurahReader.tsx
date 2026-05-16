@@ -69,10 +69,7 @@ const SurahReader = () => {
 
   // Fetch verses with Tajweed from API
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
-  const { warshVerses } = useWarshData(
-    num,
-    appSettings.textDisplayStyle === 'warsh-tajweed' || appSettings.textDisplayStyle === 'warsh-text'
-  );
+  const { warshVerses } = useWarshData(num, appSettings.textDisplayStyle === 'warsh-tajweed');
   const { qalunVerses } = useQalunData(
     num,
     appSettings.textDisplayStyle === 'qalun-tajweed' || appSettings.textDisplayStyle === 'qalun-text'
