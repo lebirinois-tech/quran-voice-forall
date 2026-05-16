@@ -12,6 +12,7 @@ import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
+import { useQalunData } from '@/hooks/useQalunData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse } from '@/data/surahs';
@@ -69,6 +70,10 @@ const SurahReader = () => {
   // Fetch verses with Tajweed from API
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
   const { warshVerses } = useWarshData(num, appSettings.textDisplayStyle === 'warsh-tajweed');
+  const { qalunVerses } = useQalunData(
+    num,
+    appSettings.textDisplayStyle === 'qalun-tajweed' || appSettings.textDisplayStyle === 'qalun-text'
+  );
 
   const handleVerseChange = useCallback((verseNum: number) => {
     const verseElement = document.getElementById(`verse-${verseNum}`);
@@ -540,6 +545,7 @@ const SurahReader = () => {
                                 fontSize={appSettings.fontSize}
                                 tajweedHtml={versesTajweed[verse.number]}
                                 warshText={warshVerses[verse.number]}
+                                qalunText={qalunVerses[verse.number]}
                                 onPlay={() => quranAudio.playVerse(verse.number)}
                                 onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
                                 isBookmarked={getSurahProgress(num)?.verse_number === verse.number}

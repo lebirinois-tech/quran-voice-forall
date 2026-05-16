@@ -1,6 +1,7 @@
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2, Volume2, Square } from 'lucide-react';
 import { Button } from './ui/button';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
@@ -59,6 +60,7 @@ interface VerseCardProps {
   fontSize?: FontSize;
   tajweedHtml?: string;
   warshText?: string;
+  qalunText?: string;
   pageNumber?: number;
   onPlay?: () => void;
   onBookmark?: () => void;
@@ -79,6 +81,7 @@ export const VerseCard = ({
   fontSize = 'medium',
   tajweedHtml,
   warshText,
+  qalunText,
   pageNumber: propPageNumber,
   onPlay,
   onBookmark,
@@ -237,6 +240,16 @@ export const VerseCard = ({
       ? sanitizeTajweedHtml(tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined) || '')
       : undefined;
 
+  // Auto-Tajweed coloring for Warsh / Qalun verse-by-verse modes
+  const warshTajweedHtml =
+    textDisplayStyle === 'warsh-tajweed' && warshText
+      ? sanitizeTajweedHtml(applyAutoTajweed(warshText))
+      : undefined;
+  const qalunTajweedHtml =
+    textDisplayStyle === 'qalun-tajweed' && qalunText
+      ? sanitizeTajweedHtml(applyAutoTajweed(qalunText))
+      : undefined;
+
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
@@ -317,6 +330,10 @@ export const VerseCard = ({
         return `font-amiri ${sizeClass} leading-loose text-foreground`;
       case 'warsh-tajweed':
         return `font-warsh ${sizeClass} leading-loose text-foreground`;
+      case 'qalun-text':
+        return `font-amiri ${sizeClass} leading-loose text-foreground`;
+      case 'qalun-tajweed':
+        return `font-amiri ${sizeClass} leading-loose text-foreground`;
       case 'mushaf-hafs':
       case 'mushaf-warsh':
         return `quran-text ${sizeClass} leading-loose`;
@@ -441,12 +458,31 @@ export const VerseCard = ({
           dir="rtl"
           dangerouslySetInnerHTML={{ __html: effectiveTajweedHtml }}
         />
+      ) : textDisplayStyle === 'warsh-tajweed' && warshTajweedHtml ? (
+        <p
+          className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
+          dir="rtl"
+          dangerouslySetInnerHTML={{ __html: warshTajweedHtml }}
+        />
       ) : textDisplayStyle === 'warsh-tajweed' && warshText ? (
         <p 
           className={cn(getTextClassName(), "mb-4 text-right")}
           dir="rtl"
         >
           {warshText}
+        </p>
+      ) : textDisplayStyle === 'qalun-tajweed' && qalunTajweedHtml ? (
+        <p
+          className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
+          dir="rtl"
+          dangerouslySetInnerHTML={{ __html: qalunTajweedHtml }}
+        />
+      ) : (textDisplayStyle === 'qalun-text' || textDisplayStyle === 'qalun-tajweed') && qalunText ? (
+        <p
+          className={cn(getTextClassName(), "mb-4 text-right")}
+          dir="rtl"
+        >
+          {qalunText}
         </p>
       ) : (
         <p 
