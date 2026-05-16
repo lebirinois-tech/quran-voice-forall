@@ -57,8 +57,20 @@ const TEXT_DISPLAY_STYLES = [
   { 
     id: 'warsh-tajweed' as TextDisplayStyle, 
     name: 'Warsh Tajweed / ورش تجويد', 
-    description: 'Police KFGQPC Warsh ottomane par verset',
+    description: 'Texte Warsh verset par verset avec Tajweed coloré',
     icon: '🕌'
+  },
+  {
+    id: 'qalun-text' as TextDisplayStyle,
+    name: 'Texte Qalun / نص قالون',
+    description: 'Texte Qalun verset par verset (sans couleurs)',
+    icon: '✒️'
+  },
+  {
+    id: 'qalun-tajweed' as TextDisplayStyle,
+    name: 'Qalun Tajweed / قالون تجويد',
+    description: 'Texte Qalun verset par verset avec Tajweed coloré',
+    icon: '🟢'
   },
   { 
     id: 'mushaf-hafs' as TextDisplayStyle, 
