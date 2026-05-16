@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ReciterId } from './useQuranAudio';
 
-export type TextDisplayStyle = 'tajweed' | 'simple' | 'warsh-text' | 'warsh-tajweed' | 'mushaf-hafs' | 'mushaf-warsh' | 'mushaf-warsh-tajweed' | 'mushaf-qalun';
+export type TextDisplayStyle = 'tajweed' | 'simple' | 'warsh-text' | 'warsh-tajweed' | 'qalun-text' | 'qalun-tajweed' | 'mushaf-hafs' | 'mushaf-warsh' | 'mushaf-warsh-tajweed' | 'mushaf-qalun';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 const STORAGE_KEYS = {
