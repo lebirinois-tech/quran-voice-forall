@@ -123,7 +123,7 @@ Si l'audio est inaudible ou ne contient pas de récitation, donne un score de 0 
     });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
