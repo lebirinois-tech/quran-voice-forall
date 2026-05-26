@@ -405,11 +405,9 @@ const SurahReader = () => {
 
         <div className="max-w-3xl mx-auto">
           {/* Bismillah - only show for text modes */}
-          {surah.number !== 1 && surah.number !== 9 && 
-           appSettings.textDisplayStyle !== 'mushaf-hafs' && 
-           appSettings.textDisplayStyle !== 'mushaf-warsh' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' &&
-           appSettings.textDisplayStyle !== 'mushaf-qalun' && (
+          {surah.number !== 1 && surah.number !== 9 &&
+           appSettings.textDisplayStyle !== 'mushaf-hafs' &&
+           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -551,7 +549,7 @@ const SurahReader = () => {
                                 isHighlighted={quranAudio.currentVerse === verse.number}
                                 isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
                                 reciter={appSettings.reciter}
-                                textDisplayStyle={appSettings.textDisplayStyle}
+                                textDisplayStyle={effectiveDisplayStyle}
                                 fontSize={appSettings.fontSize}
                                 tajweedHtml={versesTajweed[verse.number]}
                                 warshText={warshVerses[verse.number]}
