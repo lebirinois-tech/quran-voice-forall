@@ -69,13 +69,13 @@ const SurahReader = () => {
 
   // Fetch verses with Tajweed from API
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
-  const { warshVerses } = useWarshData(
+  const { warshVerses, isLoading: isLoadingWarsh } = useWarshData(
     num,
     appSettings.textDisplayStyle === 'warsh-tajweed' ||
       appSettings.textDisplayStyle === 'warsh-text' ||
       appSettings.textDisplayStyle === 'mushaf-warsh-tajweed'
   );
-  const { qalunVerses } = useQalunData(
+  const { qalunVerses, isLoading: isLoadingQalun } = useQalunData(
     num,
     appSettings.textDisplayStyle === 'qalun-tajweed' ||
       appSettings.textDisplayStyle === 'qalun-text' ||
@@ -90,6 +90,13 @@ const SurahReader = () => {
       : appSettings.textDisplayStyle === 'mushaf-qalun'
         ? 'qalun-tajweed'
         : appSettings.textDisplayStyle;
+  const isMushafImageMode =
+    appSettings.textDisplayStyle === 'mushaf-hafs' || appSettings.textDisplayStyle === 'mushaf-warsh';
+  const isColoredTextMushafMode =
+    appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' || appSettings.textDisplayStyle === 'mushaf-qalun';
+  const isLoadingTextSource =
+    (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
+    (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
 
   const handleVerseChange = useCallback((verseNum: number) => {
     const verseElement = document.getElementById(`verse-${verseNum}`);
