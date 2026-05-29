@@ -7,6 +7,11 @@ import { Download, Smartphone, Monitor, Apple, CheckCircle2 } from 'lucide-react
 const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
   const publishedUrl = 'https://quran-voice-forall.lovable.app';
+  // 📥 APK Android — lien direct vers la dernière Release GitHub.
+  // Remplacez OWNER/REPO par votre dépôt GitHub après avoir exporté le projet.
+  // Le workflow .github/workflows/build-apk.yml publie automatiquement le fichier ci-dessous.
+  const apkDownloadUrl =
+    'https://github.com/OWNER/REPO/releases/latest/download/quran-acces-pour-tous.apk';
   const [status, setStatus] = useState<string | null>(null);
 
   const platform: 'ios' | 'android' | 'desktop' = useMemo(() => {
@@ -190,6 +195,45 @@ const Install = () => {
                   <span>Icône sur l'écran</span>
                 </div>
               </div>
+            </div>
+
+            {/* Téléchargement APK Android natif */}
+            <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                  <Smartphone className="h-6 w-6 text-secondary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Application Android (APK)
+                  </p>
+                  <p className="font-semibold text-foreground">تطبيق أندرويد</p>
+                </div>
+              </div>
+
+              <a
+                href={apkDownloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block w-full sm:w-auto"
+              >
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
+                >
+                  <Download className="h-6 w-6" />
+                  Télécharger l'APK Android
+                </Button>
+              </a>
+
+              <p className="text-sm text-muted-foreground mt-3">
+                Version native Android — installation directe sans Play Store.
+                <br />
+                <span className="text-xs">
+                  (Autorisez « Sources inconnues » dans les paramètres Android avant l'installation)
+                </span>
+              </p>
             </div>
           </div>
         )}
