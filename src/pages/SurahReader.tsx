@@ -426,6 +426,12 @@ const SurahReader = () => {
             </div>
           )}
 
+          {isColoredTextMushafMode && (
+            <div className="mb-4 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-foreground">
+              Affichage Tajweed coloré verset par verset avec mémorisation et enregistrement.
+            </div>
+          )}
+
           {/* Mushaf Image Viewer Mode (only modes with real page images) */}
           {isMushafImageMode && (
             <MushafPageViewer
