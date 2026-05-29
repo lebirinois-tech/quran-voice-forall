@@ -3,15 +3,11 @@ import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, CheckCircle2 } from 'lucide-react';
+import { apkDownloadUrl } from '@/lib/apkDownload';
 
 const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
   const publishedUrl = 'https://quran-voice-forall.lovable.app';
-  // 📥 APK Android — lien direct vers la dernière Release GitHub.
-  // Remplacez OWNER/REPO par votre dépôt GitHub après avoir exporté le projet.
-  // Le workflow .github/workflows/build-apk.yml publie automatiquement le fichier ci-dessous.
-  const apkDownloadUrl =
-    'https://github.com/OWNER/REPO/releases/latest/download/quran-acces-pour-tous.apk';
   const [status, setStatus] = useState<string | null>(null);
 
   const platform: 'ios' | 'android' | 'desktop' = useMemo(() => {
