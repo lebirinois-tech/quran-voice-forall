@@ -487,7 +487,13 @@ const SurahReader = () => {
                     return pageGroups.map(([pageNum, pageVerses]) => {
                       const firstVerseOfPage = pageVerses[0].number;
                       const lastVerseOfPage = pageVerses[pageVerses.length - 1].number;
-                      const pageText = pageVerses.map((v) => v.text).join(' ');
+                      const pageText = pageVerses
+                        .map((v) => {
+                          if (effectiveDisplayStyle === 'warsh-tajweed') return warshVerses[v.number] || v.text;
+                          if (effectiveDisplayStyle === 'qalun-tajweed') return qalunVerses[v.number] || v.text;
+                          return v.text;
+                        })
+                        .join(' ');
                       const isEvenPage = pageNum % 2 === 0;
                       const juzNum = getJuzForVerse(num, firstVerseOfPage);
 
