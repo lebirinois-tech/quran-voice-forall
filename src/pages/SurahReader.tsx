@@ -138,7 +138,7 @@ const SurahReader = () => {
     
     if (verseParam) {
       scrollToElement(`verse-${parseInt(verseParam)}`);
-    } else if (pageParam && !appSettings.textDisplayStyle.startsWith('mushaf-') && verses.length > 0) {
+    } else if (pageParam && !isMushafImageMode && verses.length > 0) {
       const targetPage = parseInt(pageParam);
       const targetVerse = verses.find(v => {
         const versePage = v.page ?? getVersePage(num, v.number, verses.length);
@@ -148,7 +148,7 @@ const SurahReader = () => {
         scrollToElement(`verse-${targetVerse.number}`);
       }
     }
-  }, [searchParams, verses, appSettings.textDisplayStyle, num]);
+  }, [searchParams, verses, isMushafImageMode, num]);
 
   // Auto-save reading progress when verse changes
   useEffect(() => {
@@ -202,7 +202,7 @@ const SurahReader = () => {
     }
   };
 
-  const isMushafMode = appSettings.textDisplayStyle.startsWith('mushaf-');
+  const isMushafMode = isMushafImageMode;
 
   // Compute verse range for the current Mushaf page using real API page data
   const currentPageVerseRange = useMemo(() => {
