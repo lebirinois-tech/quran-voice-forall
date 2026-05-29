@@ -81,7 +81,7 @@ const TEXT_DISPLAY_STYLES = [
   { 
     id: 'mushaf-warsh-tajweed' as TextDisplayStyle, 
     name: 'Mushaf Warsh Tajweed / مصحف ورش ملون', 
-    description: 'Pages du Mushaf Warsh avec Tajweed coloré',
+    description: 'Warsh coloré verset par verset avec enregistrement',
     icon: '🎨'
   },
   { 
@@ -93,7 +93,7 @@ const TEXT_DISPLAY_STYLES = [
   { 
     id: 'mushaf-qalun' as TextDisplayStyle, 
     name: 'Mushaf Qalun Tajweed / مصحف قالون', 
-    description: 'Pages du Mushaf en riwaya Qalun avec Tajweed coloré',
+    description: 'Qalun coloré verset par verset avec enregistrement',
     icon: '📗'
   },
 ];
