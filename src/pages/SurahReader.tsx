@@ -69,13 +69,13 @@ const SurahReader = () => {
 
   // Fetch verses with Tajweed from API
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
-  const { warshVerses } = useWarshData(
+  const { warshVerses, isLoading: isLoadingWarsh } = useWarshData(
     num,
     appSettings.textDisplayStyle === 'warsh-tajweed' ||
       appSettings.textDisplayStyle === 'warsh-text' ||
       appSettings.textDisplayStyle === 'mushaf-warsh-tajweed'
   );
-  const { qalunVerses } = useQalunData(
+  const { qalunVerses, isLoading: isLoadingQalun } = useQalunData(
     num,
     appSettings.textDisplayStyle === 'qalun-tajweed' ||
       appSettings.textDisplayStyle === 'qalun-text' ||
@@ -90,6 +90,13 @@ const SurahReader = () => {
       : appSettings.textDisplayStyle === 'mushaf-qalun'
         ? 'qalun-tajweed'
         : appSettings.textDisplayStyle;
+  const isMushafImageMode =
+    appSettings.textDisplayStyle === 'mushaf-hafs' || appSettings.textDisplayStyle === 'mushaf-warsh';
+  const isColoredTextMushafMode =
+    appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' || appSettings.textDisplayStyle === 'mushaf-qalun';
+  const isLoadingTextSource =
+    (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
+    (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
 
   const handleVerseChange = useCallback((verseNum: number) => {
     const verseElement = document.getElementById(`verse-${verseNum}`);
@@ -131,7 +138,7 @@ const SurahReader = () => {
     
     if (verseParam) {
       scrollToElement(`verse-${parseInt(verseParam)}`);
-    } else if (pageParam && !appSettings.textDisplayStyle.startsWith('mushaf-') && verses.length > 0) {
+    } else if (pageParam && !isMushafImageMode && verses.length > 0) {
       const targetPage = parseInt(pageParam);
       const targetVerse = verses.find(v => {
         const versePage = v.page ?? getVersePage(num, v.number, verses.length);
@@ -141,7 +148,7 @@ const SurahReader = () => {
         scrollToElement(`verse-${targetVerse.number}`);
       }
     }
-  }, [searchParams, verses, appSettings.textDisplayStyle, num]);
+  }, [searchParams, verses, isMushafImageMode, num]);
 
   // Auto-save reading progress when verse changes
   useEffect(() => {
@@ -195,7 +202,7 @@ const SurahReader = () => {
     }
   };
 
-  const isMushafMode = appSettings.textDisplayStyle.startsWith('mushaf-');
+  const isMushafMode = isMushafImageMode;
 
   // Compute verse range for the current Mushaf page using real API page data
   const currentPageVerseRange = useMemo(() => {
@@ -397,6 +404,7 @@ const SurahReader = () => {
         {/* Tajweed Legend - shown for all colored Tajweed modes */}
         {(appSettings.textDisplayStyle === 'tajweed' || 
           appSettings.textDisplayStyle === 'warsh-tajweed' ||
+          appSettings.textDisplayStyle === 'qalun-tajweed' ||
           appSettings.textDisplayStyle === 'mushaf-hafs' ||
           appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
           appSettings.textDisplayStyle === 'mushaf-qalun') && (
@@ -418,9 +426,14 @@ const SurahReader = () => {
             </div>
           )}
 
+          {isColoredTextMushafMode && (
+            <div className="mb-4 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-foreground">
+              Affichage Tajweed coloré verset par verset avec mémorisation et enregistrement.
+            </div>
+          )}
+
           {/* Mushaf Image Viewer Mode (only modes with real page images) */}
-          {(appSettings.textDisplayStyle === 'mushaf-hafs' ||
-            appSettings.textDisplayStyle === 'mushaf-warsh') && (
+          {isMushafImageMode && (
             <MushafPageViewer
               key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
@@ -434,11 +447,10 @@ const SurahReader = () => {
           )}
 
           {/* Text-based display modes (Tajweed / Simple / Warsh / Qalun) */}
-          {appSettings.textDisplayStyle !== 'mushaf-hafs' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+          {!isMushafImageMode && (
             <>
               {/* Loading State */}
-              {isLoadingVerses && (
+              {(isLoadingVerses || isLoadingTextSource) && (
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <Loader2 className="h-10 w-10 text-primary animate-spin" />
                   <p className="text-muted-foreground">Chargement des versets Tajweed...</p>
@@ -460,7 +472,7 @@ const SurahReader = () => {
               )}
 
               {/* Verses */}
-              {!isLoadingVerses && !error && (
+              {!isLoadingVerses && !isLoadingTextSource && !error && (
                 <div className="space-y-6">
                   {(() => {
                     // Group verses by page
@@ -475,7 +487,13 @@ const SurahReader = () => {
                     return pageGroups.map(([pageNum, pageVerses]) => {
                       const firstVerseOfPage = pageVerses[0].number;
                       const lastVerseOfPage = pageVerses[pageVerses.length - 1].number;
-                      const pageText = pageVerses.map((v) => v.text).join(' ');
+                      const pageText = pageVerses
+                        .map((v) => {
+                          if (effectiveDisplayStyle === 'warsh-tajweed') return warshVerses[v.number] || v.text;
+                          if (effectiveDisplayStyle === 'qalun-tajweed') return qalunVerses[v.number] || v.text;
+                          return v.text;
+                        })
+                        .join(' ');
                       const isEvenPage = pageNum % 2 === 0;
                       const juzNum = getJuzForVerse(num, firstVerseOfPage);
 

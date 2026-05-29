@@ -13,17 +13,23 @@ interface QalunVerse {
   aya_text: string;
 }
 
-const QALUN_DATA_URL =
-  'https://raw.githubusercontent.com/thetruetruth/quran-data-kfgqpc/main/qaloon/data/QaloonData_v10.json';
-const CACHE_KEY = 'quran-qalun-data';
+const QALUN_DATA_URLS = [
+  'https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/qaloon/data/QaloonData_v10.json',
+  'https://raw.githubusercontent.com/thetruetruth/quran-data-kfgqpc/main/qaloon/data/QaloonData_v10.json',
+];
+const CACHE_KEY = 'quran-qalun-data-v2';
 
 let qalunDataCache: QalunVerse[] | null = null;
+
+const isQalunData = (data: unknown): data is QalunVerse[] =>
+  Array.isArray(data) && data.every((item) => typeof item === 'object' && item !== null && 'sura_no' in item && 'aya_no' in item && 'aya_text' in item);
 
 const loadFromStorage = (): QalunVerse[] | null => {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as QalunVerse[];
+    const parsed = JSON.parse(raw);
+    return isQalunData(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -37,11 +43,41 @@ const saveToStorage = (data: QalunVerse[]) => {
   }
 };
 
+const fetchQalunDataset = async (): Promise<QalunVerse[]> => {
+  let lastError: unknown;
+
+  for (const url of QALUN_DATA_URLS) {
+    try {
+      const response = await fetch(url, { cache: 'force-cache' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!isQalunData(data)) throw new Error('Invalid Qalun data');
+      return data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+};
+
+const getSurahVerses = (data: QalunVerse[], surahNumber: number): Record<number, string> => {
+  const surahVerses: Record<number, string> = {};
+  data
+    .filter((v) => v.sura_no === surahNumber)
+    .forEach((v) => {
+      surahVerses[v.aya_no] = v.aya_text;
+    });
+  return surahVerses;
+};
+
 export const useQalunData = (surahNumber: number, enabled: boolean) => {
   const [qalunVerses, setQalunVerses] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!enabled) {
       setQalunVerses({});
       return;
@@ -55,39 +91,29 @@ export const useQalunData = (surahNumber: number, enabled: boolean) => {
         }
 
         if (!qalunDataCache) {
-          const response = await fetch(QALUN_DATA_URL);
-          qalunDataCache = await response.json();
-          if (qalunDataCache) saveToStorage(qalunDataCache);
+          qalunDataCache = await fetchQalunDataset();
+          saveToStorage(qalunDataCache);
         }
 
-        if (qalunDataCache) {
-          const surahVerses: Record<number, string> = {};
-          qalunDataCache
-            .filter((v) => v.sura_no === surahNumber)
-            .forEach((v) => {
-              surahVerses[v.aya_no] = v.aya_text;
-            });
-          setQalunVerses(surahVerses);
+        if (!cancelled) {
+          setQalunVerses(getSurahVerses(qalunDataCache, surahNumber));
         }
       } catch (err) {
         console.error('Error fetching Qalun data:', err);
         const cached = loadFromStorage();
-        if (cached) {
-          qalunDataCache = cached;
-          const surahVerses: Record<number, string> = {};
-          cached
-            .filter((v) => v.sura_no === surahNumber)
-            .forEach((v) => {
-              surahVerses[v.aya_no] = v.aya_text;
-            });
-          setQalunVerses(surahVerses);
+        if (!cancelled) {
+          setQalunVerses(cached ? getSurahVerses(cached, surahNumber) : {});
         }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchQalunData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [surahNumber, enabled]);
 
   return { qalunVerses, isLoading };
