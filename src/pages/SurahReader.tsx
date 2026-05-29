@@ -404,6 +404,7 @@ const SurahReader = () => {
         {/* Tajweed Legend - shown for all colored Tajweed modes */}
         {(appSettings.textDisplayStyle === 'tajweed' || 
           appSettings.textDisplayStyle === 'warsh-tajweed' ||
+          appSettings.textDisplayStyle === 'qalun-tajweed' ||
           appSettings.textDisplayStyle === 'mushaf-hafs' ||
           appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
           appSettings.textDisplayStyle === 'mushaf-qalun') && (
@@ -426,8 +427,7 @@ const SurahReader = () => {
           )}
 
           {/* Mushaf Image Viewer Mode (only modes with real page images) */}
-          {(appSettings.textDisplayStyle === 'mushaf-hafs' ||
-            appSettings.textDisplayStyle === 'mushaf-warsh') && (
+          {isMushafImageMode && (
             <MushafPageViewer
               key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
@@ -441,11 +441,10 @@ const SurahReader = () => {
           )}
 
           {/* Text-based display modes (Tajweed / Simple / Warsh / Qalun) */}
-          {appSettings.textDisplayStyle !== 'mushaf-hafs' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+          {!isMushafImageMode && (
             <>
               {/* Loading State */}
-              {isLoadingVerses && (
+              {(isLoadingVerses || isLoadingTextSource) && (
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <Loader2 className="h-10 w-10 text-primary animate-spin" />
                   <p className="text-muted-foreground">Chargement des versets Tajweed...</p>
@@ -467,7 +466,7 @@ const SurahReader = () => {
               )}
 
               {/* Verses */}
-              {!isLoadingVerses && !error && (
+              {!isLoadingVerses && !isLoadingTextSource && !error && (
                 <div className="space-y-6">
                   {(() => {
                     // Group verses by page
