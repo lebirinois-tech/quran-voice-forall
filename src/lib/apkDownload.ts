@@ -1,6 +1,6 @@
 const apkFileName = 'quran-acces-pour-tous.apk';
 const githubRepository =
-  import.meta.env.VITE_GITHUB_REPOSITORY || 'lebirinois-tech/quran-voice-forall';
+  import.meta.env.VITE_GITHUB_REPOSITORY || 'lebirinois-tech/voix-coran-pour-tous';
 
 export const apkDownloadUrl =
   import.meta.env.VITE_APK_DOWNLOAD_URL ||
