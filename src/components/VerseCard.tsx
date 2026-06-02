@@ -234,10 +234,14 @@ export const VerseCard = ({
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
 
-  // Sanitize Tajweed HTML to prevent XSS attacks
+  // Hafs Tajweed — use the same simplified 4-color scheme as Warsh / Qalun
+  // (Madd red, Ghunnah green, Qalqalah blue, Iqlab orange) so the Ghunnah
+  // color stays consistent across all Qira'at. The richer external Tajweed
+  // markup (which sometimes recolored Ghunnah as violet for Idgham, etc.)
+  // is intentionally ignored here.
   const effectiveTajweedHtml =
     textDisplayStyle === 'tajweed'
-      ? sanitizeTajweedHtml(tajweedHtml || (verse.text.includes('[') ? parseTajweedFallback(verse.text) : undefined) || '')
+      ? sanitizeTajweedHtml(applyAutoTajweed(verse.text))
       : undefined;
 
   // Auto-Tajweed coloring for Warsh / Qalun verse-by-verse modes
