@@ -97,8 +97,8 @@ const SurahReader = () => {
   const isColoredTextMushafMode =
     appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' || appSettings.textDisplayStyle === 'mushaf-qalun';
   const isLoadingTextSource =
-    (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
-    (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
+    ((effectiveDisplayStyle === 'warsh-tajweed' || effectiveDisplayStyle === 'warsh-text') && isLoadingWarsh) ||
+    ((effectiveDisplayStyle === 'qalun-tajweed' || effectiveDisplayStyle === 'qalun-text') && isLoadingQalun);
 
   const handleVerseChange = useCallback((verseNum: number) => {
     const verseElement = document.getElementById(`verse-${verseNum}`);
