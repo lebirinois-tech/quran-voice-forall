@@ -17,6 +17,8 @@ interface VerseRecorderProps {
   label?: string;
   reciter?: ReciterId;
   onRecordingChange?: (isRecording: boolean) => void;
+  /** Called when the verse text should be hidden (recording) or revealed (playback / idle). */
+  onHideTextChange?: (hide: boolean) => void;
 }
 
 interface ComparisonResult {
@@ -25,7 +27,7 @@ interface ComparisonResult {
   details?: string;
 }
 
-export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange }: VerseRecorderProps) => {
+export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange, onHideTextChange }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
@@ -43,6 +45,16 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
 
   const { savedRecording, saveRecording, deleteRecording } = useRecordingStorage(surahNumber, verseNumber);
   const activeBlob = recordedBlob || savedRecording;
+
+  // Hide the verse text only while actively recording. Reveal during playback
+  // so the user can verify their recitation against the original text.
+  useEffect(() => {
+    onHideTextChange?.(isRecording && !isPlayingRecording);
+  }, [isRecording, isPlayingRecording, onHideTextChange]);
+
+  useEffect(() => {
+    return () => { onHideTextChange?.(false); };
+  }, [onHideTextChange]);
 
   useEffect(() => {
     return () => {
