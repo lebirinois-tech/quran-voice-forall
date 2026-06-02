@@ -229,6 +229,10 @@ const Install = () => {
                 <span className="text-xs">
                   (Autorisez « Sources inconnues » dans les paramètres Android avant l'installation)
                 </span>
+                <br />
+                <span className="text-xs text-primary font-medium">
+                  ✓ Téléchargement libre — aucune connexion requise
+                </span>
               </p>
             </div>
           </div>
