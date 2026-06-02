@@ -1,75 +1,35 @@
+## Objectif
 
-# Plan : Remplacer le Tajweed par le texte arabe simple
+Réparer le lien de téléchargement de l'APK (404) en utilisant le dépôt GitHub confirmé : `lebirinois/quran-acces-pour-tous`.
 
-## Problème identifié
+## Cause du 404
 
-L'API `quran-tajweed` retourne un format propriétaire avec des crochets qui ne s'affiche pas correctement :
+`VITE_GITHUB_REPOSITORY` n'est défini que pendant le build GitHub Actions. En preview/prod Lovable, la variable est absente et le lien retombe sur le placeholder `OWNER/REPO`, d'où le 404.
 
-```
-بِسْمِ [h:1[ٱ]للَّهِ [h:2[ٱ][l[ل]رَّحْمَ[n[ـٰ]نِ
-```
+## Changement
 
-Ce format n'est pas du HTML standard et le parsing est complexe et peu fiable.
+**`src/lib/apkDownload.ts`** — remplacer le fallback `OWNER/REPO` par le vrai dépôt :
 
-## Solution retenue
+```ts
+const apkFileName = 'quran-acces-pour-tous.apk';
+const githubRepository =
+  import.meta.env.VITE_GITHUB_REPOSITORY || 'lebirinois/quran-acces-pour-tous';
 
-Remplacer l'édition `quran-tajweed` par `ar.alafasy` qui retourne du texte arabe pur et propre, sans balisage spécial.
-
-## Modifications prévues
-
-### 1. `src/hooks/useQuranData.ts`
-
-Changer l'appel API :
-- **Avant** : `https://api.alquran.cloud/v1/surah/{n}/quran-tajweed`
-- **Après** : `https://api.alquran.cloud/v1/surah/{n}/ar.alafasy`
-
-Cette édition retourne le texte arabe standard utilisé par le récitateur Al-Afasy.
-
-### 2. `src/components/VerseCard.tsx`
-
-Remplacer le rendu HTML par du texte simple :
-- **Avant** : `dangerouslySetInnerHTML={{ __html: verse.text }}`
-- **Après** : `{verse.text}` (texte direct)
-
-### 3. `src/index.css`
-
-Supprimer les styles Tajweed inutilisés (optionnel, nettoyage) :
-- Retirer les classes `.ham_wasl`, `.slnt`, `.ghunnah`, etc.
-- Garder uniquement le style de base `.tajweed-text` pour la police arabe
-
-## Détails techniques
-
-### Flux simplifié
-
-```
-API ar.alafasy
-      │
-      ▼
-Texte arabe pur
-"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
-      │
-      ▼
-Rendu direct {verse.text}
-      │
-      ▼
-Affichage propre ✓
+export const apkDownloadUrl =
+  import.meta.env.VITE_APK_DOWNLOAD_URL ||
+  `https://github.com/${githubRepository}/releases/latest/download/${apkFileName}`;
 ```
 
-### Fichiers modifiés
+Aucun autre fichier à modifier. Le workflow GitHub Actions continue de fonctionner (la variable d'env override le fallback si présente).
 
-| Fichier | Modification |
-|---------|--------------|
-| `src/hooks/useQuranData.ts` | Changer l'édition API de `quran-tajweed` vers `ar.alafasy` |
-| `src/components/VerseCard.tsx` | Remplacer `dangerouslySetInnerHTML` par affichage texte direct |
-| `src/index.css` | Supprimer les classes CSS Tajweed inutilisées (nettoyage) |
+## Pré-requis côté GitHub
 
-## Avantages de cette solution
+Pour que le lien fonctionne réellement, il faut qu'une release `latest` existe sur `https://github.com/lebirinois/quran-acces-pour-tous/releases` avec le fichier `quran-acces-pour-tous.apk`. Le workflow `.github/workflows/build-apk.yml` la crée automatiquement à chaque push sur `main`. Si aucune release n'apparaît encore :
 
-- **Fiabilité** : Texte arabe standard, pas de parsing complexe
-- **Performance** : Moins de traitement côté client
-- **Lisibilité** : Affichage propre et uniforme
-- **Maintenance** : Code plus simple à maintenir
+1. Vérifier que le repo s'appelle bien `quran-acces-pour-tous` (sinon je corrige le nom).
+2. Aller dans l'onglet **Actions** du repo et vérifier que le workflow « Build Android APK » s'est exécuté avec succès.
+3. Au besoin, relancer le workflow manuellement (Run workflow).
 
-## Alternative future (optionnelle)
+## Vérification après implémentation
 
-Si le Tajweed coloré est souhaité ultérieurement, une option serait d'utiliser une bibliothèque spécialisée ou une police de caractères Tajweed intégrée (comme KFGQPC Uthmanic Script) qui inclut les couleurs directement dans la police.
+Ouvrir la page `/install` et cliquer « Télécharger l'APK Android » → l'URL doit pointer vers `https://github.com/lebirinois/quran-acces-pour-tous/releases/latest/download/quran-acces-pour-tous.apk` et déclencher le téléchargement.
