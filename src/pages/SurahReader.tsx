@@ -55,8 +55,8 @@ const SurahReader = () => {
   const { saveProgress, getSurahProgress } = useReadingProgress();
   const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
   const [currentMushafPage, setCurrentMushafPage] = useState<number | null>(null);
-  // Page number whose verses should hide their text (active memorization recording).
-  const [hidingPage, setHidingPage] = useState<number | null>(null);
+  // Verse range whose text should be hidden during active memorization (per page).
+  const [hidingRange, setHidingRange] = useState<{ pageNum: number; start: number; end: number } | null>(null);
 
   const num = parseInt(surahNumber || '1');
 
@@ -557,10 +557,19 @@ const SurahReader = () => {
                               verseText={pageText}
                               label={`Mémorisation — Page ${pageNum}`}
                               reciter={appSettings.reciter}
-                              onHideTextChange={(hide) =>
-                                setHidingPage((prev) => {
-                                  if (hide) return pageNum;
-                                  return prev === pageNum ? null : prev;
+                              pageVerses={pageVerses.map((v) => ({
+                                number: v.number,
+                                text:
+                                  effectiveDisplayStyle === 'warsh-tajweed'
+                                    ? warshVerses[v.number] || v.text
+                                    : effectiveDisplayStyle === 'qalun-tajweed'
+                                      ? qalunVerses[v.number] || v.text
+                                      : v.text,
+                              }))}
+                              onHideRangeChange={(range) =>
+                                setHidingRange((prev) => {
+                                  if (range) return { pageNum, start: range.start, end: range.end };
+                                  return prev?.pageNum === pageNum ? null : prev;
                                 })
                               }
                             />
@@ -583,9 +592,12 @@ const SurahReader = () => {
                                 onPlay={() => quranAudio.playVerse(verse.number)}
                                 onBookmark={isAuthenticated ? () => handleSaveProgress(verse.number) : undefined}
                                 isBookmarked={getSurahProgress(num)?.verse_number === verse.number}
-                                /* Masqué pendant l'enregistrement de mémorisation,
-                                   révélé pendant la relecture pour vérifier la récitation. */
-                                hideText={hidingPage === pageNum}
+                                /* Masqué pendant la session de mémorisation pour les versets sélectionnés. */
+                                hideText={
+                                  hidingRange?.pageNum === pageNum &&
+                                  verse.number >= hidingRange.start &&
+                                  verse.number <= hidingRange.end
+                                }
                               />
                             ))}
                           </div>
