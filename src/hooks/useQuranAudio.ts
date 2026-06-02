@@ -46,6 +46,7 @@ export const RECITERS: Record<string, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
   yassinJazaeryWarsh: { id: 'warsh_yassin_jazaery', name: 'Yassin Al-Jazaery (Warsh)', nameAr: 'ياسين الجزائري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
+  abdulbasitWarsh: { id: 'warsh_abdul_basit', name: 'Abdul Basit (Warsh)', nameAr: 'عبد الباسط (ورش)', qiraat: 'warsh' },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
@@ -376,6 +377,7 @@ export const useQuranAudio = ({
     mahermuaiqly: 'MauroAl_Muaiqely_128kbps',
     ibrahimDosaryWarsh: 'warsh/warsh_ibrahim_aldosary_128kbps',
     yassinJazaeryWarsh: 'Yassin_Al-Jazaery_64kbps',
+    abdulbasitWarsh: 'warsh/warsh_Abdul_Basit_128kbps',
   };
 
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
