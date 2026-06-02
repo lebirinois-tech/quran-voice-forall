@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit } from 'lucide-react';
+import { Mic, Square, Play, Pause, Save, Trash2, Loader2, BrainCircuit, Eye, EyeOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { Switch } from './ui/switch';
@@ -17,8 +17,13 @@ interface VerseRecorderProps {
   label?: string;
   reciter?: ReciterId;
   onRecordingChange?: (isRecording: boolean) => void;
-  /** Called when the verse text should be hidden (recording) or revealed (playback / idle). */
-  onHideTextChange?: (hide: boolean) => void;
+  /** Verses available on this page, used for the range selector. */
+  pageVerses?: { number: number; text: string }[];
+  /**
+   * Called with the verse range whose text should be hidden during memorization,
+   * or null when nothing should be hidden.
+   */
+  onHideRangeChange?: (range: { start: number; end: number } | null) => void;
 }
 
 interface ComparisonResult {
@@ -27,7 +32,7 @@ interface ComparisonResult {
   details?: string;
 }
 
-export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange, onHideTextChange }: VerseRecorderProps) => {
+export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange, pageVerses, onHideRangeChange }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
@@ -36,6 +41,27 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [echoEnabled, setEchoEnabled] = useState(false);
+  const [revealText, setRevealText] = useState(false);
+
+  // Verse range selector (defaults to the whole page).
+  const firstVerse = pageVerses?.[0]?.number ?? verseNumber;
+  const lastVerse = pageVerses?.[pageVerses.length - 1]?.number ?? verseNumber;
+  const [startVerse, setStartVerse] = useState<number>(firstVerse);
+  const [endVerse, setEndVerse] = useState<number>(lastVerse);
+
+  // Re-sync defaults if the page's verse list changes.
+  useEffect(() => {
+    setStartVerse(firstVerse);
+    setEndVerse(lastVerse);
+  }, [firstVerse, lastVerse]);
+
+  // Text actually sent to the AI / used as the memorization target.
+  const selectedText = pageVerses && pageVerses.length > 0
+    ? pageVerses
+        .filter((v) => v.number >= startVerse && v.number <= endVerse)
+        .map((v) => v.text)
+        .join(' ')
+    : verseText;
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -46,15 +72,17 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   const { savedRecording, saveRecording, deleteRecording } = useRecordingStorage(surahNumber, verseNumber);
   const activeBlob = recordedBlob || savedRecording;
 
-  // Hide the verse text only while actively recording. Reveal during playback
-  // so the user can verify their recitation against the original text.
+  // Keep verses hidden while recording, while the AI is analyzing, and while
+  // a recording is available for review (memorization mode). The user can
+  // explicitly reveal the text with the eye toggle.
+  const shouldHide = !revealText && (isRecording || isComparing || !!activeBlob);
   useEffect(() => {
-    onHideTextChange?.(isRecording && !isPlayingRecording);
-  }, [isRecording, isPlayingRecording, onHideTextChange]);
+    onHideRangeChange?.(shouldHide ? { start: startVerse, end: endVerse } : null);
+  }, [shouldHide, startVerse, endVerse, onHideRangeChange]);
 
   useEffect(() => {
-    return () => { onHideTextChange?.(false); };
-  }, [onHideTextChange]);
+    return () => { onHideRangeChange?.(null); };
+  }, [onHideRangeChange]);
 
   useEffect(() => {
     return () => {
@@ -86,6 +114,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
       onRecordingChange?.(true);
       setRecordingDuration(0);
       setComparisonResult(null);
+      setRevealText(false);
       timerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000);
     } catch {
       toast.error("Impossible d'accéder au microphone");
@@ -181,7 +210,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
         reader.readAsDataURL(activeBlob);
       });
       const { data, error } = await supabase.functions.invoke('compare-recitation', {
-        body: { audioBase64: base64, mimeType: activeBlob.type, verseText, surahNumber, verseNumber },
+        body: { audioBase64: base64, mimeType: activeBlob.type, verseText: selectedText, surahNumber, verseNumber: startVerse },
       });
       if (error) throw error;
       setComparisonResult(data as ComparisonResult);
@@ -191,7 +220,7 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
     } finally {
       setIsComparing(false);
     }
-  }, [activeBlob, verseText, surahNumber, verseNumber]);
+  }, [activeBlob, selectedText, surahNumber, startVerse]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
@@ -202,6 +231,9 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
   };
 
   const hasSaved = !!savedRecording && !recordedBlob;
+
+  const hasRange = !!pageVerses && pageVerses.length > 1;
+  const verseCount = endVerse - startVerse + 1;
 
   return (
     <div className="bg-card border border-border rounded-xl p-3 space-y-2">
@@ -229,6 +261,67 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
 
       {isExpanded && !isRecording && (
         <div className="space-y-2 pt-1">
+          {/* Verse range selector */}
+          {hasRange && (
+            <div className="rounded-lg bg-muted/40 p-2 space-y-1.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  Versets à mémoriser ({verseCount})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setStartVerse(firstVerse); setEndVerse(lastVerse); }}
+                  className="text-[10px] text-primary hover:underline"
+                >
+                  Toute la page
+                </button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Label className="text-[11px] text-muted-foreground">Du</Label>
+                <select
+                  value={startVerse}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value);
+                    setStartVerse(v);
+                    if (v > endVerse) setEndVerse(v);
+                  }}
+                  className="h-7 rounded-md border border-input bg-background px-2 text-xs"
+                  aria-label="Verset de départ"
+                >
+                  {pageVerses!.map((v) => (
+                    <option key={v.number} value={v.number}>{v.number}</option>
+                  ))}
+                </select>
+                <Label className="text-[11px] text-muted-foreground">au</Label>
+                <select
+                  value={endVerse}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value);
+                    setEndVerse(v);
+                    if (v < startVerse) setStartVerse(v);
+                  }}
+                  className="h-7 rounded-md border border-input bg-background px-2 text-xs"
+                  aria-label="Verset de fin"
+                >
+                  {pageVerses!.map((v) => (
+                    <option key={v.number} value={v.number}>{v.number}</option>
+                  ))}
+                </select>
+                {activeBlob && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRevealText((r) => !r)}
+                    className="gap-1 text-[11px] ml-auto h-7 px-2"
+                  >
+                    {revealText ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                    {revealText ? 'Masquer' : 'Afficher'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 flex-wrap">
             {!activeBlob && (
               <Button variant="outline" size="sm" onClick={startRecording} className="gap-1.5 text-xs">
