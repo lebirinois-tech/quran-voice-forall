@@ -1,11 +1,16 @@
 // Apply basic Tajweed coloring to plain Arabic Quran text (Warsh, Qalun, etc.)
 // Uses the same color scheme as the Hafs Tajweed mode (FROZEN — do not modify).
 //
-// Rules applied (best-effort, suitable for any Riwaya):
+// Rules applied (best-effort, suitable for any Riwaya — Hafs / Warsh / Qalun):
 //  - Madd  (red    #DD0000): maddah ٓ (U+0653) or superscript alef ٰ (U+0670)
 //  - Ghunnah (green #2AAD2A): shaddah ّ on noon/meem
 //  - Qalqalah (blue #2E6ECB): ق ط ب ج د carrying sukun ْ
-//  - Iqlab (orange #D4740C): tanween (ً ٌ ٍ) followed by ب
+//  - Iqlab (orange #D4740C): noon-sakin (نْ) or tanween (ً ٌ ٍ) followed by ب
+//  - Ikhfa  (red    #DD0000): noon-sakin/tanween followed by one of
+//      ت ث ج د ذ ز س ش ص ض ط ظ ف ق ك
+//  - Idgham with Ghunnah (green #2AAD2A): noon-sakin/tanween followed by
+//      ي ن م و
+//  - Ikhfa / Idgham Shafawi (green #2AAD2A): meem-sakin (مْ) followed by ب or م
 //
 // Output is HTML with <span style="color: #xxxxxx;"> wrappers, safe for the
 // DOMPurify sanitizer used in the Tajweed pipeline.
@@ -15,6 +20,7 @@ const COLORS = {
   ghunnah: '#2AAD2A',
   qalqalah: '#2E6ECB',
   iqlab: '#D4740C',
+  ikhfa: '#DD0000',
 } as const;
 
 const QALQALAH_LETTERS = new Set(['ق', 'ط', 'ب', 'ج', 'د']);
@@ -26,6 +32,24 @@ const MEEM = '\u0645';
 const BAA = 'ب';
 const MADDAH = '\u0653';
 const SUPERSCRIPT_ALEF = '\u0670';
+
+// Letters triggering Ikhfa after noon-sakin / tanween (15 letters)
+const IKHFA_LETTERS = new Set([
+  'ت','ث','ج','د','ذ','ز','س','ش','ص','ض','ط','ظ','ف','ق','ك',
+]);
+// Letters triggering Idgham with Ghunnah (يرملون subset with ghunnah)
+const IDGHAM_GHUNNAH_LETTERS = new Set(['ي','ن','م','و']);
+
+// Find the next non-space, non-diacritic Arabic letter from index `from`.
+// Returns its index or -1 if none.
+const ARABIC_LETTER_RE = /[\u0621-\u064A\u066E-\u06D3]/;
+const findNextLetter = (chars: string[], from: number): number => {
+  for (let k = from; k < chars.length; k++) {
+    if (ARABIC_LETTER_RE.test(chars[k])) return k;
+    // skip whitespace and diacritics
+  }
+  return -1;
+};
 
 const escapeHtml = (s: string): string =>
   s.replace(/[&<>"']/g, (c) => {
@@ -75,15 +99,39 @@ export const applyAutoTajweed = (text: string): string => {
       continue;
     }
 
-    // Iqlab: tanween followed by baa (allow whitespace between)
-    if (TANWEEN_MARKS.has(ch)) {
-      let j = i + 1;
-      while (j < chars.length && /\s/.test(chars[j])) j++;
-      if (chars[j] === BAA) {
-        paint(i - 1, COLORS.iqlab);
-        paint(i, COLORS.iqlab);
-        paint(j, COLORS.iqlab);
+    // Noon-sakin or tanween triggers: Iqlab / Ikhfa / Idgham-with-Ghunnah
+    const isTanween = TANWEEN_MARKS.has(ch);
+    const isNoonSakin = ch === SUKUN && prev === NOON;
+    if (isTanween || isNoonSakin) {
+      const triggerLetterIdx = isNoonSakin ? i - 1 : i - 1; // letter carrying the mark
+      const nextLetterIdx = findNextLetter(chars, i + 1);
+      if (nextLetterIdx !== -1) {
+        const nextLetter = chars[nextLetterIdx];
+        let color: string | null = null;
+        if (nextLetter === BAA) color = COLORS.iqlab;
+        else if (IDGHAM_GHUNNAH_LETTERS.has(nextLetter)) color = COLORS.ghunnah;
+        else if (IKHFA_LETTERS.has(nextLetter)) color = COLORS.ikhfa;
+        if (color) {
+          paint(triggerLetterIdx, color);
+          paint(i, color);
+          paint(nextLetterIdx, color);
+        }
       }
+      continue;
+    }
+
+    // Meem-sakin (مْ) followed by ب (Ikhfa Shafawi) or م (Idgham Shafawi) → Ghunnah
+    if (ch === SUKUN && prev === MEEM) {
+      const nextLetterIdx = findNextLetter(chars, i + 1);
+      if (nextLetterIdx !== -1) {
+        const nextLetter = chars[nextLetterIdx];
+        if (nextLetter === BAA || nextLetter === MEEM) {
+          paint(i - 1, COLORS.ghunnah);
+          paint(i, COLORS.ghunnah);
+          paint(nextLetterIdx, COLORS.ghunnah);
+        }
+      }
+      continue;
     }
   }
 
