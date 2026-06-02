@@ -294,7 +294,13 @@ export const MushafPageViewer = ({
         </Button>
 
         <div className="flex-1 relative">
-          <AspectRatio ratio={3 / 4} className="bg-card rounded-xl overflow-hidden border border-border shadow-lg">
+          <AspectRatio
+            ratio={3 / 4}
+            className={cn(
+              "rounded-xl overflow-hidden border border-border shadow-lg",
+              currentPage % 2 === 0 ? "bg-card" : "bg-muted/30"
+            )}
+          >
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
