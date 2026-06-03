@@ -8,7 +8,8 @@ import { getThemesForVerse, QuranTheme } from '@/data/quranThemes';
 
 type Lang = 'ar' | 'fr' | 'en';
 
-const CACHE_PREFIX = 'quran-tafsir-mawdou3i-';
+// v2: invalidate caches from before language enforcement fix
+const CACHE_PREFIX = 'quran-tafsir-mawdou3i-v2-';
 
 const cacheKey = (s: number, v: number, lang: Lang) => `${CACHE_PREFIX}${lang}-${s}-${v}`;
 
