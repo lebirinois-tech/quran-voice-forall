@@ -398,9 +398,7 @@ const SurahReader = () => {
         {(appSettings.textDisplayStyle === 'tajweed' || 
           appSettings.textDisplayStyle === 'warsh-tajweed' ||
           appSettings.textDisplayStyle === 'qalun-tajweed' ||
-          appSettings.textDisplayStyle === 'mushaf-hafs' ||
-          appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
-          appSettings.textDisplayStyle === 'mushaf-qalun') && (
+          appSettings.textDisplayStyle === 'mushaf-hafs') && (
           <TajweedLegend />
         )}
 
@@ -411,7 +409,8 @@ const SurahReader = () => {
           {/* Bismillah - only show for text modes */}
           {surah.number !== 1 && surah.number !== 9 &&
            appSettings.textDisplayStyle !== 'mushaf-hafs' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+           appSettings.textDisplayStyle !== 'mushaf-warsh' &&
+           appSettings.textDisplayStyle !== 'mushaf-qalun' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -419,12 +418,6 @@ const SurahReader = () => {
               <p className="text-sm text-muted-foreground mt-2">
                 Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
               </p>
-            </div>
-          )}
-
-          {isColoredTextMushafMode && (
-            <div className="mb-4 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-foreground">
-              Affichage Tajweed coloré verset par verset avec mémorisation et enregistrement.
             </div>
           )}
 
@@ -437,7 +430,11 @@ const SurahReader = () => {
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}
               mushafType={
-                appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 'warsh'
+                appSettings.textDisplayStyle === 'mushaf-hafs'
+                  ? 'hafs'
+                  : appSettings.textDisplayStyle === 'mushaf-qalun'
+                    ? 'qalun'
+                    : 'warsh'
               }
             />
           )}
