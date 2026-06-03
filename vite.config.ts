@@ -26,9 +26,14 @@ export default defineConfig(({ mode }) => ({
         name: "Apprenons le Coran",
         short_name: "Apprenons le Coran",
         description: "Application coranique accessible avec commandes vocales",
+        id: "/",
+        lang: "fr",
+        dir: "ltr",
+        categories: ["education", "books", "lifestyle"],
         theme_color: "#1B5E20",
         background_color: "#FDF6E3",
         display: "standalone",
+        display_override: ["standalone", "minimal-ui", "browser"],
         orientation: "portrait",
         scope: "/",
           // Open directly in the actual app experience after installation.
@@ -38,11 +43,13 @@ export default defineConfig(({ mode }) => ({
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
