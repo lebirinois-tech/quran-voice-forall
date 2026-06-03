@@ -104,6 +104,15 @@ export const useAudioCache = () => {
           saveAudioUrl(reciterId, surahNumber, v, url);
           setProgress(Math.round((v / totalVerses) * 100));
         }
+      } else if (reciterInfo.archiveItem) {
+        // archive.org per-verse inside a ZIP per surah
+        const surahStr = formatNum(surahNumber);
+        for (let v = 1; v <= totalVerses; v++) {
+          const url = `https://archive.org/download/${reciterInfo.archiveItem}/${surahStr}.zip/${surahStr}${formatNum(v)}.mp3`;
+          await fetch(url, { mode: 'cors' }).catch(() => {});
+          saveAudioUrl(reciterId, surahNumber, v, url);
+          setProgress(Math.round((v / totalVerses) * 100));
+        }
       } else if (reciterInfo.qiraat === 'warsh') {
         // Direct URL pattern - fetch each verse to populate SW cache + save URL
         for (let v = 1; v <= totalVerses; v++) {
