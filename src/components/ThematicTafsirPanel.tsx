@@ -33,11 +33,21 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [speakingLang, setSpeakingLang] = useState<Lang | null>(null);
+  const [availability, setAvailability] = useState<Record<Lang, string | null>>({ ar: null, fr: null, en: null });
+
+  const refreshAvailability = () => {
+    setAvailability({
+      ar: readCache(surahNumber, verseNumber, 'ar'),
+      fr: readCache(surahNumber, verseNumber, 'fr'),
+      en: readCache(surahNumber, verseNumber, 'en'),
+    });
+  };
 
   // Load from cache when panel opens or lang changes
   useEffect(() => {
     if (!isOpen) return;
     setText(readCache(surahNumber, verseNumber, activeLang));
+    refreshAvailability();
   }, [isOpen, activeLang, surahNumber, verseNumber]);
 
   // Stop speech on close
@@ -65,6 +75,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
       if (!generated) throw new Error('Empty response');
       setText(generated);
       writeCache(surahNumber, verseNumber, activeLang, generated);
+      refreshAvailability();
     } catch (e: any) {
       console.error('thematic-tafsir error', e);
       toast.error(
