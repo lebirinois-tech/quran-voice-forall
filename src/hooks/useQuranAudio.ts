@@ -27,6 +27,10 @@ export interface ReciterInfo {
   nameAr: string;
   qiraat: QiraatId;
   quranicAudioId?: number;
+  /** When true, audio is delivered as a single MP3 per surah (no per-verse files). */
+  fullSurah?: boolean;
+  /** Full-surah MP3 base URL; surah number is appended as 3-digit padded `.mp3`. */
+  fullSurahBaseUrl?: string;
 }
 
 export const RECITERS: Record<string, ReciterInfo> = {
@@ -36,9 +40,37 @@ export const RECITERS: Record<string, ReciterInfo> = {
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // WARSH (ورش عن نافع) — meilleur enregistrement verset par verset disponible
+  // WARSH (ورش عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
   ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
+  husaryWarsh: {
+    id: 'husary_warsh_full',
+    name: 'Al-Husary (Warsh – sourate entière)',
+    nameAr: 'محمود خليل الحصري (ورش – سورة كاملة)',
+    qiraat: 'warsh',
+    fullSurah: true,
+    fullSurahBaseUrl: 'https://server13.mp3quran.net/husr/Rewayat-Warsh-A-n-Nafi/',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // QALUN (قالون عن نافع) — sourate entière (per-verse non disponible publiquement)
+  // ═══════════════════════════════════════════════════════════════════════════
+  hudhaifyQalun: {
+    id: 'hudhaify_qalun_full',
+    name: 'Ali Al-Hudhayfi (Qalun – sourate entière)',
+    nameAr: 'علي الحذيفي (قالون – سورة كاملة)',
+    qiraat: 'qalun',
+    fullSurah: true,
+    fullSurahBaseUrl: 'https://server9.mp3quran.net/huthifi_qalon/',
+  },
+  husaryQalun: {
+    id: 'husary_qalun_full',
+    name: 'Al-Husary (Qalun – sourate entière)',
+    nameAr: 'محمود خليل الحصري (قالون – سورة كاملة)',
+    qiraat: 'qalun',
+    fullSurah: true,
+    fullSurahBaseUrl: 'https://server13.mp3quran.net/husr/Rewayat-Qalon-A-n-Nafi/',
+  },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
