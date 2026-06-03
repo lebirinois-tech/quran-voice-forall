@@ -10,7 +10,7 @@ import {
 } from './ui/dialog';
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { RECITERS, QIRAAT_LABELS, ReciterId, QiraatId } from '@/hooks/useQuranAudio';
+import { RECITERS, RECITER_IDS, QIRAAT_LABELS, ReciterId, QiraatId, getSafeReciter } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { AudioCacheSettings } from './AudioCacheSettings';
 import { toast } from 'sonner';
@@ -152,7 +152,7 @@ export const SettingsDialog = ({
 
   const handleOpenQuranDownloadLink = () => {
     // Open external link for full Quran download using correct QuranicAudio ID
-    const quranicAudioId = RECITERS[reciter]?.quranicAudioId || 7; // Default to Alafasy
+    const quranicAudioId = RECITERS[reciter]?.quranicAudioId || RECITERS.husary.quranicAudioId;
     window.open(`https://quranicaudio.com/quran/${quranicAudioId}`, '_blank');
     toast.info('Redirection vers QuranicAudio pour le Quran complet');
   };
@@ -187,8 +187,8 @@ export const SettingsDialog = ({
             
             {/* Group reciters by Qira'at */}
             {Object.entries(QIRAAT_LABELS).map(([qiraatKey, qiraatLabel]) => {
-              const recitersForQiraat = Object.entries(RECITERS).filter(
-                ([_, info]) => info.qiraat === qiraatKey
+              const recitersForQiraat = RECITER_IDS.filter(
+                (key) => RECITERS[key].qiraat === qiraatKey as QiraatId
               );
               
               if (recitersForQiraat.length === 0) return null;
@@ -203,7 +203,7 @@ export const SettingsDialog = ({
                     onValueChange={(value) => onReciterChange(value as ReciterId)}
                     className="space-y-1"
                   >
-                    {recitersForQiraat.map(([key, { name, nameAr }]) => (
+                    {recitersForQiraat.map((key) => (
                       <div
                         key={key}
                         className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
@@ -213,7 +213,7 @@ export const SettingsDialog = ({
                           htmlFor={`reciter-${key}`}
                           className="flex-1 cursor-pointer text-foreground text-sm"
                         >
-                          {name} / <span dir="rtl">{nameAr}</span>
+                          {RECITERS[key].name} / <span dir="rtl">{RECITERS[key].nameAr}</span>
                         </Label>
                         {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
                       </div>
@@ -358,7 +358,7 @@ export const SettingsDialog = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Récitateur / القارئ: {RECITERS[reciter]?.name ?? reciter} / {RECITERS[reciter]?.nameAr ?? ''}
+              Récitateur / القارئ: {RECITERS[getSafeReciter(reciter)].name} / {RECITERS[getSafeReciter(reciter)].nameAr}
             </p>
           </div>
         </div>
