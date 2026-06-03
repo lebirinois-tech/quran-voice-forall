@@ -48,7 +48,7 @@ export const AudioPlayer = ({
   currentVerse,
   totalVerses,
   progress = 0,
-  reciter = 'alafasy',
+  reciter = 'husary',
   surahNumber = 1,
   repeatSettings = { mode: 'none', count: 1 },
   currentRepeatCount = 0,
@@ -80,7 +80,7 @@ export const AudioPlayer = ({
   const handleDownloadCurrentVerse = async () => {
     setIsDownloading(true);
     try {
-      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
+      const edition = RECITERS[reciter]?.id ?? 'ar.husary';
       const response = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${currentVerse}/${edition}`);
       const data = await response.json();
       
@@ -114,7 +114,7 @@ export const AudioPlayer = ({
     toast.info(`Téléchargement de la sourate ${surahNumber} en cours...`);
     
     try {
-      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
+      const edition = RECITERS[reciter]?.id ?? 'ar.husary';
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
       const data = await response.json();
       

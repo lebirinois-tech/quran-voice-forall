@@ -135,7 +135,7 @@ export const SettingsDialog = ({
     setDownloadProgress(0);
     
     try {
-      const edition = RECITERS[reciter]?.id ?? 'ar.alafasy';
+      const edition = RECITERS[reciter]?.id ?? 'ar.husary';
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
       const data = await response.json();
       
