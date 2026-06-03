@@ -86,7 +86,6 @@ const SurahReader = () => {
     appSettings.textDisplayStyle === 'mushaf-hafs' ||
     appSettings.textDisplayStyle === 'mushaf-warsh' ||
     appSettings.textDisplayStyle === 'mushaf-qalun';
-  const isColoredTextMushafMode = false;
   const isLoadingTextSource =
     (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
     (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
