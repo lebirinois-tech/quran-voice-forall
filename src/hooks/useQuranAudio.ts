@@ -424,6 +424,9 @@ export const useQuranAudio = ({
     if (info?.fullSurah && info.fullSurahBaseUrl) {
       return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
     }
+    if (info?.archiveItem) {
+      return `https://archive.org/download/${info.archiveItem}/${surahStr}.zip/${surahStr}${verseStr}.mp3`;
+    }
     const folder = EVERYAYAH_FOLDERS[reciterId];
     if (folder) {
       return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
