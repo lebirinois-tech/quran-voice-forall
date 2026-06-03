@@ -414,13 +414,8 @@ const SurahReader = () => {
           <TajweedLegend />
         )}
 
-        {/* Quranic themes legend — always available in verse modes */}
-        {appSettings.textDisplayStyle !== 'mushaf-hafs' &&
-         appSettings.textDisplayStyle !== 'mushaf-warsh' &&
-         appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' &&
-         appSettings.textDisplayStyle !== 'mushaf-qalun' && (
-          <ThemeLegend />
-        )}
+        {/* Quranic themes legend — visible in all modes */}
+        <ThemeLegend />
 
         <div className="max-w-3xl mx-auto">
           {/* Bismillah - only show for text modes */}

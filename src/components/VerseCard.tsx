@@ -377,22 +377,26 @@ export const VerseCard = ({
           : {}),
       }}
     >
-      {/* Theme tags */}
+      {/* Theme tags (Tafsir Mawdou'i — trilingual) */}
       {verseThemes.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <div className="flex flex-wrap gap-2 mb-3">
           {verseThemes.map((t) => (
             <span
               key={t.id}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border-2 shadow-sm"
               style={{
-                backgroundColor: `hsl(${t.hsl} / 0.12)`,
-                borderColor: `hsl(${t.hsl} / 0.4)`,
+                backgroundColor: `hsl(${t.hsl} / 0.18)`,
+                borderColor: `hsl(${t.hsl} / 0.6)`,
                 color: `hsl(${t.hsl})`,
               }}
               title={`${t.labels.fr} · ${t.labels.ar} · ${t.labels.en}`}
             >
-              <span>{t.emoji}</span>
+              <span className="text-sm">{t.emoji}</span>
               <span>{t.labels.fr}</span>
+              <span className="opacity-70">·</span>
+              <span className="font-arabic">{t.labels.ar}</span>
+              <span className="opacity-70">·</span>
+              <span className="italic">{t.labels.en}</span>
             </span>
           ))}
         </div>
