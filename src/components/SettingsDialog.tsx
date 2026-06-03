@@ -152,7 +152,7 @@ export const SettingsDialog = ({
 
   const handleOpenQuranDownloadLink = () => {
     // Open external link for full Quran download using correct QuranicAudio ID
-    const quranicAudioId = RECITERS[reciter]?.quranicAudioId || RECITERS.husary.quranicAudioId;
+    const quranicAudioId = RECITERS[reciter]?.quranicAudioId ?? 18;
     window.open(`https://quranicaudio.com/quran/${quranicAudioId}`, '_blank');
     toast.info('Redirection vers QuranicAudio pour le Quran complet');
   };
@@ -188,7 +188,7 @@ export const SettingsDialog = ({
             {/* Group reciters by Qira'at */}
             {Object.entries(QIRAAT_LABELS).map(([qiraatKey, qiraatLabel]) => {
               const recitersForQiraat = RECITER_IDS.filter(
-                (key) => RECITERS[key].qiraat === qiraatKey as QiraatId
+                (key) => RECITERS[key].qiraat === (qiraatKey as QiraatId)
               );
               
               if (recitersForQiraat.length === 0) return null;
