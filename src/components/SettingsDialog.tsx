@@ -38,62 +38,38 @@ const BACKGROUND_COLORS = [
 const TEXT_DISPLAY_STYLES = [
   { 
     id: 'tajweed' as TextDisplayStyle, 
-    name: 'Tajweed coloré / تجويد ملون', 
-    description: 'Texte interactif avec couleurs Tajweed (Hafs)',
+    name: 'Hafs Tajweed (verset) / حفص تجويد', 
+    description: 'Texte Hafs coloré verset par verset',
     icon: '🎨'
   },
   { 
-    id: 'simple' as TextDisplayStyle, 
-    name: 'Texte simple / نص بسيط', 
-    description: 'Texte arabe sans couleurs',
-    icon: '📝'
-  },
-  { 
-    id: 'warsh-text' as TextDisplayStyle, 
-    name: 'Texte Warsh / نص ورش', 
-    description: 'Police Warsh verset par verset',
-    icon: '✍️'
-  },
-  { 
     id: 'warsh-tajweed' as TextDisplayStyle, 
-    name: 'Warsh Tajweed / ورش تجويد', 
+    name: 'Warsh Tajweed (verset) / ورش تجويد', 
     description: 'Texte Warsh verset par verset avec Tajweed coloré',
     icon: '🕌'
   },
   {
-    id: 'qalun-text' as TextDisplayStyle,
-    name: 'Texte Qalun / نص قالون',
-    description: 'Texte Qalun verset par verset (sans couleurs)',
-    icon: '✒️'
-  },
-  {
     id: 'qalun-tajweed' as TextDisplayStyle,
-    name: 'Qalun Tajweed / قالون تجويد',
+    name: 'Qalun Tajweed (verset) / قالون تجويد',
     description: 'Texte Qalun verset par verset avec Tajweed coloré',
     icon: '🟢'
   },
   { 
     id: 'mushaf-hafs' as TextDisplayStyle, 
-    name: 'Mushaf Hafs Tajweed / مصحف حفص', 
-    description: 'Pages du Mushaf Hafs avec Tajweed coloré',
+    name: 'Mushaf Hafs (pages) / مصحف حفص', 
+    description: 'Pages du Mushaf Hafs Tajweed — édition Médine',
     icon: '📖'
   },
   { 
-    id: 'mushaf-warsh-tajweed' as TextDisplayStyle, 
-    name: 'Mushaf Warsh Tajweed / مصحف ورش ملون', 
-    description: 'Warsh coloré verset par verset avec enregistrement',
-    icon: '🎨'
-  },
-  { 
     id: 'mushaf-warsh' as TextDisplayStyle, 
-    name: 'Mushaf Warsh / مصحف ورش', 
-    description: 'Pages du Mushaf en riwaya Warsh (sans couleurs)',
+    name: 'Mushaf Warsh (pages) / مصحف ورش', 
+    description: 'Pages du Mushaf Warsh — édition Médine',
     icon: '📜'
   },
   { 
     id: 'mushaf-qalun' as TextDisplayStyle, 
-    name: 'Mushaf Qalun Tajweed / مصحف قالون', 
-    description: 'Qalun coloré verset par verset avec enregistrement',
+    name: 'Mushaf Qalun (pages) / مصحف قالون', 
+    description: 'Pages Qalun — rendu Warsh en attendant une source publique',
     icon: '📗'
   },
 ];
