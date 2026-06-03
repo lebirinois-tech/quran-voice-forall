@@ -206,6 +206,8 @@ export const useQuranAudio = ({
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(readSavedPlaybackSpeed());
   const speedEnforcerRef = useRef<number | null>(null);
+  const reciterRef = useRef<ReciterId>(externalReciter);
+  useEffect(() => { reciterRef.current = reciter; }, [reciter]);
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
     schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
@@ -303,6 +305,12 @@ export const useQuranAudio = ({
       if (audio !== audioRef.current) return;
       stopSpeedEnforcer();
       setIsPlaying(false);
+      // Full-surah reciters: audio file is the entire surah, so just stop at end.
+      // No auto-advance, no repetition (would loop the whole surah).
+      if (RECITERS[reciterRef.current]?.fullSurah) {
+        toast.success('Fin de la sourate');
+        return;
+      }
       // Handle auto-play directly here using refs for always-fresh values
       const cv = currentVerseRef.current;
       const tv = totalVersesRef.current;
