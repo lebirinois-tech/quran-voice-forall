@@ -53,6 +53,15 @@ serve(async (req) => {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
 
+    // Normalize audio format for OpenAI-compatible input_audio
+    const rawMime = (mimeType || "audio/webm").toLowerCase();
+    let audioFormat = "webm";
+    if (rawMime.includes("wav")) audioFormat = "wav";
+    else if (rawMime.includes("mpeg") || rawMime.includes("mp3")) audioFormat = "mp3";
+    else if (rawMime.includes("ogg")) audioFormat = "ogg";
+    else if (rawMime.includes("mp4") || rawMime.includes("m4a") || rawMime.includes("aac")) audioFormat = "mp4";
+    else if (rawMime.includes("webm")) audioFormat = "webm";
+
     // Use Gemini with audio input for transcription + comparison
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -88,9 +97,10 @@ Si l'audio est inaudible ou ne contient pas de récitation, donne un score de 0 
                 text: `Voici le verset original (Sourate ${surahNumber}, Verset ${verseNumber}):\n${verseText}\n\nÉvalue ma récitation audio ci-jointe.`,
               },
               {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType || "audio/webm"};base64,${audioBase64}`,
+                type: "input_audio",
+                input_audio: {
+                  data: audioBase64,
+                  format: audioFormat,
                 },
               },
             ],
@@ -103,7 +113,19 @@ Si l'audio est inaudible ou ne contient pas de récitation, donne un score de 0 
     if (!response.ok) {
       const errText = await response.text();
       console.error("AI Gateway error:", errText);
-      throw new Error(`AI Gateway error: ${response.status}`);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans quelques instants." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Crédits IA épuisés. Ajoutez du crédit dans Lovable Cloud." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ error: `AI Gateway error ${response.status}`, details: errText.slice(0, 300) }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();

@@ -213,10 +213,11 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
         body: { audioBase64: base64, mimeType: activeBlob.type, verseText: selectedText, surahNumber, verseNumber: startVerse },
       });
       if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
       setComparisonResult(data as ComparisonResult);
     } catch (err) {
       console.error('Comparison error:', err);
-      toast.error("Erreur lors de l'analyse IA");
+      toast.error("Erreur lors de l'analyse IA", { description: (err as any)?.message || String(err) });
     } finally {
       setIsComparing(false);
     }
