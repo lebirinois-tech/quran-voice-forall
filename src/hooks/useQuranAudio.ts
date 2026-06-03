@@ -399,6 +399,10 @@ export const useQuranAudio = ({
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
     const surahStr = formatSurahNumber(surah);
     const verseStr = formatVerseNumber(verse);
+    const info = RECITERS[reciterId];
+    if (info?.fullSurah && info.fullSurahBaseUrl) {
+      return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
+    }
     const folder = EVERYAYAH_FOLDERS[reciterId];
     if (folder) {
       return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
