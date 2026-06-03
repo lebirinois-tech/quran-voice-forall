@@ -79,7 +79,23 @@ export const UpdatePrompt = () => {
     };
     // Small delay to let the app render first
     const timer = setTimeout(checkOnLaunch, 2000);
-    return () => clearTimeout(timer);
+
+    // Also re-check when the app becomes visible again (returning from background)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkOnLaunch();
+    };
+    const onFocus = () => checkOnLaunch();
+    const onOnline = () => checkOnLaunch();
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('online', onOnline);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('online', onOnline);
+    };
   }, []);
 
   // Mise à jour totalement automatique : dès qu'une nouvelle version est prête,
