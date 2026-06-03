@@ -203,19 +203,32 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
                   <p className="text-xs font-semibold text-primary">
                     ✨ {activeLang === 'fr' ? 'Explication pour ce verset' : activeLang === 'en' ? 'Explanation for this verse' : 'شرح لهذه الآية'}
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleSpeak(activeLang, text)}
-                    className={cn('gap-2 h-8', speakingLang === activeLang && 'bg-primary/10 border-primary')}
-                  >
-                    {speakingLang === activeLang ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                    <span className="text-xs">
-                      {activeLang === 'fr' ? (speakingLang === 'fr' ? 'Arrêter' : 'Écouter')
-                        : activeLang === 'en' ? (speakingLang === 'en' ? 'Stop' : 'Listen')
-                        : (speakingLang === 'ar' ? 'إيقاف' : 'استماع')}
-                    </span>
-                  </Button>
+                </div>
+                {/* Listen buttons for all 3 languages */}
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {(['ar', 'fr', 'en'] as Lang[]).map((l) => {
+                    const cached = availability[l];
+                    const isSpeaking = speakingLang === l;
+                    const flag = l === 'ar' ? '🇸🇦' : l === 'fr' ? '🇫🇷' : '🇬🇧';
+                    const label = isSpeaking
+                      ? (l === 'fr' ? 'Arrêter' : l === 'en' ? 'Stop' : 'إيقاف')
+                      : (l === 'fr' ? 'Écouter' : l === 'en' ? 'Listen' : 'استماع');
+                    return (
+                      <Button
+                        key={l}
+                        variant="outline"
+                        size="sm"
+                        disabled={!cached}
+                        onClick={() => cached && toggleSpeak(l, cached)}
+                        className={cn('gap-1.5 h-8 flex-1 min-w-0', isSpeaking && 'bg-primary/10 border-primary')}
+                        title={!cached ? (l === 'fr' ? 'Générer d\'abord' : l === 'en' ? 'Generate first' : 'ولّد أولاً') : undefined}
+                      >
+                        <span>{flag}</span>
+                        {isSpeaking ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                        <span className="text-xs truncate">{label}</span>
+                      </Button>
+                    );
+                  })}
                 </div>
                 <p
                   className={cn('text-sm leading-relaxed text-foreground', activeLang === 'ar' && 'font-arabic text-lg text-right leading-loose')}
