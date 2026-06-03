@@ -103,9 +103,6 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
     speakNext();
   };
 
-  // Don't render if no curated themes for this verse
-  if (themes.length === 0) return null;
-
   return (
     <div className="mt-3 border-t border-border/50 pt-3">
       <Button
@@ -123,23 +120,25 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
 
       {isOpen && (
         <div className="mt-3 p-4 rounded-lg bg-muted/30 border border-border/50 animate-fade-in space-y-4">
-          {/* Themes badges */}
-          <div className="flex flex-wrap gap-2">
-            {themes.map((t: QuranTheme) => (
-              <span
-                key={t.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border"
-                style={{
-                  backgroundColor: `hsl(${t.hsl} / 0.15)`,
-                  borderColor: `hsl(${t.hsl} / 0.5)`,
-                  color: `hsl(${t.hsl})`,
-                }}
-              >
-                <span>{t.emoji}</span>
-                <span>{t.labels[activeLang]}</span>
-              </span>
-            ))}
-          </div>
+          {/* Themes badges (only if curated) */}
+          {themes.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {themes.map((t: QuranTheme) => (
+                <span
+                  key={t.id}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border"
+                  style={{
+                    backgroundColor: `hsl(${t.hsl} / 0.15)`,
+                    borderColor: `hsl(${t.hsl} / 0.5)`,
+                    color: `hsl(${t.hsl})`,
+                  }}
+                >
+                  <span>{t.emoji}</span>
+                  <span>{t.labels[activeLang]}</span>
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Lang selector */}
           <div className="flex gap-1 p-1 rounded-lg bg-background/50 border border-border/50">
@@ -156,7 +155,8 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
             ))}
           </div>
 
-          {/* Theme descriptions (always available, curated) */}
+          {/* Theme descriptions (only if curated) */}
+          {themes.length > 0 && (
           <div className="space-y-2">
             {themes.map((t) => (
               <p
@@ -171,6 +171,18 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
               </p>
             ))}
           </div>
+          )}
+
+          {themes.length === 0 && (
+            <p className={cn('text-xs text-muted-foreground', activeLang === 'ar' && 'text-right font-arabic')}
+               dir={activeLang === 'ar' ? 'rtl' : 'ltr'}>
+              {activeLang === 'fr'
+                ? "Ce verset n'a pas encore de thèmes curatés. Générez une analyse thématique IA ci-dessous."
+                : activeLang === 'en'
+                  ? 'This verse has no curated themes yet. Generate an AI thematic analysis below.'
+                  : 'لا توجد مواضيع منسقة لهذه الآية بعد. ولّد تحليلاً موضوعياً بالذكاء الاصطناعي أدناه.'}
+            </p>
+          )}
 
           {/* AI-generated verse-specific thematic explanation */}
           <div className="pt-3 border-t border-border/50">
