@@ -27,6 +27,10 @@ export interface ReciterInfo {
   nameAr: string;
   qiraat: QiraatId;
   quranicAudioId?: number;
+  /** When true, audio is delivered as a single MP3 per surah (no per-verse files). */
+  fullSurah?: boolean;
+  /** Full-surah MP3 base URL; surah number is appended as 3-digit padded `.mp3`. */
+  fullSurahBaseUrl?: string;
 }
 
 export const RECITERS: Record<string, ReciterInfo> = {
@@ -36,9 +40,37 @@ export const RECITERS: Record<string, ReciterInfo> = {
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // WARSH (ورش عن نافع) — meilleur enregistrement verset par verset disponible
+  // WARSH (ورش عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
   ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
+  husaryWarsh: {
+    id: 'husary_warsh_full',
+    name: 'Al-Husary (Warsh – sourate entière)',
+    nameAr: 'محمود خليل الحصري (ورش – سورة كاملة)',
+    qiraat: 'warsh',
+    fullSurah: true,
+    fullSurahBaseUrl: 'https://server13.mp3quran.net/husr/Rewayat-Warsh-A-n-Nafi/',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // QALUN (قالون عن نافع) — sourate entière (per-verse non disponible publiquement)
+  // ═══════════════════════════════════════════════════════════════════════════
+  hudhaifyQalun: {
+    id: 'hudhaify_qalun_full',
+    name: 'Ali Al-Hudhayfi (Qalun – sourate entière)',
+    nameAr: 'علي الحذيفي (قالون – سورة كاملة)',
+    qiraat: 'qalun',
+    fullSurah: true,
+    fullSurahBaseUrl: 'https://server9.mp3quran.net/huthifi_qalon/',
+  },
+  husaryQalun: {
+    id: 'husary_qalun_full',
+    name: 'Al-Husary (Qalun – sourate entière)',
+    nameAr: 'محمود خليل الحصري (قالون – سورة كاملة)',
+    qiraat: 'qalun',
+    fullSurah: true,
+    fullSurahBaseUrl: 'https://server13.mp3quran.net/husr/Rewayat-Qalon-A-n-Nafi/',
+  },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
@@ -174,6 +206,8 @@ export const useQuranAudio = ({
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(readSavedPlaybackSpeed());
   const speedEnforcerRef = useRef<number | null>(null);
+  const reciterRef = useRef<ReciterId>(externalReciter);
+  useEffect(() => { reciterRef.current = reciter; }, [reciter]);
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
     schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
@@ -271,6 +305,12 @@ export const useQuranAudio = ({
       if (audio !== audioRef.current) return;
       stopSpeedEnforcer();
       setIsPlaying(false);
+      // Full-surah reciters: audio file is the entire surah, so just stop at end.
+      // No auto-advance, no repetition (would loop the whole surah).
+      if (RECITERS[reciterRef.current]?.fullSurah) {
+        toast.success('Fin de la sourate');
+        return;
+      }
       // Handle auto-play directly here using refs for always-fresh values
       const cv = currentVerseRef.current;
       const tv = totalVersesRef.current;
@@ -367,6 +407,10 @@ export const useQuranAudio = ({
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
     const surahStr = formatSurahNumber(surah);
     const verseStr = formatVerseNumber(verse);
+    const info = RECITERS[reciterId];
+    if (info?.fullSurah && info.fullSurahBaseUrl) {
+      return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
+    }
     const folder = EVERYAYAH_FOLDERS[reciterId];
     if (folder) {
       return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
