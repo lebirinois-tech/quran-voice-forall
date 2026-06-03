@@ -74,32 +74,22 @@ const SurahReader = () => {
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
   const { warshVerses, isLoading: isLoadingWarsh } = useWarshData(
     num,
-    appSettings.textDisplayStyle === 'warsh-tajweed' ||
-      appSettings.textDisplayStyle === 'warsh-text' ||
-      appSettings.textDisplayStyle === 'mushaf-warsh-tajweed'
+    appSettings.textDisplayStyle === 'warsh-tajweed'
   );
   const { qalunVerses, isLoading: isLoadingQalun } = useQalunData(
     num,
-    appSettings.textDisplayStyle === 'qalun-tajweed' ||
-      appSettings.textDisplayStyle === 'qalun-text' ||
-      appSettings.textDisplayStyle === 'mushaf-qalun'
+    appSettings.textDisplayStyle === 'qalun-tajweed'
   );
 
-  // Colored Mushaf images don't exist for Warsh/Qalun — render those modes as
-  // text + auto-Tajweed coloring so the rules and colors are actually visible.
-  const effectiveDisplayStyle =
-    appSettings.textDisplayStyle === 'mushaf-warsh-tajweed'
-      ? 'warsh-tajweed'
-      : appSettings.textDisplayStyle === 'mushaf-qalun'
-        ? 'qalun-tajweed'
-        : appSettings.textDisplayStyle;
+  const effectiveDisplayStyle = appSettings.textDisplayStyle;
   const isMushafImageMode =
-    appSettings.textDisplayStyle === 'mushaf-hafs' || appSettings.textDisplayStyle === 'mushaf-warsh';
-  const isColoredTextMushafMode =
-    appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' || appSettings.textDisplayStyle === 'mushaf-qalun';
+    appSettings.textDisplayStyle === 'mushaf-hafs' ||
+    appSettings.textDisplayStyle === 'mushaf-warsh' ||
+    appSettings.textDisplayStyle === 'mushaf-qalun';
+  const isColoredTextMushafMode = false;
   const isLoadingTextSource =
-    ((effectiveDisplayStyle === 'warsh-tajweed' || effectiveDisplayStyle === 'warsh-text') && isLoadingWarsh) ||
-    ((effectiveDisplayStyle === 'qalun-tajweed' || effectiveDisplayStyle === 'qalun-text') && isLoadingQalun);
+    (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
+    (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
 
   const handleVerseChange = useCallback((verseNum: number) => {
     const verseElement = document.getElementById(`verse-${verseNum}`);
