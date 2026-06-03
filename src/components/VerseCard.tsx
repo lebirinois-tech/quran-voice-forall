@@ -372,7 +372,11 @@ export const VerseCard = ({
         ...(primaryTheme
           ? {
               borderLeft: `4px solid hsl(${primaryTheme.hsl})`,
-              boxShadow: `inset 4px 0 0 hsl(${primaryTheme.hsl} / 0.18)`,
+              backgroundColor: `hsl(${primaryTheme.hsl} / 0.08)`,
+              backgroundImage: verseThemes.length > 1
+                ? `linear-gradient(135deg, hsl(${verseThemes[0].hsl} / 0.10) 0%, hsl(${verseThemes[1].hsl} / 0.10) 100%)`
+                : undefined,
+              boxShadow: `inset 4px 0 0 hsl(${primaryTheme.hsl} / 0.25)`,
             }
           : {}),
       }}
