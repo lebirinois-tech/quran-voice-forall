@@ -31,22 +31,14 @@ export interface ReciterInfo {
 
 export const RECITERS: Record<string, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
-  // HAFS (حفص عن عاصم) - The most widely used reading
+  // HAFS (حفص عن عاصم) — Mahmoud Khalil Al-Husary (référence mondiale)
   // ═══════════════════════════════════════════════════════════════════════════
-  alafasy: { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy', nameAr: 'مشاري راشد العفاسي', qiraat: 'hafs', quranicAudioId: 7 },
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
-  minshawi: { id: 'ar.minshawi', name: 'Mohamed Siddiq El-Minshawi', nameAr: 'محمد صديق المنشاوي', qiraat: 'hafs', quranicAudioId: 21 },
-  abdulbasit: { id: 'ar.abdulbasitmujawwad', name: 'Abdul Basit Abdul Samad', nameAr: 'عبد الباسط عبد الصمد', qiraat: 'hafs', quranicAudioId: 1 },
-  sudais: { id: 'ar.abdurrahmaansudais', name: 'Abdurrahman As-Sudais', nameAr: 'عبد الرحمن السديس', qiraat: 'hafs', quranicAudioId: 10 },
-  shuraym: { id: 'ar.saulodshurem', name: 'Saud Al-Shuraym', nameAr: 'سعود الشريم', qiraat: 'hafs', quranicAudioId: 11 },
-  mahermuaiqly: { id: 'ar.maaboraliqli', name: 'Maher Al-Muaiqly', nameAr: 'ماهر المعيقلي', qiraat: 'hafs', quranicAudioId: 6 },
-  
+
   // ═══════════════════════════════════════════════════════════════════════════
-  // WARSH (ورش عن نافع) - Popular in North & West Africa
+  // WARSH (ورش عن نافع) — meilleur enregistrement verset par verset disponible
   // ═══════════════════════════════════════════════════════════════════════════
   ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
-  yassinJazaeryWarsh: { id: 'warsh_yassin_jazaery', name: 'Yassin Al-Jazaery (Warsh)', nameAr: 'ياسين الجزائري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
-  abdulbasitWarsh: { id: 'warsh_abdul_basit', name: 'Abdul Basit (Warsh)', nameAr: 'عبد الباسط (ورش)', qiraat: 'warsh' },
 } as const;
 
 export type ReciterId = keyof typeof RECITERS;
@@ -155,7 +147,7 @@ const disposeManagedAudioElement = (audio: HTMLAudioElement | null) => {
 export const useQuranAudio = ({ 
   surahNumber, 
   totalVerses, 
-  reciter: externalReciter = 'alafasy',
+  reciter: externalReciter = 'husary',
   onVerseChange 
 }: UseQuranAudioOptions) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -368,16 +360,8 @@ export const useQuranAudio = ({
 
   // everyayah.com folder names for each reciter
   const EVERYAYAH_FOLDERS: Record<string, string> = {
-    alafasy: 'Alafasy_128kbps',
     husary: 'Husary_128kbps',
-    minshawi: 'Minshawy_Mujawwad_192kbps',
-    abdulbasit: 'Abdul_Basit_Mujawwad_128kbps',
-    sudais: 'Abdurrahmaan_As-Sudais_192kbps',
-    shuraym: 'Saood_Ash-Shuraym_128kbps',
-    mahermuaiqly: 'MauroAl_Muaiqely_128kbps',
     ibrahimDosaryWarsh: 'warsh/warsh_ibrahim_aldosary_128kbps',
-    yassinJazaeryWarsh: 'Yassin_Al-Jazaery_64kbps',
-    abdulbasitWarsh: 'warsh/warsh_Abdul_Basit_128kbps',
   };
 
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
@@ -387,8 +371,8 @@ export const useQuranAudio = ({
     if (folder) {
       return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
     }
-    // Fallback to Alafasy
-    return `https://everyayah.com/data/Alafasy_128kbps/${surahStr}${verseStr}.mp3`;
+    // Fallback to Husary
+    return `https://everyayah.com/data/Husary_128kbps/${surahStr}${verseStr}.mp3`;
   }, []);
 
   const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string): Promise<void> => {
