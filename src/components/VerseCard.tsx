@@ -78,7 +78,7 @@ export const VerseCard = ({
   isPlaying, 
   isHighlighted,
   isLoading,
-  reciter = 'alafasy',
+  reciter = 'husary',
   textDisplayStyle = 'tajweed',
   fontSize = 'medium',
   tajweedHtml,
@@ -266,16 +266,10 @@ export const VerseCard = ({
     try {
       // everyayah.com folder mapping (same source as playback)
       const EVERYAYAH_FOLDERS: Record<string, string> = {
-        alafasy: 'Alafasy_128kbps',
         husary: 'Husary_128kbps',
-        minshawi: 'Minshawy_Murattal_128kbps',
-        sudais: 'Abdurrahmaan_As-Sudais_192kbps',
-        shuraim: 'Saood_ash-Shuraym_128kbps',
-        ghamdi: 'Ghamadi_40kbps',
-        ajmi: 'ahmed_ibn_ali_al_ajamy_128kbps',
-        muaiqly: 'Maher_AlMuaiqly_64kbps',
+        ibrahimDosaryWarsh: 'warsh/warsh_ibrahim_aldosary_128kbps',
       };
-      const folder = EVERYAYAH_FOLDERS[reciter] || EVERYAYAH_FOLDERS.alafasy;
+      const folder = EVERYAYAH_FOLDERS[reciter] || EVERYAYAH_FOLDERS.husary;
       const surahStr = String(surahNumber).padStart(3, '0');
       const verseStr = String(verse.number).padStart(3, '0');
       const audioUrl = `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;

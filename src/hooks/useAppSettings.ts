@@ -16,7 +16,10 @@ const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
 export const useAppSettings = () => {
   const [reciter, setReciter] = useState<ReciterId>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RECITER);
-    return (saved as ReciterId) || 'alafasy';
+    // Migration : tout récitateur retiré bascule vers Husary (Hafs) par défaut.
+    const ALLOWED: ReciterId[] = ['husary', 'ibrahimDosaryWarsh'];
+    if (saved && ALLOWED.includes(saved as ReciterId)) return saved as ReciterId;
+    return 'husary';
   });
 
   const [backgroundColor, setBackgroundColor] = useState(() => {

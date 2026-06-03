@@ -36,7 +36,7 @@ if (isInIframe || isPreviewHost) {
   if (localStorage.getItem(FIRST_RUN_KEY)) return;
 
   const defaults: Record<string, string> = {
-    "quran-reciter": "alafasy",
+    "quran-reciter": "husary",
     "quran-background-color": "hsl(45, 30%, 96%)",
     "quran-text-display-style": "tajweed",
     "quran-font-size": "medium",

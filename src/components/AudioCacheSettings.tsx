@@ -12,8 +12,8 @@ import { toast } from 'sonner';
 import { ScrollArea } from './ui/scroll-area';
 
 const DOWNLOADABLE_RECITERS: { id: ReciterId; label: string }[] = [
-  { id: 'alafasy', label: '🟢 Mishary Alafasy (Hafs)' },
-  { id: 'yassinJazaeryWarsh', label: '🟠 Yassin Al-Jazaery (Warsh)' },
+  { id: 'husary', label: '🟢 Al-Husary (Hafs)' },
+  { id: 'ibrahimDosaryWarsh', label: '🟠 Ibrahim Al-Dosary (Warsh)' },
 ];
 
 type DownloadTab = 'audio' | 'text' | 'tafsir';
@@ -23,7 +23,7 @@ export const AudioCacheSettings = () => {
   const { downloadSurahTafsir, downloadAllTafsir, isDownloading: isTafsirDownloading, downloadingSurah: tafsirDownloadingSurah, progress: tafsirProgress } = useTafsirCache();
   const { downloadSurahText, downloadAllText, isDownloading: isTextDownloading, downloadingSurah: textDownloadingSurah, progress: textProgress } = useTextCache();
 
-  const [selectedReciter, setSelectedReciter] = useState<ReciterId>('alafasy');
+  const [selectedReciter, setSelectedReciter] = useState<ReciterId>('husary');
   const [showSurahList, setShowSurahList] = useState(false);
   const [activeTab, setActiveTab] = useState<DownloadTab>('audio');
 

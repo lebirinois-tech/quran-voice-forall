@@ -31,7 +31,7 @@ export const Header = ({
   isAccessibilityMode,
   isContinuousMode,
   onToggleContinuous,
-  reciter = 'alafasy',
+  reciter = 'husary',
   onReciterChange,
   backgroundColor = 'hsl(45, 30%, 96%)',
   onBackgroundColorChange,
