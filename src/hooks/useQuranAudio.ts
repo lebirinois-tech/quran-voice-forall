@@ -48,14 +48,6 @@ export const RECITERS: Record<string, ReciterInfo> = {
   // WARSH (ورش عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
   ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
-  husaryWarsh: {
-    id: 'husary_warsh_full',
-    name: 'Al-Husary (Warsh – sourate entière)',
-    nameAr: 'محمود خليل الحصري (ورش – سورة كاملة)',
-    qiraat: 'warsh',
-    fullSurah: true,
-    fullSurahBaseUrl: 'https://server13.mp3quran.net/husr/Rewayat-Warsh-A-n-Nafi/',
-  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // QALUN (قالون عن نافع)
@@ -67,22 +59,6 @@ export const RECITERS: Record<string, ReciterInfo> = {
     qiraat: 'qalun',
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
-  },
-  hudhaifyQalun: {
-    id: 'hudhaify_qalun_full',
-    name: 'Ali Al-Hudhayfi (Qalun – sourate entière)',
-    nameAr: 'علي الحذيفي (قالون – سورة كاملة)',
-    qiraat: 'qalun',
-    fullSurah: true,
-    fullSurahBaseUrl: 'https://server9.mp3quran.net/huthifi_qalon/',
-  },
-  husaryQalun: {
-    id: 'husary_qalun_full',
-    name: 'Al-Husary (Qalun – sourate entière)',
-    nameAr: 'محمود خليل الحصري (قالون – سورة كاملة)',
-    qiraat: 'qalun',
-    fullSurah: true,
-    fullSurahBaseUrl: 'https://server13.mp3quran.net/husr/Rewayat-Qalon-A-n-Nafi/',
   },
 } as const;
 

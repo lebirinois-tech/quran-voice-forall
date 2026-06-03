@@ -27,9 +27,6 @@ export const useAppSettings = () => {
       'husary',
       'ibrahimDosaryWarsh',
       'husaryQalunPerVerse',
-      'husaryWarsh',
-      'hudhaifyQalun',
-      'husaryQalun',
     ];
     if (saved && ALLOWED.includes(saved as ReciterId)) return saved as ReciterId;
     return 'husary';
