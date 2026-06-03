@@ -2,3 +2,9 @@ project_id = "kqhdyzpmfwsrldbmnebc"
 
 [functions.translate-tafsir]
 verify_jwt = false
+
+[functions.compare-recitation]
+verify_jwt = false
+
+[functions.thematic-tafsir]
+verify_jwt = false
