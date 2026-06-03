@@ -508,20 +508,13 @@ export const VerseCard = ({
         >
           {warshText}
         </p>
-      ) : textDisplayStyle === 'warsh-text' && warshText ? (
-        <p
-          className={cn(getTextClassName(), "mb-4 text-right")}
-          dir="rtl"
-        >
-          {warshText}
-        </p>
       ) : textDisplayStyle === 'qalun-tajweed' && qalunTajweedHtml ? (
         <p
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
           dangerouslySetInnerHTML={{ __html: qalunTajweedHtml }}
         />
-      ) : (textDisplayStyle === 'qalun-text' || textDisplayStyle === 'qalun-tajweed') && qalunText ? (
+      ) : textDisplayStyle === 'qalun-tajweed' && qalunText ? (
         <p
           className={cn(getTextClassName(), "mb-4 text-right")}
           dir="rtl"
