@@ -23,7 +23,14 @@ export const useAppSettings = () => {
   const [reciter, setReciter] = useState<ReciterId>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RECITER);
     // Migration : tout récitateur retiré bascule vers Husary (Hafs) par défaut.
-    const ALLOWED: ReciterId[] = ['husary', 'ibrahimDosaryWarsh'];
+    const ALLOWED: ReciterId[] = [
+      'husary',
+      'ibrahimDosaryWarsh',
+      'husaryQalunPerVerse',
+      'husaryWarsh',
+      'hudhaifyQalun',
+      'husaryQalun',
+    ];
     if (saved && ALLOWED.includes(saved as ReciterId)) return saved as ReciterId;
     return 'husary';
   });
