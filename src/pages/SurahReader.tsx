@@ -74,32 +74,21 @@ const SurahReader = () => {
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
   const { warshVerses, isLoading: isLoadingWarsh } = useWarshData(
     num,
-    appSettings.textDisplayStyle === 'warsh-tajweed' ||
-      appSettings.textDisplayStyle === 'warsh-text' ||
-      appSettings.textDisplayStyle === 'mushaf-warsh-tajweed'
+    appSettings.textDisplayStyle === 'warsh-tajweed'
   );
   const { qalunVerses, isLoading: isLoadingQalun } = useQalunData(
     num,
-    appSettings.textDisplayStyle === 'qalun-tajweed' ||
-      appSettings.textDisplayStyle === 'qalun-text' ||
-      appSettings.textDisplayStyle === 'mushaf-qalun'
+    appSettings.textDisplayStyle === 'qalun-tajweed'
   );
 
-  // Colored Mushaf images don't exist for Warsh/Qalun — render those modes as
-  // text + auto-Tajweed coloring so the rules and colors are actually visible.
-  const effectiveDisplayStyle =
-    appSettings.textDisplayStyle === 'mushaf-warsh-tajweed'
-      ? 'warsh-tajweed'
-      : appSettings.textDisplayStyle === 'mushaf-qalun'
-        ? 'qalun-tajweed'
-        : appSettings.textDisplayStyle;
+  const effectiveDisplayStyle = appSettings.textDisplayStyle;
   const isMushafImageMode =
-    appSettings.textDisplayStyle === 'mushaf-hafs' || appSettings.textDisplayStyle === 'mushaf-warsh';
-  const isColoredTextMushafMode =
-    appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' || appSettings.textDisplayStyle === 'mushaf-qalun';
+    appSettings.textDisplayStyle === 'mushaf-hafs' ||
+    appSettings.textDisplayStyle === 'mushaf-warsh' ||
+    appSettings.textDisplayStyle === 'mushaf-qalun';
   const isLoadingTextSource =
-    ((effectiveDisplayStyle === 'warsh-tajweed' || effectiveDisplayStyle === 'warsh-text') && isLoadingWarsh) ||
-    ((effectiveDisplayStyle === 'qalun-tajweed' || effectiveDisplayStyle === 'qalun-text') && isLoadingQalun);
+    (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
+    (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
 
   const handleVerseChange = useCallback((verseNum: number) => {
     const verseElement = document.getElementById(`verse-${verseNum}`);
@@ -408,9 +397,7 @@ const SurahReader = () => {
         {(appSettings.textDisplayStyle === 'tajweed' || 
           appSettings.textDisplayStyle === 'warsh-tajweed' ||
           appSettings.textDisplayStyle === 'qalun-tajweed' ||
-          appSettings.textDisplayStyle === 'mushaf-hafs' ||
-          appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
-          appSettings.textDisplayStyle === 'mushaf-qalun') && (
+          appSettings.textDisplayStyle === 'mushaf-hafs') && (
           <TajweedLegend />
         )}
 
@@ -421,7 +408,8 @@ const SurahReader = () => {
           {/* Bismillah - only show for text modes */}
           {surah.number !== 1 && surah.number !== 9 &&
            appSettings.textDisplayStyle !== 'mushaf-hafs' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh' && (
+           appSettings.textDisplayStyle !== 'mushaf-warsh' &&
+           appSettings.textDisplayStyle !== 'mushaf-qalun' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -429,12 +417,6 @@ const SurahReader = () => {
               <p className="text-sm text-muted-foreground mt-2">
                 Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
               </p>
-            </div>
-          )}
-
-          {isColoredTextMushafMode && (
-            <div className="mb-4 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-foreground">
-              Affichage Tajweed coloré verset par verset avec mémorisation et enregistrement.
             </div>
           )}
 
@@ -447,7 +429,11 @@ const SurahReader = () => {
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}
               mushafType={
-                appSettings.textDisplayStyle === 'mushaf-hafs' ? 'hafs' : 'warsh'
+                appSettings.textDisplayStyle === 'mushaf-hafs'
+                  ? 'hafs'
+                  : appSettings.textDisplayStyle === 'mushaf-qalun'
+                    ? 'qalun'
+                    : 'warsh'
               }
             />
           )}

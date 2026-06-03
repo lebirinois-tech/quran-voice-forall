@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ReciterId } from './useQuranAudio';
 
-export type TextDisplayStyle = 'tajweed' | 'simple' | 'warsh-text' | 'warsh-tajweed' | 'qalun-text' | 'qalun-tajweed' | 'mushaf-hafs' | 'mushaf-warsh' | 'mushaf-warsh-tajweed' | 'mushaf-qalun';
+export type TextDisplayStyle =
+  | 'tajweed'
+  | 'warsh-tajweed'
+  | 'qalun-tajweed'
+  | 'mushaf-hafs'
+  | 'mushaf-warsh'
+  | 'mushaf-qalun';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 const STORAGE_KEYS = {
@@ -28,7 +34,24 @@ export const useAppSettings = () => {
 
   const [textDisplayStyle, setTextDisplayStyle] = useState<TextDisplayStyle>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE);
-    return (saved as TextDisplayStyle) || 'tajweed';
+    // Migration : les anciens modes retirés basculent vers un équivalent conservé.
+    const ALLOWED: TextDisplayStyle[] = [
+      'tajweed',
+      'warsh-tajweed',
+      'qalun-tajweed',
+      'mushaf-hafs',
+      'mushaf-warsh',
+      'mushaf-qalun',
+    ];
+    const MIGRATIONS: Record<string, TextDisplayStyle> = {
+      simple: 'tajweed',
+      'warsh-text': 'warsh-tajweed',
+      'qalun-text': 'qalun-tajweed',
+      'mushaf-warsh-tajweed': 'warsh-tajweed',
+    };
+    if (saved && ALLOWED.includes(saved as TextDisplayStyle)) return saved as TextDisplayStyle;
+    if (saved && MIGRATIONS[saved]) return MIGRATIONS[saved];
+    return 'tajweed';
   });
 
   const [fontSize, setFontSize] = useState<FontSize>(() => {
