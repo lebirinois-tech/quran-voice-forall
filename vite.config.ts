@@ -103,6 +103,21 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
+            urlPattern: /^https:\/\/archive\.org\/(download|cors)\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-archive-audio-cache",
+              expiration: {
+                maxEntries: 7000,
+                maxAgeSeconds: 60 * 60 * 24 * 90,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              rangeRequests: true,
+            },
+          },
+          {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: "CacheFirst",
             options: {
