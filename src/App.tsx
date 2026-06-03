@@ -43,6 +43,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/index" element={<Index />} />
               <Route path="/app" element={<Index />} />
               <Route path="/surah/:surahNumber" element={<SurahReader />} />
               <Route path="/install" element={<Install />} />
