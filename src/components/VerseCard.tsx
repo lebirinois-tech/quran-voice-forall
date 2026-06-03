@@ -620,6 +620,16 @@ export const VerseCard = ({
         isOpen={isTafsirOpen}
         onToggle={() => setIsTafsirOpen(!isTafsirOpen)}
       />
+
+      {/* Thematic Tafsir Panel (only if verse has curated themes) */}
+      {!hideText && (
+        <ThematicTafsirPanel
+          surahNumber={surahNumber}
+          verseNumber={verse.number}
+          isOpen={isThematicOpen}
+          onToggle={() => setIsThematicOpen(!isThematicOpen)}
+        />
+      )}
     </div>
   );
 };
