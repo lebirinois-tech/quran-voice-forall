@@ -13,6 +13,14 @@ export const QIRAAT_LABELS = {
 
 export type QiraatId = keyof typeof QIRAAT_LABELS;
 
+export const RECITER_IDS = [
+  'husary',
+  'ibrahimDosaryWarsh',
+  'husaryQalunPerVerse',
+] as const;
+
+export type ReciterId = (typeof RECITER_IDS)[number];
+
 export interface ReciterInfo {
   id: string;
   name: string;
@@ -30,7 +38,7 @@ export interface ReciterInfo {
   archiveItem?: string;
 }
 
-export const RECITERS = {
+export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // HAFS (حفص عن عاصم) — Mahmoud Khalil Al-Husary (référence mondiale)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -52,11 +60,7 @@ export const RECITERS = {
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
   },
-} as const satisfies Record<string, ReciterInfo>;
-
-export type ReciterId = keyof typeof RECITERS;
-
-export const RECITER_IDS = Object.keys(RECITERS) as ReciterId[];
+};
 
 export const isReciterId = (value: unknown): value is ReciterId =>
   typeof value === 'string' && value in RECITERS;
