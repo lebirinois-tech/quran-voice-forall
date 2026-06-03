@@ -11,6 +11,8 @@ import { useEnglishTranslation } from '@/hooks/useEnglishTranslation';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import { TafsirPanel } from './TafsirPanel';
+import { ThematicTafsirPanel } from './ThematicTafsirPanel';
+import { getThemesForVerse } from '@/data/quranThemes';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
@@ -92,6 +94,7 @@ export const VerseCard = ({
   const pageNumber = propPageNumber || verse.page || getVersePage(surahNumber, verse.number, surah?.versesCount || 1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
+  const [isThematicOpen, setIsThematicOpen] = useState(false);
   const [ttsLang] = useTtsLang();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -234,6 +237,10 @@ export const VerseCard = ({
   // Alternate background colors based on page number (odd/even)
   const isEvenPage = pageNumber % 2 === 0;
 
+  // Themes this verse belongs to (curated mapping)
+  const verseThemes = getThemesForVerse(surahNumber, verse.number);
+  const primaryTheme = verseThemes[0];
+
   // Hafs Tajweed — use the same simplified 4-color scheme as Warsh / Qalun
   // (Madd red, Ghunnah green, Qalqalah blue, Iqlab orange) so the Ghunnah
   // color stays consistent across all Qira'at. The richer external Tajweed
@@ -360,8 +367,37 @@ export const VerseCard = ({
         (textDisplayStyle === 'mushaf-hafs' || textDisplayStyle === 'mushaf-warsh') && "bg-ivory/50 dark:bg-card",
         "animate-fade-in"
       )}
-      style={{ animationDelay: `${verse.number * 0.05}s` }}
+      style={{
+        animationDelay: `${verse.number * 0.05}s`,
+        ...(primaryTheme
+          ? {
+              borderLeft: `4px solid hsl(${primaryTheme.hsl})`,
+              boxShadow: `inset 4px 0 0 hsl(${primaryTheme.hsl} / 0.18)`,
+            }
+          : {}),
+      }}
     >
+      {/* Theme tags */}
+      {verseThemes.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {verseThemes.map((t) => (
+            <span
+              key={t.id}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border"
+              style={{
+                backgroundColor: `hsl(${t.hsl} / 0.12)`,
+                borderColor: `hsl(${t.hsl} / 0.4)`,
+                color: `hsl(${t.hsl})`,
+              }}
+              title={`${t.labels.fr} · ${t.labels.ar} · ${t.labels.en}`}
+            >
+              <span>{t.emoji}</span>
+              <span>{t.labels.fr}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Verse Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
