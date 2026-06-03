@@ -31,6 +31,11 @@ export interface ReciterInfo {
   fullSurah?: boolean;
   /** Full-surah MP3 base URL; surah number is appended as 3-digit padded `.mp3`. */
   fullSurahBaseUrl?: string;
+  /**
+   * Archive.org item where per-verse MP3s are bundled inside one ZIP per surah.
+   * URL pattern: `https://archive.org/download/{archiveItem}/{SSS}.zip/{SSSAAA}.mp3`.
+   */
+  archiveItem?: string;
 }
 
 export const RECITERS: Record<string, ReciterInfo> = {
@@ -53,8 +58,16 @@ export const RECITERS: Record<string, ReciterInfo> = {
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // QALUN (قالون عن نافع) — sourate entière (per-verse non disponible publiquement)
+  // QALUN (قالون عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
+  husaryQalunPerVerse: {
+    id: 'husary_qalun_per_verse',
+    name: 'Al-Husary (Qalun – verset par verset)',
+    nameAr: 'محمود خليل الحصري (قالون – آية آية)',
+    qiraat: 'qalun',
+    archiveItem:
+      '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
+  },
   hudhaifyQalun: {
     id: 'hudhaify_qalun_full',
     name: 'Ali Al-Hudhayfi (Qalun – sourate entière)',
