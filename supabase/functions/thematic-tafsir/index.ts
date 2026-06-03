@@ -55,14 +55,17 @@ serve(async (req) => {
     }
 
     const langName = lang === "ar" ? "Arabic (Modern Standard, classical religious tone)" : lang === "fr" ? "French" : "English";
+    const langCode = lang === "ar" ? "ar" : lang === "fr" ? "fr" : "en";
     const systemPrompt = `You are a respectful Islamic scholar specialized in thematic Tafsir (Tafsir Mawdou'i).
+CRITICAL LANGUAGE REQUIREMENT: You MUST write the ENTIRE response in ${langName} (ISO code: ${langCode}). Do NOT mix languages. Do NOT respond in Arabic unless ${langCode} === "ar".
 Given a Quranic verse reference and its associated themes, write a clear, concise thematic explanation in ${langName} (3–5 sentences, 60–120 words).
 - Explain how this specific verse relates to the listed themes.
 - Stay faithful to mainstream Sunni scholarship (no sectarian polemic).
 - Do NOT quote the Arabic text of the verse.
-- Output ONLY the explanation, no preamble, no markdown, no headings.`;
+- Output ONLY the explanation, no preamble, no markdown, no headings.
+- Final reminder: respond strictly in ${langName}.`;
 
-    const userPrompt = `Verse: Surah ${surah}, Ayah ${verse}\nThemes: ${safeThemes.join(", ")}\nWrite the thematic explanation in ${langName}.`;
+    const userPrompt = `Verse: Surah ${surah}, Ayah ${verse}\nThemes: ${safeThemes.join(", ")}\n\nWrite the thematic explanation. Required output language: ${langName} ONLY.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
