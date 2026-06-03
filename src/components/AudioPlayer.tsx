@@ -1,7 +1,7 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { ReciterId, RECITERS, RepeatMode, RepeatSettings } from '@/hooks/useQuranAudio';
+import { ReciterId, RECITERS, RECITER_IDS, RepeatMode, RepeatSettings, getSafeReciter } from '@/hooks/useQuranAudio';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import {
@@ -218,9 +218,9 @@ export const AudioPlayer = ({
                   <SelectValue placeholder="Récitateur" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(RECITERS).map(([key, { name, nameAr }]) => (
+                  {RECITER_IDS.map((key) => (
                     <SelectItem key={key} value={key} className="text-xs">
-                      {name} / {nameAr}
+                      {RECITERS[key].name} / {RECITERS[key].nameAr}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -475,7 +475,7 @@ export const AudioPlayer = ({
                   </Button>
                    <div className="pt-2 border-t border-border">
                     <p className="text-xs text-muted-foreground">
-                      Récitateur: {RECITERS[reciter]?.name ?? reciter} / {RECITERS[reciter]?.nameAr ?? ''}
+                      Récitateur: {RECITERS[getSafeReciter(reciter)].name} / {RECITERS[getSafeReciter(reciter)].nameAr}
                     </p>
                   </div>
                 </div>

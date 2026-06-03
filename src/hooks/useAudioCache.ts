@@ -103,9 +103,6 @@ const getWarshDirectUrl = (reciterId: ReciterId, surahNumber: number, verseNumbe
   if (reciterId === 'ibrahimDosaryWarsh') {
     return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${formatNum(surahNumber)}${formatNum(verseNumber)}.mp3`;
   }
-  if (reciterId === 'yassinJazaeryWarsh') {
-    return `https://everyayah.com/data/Yassin_Al-Jazaery_64kbps/${formatNum(surahNumber)}${formatNum(verseNumber)}.mp3`;
-  }
   return '';
 };
 

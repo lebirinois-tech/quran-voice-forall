@@ -215,7 +215,7 @@ const AudioUpload = () => {
             <Label htmlFor="title" className="text-sm font-medium mb-2 block">Titre</Label>
             <Input
               id="title"
-              placeholder="Ex: Sourate Al-Kahf — Sheikh Mishary"
+              placeholder="Ex: Sourate Al-Kahf — Husary"
               value={title}
               onChange={e => setTitle(e.target.value)}
               className="bg-card"

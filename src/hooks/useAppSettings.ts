@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ReciterId } from './useQuranAudio';
+import { getSafeReciter, ReciterId } from './useQuranAudio';
 
 export type TextDisplayStyle =
   | 'tajweed'
@@ -22,14 +22,9 @@ const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
 export const useAppSettings = () => {
   const [reciter, setReciter] = useState<ReciterId>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RECITER);
-    // Migration : tout récitateur retiré bascule vers Husary (Hafs) par défaut.
-    const ALLOWED: ReciterId[] = [
-      'husary',
-      'ibrahimDosaryWarsh',
-      'husaryQalunPerVerse',
-    ];
-    if (saved && ALLOWED.includes(saved as ReciterId)) return saved as ReciterId;
-    return 'husary';
+    const safeReciter = getSafeReciter(saved);
+    if (saved !== safeReciter) localStorage.setItem(STORAGE_KEYS.RECITER, safeReciter);
+    return safeReciter;
   });
 
   const [backgroundColor, setBackgroundColor] = useState(() => {

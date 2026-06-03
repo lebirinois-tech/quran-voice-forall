@@ -9,17 +9,17 @@ export const QIRAAT_LABELS = {
   hafs: 'Hafs (حفص)',
   warsh: 'Warsh (ورش)',
   qalun: 'Qalun (قالون)',
-  doori: 'Al-Doori (الدوري)',
 } as const;
 
 export type QiraatId = keyof typeof QIRAAT_LABELS;
 
-export interface ReciterInfo {
-  id: string;
-  name: string;
-  nameAr: string;
-  qiraat: QiraatId;
-}
+export const RECITER_IDS = [
+  'husary',
+  'ibrahimDosaryWarsh',
+  'husaryQalunPerVerse',
+] as const;
+
+export type ReciterId = (typeof RECITER_IDS)[number];
 
 export interface ReciterInfo {
   id: string;
@@ -38,7 +38,7 @@ export interface ReciterInfo {
   archiveItem?: string;
 }
 
-export const RECITERS: Record<string, ReciterInfo> = {
+export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // HAFS (حفص عن عاصم) — Mahmoud Khalil Al-Husary (référence mondiale)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -60,9 +60,13 @@ export const RECITERS: Record<string, ReciterInfo> = {
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
   },
-} as const;
+};
 
-export type ReciterId = keyof typeof RECITERS;
+export const isReciterId = (value: unknown): value is ReciterId =>
+  typeof value === 'string' && value in RECITERS;
+
+export const getSafeReciter = (value: unknown): ReciterId =>
+  isReciterId(value) ? value : 'husary';
 
 export type RepeatMode = 'none' | 'verse' | 'range' | 'page';
 

@@ -33,6 +33,18 @@ if (isInIframe || isPreviewHost) {
 // install time so the user never lands on an "empty" configuration.
 (() => {
   const FIRST_RUN_KEY = "quran-first-run-initialized-v1";
+  const RECITER_MIGRATION_KEY = "quran-reciter-list-v2";
+  const allowedReciters = new Set(["husary", "ibrahimDosaryWarsh", "husaryQalunPerVerse"]);
+  const savedReciter = localStorage.getItem("quran-reciter");
+
+  if (!allowedReciters.has(savedReciter || "")) {
+    localStorage.setItem("quran-reciter", "husary");
+  }
+
+  if (localStorage.getItem(RECITER_MIGRATION_KEY) !== "done") {
+    localStorage.setItem(RECITER_MIGRATION_KEY, "done");
+  }
+
   if (localStorage.getItem(FIRST_RUN_KEY)) return;
 
   const defaults: Record<string, string> = {
