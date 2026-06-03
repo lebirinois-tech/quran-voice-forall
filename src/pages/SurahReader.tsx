@@ -7,6 +7,7 @@ import { MushafPageViewer } from '@/components/MushafPageViewer';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { TajweedLegend } from '@/components/TajweedLegend';
+import { ThemeLegend } from '@/components/ThemeLegend';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
 import { useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
@@ -411,6 +412,14 @@ const SurahReader = () => {
           appSettings.textDisplayStyle === 'mushaf-warsh-tajweed' ||
           appSettings.textDisplayStyle === 'mushaf-qalun') && (
           <TajweedLegend />
+        )}
+
+        {/* Quranic themes legend — always available in verse modes */}
+        {appSettings.textDisplayStyle !== 'mushaf-hafs' &&
+         appSettings.textDisplayStyle !== 'mushaf-warsh' &&
+         appSettings.textDisplayStyle !== 'mushaf-warsh-tajweed' &&
+         appSettings.textDisplayStyle !== 'mushaf-qalun' && (
+          <ThemeLegend />
         )}
 
         <div className="max-w-3xl mx-auto">
