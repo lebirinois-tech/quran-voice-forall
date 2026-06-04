@@ -20,7 +20,33 @@
     <meta name="msapplication-TileColor" content="#1B5E20" />
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      (function () {
+        var host = window.location.hostname;
+        var isPreview =
+          host.indexOf("id-preview--") !== -1 ||
+          host.indexOf("preview--") === 0 ||
+          host === "lovableproject.com" ||
+          host.endsWith(".lovableproject.com") ||
+          host === "lovableproject-dev.com" ||
+          host.endsWith(".lovableproject-dev.com") ||
+          host === "beta.lovable.dev" ||
+          host.endsWith(".beta.lovable.dev");
+
+        try {
+          isPreview = isPreview || window.self !== window.top;
+        } catch (e) {
+          isPreview = true;
+        }
+
+        if (!isPreview) {
+          var manifest = document.createElement("link");
+          manifest.rel = "manifest";
+          manifest.href = "/manifest.webmanifest";
+          document.head.appendChild(manifest);
+        }
+      })();
+    </script>
 
     <!-- Icons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
