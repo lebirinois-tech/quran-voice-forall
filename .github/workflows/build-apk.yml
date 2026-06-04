@@ -18,14 +18,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
-      - name: Setup Java 21
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -41,9 +41,17 @@ jobs:
       - name: Build web app
         run: npm run build
 
+      - name: Prepare native APK config
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+          delete config.server;
+          fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2) + '\n');
+          NODE
+
       - name: Add Android platform
         run: |
-          npm install @capacitor/android @capacitor/cli
           npx cap add android || echo "Android platform already exists"
           npx cap sync android
 
@@ -52,12 +60,12 @@ jobs:
 
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew --no-daemon assembleDebug
 
       - name: Rename APK
         run: |
           mkdir -p artifacts
-          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/quran-acces-pour-tous.apk
+          cp "$(find android/app/build/outputs/apk -name '*debug*.apk' | head -n 1)" artifacts/quran-acces-pour-tous.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
