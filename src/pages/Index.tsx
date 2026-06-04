@@ -15,7 +15,6 @@ import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { apkDownloadUrl } from '@/lib/apkDownload';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -349,12 +348,6 @@ const Index = () => {
                 Installer l'application
               </Button>
             </Link>
-            <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer">
-              <Button variant="secondary" className="gap-2">
-                <Download className="h-4 w-4" />
-                Télécharger APK
-              </Button>
-            </a>
             {/* Update Check Button */}
             <Button 
               variant="outline" 
