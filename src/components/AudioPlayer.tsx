@@ -330,11 +330,8 @@ export const AudioPlayer = ({
               </Popover>
             )}
 
-            {/* Repeat Button with Popover */}
-            {onRepeatModeChange && (
-              <Popover>
-
-                {onRepeatPauseChange && (
+            {/* Pause-to-repeat (after reciter) */}
+            {onRepeatPauseChange && (
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -391,8 +388,11 @@ export const AudioPlayer = ({
                       </div>
                     </PopoverContent>
                   </Popover>
-                )}
+            )}
 
+            {/* Repeat Button with Popover */}
+            {onRepeatModeChange && (
+              <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
