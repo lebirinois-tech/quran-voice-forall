@@ -556,7 +556,7 @@ export const AudioPlayer = ({
                 </div>
               </PopoverContent>
             </Popover>
-            <Volume2 className="h-5 w-5 text-muted-foreground" />
+            <Volume2 className="hidden sm:block h-5 w-5 text-muted-foreground" />
           </div>
         </div>
       </div>
