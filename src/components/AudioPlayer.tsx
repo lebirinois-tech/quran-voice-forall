@@ -335,15 +335,16 @@ export const AudioPlayer = ({
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        variant={repeatPause.enabled ? 'default' : 'outline'}
+                        size="sm"
                         className={cn(
-                          "rounded-full",
-                          repeatPause.enabled && "text-primary bg-primary/10"
+                          "rounded-full h-8 gap-1 px-2",
+                          repeatPause.enabled && "bg-primary text-primary-foreground"
                         )}
                         aria-label="Pause pour répéter après le récitateur"
                       >
-                        <Mic2 className="h-5 w-5" />
+                        <Mic2 className="h-4 w-4" />
+                        <span className="text-[11px] font-medium">Répéter</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-72" align="end">
