@@ -213,6 +213,9 @@ export const useQuranAudio = ({
   const [repeatSettings, _setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
   const [currentRepeatCount, _setCurrentRepeatCount] = useState(0);
   const [playbackSpeed, _setPlaybackSpeed] = useState(readSavedPlaybackSpeed);
+  const [repeatPause, _setRepeatPause] = useState<RepeatPauseSettings>(readSavedRepeatPause);
+  const [isPausingForRepeat, setIsPausingForRepeat] = useState(false);
+  const [pauseRemainingSec, setPauseRemainingSec] = useState(0);
 
   // Sync reciter with external prop
   useEffect(() => {
@@ -228,6 +231,9 @@ export const useQuranAudio = ({
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(readSavedPlaybackSpeed());
   const speedEnforcerRef = useRef<number | null>(null);
+  const repeatPauseRef = useRef<RepeatPauseSettings>(readSavedRepeatPause());
+  const pauseTimeoutRef = useRef<number | null>(null);
+  const pauseCountdownRef = useRef<number | null>(null);
   const reciterRef = useRef<ReciterId>(externalReciter);
   useEffect(() => { reciterRef.current = reciter; }, [reciter]);
 
@@ -278,6 +284,20 @@ export const useQuranAudio = ({
   useEffect(() => { onVerseChangeRef.current = onVerseChange; }, [onVerseChange]);
   useEffect(() => { repeatSettingsRef.current = repeatSettings; }, [repeatSettings]);
   useEffect(() => { playbackSpeedRef.current = playbackSpeed; }, [playbackSpeed]);
+  useEffect(() => { repeatPauseRef.current = repeatPause; }, [repeatPause]);
+
+  const clearRepeatPauseTimers = useCallback(() => {
+    if (pauseTimeoutRef.current !== null) {
+      window.clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+    }
+    if (pauseCountdownRef.current !== null) {
+      window.clearInterval(pauseCountdownRef.current);
+      pauseCountdownRef.current = null;
+    }
+    setIsPausingForRepeat(false);
+    setPauseRemainingSec(0);
+  }, []);
 
   // Setup audio event handlers - only act if this audio is still the current one
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
