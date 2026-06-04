@@ -211,6 +211,12 @@ export const AudioPlayer = ({
                 Chargement...
               </span>
             )}
+            {isPausingForRepeat && !isLoading && (
+              <span className="text-xs text-primary flex items-center gap-1 font-medium animate-pulse">
+                <Mic2 className="h-3 w-3" />
+                Répétez à voix haute… {pauseRemainingSec}s
+              </span>
+            )}
           </div>
         </div>
 
