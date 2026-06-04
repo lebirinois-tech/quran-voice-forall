@@ -674,6 +674,29 @@ export const useQuranAudio = ({
     }
   }, [repeatSettings.mode, setRepeatMode]);
 
+  const setRepeatPauseSettings = useCallback(
+    (next: Partial<RepeatPauseSettings>) => {
+      _setRepeatPause((prev) => {
+        const merged: RepeatPauseSettings = {
+          enabled: next.enabled ?? prev.enabled,
+          multiplier: normalizeRepeatMultiplier(next.multiplier ?? prev.multiplier),
+        };
+        repeatPauseRef.current = merged;
+        saveRepeatPause(merged);
+        if (!merged.enabled) {
+          clearRepeatPauseTimers();
+        }
+        if (next.enabled === true && (prev.enabled === false)) {
+          toast.success('Pause de répétition activée');
+        } else if (next.enabled === false && prev.enabled === true) {
+          toast.info('Pause de répétition désactivée');
+        }
+        return merged;
+      });
+    },
+    [clearRepeatPauseTimers]
+  );
+
   return {
     isPlaying,
     isLoading,
@@ -684,6 +707,9 @@ export const useQuranAudio = ({
     repeatSettings,
     currentRepeatCount,
     playbackSpeed,
+    repeatPause,
+    isPausingForRepeat,
+    pauseRemainingSec,
     play,
     pause,
     togglePlayPause,
@@ -698,5 +724,6 @@ export const useQuranAudio = ({
     setRepeatMode,
     toggleRepeatVerse,
     changeSpeed,
+    setRepeatPauseSettings,
   };
 };
