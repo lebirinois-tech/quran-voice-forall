@@ -359,7 +359,27 @@ export const useQuranAudio = ({
       const rs = repeatSettingsRef.current;
       const rc = currentRepeatCountRef.current;
       const { mode, count, rangeStart, rangeEnd } = rs;
-      const play = (v: number) => setTimeout(() => playVerseRef.current(v), 300);
+      const verseDurationMs = Number.isFinite(audio.duration) && audio.duration > 0
+        ? audio.duration * 1000
+        : 0;
+      const rp = repeatPauseRef.current;
+      const play = (v: number) => {
+        clearRepeatPauseTimers();
+        if (rp.enabled && verseDurationMs > 0) {
+          const waitMs = Math.max(500, verseDurationMs * rp.multiplier);
+          setIsPausingForRepeat(true);
+          setPauseRemainingSec(Math.ceil(waitMs / 1000));
+          pauseCountdownRef.current = window.setInterval(() => {
+            setPauseRemainingSec((s) => (s > 1 ? s - 1 : 0));
+          }, 1000);
+          pauseTimeoutRef.current = window.setTimeout(() => {
+            clearRepeatPauseTimers();
+            playVerseRef.current(v);
+          }, waitMs);
+        } else {
+          setTimeout(() => playVerseRef.current(v), 300);
+        }
+      };
 
       if (mode === 'verse') {
         const shouldRepeat = count === 0 || rc < count - 1;
