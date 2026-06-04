@@ -221,9 +221,9 @@ export const AudioPlayer = ({
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Reciter Selector */}
-          <div className="flex-1 min-w-0">
+          <div className="hidden sm:block flex-1 min-w-0">
             {onReciterChange ? (
               <Select 
                 value={reciter} 
@@ -250,7 +250,7 @@ export const AudioPlayer = ({
           </div>
 
           {/* Playback Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -292,7 +292,7 @@ export const AudioPlayer = ({
           </div>
 
           {/* Speed, Repeat & Download Buttons */}
-          <div className="flex-1 flex justify-end gap-1">
+          <div className="flex-1 flex flex-wrap justify-end gap-0.5 sm:gap-1">
             {/* Speed Control */}
             {onSpeedChange && (
               <Popover>
@@ -556,7 +556,7 @@ export const AudioPlayer = ({
                 </div>
               </PopoverContent>
             </Popover>
-            <Volume2 className="h-5 w-5 text-muted-foreground" />
+            <Volume2 className="hidden sm:block h-5 w-5 text-muted-foreground" />
           </div>
         </div>
       </div>
