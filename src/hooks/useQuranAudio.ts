@@ -553,7 +553,7 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed]);
+  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed, clearRepeatPauseTimers]);
 
   const playVerse = useCallback(async (verseNumber: number) => {
     await playVerseAt(surahNumber, verseNumber);
