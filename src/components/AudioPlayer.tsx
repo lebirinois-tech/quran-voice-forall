@@ -333,6 +333,66 @@ export const AudioPlayer = ({
             {/* Repeat Button with Popover */}
             {onRepeatModeChange && (
               <Popover>
+
+                {onRepeatPauseChange && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "rounded-full",
+                          repeatPause.enabled && "text-primary bg-primary/10"
+                        )}
+                        aria-label="Pause pour répéter après le récitateur"
+                      >
+                        <Mic2 className="h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72" align="end">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <h4 className="font-medium text-sm">Pause pour répéter</h4>
+                            <p className="text-[11px] text-muted-foreground">
+                              Après chaque verset, marque une pause pour que vous puissiez répéter à voix haute.
+                            </p>
+                          </div>
+                          <Switch
+                            checked={repeatPause.enabled}
+                            onCheckedChange={(checked) => onRepeatPauseChange({ enabled: checked })}
+                            aria-label="Activer la pause"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs">Durée de la pause</Label>
+                          <div className="grid grid-cols-4 gap-1">
+                            {[
+                              { v: 1, label: '1x' },
+                              { v: 1.25, label: '1.25x' },
+                              { v: 1.5, label: '1.5x' },
+                              { v: 2, label: '2x' },
+                            ].map(({ v, label }) => (
+                              <Button
+                                key={v}
+                                variant={Math.abs(repeatPause.multiplier - v) < 0.01 ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => onRepeatPauseChange({ multiplier: v })}
+                                className="text-xs px-2"
+                              >
+                                {label}
+                              </Button>
+                            ))}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">
+                            La pause dure la durée du verset multipliée par cette valeur.
+                          </p>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
