@@ -450,6 +450,8 @@ export const useQuranAudio = ({
     
     return () => {
       stopSpeedEnforcer();
+      if (pauseTimeoutRef.current !== null) window.clearTimeout(pauseTimeoutRef.current);
+      if (pauseCountdownRef.current !== null) window.clearInterval(pauseCountdownRef.current);
       disposeManagedAudioElement(audio);
       if (audioRef.current === audio) audioRef.current = null;
     };
@@ -515,6 +517,7 @@ export const useQuranAudio = ({
   }, [startSpeedEnforcer, syncPlaybackSpeed]);
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
+    clearRepeatPauseTimers();
     setIsLoading(true);
     
     try {
