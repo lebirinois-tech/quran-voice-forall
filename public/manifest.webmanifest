@@ -2,7 +2,7 @@
   "name": "Quran Accès Pour Tous",
   "short_name": "Quran Accès",
   "description": "Application coranique accessible avec commandes vocales, Tajweed coloré et Tafsir audio",
-  "id": "/",
+  "id": "/app",
   "start_url": "/app",
   "scope": "/",
   "lang": "fr",
