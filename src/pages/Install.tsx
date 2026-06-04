@@ -3,7 +3,6 @@ import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, CheckCircle2 } from 'lucide-react';
-import { apkDownloadUrl } from '@/lib/apkDownload';
 
 const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
@@ -193,7 +192,6 @@ const Install = () => {
               </div>
             </div>
 
-            {/* Téléchargement APK Android natif */}
             <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
@@ -206,32 +204,11 @@ const Install = () => {
                   <p className="font-semibold text-foreground">تطبيق أندرويد</p>
                 </div>
               </div>
-
-              <a
-                href={apkDownloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-full sm:w-auto"
-              >
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
-                >
-                  <Download className="h-6 w-6" />
-                  Télécharger l'APK Android
-                </Button>
-              </a>
-
               <p className="text-sm text-muted-foreground mt-3">
-                Version native Android — installation directe sans Play Store.
-                <br />
-                <span className="text-xs">
-                  (Autorisez « Sources inconnues » dans les paramètres Android avant l'installation)
-                </span>
+                Le téléchargement APK est temporairement désactivé pendant la régénération du fichier Android.
                 <br />
                 <span className="text-xs text-primary font-medium">
-                  ✓ Téléchargement libre — aucune connexion requise
+                  Utilisez « Installer maintenant » ci-dessus pour remettre l’application sur votre écran d’accueil.
                 </span>
               </p>
             </div>
