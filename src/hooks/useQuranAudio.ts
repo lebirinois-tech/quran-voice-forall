@@ -91,6 +91,35 @@ const normalizePlaybackSpeed = (speed: number) => {
 
 const PLAYBACK_SPEED_STORAGE_KEY = 'quran-audio-playback-speed';
 
+const REPEAT_PAUSE_ENABLED_KEY = 'quran-audio-repeat-pause-enabled';
+const REPEAT_PAUSE_MULTIPLIER_KEY = 'quran-audio-repeat-pause-multiplier';
+
+export interface RepeatPauseSettings {
+  enabled: boolean;
+  /** Multiplier applied to the verse duration to compute the pause length. */
+  multiplier: number;
+}
+
+const normalizeRepeatMultiplier = (value: number) => {
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(3, Math.max(0.5, value));
+};
+
+const readSavedRepeatPause = (): RepeatPauseSettings => {
+  if (typeof window === 'undefined') return { enabled: false, multiplier: 1 };
+  const enabled = window.localStorage.getItem(REPEAT_PAUSE_ENABLED_KEY) === '1';
+  const multiplier = normalizeRepeatMultiplier(
+    Number(window.localStorage.getItem(REPEAT_PAUSE_MULTIPLIER_KEY)) || 1
+  );
+  return { enabled, multiplier };
+};
+
+const saveRepeatPause = (settings: RepeatPauseSettings) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(REPEAT_PAUSE_ENABLED_KEY, settings.enabled ? '1' : '0');
+  window.localStorage.setItem(REPEAT_PAUSE_MULTIPLIER_KEY, String(settings.multiplier));
+};
+
 const readSavedPlaybackSpeed = () => {
   if (typeof window === 'undefined') return 1;
   return normalizePlaybackSpeed(Number(window.localStorage.getItem(PLAYBACK_SPEED_STORAGE_KEY)));
