@@ -319,15 +319,145 @@ function rangeIncludes(ref: VerseRef, n: number): boolean {
   return n >= a && n <= b;
 }
 
+/**
+ * Surah-level default themes — used as a fallback when no curated verse-specific
+ * mapping exists. Ensures every one of the 114 surahs has at least one theme,
+ * so theme coloring / badges work everywhere (not only in Al-Fatiha).
+ * Each surah lists its 1–4 dominant themes (mainstream classical consensus).
+ */
+const SURAH_DEFAULTS: Record<number, ThemeId[]> = {
+  1: ['tawhid', 'prayer'],
+  2: ['tawhid', 'prayer', 'charity', 'stories'],
+  3: ['tawhid', 'prophets', 'patience'],
+  4: ['family', 'charity', 'jihad-nafs'],
+  5: ['family', 'prophets', 'charity'],
+  6: ['tawhid', 'prophets', 'knowledge'],
+  7: ['prophets', 'stories', 'repentance'],
+  8: ['jihad-nafs', 'patience'],
+  9: ['repentance', 'charity', 'jihad-nafs'],
+  10: ['tawhid', 'prophets', 'mercy'],
+  11: ['prophets', 'stories', 'patience'],
+  12: ['stories', 'prophets', 'patience', 'family'],
+  13: ['tawhid', 'knowledge'],
+  14: ['tawhid', 'prophets', 'prayer'],
+  15: ['tawhid', 'stories', 'prophets'],
+  16: ['tawhid', 'knowledge', 'charity'],
+  17: ['family', 'prayer', 'jihad-nafs', 'tawhid'],
+  18: ['stories', 'patience', 'jihad-nafs'],
+  19: ['prophets', 'family', 'mercy'],
+  20: ['stories', 'prophets', 'prayer'],
+  21: ['prophets', 'tawhid', 'mercy'],
+  22: ['hereafter', 'prayer', 'charity'],
+  23: ['jihad-nafs', 'prayer', 'charity', 'hereafter'],
+  24: ['family', 'jihad-nafs', 'prayer'],
+  25: ['jihad-nafs', 'repentance', 'prayer'],
+  26: ['prophets', 'stories'],
+  27: ['prophets', 'stories', 'tawhid'],
+  28: ['stories', 'prophets', 'patience'],
+  29: ['patience', 'prayer', 'prophets'],
+  30: ['tawhid', 'knowledge', 'hereafter'],
+  31: ['family', 'knowledge', 'jihad-nafs'],
+  32: ['tawhid', 'hereafter'],
+  33: ['family', 'prayer', 'jihad-nafs'],
+  34: ['tawhid', 'hereafter', 'prophets'],
+  35: ['tawhid', 'mercy', 'charity'],
+  36: ['tawhid', 'hereafter', 'prophets'],
+  37: ['prophets', 'stories', 'tawhid'],
+  38: ['prophets', 'stories', 'patience'],
+  39: ['tawhid', 'repentance', 'mercy'],
+  40: ['repentance', 'prayer', 'tawhid'],
+  41: ['patience', 'jihad-nafs', 'tawhid'],
+  42: ['mercy', 'repentance', 'tawhid'],
+  43: ['tawhid', 'prophets', 'hereafter'],
+  44: ['tawhid', 'hereafter', 'stories'],
+  45: ['tawhid', 'knowledge', 'hereafter'],
+  46: ['family', 'patience', 'prophets'],
+  47: ['jihad-nafs', 'patience'],
+  48: ['mercy', 'jihad-nafs', 'repentance'],
+  49: ['jihad-nafs', 'family', 'repentance'],
+  50: ['hereafter', 'tawhid'],
+  51: ['tawhid', 'hereafter', 'charity'],
+  52: ['hereafter', 'tawhid'],
+  53: ['tawhid', 'jihad-nafs'],
+  54: ['hereafter', 'stories', 'prophets'],
+  55: ['mercy', 'hereafter', 'tawhid'],
+  56: ['hereafter'],
+  57: ['tawhid', 'charity', 'patience'],
+  58: ['family', 'charity'],
+  59: ['tawhid', 'jihad-nafs'],
+  60: ['family', 'jihad-nafs'],
+  61: ['jihad-nafs', 'tawhid'],
+  62: ['prayer', 'knowledge'],
+  63: ['charity', 'jihad-nafs'],
+  64: ['family', 'charity', 'tawhid'],
+  65: ['family', 'repentance', 'patience'],
+  66: ['family', 'repentance'],
+  67: ['tawhid', 'hereafter'],
+  68: ['patience', 'jihad-nafs'],
+  69: ['hereafter'],
+  70: ['hereafter', 'prayer', 'charity'],
+  71: ['prophets', 'stories', 'tawhid'],
+  72: ['tawhid', 'hereafter'],
+  73: ['prayer', 'patience', 'charity'],
+  74: ['hereafter', 'jihad-nafs'],
+  75: ['hereafter'],
+  76: ['hereafter', 'charity'],
+  77: ['hereafter'],
+  78: ['hereafter', 'tawhid'],
+  79: ['hereafter', 'stories'],
+  80: ['jihad-nafs', 'hereafter'],
+  81: ['hereafter'],
+  82: ['hereafter'],
+  83: ['hereafter', 'jihad-nafs'],
+  84: ['hereafter'],
+  85: ['patience', 'hereafter'],
+  86: ['tawhid', 'hereafter'],
+  87: ['prayer', 'jihad-nafs', 'tawhid'],
+  88: ['hereafter', 'tawhid'],
+  89: ['hereafter', 'stories'],
+  90: ['charity', 'jihad-nafs'],
+  91: ['jihad-nafs', 'tawhid'],
+  92: ['charity', 'jihad-nafs'],
+  93: ['mercy', 'charity'],
+  94: ['patience', 'mercy'],
+  95: ['tawhid', 'hereafter'],
+  96: ['knowledge', 'prayer'],
+  97: ['mercy', 'prayer'],
+  98: ['tawhid', 'prayer', 'charity'],
+  99: ['hereafter'],
+  100: ['hereafter', 'jihad-nafs'],
+  101: ['hereafter'],
+  102: ['hereafter', 'jihad-nafs'],
+  103: ['patience', 'jihad-nafs'],
+  104: ['jihad-nafs', 'charity'],
+  105: ['stories', 'tawhid'],
+  106: ['tawhid'],
+  107: ['prayer', 'charity'],
+  108: ['prayer', 'mercy'],
+  109: ['tawhid'],
+  110: ['mercy', 'repentance'],
+  111: ['hereafter'],
+  112: ['tawhid'],
+  113: ['tawhid'],
+  114: ['tawhid'],
+};
+
 /** Return all themes that the given verse belongs to (from curated data). */
 export const getThemesForVerse = (surahNumber: number, verseNumber: number): QuranTheme[] => {
   const surahMap = M[surahNumber];
-  if (!surahMap) return [];
   const ids: ThemeId[] = [];
-  for (const [themeId, refs] of Object.entries(surahMap)) {
-    if (refs?.some((r) => rangeIncludes(r, verseNumber))) {
-      ids.push(themeId as ThemeId);
+  if (surahMap) {
+    for (const [themeId, refs] of Object.entries(surahMap)) {
+      if (refs?.some((r) => rangeIncludes(r, verseNumber))) {
+        ids.push(themeId as ThemeId);
+      }
     }
+  }
+  // Fallback: if no verse-specific theme matched, use the surah's dominant themes
+  // so every verse of every surah still gets visual theming.
+  if (ids.length === 0) {
+    const defaults = SURAH_DEFAULTS[surahNumber];
+    if (defaults) ids.push(...defaults);
   }
   return QURAN_THEMES.filter((t) => ids.includes(t.id));
 };
