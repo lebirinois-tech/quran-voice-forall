@@ -1,0 +1,36 @@
+{
+  "name": "Quran Accès Pour Tous",
+  "short_name": "Quran Accès",
+  "description": "Application coranique accessible avec commandes vocales, Tajweed coloré et Tafsir audio",
+  "id": "/",
+  "start_url": "/app",
+  "scope": "/",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["education", "books", "lifestyle"],
+  "theme_color": "#1B5E20",
+  "background_color": "#FDF6E3",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
