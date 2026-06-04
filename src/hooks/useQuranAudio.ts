@@ -579,12 +579,13 @@ export const useQuranAudio = ({
   }, [currentVerse, playVerse, startSpeedEnforcer, syncPlaybackSpeed]);
 
   const pause = useCallback(() => {
+    clearRepeatPauseTimers();
     if (audioRef.current) {
       stopSpeedEnforcer();
       audioRef.current.pause();
       setIsPlaying(false);
     }
-  }, [stopSpeedEnforcer]);
+  }, [stopSpeedEnforcer, clearRepeatPauseTimers]);
 
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
@@ -595,6 +596,7 @@ export const useQuranAudio = ({
   }, [isPlaying, play, pause]);
 
   const nextVerse = useCallback(() => {
+    clearRepeatPauseTimers();
     if (currentVerse < totalVerses) {
       const next = currentVerse + 1;
       setCurrentVerse(next);
@@ -603,9 +605,10 @@ export const useQuranAudio = ({
         playVerse(next);
       }
     }
-  }, [currentVerse, totalVerses, isPlaying, playVerse, onVerseChange]);
+  }, [currentVerse, totalVerses, isPlaying, playVerse, onVerseChange, clearRepeatPauseTimers]);
 
   const previousVerse = useCallback(() => {
+    clearRepeatPauseTimers();
     if (currentVerse > 1) {
       const prev = currentVerse - 1;
       setCurrentVerse(prev);
@@ -614,7 +617,7 @@ export const useQuranAudio = ({
         playVerse(prev);
       }
     }
-  }, [currentVerse, isPlaying, playVerse, onVerseChange]);
+  }, [currentVerse, isPlaying, playVerse, onVerseChange, clearRepeatPauseTimers]);
 
   const goToVerse = useCallback((verseNumber: number) => {
     if (verseNumber >= 1 && verseNumber <= totalVerses) {
