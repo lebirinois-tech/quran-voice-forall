@@ -1,7 +1,7 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge, Mic2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { ReciterId, RECITERS, RECITER_IDS, RepeatMode, RepeatSettings, getSafeReciter } from '@/hooks/useQuranAudio';
+import { ReciterId, RECITERS, RECITER_IDS, RepeatMode, RepeatSettings, RepeatPauseSettings, getSafeReciter } from '@/hooks/useQuranAudio';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import {
@@ -18,6 +18,7 @@ import {
 } from './ui/popover';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 interface AudioPlayerProps {
   isPlaying: boolean;
@@ -30,6 +31,9 @@ interface AudioPlayerProps {
   repeatSettings?: RepeatSettings;
   currentRepeatCount?: number;
   playbackSpeed?: number;
+  repeatPause?: RepeatPauseSettings;
+  isPausingForRepeat?: boolean;
+  pauseRemainingSec?: number;
   onPlay: () => void;
   onPause: () => void;
   onNext: () => void;
@@ -38,6 +42,7 @@ interface AudioPlayerProps {
   onSeek?: (percentage: number) => void;
   onRepeatModeChange?: (mode: RepeatMode, count: number, rangeStart?: number, rangeEnd?: number) => void;
   onSpeedChange?: (speed: number) => void;
+  onRepeatPauseChange?: (next: Partial<RepeatPauseSettings>) => void;
   surahName?: string;
   className?: string;
 }
@@ -53,6 +58,9 @@ export const AudioPlayer = ({
   repeatSettings = { mode: 'none', count: 1 },
   currentRepeatCount = 0,
   playbackSpeed = 1,
+  repeatPause = { enabled: false, multiplier: 1 },
+  isPausingForRepeat = false,
+  pauseRemainingSec = 0,
   onPlay,
   onPause,
   onNext,
@@ -61,6 +69,7 @@ export const AudioPlayer = ({
   onSeek,
   onRepeatModeChange,
   onSpeedChange,
+  onRepeatPauseChange,
   surahName,
   className,
 }: AudioPlayerProps) => {
@@ -202,6 +211,12 @@ export const AudioPlayer = ({
                 Chargement...
               </span>
             )}
+            {isPausingForRepeat && !isLoading && (
+              <span className="text-xs text-primary flex items-center gap-1 font-medium animate-pulse">
+                <Mic2 className="h-3 w-3" />
+                Répétez à voix haute… {pauseRemainingSec}s
+              </span>
+            )}
           </div>
         </div>
 
@@ -313,6 +328,66 @@ export const AudioPlayer = ({
                   </div>
                 </PopoverContent>
               </Popover>
+            )}
+
+            {/* Pause-to-repeat (after reciter) */}
+            {onRepeatPauseChange && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "rounded-full",
+                          repeatPause.enabled && "text-primary bg-primary/10"
+                        )}
+                        aria-label="Pause pour répéter après le récitateur"
+                      >
+                        <Mic2 className="h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72" align="end">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <h4 className="font-medium text-sm">Pause pour répéter</h4>
+                            <p className="text-[11px] text-muted-foreground">
+                              Après chaque verset, marque une pause pour que vous puissiez répéter à voix haute.
+                            </p>
+                          </div>
+                          <Switch
+                            checked={repeatPause.enabled}
+                            onCheckedChange={(checked) => onRepeatPauseChange({ enabled: checked })}
+                            aria-label="Activer la pause"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs">Durée de la pause</Label>
+                          <div className="grid grid-cols-4 gap-1">
+                            {[
+                              { v: 1, label: '1x' },
+                              { v: 1.25, label: '1.25x' },
+                              { v: 1.5, label: '1.5x' },
+                              { v: 2, label: '2x' },
+                            ].map(({ v, label }) => (
+                              <Button
+                                key={v}
+                                variant={Math.abs(repeatPause.multiplier - v) < 0.01 ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => onRepeatPauseChange({ multiplier: v })}
+                                className="text-xs px-2"
+                              >
+                                {label}
+                              </Button>
+                            ))}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">
+                            La pause dure la durée du verset multipliée par cette valeur.
+                          </p>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
             )}
 
             {/* Repeat Button with Popover */}

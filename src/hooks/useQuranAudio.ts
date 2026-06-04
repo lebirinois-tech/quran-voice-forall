@@ -91,6 +91,35 @@ const normalizePlaybackSpeed = (speed: number) => {
 
 const PLAYBACK_SPEED_STORAGE_KEY = 'quran-audio-playback-speed';
 
+const REPEAT_PAUSE_ENABLED_KEY = 'quran-audio-repeat-pause-enabled';
+const REPEAT_PAUSE_MULTIPLIER_KEY = 'quran-audio-repeat-pause-multiplier';
+
+export interface RepeatPauseSettings {
+  enabled: boolean;
+  /** Multiplier applied to the verse duration to compute the pause length. */
+  multiplier: number;
+}
+
+const normalizeRepeatMultiplier = (value: number) => {
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(3, Math.max(0.5, value));
+};
+
+const readSavedRepeatPause = (): RepeatPauseSettings => {
+  if (typeof window === 'undefined') return { enabled: false, multiplier: 1 };
+  const enabled = window.localStorage.getItem(REPEAT_PAUSE_ENABLED_KEY) === '1';
+  const multiplier = normalizeRepeatMultiplier(
+    Number(window.localStorage.getItem(REPEAT_PAUSE_MULTIPLIER_KEY)) || 1
+  );
+  return { enabled, multiplier };
+};
+
+const saveRepeatPause = (settings: RepeatPauseSettings) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(REPEAT_PAUSE_ENABLED_KEY, settings.enabled ? '1' : '0');
+  window.localStorage.setItem(REPEAT_PAUSE_MULTIPLIER_KEY, String(settings.multiplier));
+};
+
 const readSavedPlaybackSpeed = () => {
   if (typeof window === 'undefined') return 1;
   return normalizePlaybackSpeed(Number(window.localStorage.getItem(PLAYBACK_SPEED_STORAGE_KEY)));
@@ -184,6 +213,9 @@ export const useQuranAudio = ({
   const [repeatSettings, _setRepeatSettings] = useState<RepeatSettings>({ mode: 'none', count: 1 });
   const [currentRepeatCount, _setCurrentRepeatCount] = useState(0);
   const [playbackSpeed, _setPlaybackSpeed] = useState(readSavedPlaybackSpeed);
+  const [repeatPause, _setRepeatPause] = useState<RepeatPauseSettings>(readSavedRepeatPause);
+  const [isPausingForRepeat, setIsPausingForRepeat] = useState(false);
+  const [pauseRemainingSec, setPauseRemainingSec] = useState(0);
 
   // Sync reciter with external prop
   useEffect(() => {
@@ -199,6 +231,9 @@ export const useQuranAudio = ({
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(readSavedPlaybackSpeed());
   const speedEnforcerRef = useRef<number | null>(null);
+  const repeatPauseRef = useRef<RepeatPauseSettings>(readSavedRepeatPause());
+  const pauseTimeoutRef = useRef<number | null>(null);
+  const pauseCountdownRef = useRef<number | null>(null);
   const reciterRef = useRef<ReciterId>(externalReciter);
   useEffect(() => { reciterRef.current = reciter; }, [reciter]);
 
@@ -249,6 +284,20 @@ export const useQuranAudio = ({
   useEffect(() => { onVerseChangeRef.current = onVerseChange; }, [onVerseChange]);
   useEffect(() => { repeatSettingsRef.current = repeatSettings; }, [repeatSettings]);
   useEffect(() => { playbackSpeedRef.current = playbackSpeed; }, [playbackSpeed]);
+  useEffect(() => { repeatPauseRef.current = repeatPause; }, [repeatPause]);
+
+  const clearRepeatPauseTimers = useCallback(() => {
+    if (pauseTimeoutRef.current !== null) {
+      window.clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+    }
+    if (pauseCountdownRef.current !== null) {
+      window.clearInterval(pauseCountdownRef.current);
+      pauseCountdownRef.current = null;
+    }
+    setIsPausingForRepeat(false);
+    setPauseRemainingSec(0);
+  }, []);
 
   // Setup audio event handlers - only act if this audio is still the current one
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
@@ -310,7 +359,27 @@ export const useQuranAudio = ({
       const rs = repeatSettingsRef.current;
       const rc = currentRepeatCountRef.current;
       const { mode, count, rangeStart, rangeEnd } = rs;
-      const play = (v: number) => setTimeout(() => playVerseRef.current(v), 300);
+      const verseDurationMs = Number.isFinite(audio.duration) && audio.duration > 0
+        ? audio.duration * 1000
+        : 0;
+      const rp = repeatPauseRef.current;
+      const play = (v: number) => {
+        clearRepeatPauseTimers();
+        if (rp.enabled && verseDurationMs > 0) {
+          const waitMs = Math.max(500, verseDurationMs * rp.multiplier);
+          setIsPausingForRepeat(true);
+          setPauseRemainingSec(Math.ceil(waitMs / 1000));
+          pauseCountdownRef.current = window.setInterval(() => {
+            setPauseRemainingSec((s) => (s > 1 ? s - 1 : 0));
+          }, 1000);
+          pauseTimeoutRef.current = window.setTimeout(() => {
+            clearRepeatPauseTimers();
+            playVerseRef.current(v);
+          }, waitMs);
+        } else {
+          setTimeout(() => playVerseRef.current(v), 300);
+        }
+      };
 
       if (mode === 'verse') {
         const shouldRepeat = count === 0 || rc < count - 1;
@@ -381,6 +450,8 @@ export const useQuranAudio = ({
     
     return () => {
       stopSpeedEnforcer();
+      if (pauseTimeoutRef.current !== null) window.clearTimeout(pauseTimeoutRef.current);
+      if (pauseCountdownRef.current !== null) window.clearInterval(pauseCountdownRef.current);
       disposeManagedAudioElement(audio);
       if (audioRef.current === audio) audioRef.current = null;
     };
@@ -446,6 +517,7 @@ export const useQuranAudio = ({
   }, [startSpeedEnforcer, syncPlaybackSpeed]);
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
+    clearRepeatPauseTimers();
     setIsLoading(true);
     
     try {
@@ -481,7 +553,7 @@ export const useQuranAudio = ({
     } finally {
       setIsLoading(false);
     }
-  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed]);
+  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed, clearRepeatPauseTimers]);
 
   const playVerse = useCallback(async (verseNumber: number) => {
     await playVerseAt(surahNumber, verseNumber);
@@ -510,12 +582,13 @@ export const useQuranAudio = ({
   }, [currentVerse, playVerse, startSpeedEnforcer, syncPlaybackSpeed]);
 
   const pause = useCallback(() => {
+    clearRepeatPauseTimers();
     if (audioRef.current) {
       stopSpeedEnforcer();
       audioRef.current.pause();
       setIsPlaying(false);
     }
-  }, [stopSpeedEnforcer]);
+  }, [stopSpeedEnforcer, clearRepeatPauseTimers]);
 
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
@@ -526,6 +599,7 @@ export const useQuranAudio = ({
   }, [isPlaying, play, pause]);
 
   const nextVerse = useCallback(() => {
+    clearRepeatPauseTimers();
     if (currentVerse < totalVerses) {
       const next = currentVerse + 1;
       setCurrentVerse(next);
@@ -534,9 +608,10 @@ export const useQuranAudio = ({
         playVerse(next);
       }
     }
-  }, [currentVerse, totalVerses, isPlaying, playVerse, onVerseChange]);
+  }, [currentVerse, totalVerses, isPlaying, playVerse, onVerseChange, clearRepeatPauseTimers]);
 
   const previousVerse = useCallback(() => {
+    clearRepeatPauseTimers();
     if (currentVerse > 1) {
       const prev = currentVerse - 1;
       setCurrentVerse(prev);
@@ -545,7 +620,7 @@ export const useQuranAudio = ({
         playVerse(prev);
       }
     }
-  }, [currentVerse, isPlaying, playVerse, onVerseChange]);
+  }, [currentVerse, isPlaying, playVerse, onVerseChange, clearRepeatPauseTimers]);
 
   const goToVerse = useCallback((verseNumber: number) => {
     if (verseNumber >= 1 && verseNumber <= totalVerses) {
@@ -602,6 +677,29 @@ export const useQuranAudio = ({
     }
   }, [repeatSettings.mode, setRepeatMode]);
 
+  const setRepeatPauseSettings = useCallback(
+    (next: Partial<RepeatPauseSettings>) => {
+      _setRepeatPause((prev) => {
+        const merged: RepeatPauseSettings = {
+          enabled: next.enabled ?? prev.enabled,
+          multiplier: normalizeRepeatMultiplier(next.multiplier ?? prev.multiplier),
+        };
+        repeatPauseRef.current = merged;
+        saveRepeatPause(merged);
+        if (!merged.enabled) {
+          clearRepeatPauseTimers();
+        }
+        if (next.enabled === true && (prev.enabled === false)) {
+          toast.success('Pause de répétition activée');
+        } else if (next.enabled === false && prev.enabled === true) {
+          toast.info('Pause de répétition désactivée');
+        }
+        return merged;
+      });
+    },
+    [clearRepeatPauseTimers]
+  );
+
   return {
     isPlaying,
     isLoading,
@@ -612,6 +710,9 @@ export const useQuranAudio = ({
     repeatSettings,
     currentRepeatCount,
     playbackSpeed,
+    repeatPause,
+    isPausingForRepeat,
+    pauseRemainingSec,
     play,
     pause,
     togglePlayPause,
@@ -626,5 +727,6 @@ export const useQuranAudio = ({
     setRepeatMode,
     toggleRepeatVerse,
     changeSpeed,
+    setRepeatPauseSettings,
   };
 };
