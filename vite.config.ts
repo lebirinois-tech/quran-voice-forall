@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith("/assets/"),
+            urlPattern: ({ url }) => url.pathname.startsWith("/assets/"),
             handler: "CacheFirst",
             options: {
               cacheName: "quran-assets-cache",
