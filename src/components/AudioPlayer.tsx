@@ -1,7 +1,7 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge, Mic2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { ReciterId, RECITERS, RECITER_IDS, RepeatMode, RepeatSettings, getSafeReciter } from '@/hooks/useQuranAudio';
+import { ReciterId, RECITERS, RECITER_IDS, RepeatMode, RepeatSettings, RepeatPauseSettings, getSafeReciter } from '@/hooks/useQuranAudio';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import {
@@ -18,6 +18,7 @@ import {
 } from './ui/popover';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 interface AudioPlayerProps {
   isPlaying: boolean;
@@ -30,6 +31,9 @@ interface AudioPlayerProps {
   repeatSettings?: RepeatSettings;
   currentRepeatCount?: number;
   playbackSpeed?: number;
+  repeatPause?: RepeatPauseSettings;
+  isPausingForRepeat?: boolean;
+  pauseRemainingSec?: number;
   onPlay: () => void;
   onPause: () => void;
   onNext: () => void;
@@ -38,6 +42,7 @@ interface AudioPlayerProps {
   onSeek?: (percentage: number) => void;
   onRepeatModeChange?: (mode: RepeatMode, count: number, rangeStart?: number, rangeEnd?: number) => void;
   onSpeedChange?: (speed: number) => void;
+  onRepeatPauseChange?: (next: Partial<RepeatPauseSettings>) => void;
   surahName?: string;
   className?: string;
 }
@@ -53,6 +58,9 @@ export const AudioPlayer = ({
   repeatSettings = { mode: 'none', count: 1 },
   currentRepeatCount = 0,
   playbackSpeed = 1,
+  repeatPause = { enabled: false, multiplier: 1 },
+  isPausingForRepeat = false,
+  pauseRemainingSec = 0,
   onPlay,
   onPause,
   onNext,
@@ -61,6 +69,7 @@ export const AudioPlayer = ({
   onSeek,
   onRepeatModeChange,
   onSpeedChange,
+  onRepeatPauseChange,
   surahName,
   className,
 }: AudioPlayerProps) => {
