@@ -31,11 +31,9 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
         `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`,
       ];
     case 'qalun':
-      // Pages Qalun non publiées en source ouverte —
-      // fallback sur le Mushaf Warsh (même lecture de Nafi') jusqu'à disponibilité.
+      // Mushaf Qalun Tajweed coloré — hébergé sur Lovable Cloud (archive.org / qalooon-taj)
       return [
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
-        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
+        `https://kqhdyzpmfwsrldbmnebc.supabase.co/storage/v1/object/public/mushaf-pages/qalun-tajweed/${padded}.jpg`,
       ];
     case 'warsh':
     default:
