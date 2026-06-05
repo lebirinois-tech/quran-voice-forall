@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.thematic-tafsir]
 verify_jwt = false
+
+[functions.upload-qalun-pages]
+verify_jwt = false
