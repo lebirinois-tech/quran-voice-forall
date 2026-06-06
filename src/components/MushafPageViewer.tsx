@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Loader2, Image as ImageIcon, Type } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
-import { MushafPageRenderer } from './MushafPageRenderer';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun';
 
@@ -92,17 +91,6 @@ export const MushafPageViewer = ({
   );
   const prevSurahNumberRef = useRef(surahNumber);
   const currentVerseBtnRef = useRef<HTMLButtonElement | null>(null);
-  // View mode for Hafs: 'image' (Tajweed colored) or 'text' (QPC font + highlight)
-  const [hafsViewMode, setHafsViewMode] = useState<'image' | 'text'>(() => {
-    try { return (localStorage.getItem('hafs-view-mode') as any) || 'image'; } catch { return 'image'; }
-  });
-  const toggleHafsView = useCallback(() => {
-    setHafsViewMode((m) => {
-      const next = m === 'image' ? 'text' : 'image';
-      try { localStorage.setItem('hafs-view-mode', next); } catch {}
-      return next;
-    });
-  }, []);
 
   // Swipe handling
   const touchStartXRef = useRef<number | null>(null);
@@ -204,26 +192,9 @@ export const MushafPageViewer = ({
           {mushafType === 'warsh' && '📜 Mushaf Warsh (Médine)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
         </div>
-        <div className="flex items-center gap-2">
-          {mushafType === 'hafs' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleHafsView}
-              className="h-7 px-2 text-xs gap-1"
-              title={hafsViewMode === 'image' ? 'Passer au texte avec surbrillance' : 'Revenir au Tajweed coloré'}
-            >
-              {hafsViewMode === 'image' ? (
-                <><Type className="h-3 w-3" /> Surbrillance</>
-              ) : (
-                <><ImageIcon className="h-3 w-3" /> Tajweed</>
-              )}
-            </Button>
-          )}
-          <span className="text-sm font-medium text-foreground">
-            Page {currentPage} / 604
-          </span>
-        </div>
+        <span className="text-sm font-medium text-foreground">
+          Page {currentPage} / 604
+        </span>
       </div>
 
       {/* Currently playing verse indicator */}
@@ -249,15 +220,6 @@ export const MushafPageViewer = ({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-          {mushafType === 'hafs' && hafsViewMode === 'text' ? (
-            <MushafPageRenderer
-              page={currentPage}
-              surahNumber={surahNumber}
-              currentVerse={currentVerse}
-              isAudioPlaying={isAudioPlaying}
-              onVerseClick={onVerseClick}
-            />
-          ) : (
           <AspectRatio
             ratio={3 / 4}
             className={cn(
@@ -293,7 +255,6 @@ export const MushafPageViewer = ({
               />
             )}
           </AspectRatio>
-          )}
       </div>
 
       {/* Quick page navigation */}
@@ -348,8 +309,7 @@ export const MushafPageViewer = ({
       {/* Mushaf type indicator */}
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
         <p className="text-xs text-center text-muted-foreground">
-          {mushafType === 'hafs' && hafsViewMode === 'image' && '🎨 Hafs avec Tajweed coloré — édition Médine (KFGQPC). Bouton « Surbrillance » pour activer le suivi du verset.'}
-          {mushafType === 'hafs' && hafsViewMode === 'text' && '📖 Hafs — rendu officiel Quran.com (police QPC v2). Verset surligné pendant la lecture.'}
+          {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré — édition Médine (KFGQPC)'}
           {mushafType === 'warsh' && '📜 Warsh — édition Médine (KFGQPC, sans couleurs Tajweed)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed coloré — lecture de Nafi\'. Source : archive.org (qalooon-taj).'}
         </p>
