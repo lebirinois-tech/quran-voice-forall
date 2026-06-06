@@ -138,11 +138,14 @@ export const MushafPageViewer = ({
   // Auto-scroll the current verse button into view inside the strip
   useEffect(() => {
     if (currentVerseBtnRef.current) {
-      currentVerseBtnRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
+      const btn = currentVerseBtnRef.current;
+      const strip = btn.closest('[data-verse-strip]') as HTMLElement | null;
+      if (strip) {
+        // Scroll only horizontally inside the strip, without affecting the page
+        const target =
+          btn.offsetLeft - strip.clientWidth / 2 + btn.clientWidth / 2;
+        strip.scrollTo({ left: target, behavior: 'smooth' });
+      }
     }
   }, [currentVerse, isAudioPlaying]);
 
@@ -224,7 +227,7 @@ export const MushafPageViewer = ({
             ratio={3 / 4}
             className={cn(
               "rounded-xl overflow-hidden border border-border shadow-lg",
-              currentPage % 2 === 0 ? "bg-card" : "bg-muted/30",
+              "bg-[hsl(40,45%,92%)]",
               isAudioPlaying && "ring-2 ring-primary ring-offset-2 ring-offset-background"
             )}
           >
@@ -273,7 +276,10 @@ export const MushafPageViewer = ({
           <p className="text-[11px] text-muted-foreground mb-2 text-center">
             🎨 Versets de cette page colorés par thème (cliquez pour écouter)
           </p>
-          <div className="flex flex-wrap gap-1.5 justify-center">
+          <div
+            data-verse-strip
+            className="flex flex-nowrap gap-1.5 justify-start overflow-x-auto scroll-smooth py-1"
+          >
             {pageVerseNumbers.map((vn) => {
               const themes = getThemesForVerse(surahNumber, vn);
               const primary = themes[0];
