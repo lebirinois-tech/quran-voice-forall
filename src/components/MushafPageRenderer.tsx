@@ -35,8 +35,8 @@ const PAGE_CACHE_PREFIX = 'qpc-page-data-';
 const loadedFonts = new Set<number>();
 
 const FONT_CDNS = (page: number) => [
-  `https://cdn.jsdelivr.net/gh/quran/quran.com-frontend-next@main/public/fonts/quran/hafs/v2/woff2/p${page}.woff2`,
-  `https://raw.githubusercontent.com/quran/quran.com-frontend-next/main/public/fonts/quran/hafs/v2/woff2/p${page}.woff2`,
+  `https://cdn.jsdelivr.net/gh/quran/quran.com-frontend-next@production/public/fonts/quran/hafs/v2/woff2/p${page}.woff2`,
+  `https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v2/woff2/p${page}.woff2`,
 ];
 
 async function loadPageFont(page: number): Promise<void> {
