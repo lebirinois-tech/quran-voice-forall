@@ -440,6 +440,9 @@ const SurahReader = () => {
               totalVerses={verses.length || surah.versesCount}
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}
+              currentVerse={quranAudio.currentVerse}
+              isAudioPlaying={quranAudio.isPlaying}
+              pageVerseRange={currentPageVerseRange}
               mushafType={
                 appSettings.textDisplayStyle === 'mushaf-hafs'
                   ? 'hafs'
