@@ -616,9 +616,8 @@ const SurahReader = () => {
         />
       </div>
 
-      {/* Audio Player - hidden in Mushaf mode (MushafPageViewer has its own page audio) */}
-      {!isMushafMode && (
-        <AudioPlayer
+      {/* Audio Player — visible in all modes (verse-by-verse playback) */}
+      <AudioPlayer
           isPlaying={quranAudio.isPlaying}
           isLoading={quranAudio.isLoading}
           currentVerse={quranAudio.currentVerse}
@@ -642,8 +641,7 @@ const SurahReader = () => {
           pauseRemainingSec={quranAudio.pauseRemainingSec}
           onRepeatPauseChange={quranAudio.setRepeatPauseSettings}
           surahName={`${surah.name} - ${surah.nameArabic}`}
-        />
-      )}
+      />
     </div>
   );
 };
