@@ -204,6 +204,18 @@ const SurahReader = () => {
     return { first: pageVerses[0].number, last: pageVerses[pageVerses.length - 1].number };
   }, [isMushafMode, currentMushafPage, verses]);
 
+  // In Mushaf mode: when the user swipes to a new page while audio is playing,
+  // jump verse playback to that page's range.
+  useEffect(() => {
+    if (!isMushafMode || !currentPageVerseRange) return;
+    if (!quranAudio.isPlaying) return;
+    const { first, last } = currentPageVerseRange;
+    if (quranAudio.currentVerse >= first && quranAudio.currentVerse <= last) return;
+    quranAudio.playVerse(first);
+    quranAudio.setRepeatMode('range', 1, first, last);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPageVerseRange?.first, currentPageVerseRange?.last, isMushafMode]);
+
   const handlePlayRequest = useCallback(() => {
     if (isMushafMode && currentPageVerseRange) {
       quranAudio.playVerse(currentPageVerseRange.first);
@@ -616,9 +628,8 @@ const SurahReader = () => {
         />
       </div>
 
-      {/* Audio Player - hidden in Mushaf mode (MushafPageViewer has its own page audio) */}
-      {!isMushafMode && (
-        <AudioPlayer
+      {/* Audio Player — visible in all modes (verse-by-verse playback) */}
+      <AudioPlayer
           isPlaying={quranAudio.isPlaying}
           isLoading={quranAudio.isLoading}
           currentVerse={quranAudio.currentVerse}
@@ -642,8 +653,7 @@ const SurahReader = () => {
           pauseRemainingSec={quranAudio.pauseRemainingSec}
           onRepeatPauseChange={quranAudio.setRepeatPauseSettings}
           surahName={`${surah.name} - ${surah.nameArabic}`}
-        />
-      )}
+      />
     </div>
   );
 };
