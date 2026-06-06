@@ -13,6 +13,9 @@ interface MushafPageViewerProps {
   mushafType: MushafType;
   initialPage?: number;
   onPageChange?: (page: number) => void;
+  currentVerse?: number;
+  isAudioPlaying?: boolean;
+  pageVerseRange?: { first: number; last: number } | null;
 }
 
 const padPage3 = (n: number) => n.toString().padStart(3, '0');
@@ -57,6 +60,9 @@ export const MushafPageViewer = ({
   mushafType,
   initialPage,
   onPageChange,
+  currentVerse,
+  isAudioPlaying,
+  pageVerseRange,
 }: MushafPageViewerProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
   const { start: surahStartPage, end: surahEndPage } = useMemo(
@@ -174,6 +180,23 @@ export const MushafPageViewer = ({
         </span>
       </div>
 
+      {/* Currently playing verse indicator */}
+      {pageVerseRange && currentVerse && currentVerse >= pageVerseRange.first && currentVerse <= pageVerseRange.last && (
+        <div className={cn(
+          "mb-3 flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-all",
+          isAudioPlaying
+            ? "bg-primary/15 border-primary text-primary animate-pulse"
+            : "bg-muted/50 border-border text-foreground"
+        )}>
+          <span className="text-sm font-semibold">
+            🔊 Verset en cours : <span className="font-bold">{currentVerse}</span>
+            <span className="text-xs opacity-70 ml-2">
+              (page {pageVerseRange.first}–{pageVerseRange.last})
+            </span>
+          </span>
+        </div>
+      )}
+
       {/* Page viewer (swipe left/right to change page) */}
       <div
         className="relative touch-pan-y select-none"
@@ -184,7 +207,8 @@ export const MushafPageViewer = ({
             ratio={3 / 4}
             className={cn(
               "rounded-xl overflow-hidden border border-border shadow-lg",
-              currentPage % 2 === 0 ? "bg-card" : "bg-muted/30"
+              currentPage % 2 === 0 ? "bg-card" : "bg-muted/30",
+              isAudioPlaying && "ring-2 ring-primary ring-offset-2 ring-offset-background"
             )}
           >
             {isLoading && (
