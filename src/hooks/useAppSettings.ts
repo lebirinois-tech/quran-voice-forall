@@ -10,6 +10,19 @@ export type TextDisplayStyle =
   | 'mushaf-qalun';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 
+/**
+ * Récitateur par défaut pour chaque qira'a / mode d'affichage.
+ * Permet d'aligner automatiquement l'audio avec la lecture choisie.
+ */
+const STYLE_TO_RECITER: Record<TextDisplayStyle, ReciterId> = {
+  'tajweed': 'husary',
+  'mushaf-hafs': 'husary',
+  'warsh-tajweed': 'ibrahimDosaryWarsh',
+  'mushaf-warsh': 'ibrahimDosaryWarsh',
+  'qalun-tajweed': 'husaryQalunPerVerse',
+  'mushaf-qalun': 'husaryQalunPerVerse',
+};
+
 const STORAGE_KEYS = {
   RECITER: 'quran-reciter',
   BACKGROUND_COLOR: 'quran-background-color',
@@ -77,6 +90,12 @@ export const useAppSettings = () => {
   const handleTextDisplayStyleChange = useCallback((style: TextDisplayStyle) => {
     setTextDisplayStyle(style);
     localStorage.setItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE, style);
+    // Aligne automatiquement le récitateur avec la qira'a affichée
+    const matchingReciter = STYLE_TO_RECITER[style];
+    if (matchingReciter) {
+      setReciter(matchingReciter);
+      localStorage.setItem(STORAGE_KEYS.RECITER, matchingReciter);
+    }
   }, []);
 
   const handleFontSizeChange = useCallback((size: FontSize) => {
