@@ -90,6 +90,7 @@ export const MushafPageViewer = ({
     !!(initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage)
   );
   const prevSurahNumberRef = useRef(surahNumber);
+  const currentVerseBtnRef = useRef<HTMLButtonElement | null>(null);
 
   // Swipe handling
   const touchStartXRef = useRef<number | null>(null);
@@ -133,6 +134,17 @@ export const MushafPageViewer = ({
     setCurrentPage(newPage);
     onPageChange?.(newPage);
   }, [currentPage, onPageChange]);
+
+  // Auto-scroll the current verse button into view inside the strip
+  useEffect(() => {
+    if (currentVerseBtnRef.current) {
+      currentVerseBtnRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [currentVerse, isAudioPlaying]);
 
   // Note: in RTL Arabic reading, swiping LEFT advances to the next page,
   // swiping RIGHT goes back to the previous page (book opens right-to-left).
@@ -272,14 +284,19 @@ export const MushafPageViewer = ({
               return (
                 <button
                   key={vn}
+                  ref={isCurrent ? currentVerseBtnRef : undefined}
                   type="button"
                   onClick={() => onVerseClick?.(vn)}
                   title={primary ? `${primary.emoji} ${primary.labels.fr}` : `Verset ${vn}`}
                   className={cn(
                     "px-2.5 py-1 rounded-full text-xs font-semibold border-2 transition-all hover:scale-105",
-                    isCurrent && "ring-2 ring-offset-1 ring-offset-background animate-pulse"
+                    isCurrent && "scale-125 ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/50 animate-pulse font-bold z-10 relative"
                   )}
-                  style={{ backgroundColor: bg, borderColor: border, color: fg }}
+                  style={
+                    isCurrent
+                      ? { backgroundColor: `hsl(var(--primary) / 0.25)`, borderColor: `hsl(var(--primary))`, color: `hsl(var(--primary))` }
+                      : { backgroundColor: bg, borderColor: border, color: fg }
+                  }
                 >
                   {primary?.emoji ?? ''} {vn}
                 </button>
