@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
+import { getThemesForVerse } from '@/data/quranThemes';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun';
 
@@ -16,6 +17,8 @@ interface MushafPageViewerProps {
   currentVerse?: number;
   isAudioPlaying?: boolean;
   pageVerseRange?: { first: number; last: number } | null;
+  pageVerseNumbers?: number[];
+  onVerseClick?: (verseNumber: number) => void;
 }
 
 const padPage3 = (n: number) => n.toString().padStart(3, '0');
@@ -63,6 +66,8 @@ export const MushafPageViewer = ({
   currentVerse,
   isAudioPlaying,
   pageVerseRange,
+  pageVerseNumbers,
+  onVerseClick,
 }: MushafPageViewerProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
   const { start: surahStartPage, end: surahEndPage } = useMemo(
@@ -249,6 +254,40 @@ export const MushafPageViewer = ({
           Sourate {surah?.name} : Pages {surahStartPage} - {surahEndPage}
         </span>
       </div>
+
+      {/* Themed verse strip — shows each verse on this page with its theme color */}
+      {pageVerseNumbers && pageVerseNumbers.length > 0 && (
+        <div className="mt-4 p-3 bg-card/60 rounded-lg border border-border/60">
+          <p className="text-[11px] text-muted-foreground mb-2 text-center">
+            🎨 Versets de cette page colorés par thème (cliquez pour écouter)
+          </p>
+          <div className="flex flex-wrap gap-1.5 justify-center">
+            {pageVerseNumbers.map((vn) => {
+              const themes = getThemesForVerse(surahNumber, vn);
+              const primary = themes[0];
+              const isCurrent = currentVerse === vn;
+              const bg = primary ? `hsl(${primary.hsl} / 0.20)` : 'hsl(var(--muted))';
+              const border = primary ? `hsl(${primary.hsl})` : 'hsl(var(--border))';
+              const fg = primary ? `hsl(${primary.hsl})` : 'hsl(var(--foreground))';
+              return (
+                <button
+                  key={vn}
+                  type="button"
+                  onClick={() => onVerseClick?.(vn)}
+                  title={primary ? `${primary.emoji} ${primary.labels.fr}` : `Verset ${vn}`}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-xs font-semibold border-2 transition-all hover:scale-105",
+                    isCurrent && "ring-2 ring-offset-1 ring-offset-background animate-pulse"
+                  )}
+                  style={{ backgroundColor: bg, borderColor: border, color: fg }}
+                >
+                  {primary?.emoji ?? ''} {vn}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Mushaf type indicator */}
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">

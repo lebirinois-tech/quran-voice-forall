@@ -443,6 +443,12 @@ const SurahReader = () => {
               currentVerse={quranAudio.currentVerse}
               isAudioPlaying={quranAudio.isPlaying}
               pageVerseRange={currentPageVerseRange}
+              pageVerseNumbers={
+                currentMushafPage
+                  ? verses.filter(v => v.page === currentMushafPage).map(v => v.number)
+                  : []
+              }
+              onVerseClick={(vn) => quranAudio.playVerse(vn)}
               mushafType={
                 appSettings.textDisplayStyle === 'mushaf-hafs'
                   ? 'hafs'
