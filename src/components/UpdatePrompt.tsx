@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { registerSW } from 'virtual:pwa-register';
 
 async function clearAppShellServiceWorkers(options: { includeGeneratedSw?: boolean } = {}) {
   if (!("serviceWorker" in navigator)) return 0;
@@ -84,23 +83,16 @@ export const UpdatePrompt = () => {
       return;
     }
 
-    const updateSW = registerSW({
-      immediate: true,
-      onNeedRefresh() {
-        window.dispatchEvent(new CustomEvent('quran-app-update-ready', { detail: { update: () => updateSW(true) } }));
-        toast.info('Nouvelle version disponible', {
+    void clearAppShellServiceWorkers({ includeGeneratedSw: true }).then((removed) => {
+      if (removed > 0 && !sessionStorage.getItem('quran-sw-cleaned')) {
+        sessionStorage.setItem('quran-sw-cleaned', '1');
+        toast.info('Nouvelle version récupérée', {
           action: {
-            label: 'Mettre à jour',
-            onClick: () => void updateSW(true),
+            label: 'Recharger',
+            onClick: () => window.location.reload(),
           },
         });
-      },
-      onOfflineReady() {
-        toast.success('Application prête pour l’installation ✅');
-      },
-      onRegisterError(error) {
-        console.error('PWA registration error:', error);
-      },
+      }
     });
   }, []);
 
