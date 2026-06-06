@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
+import { getThemesForVerse } from '@/data/quranThemes';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun';
 
@@ -16,6 +17,8 @@ interface MushafPageViewerProps {
   currentVerse?: number;
   isAudioPlaying?: boolean;
   pageVerseRange?: { first: number; last: number } | null;
+  pageVerseNumbers?: number[];
+  onVerseClick?: (verseNumber: number) => void;
 }
 
 const padPage3 = (n: number) => n.toString().padStart(3, '0');
@@ -63,6 +66,8 @@ export const MushafPageViewer = ({
   currentVerse,
   isAudioPlaying,
   pageVerseRange,
+  pageVerseNumbers,
+  onVerseClick,
 }: MushafPageViewerProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
   const { start: surahStartPage, end: surahEndPage } = useMemo(
