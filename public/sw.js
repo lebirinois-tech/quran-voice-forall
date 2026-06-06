@@ -2,7 +2,8 @@ function isQuranAppCache(name) {
   return (
     name === "quran-navigation-cache" ||
     name === "quran-assets-cache" ||
-    /(^|-)precache-v\d+-|(^|-)runtime-|(^|-)googleAnalytics-/.test(name)
+    (/(^|-)precache-v\d+-|(^|-)runtime-|(^|-)googleAnalytics-/.test(name) &&
+      name.endsWith(self.registration.scope))
   );
 }
 
