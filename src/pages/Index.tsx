@@ -179,6 +179,43 @@ const Index = () => {
           </p>
         </section>
 
+        {/* Mode de lecture : Versets / Pages */}
+        <section className="mb-6 max-w-md mx-auto animate-fade-in">
+          <div className="bg-card border border-border rounded-xl p-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() => appSettings.onTextDisplayStyleChange('tajweed')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
+                appSettings.textDisplayStyle.startsWith('mushaf-')
+                  ? 'text-muted-foreground hover:bg-muted'
+                  : 'bg-primary text-primary-foreground shadow'
+              )}
+              aria-pressed={!appSettings.textDisplayStyle.startsWith('mushaf-')}
+            >
+              <FileText className="h-4 w-4" />
+              <span>Versets <span className="opacity-70 text-xs">/ آيات</span></span>
+            </button>
+            <button
+              type="button"
+              onClick={() => appSettings.onTextDisplayStyleChange('mushaf-hafs')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
+                appSettings.textDisplayStyle.startsWith('mushaf-')
+                  ? 'bg-primary text-primary-foreground shadow'
+                  : 'text-muted-foreground hover:bg-muted'
+              )}
+              aria-pressed={appSettings.textDisplayStyle.startsWith('mushaf-')}
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>Pages <span className="opacity-70 text-xs">/ صفحات</span></span>
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Choisissez le mode d'affichage par défaut
+          </p>
+        </section>
+
         {/* Voice Command Section */}
         <section className="mb-8 flex flex-col items-center gap-4 animate-scale-in">
           <VoiceCommandButton
