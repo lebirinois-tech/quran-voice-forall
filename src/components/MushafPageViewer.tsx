@@ -249,6 +249,7 @@ export const MushafPageViewer = ({
                 alt={`Page ${currentPage} - ${mushafType}`}
                 className={cn(
                   "w-full h-full object-contain transition-opacity duration-300",
+                  "mix-blend-multiply",
                   isLoading ? "opacity-0" : "opacity-100"
                 )}
                 referrerPolicy="no-referrer"
