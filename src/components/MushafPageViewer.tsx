@@ -5,6 +5,7 @@ import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
+import { MushafPageRenderer } from './MushafPageRenderer';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun';
 
@@ -220,6 +221,15 @@ export const MushafPageViewer = ({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
+          {mushafType === 'hafs' ? (
+            <MushafPageRenderer
+              page={currentPage}
+              surahNumber={surahNumber}
+              currentVerse={currentVerse}
+              isAudioPlaying={isAudioPlaying}
+              onVerseClick={onVerseClick}
+            />
+          ) : (
           <AspectRatio
             ratio={3 / 4}
             className={cn(
@@ -255,6 +265,7 @@ export const MushafPageViewer = ({
               />
             )}
           </AspectRatio>
+          )}
       </div>
 
       {/* Quick page navigation */}
@@ -309,7 +320,7 @@ export const MushafPageViewer = ({
       {/* Mushaf type indicator */}
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
         <p className="text-xs text-center text-muted-foreground">
-          {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré — édition Médine (KFGQPC)'}
+          {mushafType === 'hafs' && '📖 Hafs — rendu officiel Quran.com (police QPC v2). Verset surligné pendant la lecture.'}
           {mushafType === 'warsh' && '📜 Warsh — édition Médine (KFGQPC, sans couleurs Tajweed)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed coloré — lecture de Nafi\'. Source : archive.org (qalooon-taj).'}
         </p>
