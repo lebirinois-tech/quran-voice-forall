@@ -16,7 +16,9 @@ export type QiraatId = keyof typeof QIRAAT_LABELS;
 export const RECITER_IDS = [
   'husary',
   'ibrahimDosaryWarsh',
+  'husaryWarshPerVerse',
   'husaryQalunPerVerse',
+  'ahmadKhedrQalunPerVerse',
 ] as const;
 
 export type ReciterId = (typeof RECITER_IDS)[number];
@@ -36,6 +38,11 @@ export interface ReciterInfo {
    * URL pattern: `https://archive.org/download/{archiveItem}/{SSS}.zip/{SSSAAA}.mp3`.
    */
   archiveItem?: string;
+  /**
+   * Zero-padding width for the surah-zip filename inside `archiveItem`.
+   * Default is 3 (e.g. `001.zip`). Some archives use 2 (e.g. `01.zip`).
+   */
+  archiveZipPad?: 2 | 3;
 }
 
 export const RECITERS: Record<ReciterId, ReciterInfo> = {
@@ -49,6 +56,16 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
 
+  husaryWarshPerVerse: {
+    id: 'husary_warsh_per_verse',
+    name: 'Al-Husary (Warsh – verset par verset)',
+    nameAr: 'محمود خليل الحصري (ورش – آية آية)',
+    qiraat: 'warsh',
+    archiveItem:
+      '64kb---ayat--alhosary---warsh---full-quran---mp3-----verse--by--verse---6236--',
+    archiveZipPad: 2,
+  },
+
   // ═══════════════════════════════════════════════════════════════════════════
   // QALUN (قالون عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -59,6 +76,15 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     qiraat: 'qalun',
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
+  },
+  ahmadKhedrQalunPerVerse: {
+    id: 'ahmad_khedr_qalun_per_verse',
+    name: 'Ahmad Khedr Al-Trabolsy (Qalun – verset par verset)',
+    nameAr: 'أحمد خضر الطرابلسي (قالون – آية آية)',
+    qiraat: 'qalun',
+    archiveItem:
+      '128kb--quran--ahmad--khedr--altrabolsy---by---qaloon-----6236---ayaat-----__ve',
+    archiveZipPad: 2,
   },
 };
 
@@ -476,7 +502,8 @@ export const useQuranAudio = ({
       return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
     }
     if (info?.archiveItem) {
-      return `https://archive.org/download/${info.archiveItem}/${surahStr}.zip/${surahStr}${verseStr}.mp3`;
+      const zipName = (info.archiveZipPad === 2 ? surah.toString().padStart(2, '0') : surahStr);
+      return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;
     }
     const folder = EVERYAYAH_FOLDERS[reciterId];
     if (folder) {
