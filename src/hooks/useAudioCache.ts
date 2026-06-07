@@ -141,8 +141,11 @@ export const useAudioCache = () => {
       } else if (reciterInfo.archiveItem) {
         // archive.org per-verse inside a ZIP per surah
         const surahStr = formatNum(surahNumber);
+        const zipName = reciterInfo.archiveZipPad === 2
+          ? surahNumber.toString().padStart(2, '0')
+          : surahStr;
         for (let v = 1; v <= totalVerses; v++) {
-          const url = `https://archive.org/download/${reciterInfo.archiveItem}/${surahStr}.zip/${surahStr}${formatNum(v)}.mp3`;
+          const url = `https://archive.org/download/${reciterInfo.archiveItem}/${zipName}.zip/${surahStr}${formatNum(v)}.mp3`;
           const ok = await putInRuntimeCache(url);
           ok ? okCount++ : failCount++;
           saveAudioUrl(reciterId, surahNumber, v, url);
