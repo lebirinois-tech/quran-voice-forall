@@ -23,6 +23,23 @@ interface MushafPageViewerProps {
 
 const padPage3 = (n: number) => n.toString().padStart(3, '0');
 
+// Archive.org scanned Mushafs (own pagination, NOT the standard 604 pages)
+const ARCHIVE_SOURCES = {
+  warsh: {
+    id: 'Warsh_Azraq',
+    totalPages: 609,
+    label: '📜 Warsh (Azraq) — Tajweed coloré, archive.org',
+  },
+  qalun: {
+    id: 'moshaf-tajwed-qaloun',
+    totalPages: 601,
+    label: '📗 Qalun — Tajweed coloré (Dar Al-Ma\'rifa), archive.org',
+  },
+} as const;
+
+const getArchivePageUrl = (id: string, page: number) =>
+  `https://archive.org/download/${id}/page/n${page - 1}_w1200.jpg`;
+
 const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   const padded = padPage3(page);
   switch (mushafType) {
@@ -34,17 +51,12 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
         `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`,
       ];
     case 'qalun':
-      // Mushaf Qalun Tajweed coloré — hébergé sur Lovable Cloud (archive.org / qalooon-taj)
-      return [
-        `https://kqhdyzpmfwsrldbmnebc.supabase.co/storage/v1/object/public/mushaf-pages/qalun-tajweed/${padded}.jpg`,
-      ];
+      // Mushaf Qalun Tajweed coloré — scans directs archive.org (moshaf-tajwed-qaloun)
+      return [getArchivePageUrl(ARCHIVE_SOURCES.qalun.id, page)];
     case 'warsh':
     default:
-      // Mushaf Warsh édition Médine (KFGQPC)
-      return [
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/warsh/${page}.jpg`,
-        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/kfgqpc/warsh/${page}.jpg`,
-      ];
+      // Mushaf Warsh Tajweed coloré (Azraq) — scans directs archive.org
+      return [getArchivePageUrl(ARCHIVE_SOURCES.warsh.id, page)];
   }
 };
 
@@ -70,11 +82,17 @@ export const MushafPageViewer = ({
   onVerseClick,
 }: MushafPageViewerProps) => {
   const surah = surahs.find(s => s.number === surahNumber);
+  // Archive-mode Mushafs (Warsh/Qalun) use their own scanned pagination (1..N),
+  // independent of the 604-page Madina standard. Hafs keeps the standard mapping.
+  const isArchiveMode = mushafType === 'warsh' || mushafType === 'qalun';
+  const archive = isArchiveMode ? ARCHIVE_SOURCES[mushafType] : null;
+
   const { start: surahStartPage, end: surahEndPage } = useMemo(
-    () => getSurahPages(surahNumber),
-    [surahNumber]
+    () => (isArchiveMode ? { start: 1, end: archive!.totalPages } : getSurahPages(surahNumber)),
+    [surahNumber, isArchiveMode, archive]
   );
-  
+  const maxPage = isArchiveMode ? archive!.totalPages : 604;
+
   const [currentPage, setCurrentPage] = useState(
     initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage
       ? initialPage
@@ -129,11 +147,11 @@ export const MushafPageViewer = ({
   }, [currentPage, mushafType]);
 
   const goToPage = useCallback((newPage: number) => {
-    if (newPage < 1 || newPage > 604 || newPage === currentPage) return;
+    if (newPage < 1 || newPage > maxPage || newPage === currentPage) return;
     hasManuallyNavigatedRef.current = true;
     setCurrentPage(newPage);
     onPageChange?.(newPage);
-  }, [currentPage, onPageChange]);
+  }, [currentPage, onPageChange, maxPage]);
 
   // Auto-scroll the current verse button into view inside the strip
   useEffect(() => {
@@ -192,16 +210,16 @@ export const MushafPageViewer = ({
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="text-sm text-muted-foreground">
           {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
-          {mushafType === 'warsh' && '📜 Mushaf Warsh (Médine)'}
+          {mushafType === 'warsh' && '📜 Mushaf Warsh Tajweed (Azraq)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
         </div>
         <span className="text-sm font-medium text-foreground">
-          Page {currentPage} / 604
+          Page {currentPage} / {maxPage}
         </span>
       </div>
 
-      {/* Currently playing verse indicator */}
-      {pageVerseRange && currentVerse && currentVerse >= pageVerseRange.first && currentVerse <= pageVerseRange.last && (
+      {/* Currently playing verse indicator — only meaningful for standard 604-page mapping (Hafs) */}
+      {!isArchiveMode && pageVerseRange && currentVerse && currentVerse >= pageVerseRange.first && currentVerse <= pageVerseRange.last && (
         <div className={cn(
           "mb-3 flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-all",
           isAudioPlaying
@@ -266,13 +284,31 @@ export const MushafPageViewer = ({
         <span className="text-xs text-muted-foreground">
           ← Glissez vers la gauche/droite pour changer de page →
         </span>
-        <span className="text-xs text-muted-foreground">
-          Sourate {surah?.name} : Pages {surahStartPage} - {surahEndPage}
-        </span>
+        {!isArchiveMode && (
+          <span className="text-xs text-muted-foreground">
+            Sourate {surah?.name} : Pages {surahStartPage} - {surahEndPage}
+          </span>
+        )}
       </div>
 
-      {/* Themed verse strip — shows each verse on this page with its theme color */}
-      {pageVerseNumbers && pageVerseNumbers.length > 0 && (
+      {/* In archive mode the scanned pagination doesn't match the 604-page mapping,
+          so we offer a single "play whole surah" button instead of the verse strip. */}
+      {isArchiveMode && onVerseClick && (
+        <div className="mt-4 flex justify-center">
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => onVerseClick(1)}
+            className="gap-2"
+          >
+            ▶️ Écouter la sourate {surah?.name} en entier
+          </Button>
+        </div>
+      )}
+
+      {/* Themed verse strip — shows each verse on this page with its theme color (Hafs only) */}
+      {!isArchiveMode && pageVerseNumbers && pageVerseNumbers.length > 0 && (
         <div className="mt-4 p-3 bg-card/60 rounded-lg border border-border/60">
           <p className="text-[11px] text-muted-foreground mb-2 text-center">
             🎨 Versets de cette page colorés par thème (cliquez pour écouter)
@@ -317,8 +353,8 @@ export const MushafPageViewer = ({
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
         <p className="text-xs text-center text-muted-foreground">
           {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré — édition Médine (KFGQPC)'}
-          {mushafType === 'warsh' && '📜 Warsh — édition Médine (KFGQPC, sans couleurs Tajweed)'}
-          {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed coloré — lecture de Nafi\'. Source : archive.org (qalooon-taj).'}
+          {mushafType === 'warsh' && '📜 Warsh Tajweed coloré (Azraq) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
+          {mushafType === 'qalun' && '📗 Qalun Tajweed coloré (Dar Al-Ma\'rifa) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
         </p>
       </div>
     </div>
