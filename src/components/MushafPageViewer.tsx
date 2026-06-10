@@ -254,16 +254,50 @@ export const MushafPageViewer = ({
         onTouchEnd={onTouchEnd}
       >
         {isVideoMode ? (
-          <AspectRatio ratio={3 / 4} className="rounded-xl overflow-hidden border border-border shadow-lg bg-black">
-            <video
-              key={currentPage}
-              src={`https://archive.org/download/508_202gggggggg/${padPage3(currentPage)}.mp4`}
-              controls
-              playsInline
-              preload="metadata"
-              className="w-full h-full object-contain bg-black"
-            />
-          </AspectRatio>
+          <>
+            <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={loopPage ? 'default' : 'outline'}
+                onClick={() => setLoopPage(v => !v)}
+              >
+                🔁 Répéter la page {loopPage ? '(activé)' : ''}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage <= 1}
+              >
+                ◀️ Page préc.
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage >= maxPage}
+              >
+                Page suiv. ▶️
+              </Button>
+            </div>
+            <AspectRatio ratio={3 / 4} className="rounded-xl overflow-hidden border border-border shadow-lg bg-black">
+              <video
+                key={`${mushafType}-${currentPage}`}
+                src={`https://archive.org/download/${videoSource!.id}/${padPage3(currentPage)}.mp4`}
+                controls
+                playsInline
+                preload="metadata"
+                loop={loopPage}
+                onEnded={() => {
+                  if (!loopPage && currentPage < maxPage) goToPage(currentPage + 1);
+                }}
+                className="w-full h-full object-contain bg-black"
+              />
+            </AspectRatio>
+          </>
         ) : (
           <AspectRatio
             ratio={3 / 4}
