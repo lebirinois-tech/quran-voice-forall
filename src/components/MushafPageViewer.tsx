@@ -222,6 +222,8 @@ export const MushafPageViewer = ({
           {mushafType === 'warsh' && '📜 Mushaf Warsh Tajweed (Azraq)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
           {mushafType === 'hafs-video' && '🎬 Mushaf Hafs vidéo'}
+          {mushafType === 'warsh-video' && '🎬 Mushaf Warsh vidéo'}
+          {mushafType === 'qalun-video' && '🎬 Mushaf Qalun vidéo'}
         </div>
         <span className="text-sm font-medium text-foreground">
           Page {currentPage} / {maxPage}
