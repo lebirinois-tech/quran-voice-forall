@@ -7,7 +7,8 @@ export type TextDisplayStyle =
   | 'qalun-tajweed'
   | 'mushaf-hafs'
   | 'mushaf-warsh'
-  | 'mushaf-qalun';
+  | 'mushaf-qalun'
+  | 'mushaf-hafs-video';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 /**
@@ -17,6 +18,7 @@ export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 const STYLE_TO_RECITER: Record<TextDisplayStyle, ReciterId> = {
   'tajweed': 'husary',
   'mushaf-hafs': 'husary',
+  'mushaf-hafs-video': 'husary',
   'warsh-tajweed': 'ibrahimDosaryWarsh',
   'mushaf-warsh': 'ibrahimDosaryWarsh',
   'qalun-tajweed': 'husaryQalunPerVerse',
@@ -54,6 +56,7 @@ export const useAppSettings = () => {
       'mushaf-hafs',
       'mushaf-warsh',
       'mushaf-qalun',
+      'mushaf-hafs-video',
     ];
     const MIGRATIONS: Record<string, TextDisplayStyle> = {
       simple: 'tajweed',

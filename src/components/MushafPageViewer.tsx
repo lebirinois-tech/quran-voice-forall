@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
 
-type MushafType = 'hafs' | 'warsh' | 'qalun';
+type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video';
 
 interface MushafPageViewerProps {
   surahNumber: number;
@@ -86,6 +86,7 @@ export const MushafPageViewer = ({
   // independent of the 604-page Madina standard. Hafs keeps the standard mapping.
   const isArchiveMode = mushafType === 'warsh' || mushafType === 'qalun';
   const archive = isArchiveMode ? ARCHIVE_SOURCES[mushafType] : null;
+  const isVideoMode = mushafType === 'hafs-video';
 
   const { start: surahStartPage, end: surahEndPage } = useMemo(
     () => (isArchiveMode ? { start: 1, end: archive!.totalPages } : getSurahPages(surahNumber)),
@@ -212,6 +213,7 @@ export const MushafPageViewer = ({
           {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
           {mushafType === 'warsh' && '📜 Mushaf Warsh Tajweed (Azraq)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
+          {mushafType === 'hafs-video' && '🎬 Mushaf Hafs vidéo'}
         </div>
         <span className="text-sm font-medium text-foreground">
           Page {currentPage} / {maxPage}
@@ -241,6 +243,18 @@ export const MushafPageViewer = ({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
+        {isVideoMode ? (
+          <AspectRatio ratio={3 / 4} className="rounded-xl overflow-hidden border border-border shadow-lg bg-black">
+            <video
+              key={currentPage}
+              src={`https://archive.org/download/508_202gggggggg/${padPage3(currentPage)}.mp4`}
+              controls
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-contain bg-black"
+            />
+          </AspectRatio>
+        ) : (
           <AspectRatio
             ratio={3 / 4}
             className={cn(
@@ -277,6 +291,7 @@ export const MushafPageViewer = ({
               />
             )}
           </AspectRatio>
+        )}
       </div>
 
       {/* Quick page navigation */}
@@ -355,6 +370,7 @@ export const MushafPageViewer = ({
           {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré — édition Médine (KFGQPC)'}
           {mushafType === 'warsh' && '📜 Warsh Tajweed coloré (Azraq) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
           {mushafType === 'qalun' && '📗 Qalun Tajweed coloré (Dar Al-Ma\'rifa) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
+        {mushafType === 'hafs-video' && '🎬 Vidéo Hafs page par page (604 pages, audio inclus) — source : archive.org. Utilisez les contrôles vidéo pour la lecture.'}
         </p>
       </div>
     </div>

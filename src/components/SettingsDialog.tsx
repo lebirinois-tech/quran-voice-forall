@@ -72,6 +72,12 @@ const TEXT_DISPLAY_STYLES = [
     description: 'Pages Qalun — rendu Warsh en attendant une source publique',
     icon: '📗'
   },
+  {
+    id: 'mushaf-hafs-video' as TextDisplayStyle,
+    name: 'Mushaf Hafs vidéo / مصحف حفص فيديو',
+    description: 'Vidéo page par page (604 pages, son inclus) — archive.org',
+    icon: '🎬'
+  },
 ];
 
 const FONT_SIZES = [
