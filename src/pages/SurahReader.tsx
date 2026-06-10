@@ -422,7 +422,8 @@ const SurahReader = () => {
           {surah.number !== 1 && surah.number !== 9 &&
            appSettings.textDisplayStyle !== 'mushaf-hafs' &&
            appSettings.textDisplayStyle !== 'mushaf-warsh' &&
-           appSettings.textDisplayStyle !== 'mushaf-qalun' && (
+           appSettings.textDisplayStyle !== 'mushaf-qalun' &&
+           appSettings.textDisplayStyle !== 'mushaf-hafs-video' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -455,7 +456,9 @@ const SurahReader = () => {
                   ? 'hafs'
                   : appSettings.textDisplayStyle === 'mushaf-qalun'
                     ? 'qalun'
-                    : 'warsh'
+                    : appSettings.textDisplayStyle === 'mushaf-warsh'
+                      ? 'warsh'
+                      : 'hafs-video'
               }
             />
           )}
