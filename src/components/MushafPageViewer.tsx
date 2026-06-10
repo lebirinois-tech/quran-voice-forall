@@ -415,6 +415,8 @@ export const MushafPageViewer = ({
           {mushafType === 'warsh' && '📜 Warsh Tajweed coloré (Azraq) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
           {mushafType === 'qalun' && '📗 Qalun Tajweed coloré (Dar Al-Ma\'rifa) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
         {mushafType === 'hafs-video' && '🎬 Vidéo Hafs page par page (604 pages, audio inclus) — source : archive.org. Utilisez les contrôles vidéo pour la lecture.'}
+        {mushafType === 'warsh-video' && '🎬 Vidéo Warsh page par page (604 pages, audio inclus) — source : archive.org.'}
+        {mushafType === 'qalun-video' && '🎬 Vidéo Qalun page par page (604 pages, audio inclus) — source : archive.org.'}
         </p>
       </div>
     </div>
