@@ -6,7 +6,13 @@ import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
 
-type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video';
+type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
+
+const VIDEO_SOURCES: Record<'hafs-video' | 'warsh-video' | 'qalun-video', { id: string; label: string }> = {
+  'hafs-video': { id: '508_202gggggggg', label: '🎬 Mushaf Hafs vidéo' },
+  'warsh-video': { id: '228_2025ssssssss', label: '🎬 Mushaf Warsh vidéo' },
+  'qalun-video': { id: 'x241120cccccccccc', label: '🎬 Mushaf Qalun vidéo' },
+};
 
 interface MushafPageViewerProps {
   surahNumber: number;
@@ -86,7 +92,9 @@ export const MushafPageViewer = ({
   // independent of the 604-page Madina standard. Hafs keeps the standard mapping.
   const isArchiveMode = mushafType === 'warsh' || mushafType === 'qalun';
   const archive = isArchiveMode ? ARCHIVE_SOURCES[mushafType] : null;
-  const isVideoMode = mushafType === 'hafs-video';
+  const isVideoMode = mushafType === 'hafs-video' || mushafType === 'warsh-video' || mushafType === 'qalun-video';
+  const videoSource = isVideoMode ? VIDEO_SOURCES[mushafType as keyof typeof VIDEO_SOURCES] : null;
+  const [loopPage, setLoopPage] = useState(false);
 
   const { start: surahStartPage, end: surahEndPage } = useMemo(
     () => (isArchiveMode ? { start: 1, end: archive!.totalPages } : getSurahPages(surahNumber)),
@@ -214,6 +222,8 @@ export const MushafPageViewer = ({
           {mushafType === 'warsh' && '📜 Mushaf Warsh Tajweed (Azraq)'}
           {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
           {mushafType === 'hafs-video' && '🎬 Mushaf Hafs vidéo'}
+          {mushafType === 'warsh-video' && '🎬 Mushaf Warsh vidéo'}
+          {mushafType === 'qalun-video' && '🎬 Mushaf Qalun vidéo'}
         </div>
         <span className="text-sm font-medium text-foreground">
           Page {currentPage} / {maxPage}
@@ -244,16 +254,50 @@ export const MushafPageViewer = ({
         onTouchEnd={onTouchEnd}
       >
         {isVideoMode ? (
-          <AspectRatio ratio={3 / 4} className="rounded-xl overflow-hidden border border-border shadow-lg bg-black">
-            <video
-              key={currentPage}
-              src={`https://archive.org/download/508_202gggggggg/${padPage3(currentPage)}.mp4`}
-              controls
-              playsInline
-              preload="metadata"
-              className="w-full h-full object-contain bg-black"
-            />
-          </AspectRatio>
+          <>
+            <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={loopPage ? 'default' : 'outline'}
+                onClick={() => setLoopPage(v => !v)}
+              >
+                🔁 Répéter la page {loopPage ? '(activé)' : ''}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage <= 1}
+              >
+                ◀️ Page préc.
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage >= maxPage}
+              >
+                Page suiv. ▶️
+              </Button>
+            </div>
+            <AspectRatio ratio={3 / 4} className="rounded-xl overflow-hidden border border-border shadow-lg bg-black">
+              <video
+                key={`${mushafType}-${currentPage}`}
+                src={`https://archive.org/download/${videoSource!.id}/${padPage3(currentPage)}.mp4`}
+                controls
+                playsInline
+                preload="metadata"
+                loop={loopPage}
+                onEnded={() => {
+                  if (!loopPage && currentPage < maxPage) goToPage(currentPage + 1);
+                }}
+                className="w-full h-full object-contain bg-black"
+              />
+            </AspectRatio>
+          </>
         ) : (
           <AspectRatio
             ratio={3 / 4}
@@ -371,6 +415,8 @@ export const MushafPageViewer = ({
           {mushafType === 'warsh' && '📜 Warsh Tajweed coloré (Azraq) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
           {mushafType === 'qalun' && '📗 Qalun Tajweed coloré (Dar Al-Ma\'rifa) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
         {mushafType === 'hafs-video' && '🎬 Vidéo Hafs page par page (604 pages, audio inclus) — source : archive.org. Utilisez les contrôles vidéo pour la lecture.'}
+        {mushafType === 'warsh-video' && '🎬 Vidéo Warsh page par page (604 pages, audio inclus) — source : archive.org.'}
+        {mushafType === 'qalun-video' && '🎬 Vidéo Qalun page par page (604 pages, audio inclus) — source : archive.org.'}
         </p>
       </div>
     </div>

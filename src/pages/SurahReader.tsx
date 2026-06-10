@@ -86,7 +86,9 @@ const SurahReader = () => {
     appSettings.textDisplayStyle === 'mushaf-hafs' ||
     appSettings.textDisplayStyle === 'mushaf-warsh' ||
     appSettings.textDisplayStyle === 'mushaf-qalun' ||
-    appSettings.textDisplayStyle === 'mushaf-hafs-video';
+    appSettings.textDisplayStyle === 'mushaf-hafs-video' ||
+    appSettings.textDisplayStyle === 'mushaf-warsh-video' ||
+    appSettings.textDisplayStyle === 'mushaf-qalun-video';
   const isLoadingTextSource =
     (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
     (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
@@ -423,7 +425,9 @@ const SurahReader = () => {
            appSettings.textDisplayStyle !== 'mushaf-hafs' &&
            appSettings.textDisplayStyle !== 'mushaf-warsh' &&
            appSettings.textDisplayStyle !== 'mushaf-qalun' &&
-           appSettings.textDisplayStyle !== 'mushaf-hafs-video' && (
+           appSettings.textDisplayStyle !== 'mushaf-hafs-video' &&
+           appSettings.textDisplayStyle !== 'mushaf-warsh-video' &&
+           appSettings.textDisplayStyle !== 'mushaf-qalun-video' && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -458,7 +462,11 @@ const SurahReader = () => {
                     ? 'qalun'
                     : appSettings.textDisplayStyle === 'mushaf-warsh'
                       ? 'warsh'
-                      : 'hafs-video'
+                      : appSettings.textDisplayStyle === 'mushaf-warsh-video'
+                        ? 'warsh-video'
+                        : appSettings.textDisplayStyle === 'mushaf-qalun-video'
+                          ? 'qalun-video'
+                          : 'hafs-video'
               }
             />
           )}

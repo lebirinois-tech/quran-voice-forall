@@ -78,6 +78,18 @@ const TEXT_DISPLAY_STYLES = [
     description: 'Vidéo page par page (604 pages, son inclus) — archive.org',
     icon: '🎬'
   },
+  {
+    id: 'mushaf-warsh-video' as TextDisplayStyle,
+    name: 'Mushaf Warsh vidéo / مصحف ورش فيديو',
+    description: 'Vidéo Warsh page par page (604 pages, son inclus) — archive.org',
+    icon: '🎬'
+  },
+  {
+    id: 'mushaf-qalun-video' as TextDisplayStyle,
+    name: 'Mushaf Qalun vidéo / مصحف قالون فيديو',
+    description: 'Vidéo Qalun page par page (604 pages, son inclus) — archive.org',
+    icon: '🎬'
+  },
 ];
 
 const FONT_SIZES = [
