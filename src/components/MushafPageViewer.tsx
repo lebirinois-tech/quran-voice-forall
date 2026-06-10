@@ -6,7 +6,13 @@ import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
 
-type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video';
+type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
+
+const VIDEO_SOURCES: Record<'hafs-video' | 'warsh-video' | 'qalun-video', { id: string; label: string }> = {
+  'hafs-video': { id: '508_202gggggggg', label: '🎬 Mushaf Hafs vidéo' },
+  'warsh-video': { id: '228_2025ssssssss', label: '🎬 Mushaf Warsh vidéo' },
+  'qalun-video': { id: 'x241120cccccccccc', label: '🎬 Mushaf Qalun vidéo' },
+};
 
 interface MushafPageViewerProps {
   surahNumber: number;
@@ -86,7 +92,9 @@ export const MushafPageViewer = ({
   // independent of the 604-page Madina standard. Hafs keeps the standard mapping.
   const isArchiveMode = mushafType === 'warsh' || mushafType === 'qalun';
   const archive = isArchiveMode ? ARCHIVE_SOURCES[mushafType] : null;
-  const isVideoMode = mushafType === 'hafs-video';
+  const isVideoMode = mushafType === 'hafs-video' || mushafType === 'warsh-video' || mushafType === 'qalun-video';
+  const videoSource = isVideoMode ? VIDEO_SOURCES[mushafType as keyof typeof VIDEO_SOURCES] : null;
+  const [loopPage, setLoopPage] = useState(false);
 
   const { start: surahStartPage, end: surahEndPage } = useMemo(
     () => (isArchiveMode ? { start: 1, end: archive!.totalPages } : getSurahPages(surahNumber)),
