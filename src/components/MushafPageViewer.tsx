@@ -260,6 +260,31 @@ export const MushafPageViewer = ({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
+        {isArchiveMode && (
+          <div className="mb-3 flex items-center justify-center gap-2">
+            {/* En lecture RTL : le bouton de GAUCHE avance vers la page suivante */}
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage >= maxPage}
+              aria-label="Page suivante"
+            >
+              ◀️ Page suivante
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage <= 1}
+              aria-label="Page précédente"
+            >
+              Page préc. ▶️
+            </Button>
+          </div>
+        )}
         {isVideoMode ? (
           <>
             <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
