@@ -34,11 +34,14 @@ const ARCHIVE_SOURCES = {
   warsh: {
     id: 'Warsh_Azraq',
     totalPages: 609,
+    // Nombre de pages de couverture/intro avant la Fatiha dans le scan
+    fatihaOffset: 4,
     label: '📜 Warsh (Azraq) — Tajweed coloré, archive.org',
   },
   qalun: {
     id: 'moshaf-tajwed-qaloun',
     totalPages: 601,
+    fatihaOffset: 6,
     label: '📗 Qalun — Tajweed coloré (Dar Al-Ma\'rifa), archive.org',
   },
 } as const;
@@ -97,10 +100,12 @@ export const MushafPageViewer = ({
   const [loopPage, setLoopPage] = useState(false);
 
   const { start: surahStartPage, end: surahEndPage } = useMemo(
-    () => (isArchiveMode ? { start: 1, end: archive!.totalPages } : getSurahPages(surahNumber)),
+    () => (isArchiveMode
+      ? { start: 1, end: archive!.totalPages - archive!.fatihaOffset }
+      : getSurahPages(surahNumber)),
     [surahNumber, isArchiveMode, archive]
   );
-  const maxPage = isArchiveMode ? archive!.totalPages : 604;
+  const maxPage = isArchiveMode ? archive!.totalPages - archive!.fatihaOffset : 604;
 
   const [currentPage, setCurrentPage] = useState(
     initialPage && initialPage >= surahStartPage && initialPage <= surahEndPage
@@ -152,7 +157,8 @@ export const MushafPageViewer = ({
     setIsLoading(true);
     setImageError(false);
     setImageSourceIndex(0);
-    setImageSrc(getPageUrls(currentPage, mushafType)[0] ?? '');
+    const effectivePage = isArchiveMode ? currentPage + (archive?.fatihaOffset ?? 0) : currentPage;
+    setImageSrc(getPageUrls(effectivePage, mushafType)[0] ?? '');
   }, [currentPage, mushafType]);
 
   const goToPage = useCallback((newPage: number) => {
@@ -199,7 +205,8 @@ export const MushafPageViewer = ({
 
   const handleImageLoad = () => { setIsLoading(false); setImageError(false); };
   const handleImageError = () => {
-    const sources = getPageUrls(currentPage, mushafType);
+    const effectivePage = isArchiveMode ? currentPage + (archive?.fatihaOffset ?? 0) : currentPage;
+    const sources = getPageUrls(effectivePage, mushafType);
     const nextIndex = imageSourceIndex + 1;
 
     if (nextIndex < sources.length) {
