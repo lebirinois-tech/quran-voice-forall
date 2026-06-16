@@ -20,33 +20,10 @@
     <meta name="msapplication-TileColor" content="#1B5E20" />
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="format-detection" content="telephone=no" />
-    <script>
-      (function () {
-        var host = window.location.hostname;
-        var isPreview =
-          host.indexOf("id-preview--") !== -1 ||
-          host.indexOf("preview--") === 0 ||
-          host === "lovableproject.com" ||
-          host.endsWith(".lovableproject.com") ||
-          host === "lovableproject-dev.com" ||
-          host.endsWith(".lovableproject-dev.com") ||
-          host === "beta.lovable.dev" ||
-          host.endsWith(".beta.lovable.dev");
-
-        try {
-          isPreview = isPreview || window.self !== window.top;
-        } catch (e) {
-          isPreview = true;
-        }
-
-        if (!isPreview) {
-          var manifest = document.createElement("link");
-          manifest.rel = "manifest";
-          manifest.href = "/manifest.webmanifest";
-          document.head.appendChild(manifest);
-        }
-      })();
-    </script>
+    <!-- Manifest statique : nécessaire pour que Chrome/Edge (Windows) détectent
+         l'éligibilité à l'installation dès le premier rendu HTML. L'injection
+         différée par JS empêchait l'apparition du bouton "Installer". -->
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Icons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
