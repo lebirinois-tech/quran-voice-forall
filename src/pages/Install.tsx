@@ -3,6 +3,7 @@ import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, CheckCircle2 } from 'lucide-react';
+import { apkDownloadUrl } from '@/lib/apkDownload';
 
 const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
@@ -204,12 +205,40 @@ const Install = () => {
                   <p className="font-semibold text-foreground">تطبيق أندرويد</p>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground mt-3">
-                Le téléchargement APK est temporairement désactivé pendant la régénération du fichier Android.
-                <br />
-                <span className="text-xs text-primary font-medium">
-                  Utilisez « Installer maintenant » ci-dessus pour remettre l’application sur votre écran d’accueil.
-                </span>
+              <Button
+                asChild
+                size="lg"
+                variant="secondary"
+                className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
+              >
+                <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer">
+                  <Download className="h-6 w-6" />
+                  Télécharger l'APK
+                </a>
+              </Button>
+              <p className="text-xs text-muted-foreground mt-3">
+                Build automatique depuis GitHub Releases. Autorisez l'installation depuis des sources inconnues sur votre Android.
+              </p>
+            </div>
+
+            <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                  <Apple className="h-6 w-6 text-secondary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Application iPhone (IPA)
+                  </p>
+                  <p className="font-semibold text-foreground">تطبيق آيفون</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Apple n'autorise pas la distribution libre d'un fichier <strong>.ipa</strong> :
+                il faut un compte Apple Developer (99 $/an), un Mac avec Xcode et une signature
+                officielle. Sur iPhone, utilisez plutôt <strong>« Installer maintenant »</strong>
+                ci-dessus : Safari → Partager ⬆️ → « Sur l'écran d'accueil ». L'app fonctionne
+                ensuite comme une vraie application native.
               </p>
             </div>
           </div>
