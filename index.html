@@ -49,7 +49,16 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#fdf6e3;color:#123524;font-family:system-ui,-apple-system,Segoe UI,sans-serif;text-align:center;">
+        <section style="max-width:520px;">
+          <img src="/pwa-192x192.png" alt="Apprenons le Coran" style="width:88px;height:88px;border-radius:20px;margin-bottom:18px;" />
+          <h1 style="font-size:24px;margin:0 0 10px;">Apprenons le Coran</h1>
+          <p style="margin:0 0 18px;line-height:1.6;">Chargement de l’application…</p>
+          <p style="font-size:14px;margin:0;opacity:.78;">Si l’écran reste bloqué, ouvrez <a href="/reset" style="color:#1b7f5a;font-weight:700;">Réinitialiser</a>.</p>
+        </section>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
