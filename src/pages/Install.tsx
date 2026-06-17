@@ -105,6 +105,34 @@ const Install = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            <div className="bg-card border-2 border-secondary/40 rounded-xl p-6 text-center shadow-lg">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                  <Smartphone className="h-6 w-6 text-secondary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Téléchargement direct
+                  </p>
+                  <p className="font-semibold text-foreground">APK Android</p>
+                </div>
+              </div>
+              <Button
+                asChild
+                size="lg"
+                variant="secondary"
+                className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
+              >
+                <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer">
+                  <Download className="h-6 w-6" />
+                  Télécharger l'APK
+                </a>
+              </Button>
+              <p className="text-xs text-muted-foreground mt-3">
+                تحميل مباشر — Autorisez les sources inconnues sur Android.
+              </p>
+            </div>
+
             <div className="bg-card border border-primary/30 rounded-xl p-6 text-center animate-scale-in shadow-lg">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
