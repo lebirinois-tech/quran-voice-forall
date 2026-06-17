@@ -51,13 +51,20 @@ jobs:
           const fs = require('fs');
           const config = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
           delete config.server;
+
+          const appId = config.appId || '';
+          const validAppId = /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(appId);
+          if (!validAppId) {
+            throw new Error(`Invalid Android appId: ${appId}`);
+          }
+
           fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2) + '\n');
           NODE
 
       - name: Add Android platform
         run: |
-          npx cap add android || echo "Android platform already exists"
-          npx cap sync android
+          bunx cap add android
+          bunx cap sync android
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
