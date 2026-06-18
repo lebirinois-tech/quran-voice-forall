@@ -69,8 +69,8 @@ const formatNum = (n: number) => n.toString().padStart(3, '0');
 // so the service worker will serve these entries on later playback.
 const CACHE_NAME_BY_HOST: Record<string, string> = {
   'cdn.islamic.network': 'quran-audio-cache',
-  'everyayah.com': 'quran-warsh-audio-cache',
-  'archive.org': 'quran-archive-audio-cache',
+  'everyayah.com': 'quran-audio-cache',
+  'archive.org': 'quran-audio-cache',
 };
 
 const putInRuntimeCache = async (url: string): Promise<boolean> => {
