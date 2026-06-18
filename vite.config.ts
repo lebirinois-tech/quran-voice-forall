@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: ({ url }) => url.origin === self.location.origin && /\/assets\/.*\.(?:js|css|woff2?|ttf)$/.test(url.pathname),
+            urlPattern: ({ url }) => /\/assets\/.*\.(?:js|css|woff2?|ttf)$/.test(url.pathname),
             handler: "CacheFirst",
             options: {
               cacheName: "quran-assets-cache",
