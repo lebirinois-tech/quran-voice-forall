@@ -2,8 +2,11 @@
   "appId": "app.quranaccespourtous.mobile",
   "appName": "Quran Accès Pour Tous",
   "webDir": "dist",
+  "android": {
+    "allowMixedContent": true
+  },
   "server": {
-    "url": "https://42617e51-2ca9-460b-bad5-91ead30442a7.lovableproject.com?forceHideBadge=true",
+    "androidScheme": "https",
     "cleartext": true
   }
 }
