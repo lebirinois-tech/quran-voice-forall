@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallback: "/app",
+        navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/~oauth(?:\/|$)/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf}"],
         runtimeCaching: [
