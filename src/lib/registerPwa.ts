@@ -51,10 +51,11 @@ export const registerQuranPwa = (onNeedRefresh?: (update: () => Promise<void>) =
     return;
   }
 
-  const updateSW = registerSW({
+  let updateSW: ((reloadPage?: boolean) => Promise<void>) | undefined;
+  updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
-      onNeedRefresh?.(updateSW);
+      if (updateSW) onNeedRefresh?.(() => updateSW?.(true) ?? Promise.resolve());
     },
     onOfflineReady() {
       window.dispatchEvent(new CustomEvent("quran-app-offline-ready"));
