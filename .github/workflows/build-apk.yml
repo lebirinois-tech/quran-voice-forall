@@ -66,6 +66,24 @@ jobs:
           bunx cap add android
           bunx cap sync android
 
+      - name: Generate Android app icons
+        run: |
+          mkdir -p assets
+          cp public/pwa-512x512.png assets/icon-only.png
+          cp public/pwa-512x512.png assets/icon-foreground.png
+          cp public/pwa-512x512.png assets/icon.png
+          # Solid background derived from the app's emerald theme
+          node - <<'NODE'
+          const fs = require('fs');
+          // 1x1 emerald PNG used as adaptive icon background
+          const bg = Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAEElEQVR42mNk+M9QzwAEAAYUAQHQ4eIDAAAAAElFTkSuQmCC',
+            'base64'
+          );
+          fs.writeFileSync('assets/icon-background.png', bg);
+          NODE
+          bunx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#1b7f5a' --iconBackgroundColorDark '#0f3d2b' --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b'
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
