@@ -2,12 +2,31 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
+
+  // Sur l'APK natif (Capacitor) ou en mode standalone installé, on ouvre
+  // directement l'application au lieu d'afficher la page d'installation.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
+    const isCapacitor =
+      !!w.Capacitor?.isNativePlatform?.() ||
+      window.location.protocol === 'capacitor:' ||
+      (window.location.protocol === 'https:' && window.location.hostname === 'localhost');
+    const isStandalone =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      // iOS Safari standalone
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    if (isCapacitor || isStandalone) {
+      window.location.replace('/app');
+    }
+  }, []);
 
   const openApp = () => {
     // In some installed-PWA desktop contexts, client-side navigation can appear to do nothing.
