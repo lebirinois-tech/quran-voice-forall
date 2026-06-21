@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { preloadAllTafsirInBackground } from "./lib/preloadTafsir";
+import { preloadAllTafsirInBackground, preloadFrenchTafsirInBackground } from "./lib/preloadTafsir";
 
 function showStartupFallback(error?: unknown) {
   const root = document.getElementById("root");
@@ -92,6 +92,8 @@ try {
   // Pré-charge le Tafsir Al-Muyassar (arabe) en arrière-plan dès l'installation
   // pour qu'il soit disponible hors-ligne sans manipulation manuelle.
   preloadAllTafsirInBackground();
+  // Puis traduit Al-Muyassar en français en arrière-plan (utilise l'IA, reprend à chaque session)
+  preloadFrenchTafsirInBackground();
 } catch (error) {
   showStartupFallback(error);
 }
