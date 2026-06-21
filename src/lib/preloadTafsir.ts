@@ -7,6 +7,14 @@ const TAFSIR_CACHE_STATUS = 'quran-tafsir-cache-status';
 const PRELOAD_FLAG = 'quran-tafsir-preload-v1';
 const PRELOAD_IN_PROGRESS = 'quran-tafsir-preload-running';
 
+// Pré-traduction FR de Al-Muyassar via l'edge function translate-tafsir.
+// S'exécute en arrière-plan, reprend là où elle s'est arrêtée,
+// s'interrompt proprement en cas de 402 (crédits épuisés) ou 429 (rate limit).
+const FR_CACHE_PREFIX = 'quran-tafsir-fr-';
+const FR_STATUS_KEY = 'quran-tafsir-fr-status';
+const FR_PRELOAD_FLAG = 'quran-tafsir-fr-preload-v1';
+const FR_PRELOAD_IN_PROGRESS = 'quran-tafsir-fr-preload-running';
+
 interface CacheStatus { [surah: number]: boolean }
 
 const getStatus = (): CacheStatus => {
