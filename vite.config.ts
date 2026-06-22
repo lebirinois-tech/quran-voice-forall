@@ -29,7 +29,8 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/~oauth(?:\/|$)/],
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf}", "data/*.json"],
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: ({ request, url }) => request.mode === "navigate" && !url.pathname.startsWith("/~oauth"),
