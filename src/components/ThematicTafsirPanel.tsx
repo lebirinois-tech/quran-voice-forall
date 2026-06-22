@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getThemesForVerse, QuranTheme } from '@/data/quranThemes';
+import { getOfflineTafsir } from '@/lib/offlineTafsir';
 
 type Lang = 'ar' | 'fr' | 'en';
 
@@ -35,10 +36,14 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
   const [speakingLang, setSpeakingLang] = useState<Lang | null>(null);
   const [availability, setAvailability] = useState<Record<Lang, string | null>>({ ar: null, fr: null, en: null });
 
-  const refreshAvailability = () => {
+  const refreshAvailability = async () => {
+    const [arOff, frOff] = await Promise.all([
+      getOfflineTafsir(surahNumber, verseNumber, 'ar'),
+      getOfflineTafsir(surahNumber, verseNumber, 'fr'),
+    ]);
     setAvailability({
-      ar: readCache(surahNumber, verseNumber, 'ar'),
-      fr: readCache(surahNumber, verseNumber, 'fr'),
+      ar: readCache(surahNumber, verseNumber, 'ar') ?? arOff,
+      fr: readCache(surahNumber, verseNumber, 'fr') ?? frOff,
       en: readCache(surahNumber, verseNumber, 'en'),
     });
   };
@@ -46,8 +51,20 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
   // Load from cache when panel opens or lang changes
   useEffect(() => {
     if (!isOpen) return;
-    setText(readCache(surahNumber, verseNumber, activeLang));
-    refreshAvailability();
+    let cancelled = false;
+    (async () => {
+      const cached = readCache(surahNumber, verseNumber, activeLang);
+      if (cached) {
+        if (!cancelled) setText(cached);
+      } else if (activeLang === 'ar' || activeLang === 'fr') {
+        const offline = await getOfflineTafsir(surahNumber, verseNumber, activeLang);
+        if (!cancelled) setText(offline ?? null);
+      } else {
+        if (!cancelled) setText(null);
+      }
+      if (!cancelled) await refreshAvailability();
+    })();
+    return () => { cancelled = true; };
   }, [isOpen, activeLang, surahNumber, verseNumber]);
 
   // Stop speech on close
