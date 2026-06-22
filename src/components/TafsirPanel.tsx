@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { getCachedTafsir, saveTafsirToCache } from '@/hooks/useTafsirCache';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getOfflineTafsir } from '@/lib/offlineTafsir';
 
 interface TafsirPanelProps {
   surahNumber: number;
@@ -77,40 +78,39 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     setIsLoading(true);
     setError(null);
 
-    // Check offline cache first
-    const cached = getCachedTafsir(surahNumber, verseNumber);
-    if (cached) {
-      setTafsirText(cached);
-    } else {
+    // 1) Offline bundle first (Arabic Al-Muyassar — ships with the app)
+    let ar = await getOfflineTafsir(surahNumber, verseNumber, 'ar');
+    if (!ar) ar = getCachedTafsir(surahNumber, verseNumber);
+
+    if (!ar) {
+      // 2) Network fallback if for some reason the bundle isn't available yet
       try {
         const response = await fetch(
           `https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/ar.muyassar`
         );
         const data = await response.json();
-
-        if (data.code === 200 && data.data?.text) {
-          setTafsirText(data.data.text);
-          saveTafsirToCache(surahNumber, verseNumber, data.data.text);
-        } else {
-          const fallbackResponse = await fetch(
-            `https://api.alquran.cloud/v1/ayah/${surahNumber}:${verseNumber}/ar.jalalayn`
-          );
-          const fallbackData = await fallbackResponse.json();
-          if (fallbackData.code === 200 && fallbackData.data?.text) {
-            setTafsirText(fallbackData.data.text);
-            saveTafsirToCache(surahNumber, verseNumber, fallbackData.data.text);
-          } else {
-            throw new Error('التفسير غير متوفر');
-          }
-        }
+        if (data.code === 200 && data.data?.text) ar = data.data.text;
       } catch (err) {
         console.error('Tafsir fetch error:', err);
-        setError('التفسير غير متوفر حالياً / Tafsir non disponible');
       }
     }
 
-    // Load any previously translated tafsir from cache (no auto-fetch)
-    setTafsirFr(getCachedTranslation(FR_CACHE_PREFIX, surahNumber, verseNumber));
+    if (ar) {
+      setTafsirText(ar);
+      saveTafsirToCache(surahNumber, verseNumber, ar);
+    } else {
+      setError('التفسير غير متوفر حالياً / Tafsir non disponible');
+    }
+
+    // French — bundled offline (Traduction Al-Montada). No AI/credits required.
+    let fr = await getOfflineTafsir(surahNumber, verseNumber, 'fr');
+    if (!fr) fr = getCachedTranslation(FR_CACHE_PREFIX, surahNumber, verseNumber);
+    if (fr) {
+      setTafsirFr(fr);
+      saveTranslationToCache(FR_CACHE_PREFIX, surahNumber, verseNumber, fr);
+    } else {
+      setTafsirFr(null);
+    }
     setTafsirEn(getCachedTranslation(EN_CACHE_PREFIX, surahNumber, verseNumber));
 
     setIsLoading(false);
