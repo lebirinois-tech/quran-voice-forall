@@ -111,7 +111,15 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     } else {
       setTafsirFr(null);
     }
-    setTafsirEn(getCachedTranslation(EN_CACHE_PREFIX, surahNumber, verseNumber));
+    // English — bundled offline (Tafsir Al-Mukhtasar). No AI/credits required.
+    let en = await getOfflineTafsir(surahNumber, verseNumber, 'en');
+    if (!en) en = getCachedTranslation(EN_CACHE_PREFIX, surahNumber, verseNumber);
+    if (en) {
+      setTafsirEn(en);
+      saveTranslationToCache(EN_CACHE_PREFIX, surahNumber, verseNumber, en);
+    } else {
+      setTafsirEn(null);
+    }
 
     setIsLoading(false);
   };
