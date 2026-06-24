@@ -37,14 +37,15 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
   const [availability, setAvailability] = useState<Record<Lang, string | null>>({ ar: null, fr: null, en: null });
 
   const refreshAvailability = async () => {
-    const [arOff, frOff] = await Promise.all([
+    const [arOff, frOff, enOff] = await Promise.all([
       getOfflineTafsir(surahNumber, verseNumber, 'ar'),
       getOfflineTafsir(surahNumber, verseNumber, 'fr'),
+      getOfflineTafsir(surahNumber, verseNumber, 'en'),
     ]);
     setAvailability({
       ar: readCache(surahNumber, verseNumber, 'ar') ?? arOff,
       fr: readCache(surahNumber, verseNumber, 'fr') ?? frOff,
-      en: readCache(surahNumber, verseNumber, 'en'),
+      en: readCache(surahNumber, verseNumber, 'en') ?? enOff,
     });
   };
 
@@ -56,11 +57,9 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle
       const cached = readCache(surahNumber, verseNumber, activeLang);
       if (cached) {
         if (!cancelled) setText(cached);
-      } else if (activeLang === 'ar' || activeLang === 'fr') {
+      } else {
         const offline = await getOfflineTafsir(surahNumber, verseNumber, activeLang);
         if (!cancelled) setText(offline ?? null);
-      } else {
-        if (!cancelled) setText(null);
       }
       if (!cancelled) await refreshAvailability();
     })();
