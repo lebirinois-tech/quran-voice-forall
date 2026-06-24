@@ -1,22 +1,26 @@
 // Offline-first Tafsir provider.
-// Two static JSON files are shipped with the app under /data:
-//   - tafsir-muyassar-ar.json  (Tafsir Al-Muyassar, Arabic, ~2.5 MB)
-//   - tafsir-montada-fr.json   (Traduction explicative Al-Montada, FR, ~1.2 MB)
-// Both are precached by the service worker so they are available without network.
+// Three static JSON files are shipped with the app under /data:
+//   - tafsir-muyassar-ar.json   (Tafsir Al-Muyassar, Arabic, ~2.5 MB)
+//   - tafsir-montada-fr.json    (Traduction explicative Al-Montada, FR, ~1.2 MB)
+//   - tafsir-mukhtasar-en.json  (English Al-Mukhtasar, EN, ~1.8 MB)
+// All are precached by the service worker so they are available without network.
 //
 // Structure: { [surah: string]: { [verse: string]: string } }
 
 type SurahMap = Record<string, Record<string, string>>;
 
-const URLS: Record<'ar' | 'fr', string> = {
+type Lang = 'ar' | 'fr' | 'en';
+
+const URLS: Record<Lang, string> = {
   ar: '/data/tafsir-muyassar-ar.json',
   fr: '/data/tafsir-montada-fr.json',
+  en: '/data/tafsir-mukhtasar-en.json',
 };
 
-const memCache: Partial<Record<'ar' | 'fr', SurahMap>> = {};
-const inflight: Partial<Record<'ar' | 'fr', Promise<SurahMap | null>>> = {};
+const memCache: Partial<Record<Lang, SurahMap>> = {};
+const inflight: Partial<Record<Lang, Promise<SurahMap | null>>> = {};
 
-async function loadLang(lang: 'ar' | 'fr'): Promise<SurahMap | null> {
+async function loadLang(lang: Lang): Promise<SurahMap | null> {
   if (memCache[lang]) return memCache[lang]!;
   if (inflight[lang]) return inflight[lang]!;
 
@@ -41,7 +45,7 @@ async function loadLang(lang: 'ar' | 'fr'): Promise<SurahMap | null> {
 export async function getOfflineTafsir(
   surah: number,
   verse: number,
-  lang: 'ar' | 'fr',
+  lang: Lang,
 ): Promise<string | null> {
   const map = await loadLang(lang);
   return map?.[String(surah)]?.[String(verse)] ?? null;
@@ -51,15 +55,16 @@ export async function getOfflineTafsir(
 export function getOfflineTafsirSync(
   surah: number,
   verse: number,
-  lang: 'ar' | 'fr',
+  lang: Lang,
 ): string | null {
   return memCache[lang]?.[String(surah)]?.[String(verse)] ?? null;
 }
 
-/** Preload both datasets so they are cached by the service worker and ready offline. */
+/** Preload all datasets so they are cached by the service worker and ready offline. */
 export function preloadOfflineTafsir(): void {
   if (typeof window === 'undefined') return;
   // Stagger slightly to avoid competing with first paint.
   setTimeout(() => { void loadLang('ar'); }, 1500);
   setTimeout(() => { void loadLang('fr'); }, 3000);
+  setTimeout(() => { void loadLang('en'); }, 4500);
 }
