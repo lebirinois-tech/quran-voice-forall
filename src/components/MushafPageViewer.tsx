@@ -5,6 +5,7 @@ import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
+import { MushafPageRenderer } from './MushafPageRenderer';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
 
@@ -339,6 +340,18 @@ export const MushafPageViewer = ({
               isAudioPlaying && "ring-2 ring-primary ring-offset-2 ring-offset-background"
             )}
           >
+            {mushafType === 'hafs' ? (
+              <div className="absolute inset-0 overflow-auto">
+                <MushafPageRenderer
+                  page={currentPage}
+                  currentSurah={surahNumber}
+                  currentVerse={currentVerse}
+                  isAudioPlaying={isAudioPlaying}
+                  onVerseClick={(_s, v) => onVerseClick?.(v)}
+                />
+              </div>
+            ) : (
+              <>
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -365,6 +378,8 @@ export const MushafPageViewer = ({
                 onLoad={handleImageLoad}
                 onError={handleImageError}
               />
+            )}
+              </>
             )}
           </AspectRatio>
         )}
