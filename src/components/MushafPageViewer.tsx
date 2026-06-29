@@ -5,6 +5,7 @@ import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
 import { getThemesForVerse } from '@/data/quranThemes';
+import { MushafPageRenderer } from './MushafPageRenderer';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
 
@@ -339,6 +340,18 @@ export const MushafPageViewer = ({
               isAudioPlaying && "ring-2 ring-primary ring-offset-2 ring-offset-background"
             )}
           >
+            {mushafType === 'hafs' ? (
+              <div className="absolute inset-0 overflow-auto">
+                <MushafPageRenderer
+                  page={currentPage}
+                  currentSurah={surahNumber}
+                  currentVerse={currentVerse}
+                  isAudioPlaying={isAudioPlaying}
+                  onVerseClick={(_s, v) => onVerseClick?.(v)}
+                />
+              </div>
+            ) : (
+              <>
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -365,6 +378,8 @@ export const MushafPageViewer = ({
                 onLoad={handleImageLoad}
                 onError={handleImageError}
               />
+            )}
+              </>
             )}
           </AspectRatio>
         )}
@@ -480,7 +495,7 @@ export const MushafPageViewer = ({
       {/* Mushaf type indicator */}
       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
         <p className="text-xs text-center text-muted-foreground">
-          {mushafType === 'hafs' && '🎨 Hafs avec Tajweed coloré — édition Médine (KFGQPC)'}
+          {mushafType === 'hafs' && '🎨 Hafs — rendu officiel QPC v2 (quran.com), versets surlignés par thème (Tafsir Mawdou\'i)'}
           {mushafType === 'warsh' && '📜 Warsh Tajweed coloré (Azraq) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
           {mushafType === 'qalun' && '📗 Qalun Tajweed coloré (Dar Al-Ma\'rifa) — source : archive.org. Pagination propre à l\'édition (≠ 604), navigation libre par glissement.'}
         {mushafType === 'hafs-video' && '🎬 Vidéo Hafs page par page (604 pages, audio inclus) — source : archive.org. Utilisez les contrôles vidéo pour la lecture.'}
