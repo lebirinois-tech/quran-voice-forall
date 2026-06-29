@@ -383,18 +383,55 @@ export const MushafPageViewer = ({
       </div>
 
       {/* In archive mode the scanned pagination doesn't match the 604-page mapping,
-          so we offer a single "play whole surah" button instead of the verse strip. */}
-      {isArchiveMode && onVerseClick && (
-        <div className="mt-4 flex justify-center">
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            onClick={() => onVerseClick(1)}
-            className="gap-2"
-          >
-            ▶️ Écouter la sourate {surah?.name} en entier
-          </Button>
+          so we list every verse of the surah colored by theme (Tafsir Mawdou'i). */}
+      {isArchiveMode && surah && (
+        <div className="mt-4 p-3 bg-card/60 rounded-lg border border-border/60">
+          <p className="text-[11px] text-muted-foreground mb-2 text-center">
+            🎨 Versets de la sourate {surah.name} colorés par thème (Tafsir Mawdou'i)
+            {onVerseClick && ' — cliquez pour écouter'}
+          </p>
+          <div className="flex flex-wrap gap-1.5 justify-center py-1 max-h-48 overflow-y-auto">
+            {Array.from({ length: surah.versesCount }, (_, i) => i + 1).map((vn) => {
+              const themes = getThemesForVerse(surahNumber, vn);
+              const primary = themes[0];
+              const isCurrent = currentVerse === vn;
+              const bg = primary ? `hsl(${primary.hsl} / 0.20)` : 'hsl(var(--muted))';
+              const border = primary ? `hsl(${primary.hsl})` : 'hsl(var(--border))';
+              const fg = primary ? `hsl(${primary.hsl})` : 'hsl(var(--foreground))';
+              return (
+                <button
+                  key={vn}
+                  type="button"
+                  onClick={() => onVerseClick?.(vn)}
+                  title={primary ? `${primary.emoji} ${primary.labels.fr}` : `Verset ${vn}`}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-xs font-semibold border-2 transition-all hover:scale-105",
+                    isCurrent && "scale-125 ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/50 animate-pulse font-bold z-10 relative"
+                  )}
+                  style={
+                    isCurrent
+                      ? { backgroundColor: `hsl(var(--primary) / 0.25)`, borderColor: `hsl(var(--primary))`, color: `hsl(var(--primary))` }
+                      : { backgroundColor: bg, borderColor: border, color: fg }
+                  }
+                >
+                  {primary?.emoji ?? ''} {vn}
+                </button>
+              );
+            })}
+          </div>
+          {onVerseClick && (
+            <div className="mt-2 flex justify-center">
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => onVerseClick(1)}
+                className="gap-2"
+              >
+                ▶️ Écouter la sourate en entier
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
