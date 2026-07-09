@@ -142,81 +142,51 @@ const Install = () => {
               </div>
 
               {platform === 'ios' ? (
-                <div className="text-left space-y-4">
-                  {!isIOSSafari && (
-                    <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
-                      <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-destructive mb-1">
-                          Ouvrez ce site dans Safari
-                        </p>
-                        <p className="text-muted-foreground">
-                          Apple n'autorise <strong>que Safari</strong> à installer une application
-                          sur l'écran d'accueil. Chrome, Firefox et Edge sur iPhone ne peuvent pas
-                          le faire. Copiez le lien puis ouvrez-le dans Safari.
-                        </p>
-                        <button
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(publishedUrl);
-                              setStatus('copied-ios');
-                            } catch {
-                              window.prompt('Copiez ce lien et collez-le dans Safari :', publishedUrl);
-                            }
-                          }}
-                          className="mt-2 underline underline-offset-4 text-primary font-medium"
-                        >
-                          Copier le lien
-                        </button>
-                      </div>
+                <div className="text-left space-y-3">
+                  {!isIOSSafari ? (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center">
+                      <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" />
+                      <p className="font-semibold text-destructive mb-2">Ouvrez ce site dans Safari</p>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Seul Safari peut installer l'app sur iPhone (limitation Apple).
+                      </p>
+                      <Button
+                        size="lg"
+                        className="w-full gap-2"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(publishedUrl);
+                            setStatus('copied-ios');
+                          } catch {
+                            window.prompt('Copiez ce lien et ouvrez-le dans Safari :', publishedUrl);
+                          }
+                        }}
+                      >
+                        Copier le lien pour Safari
+                      </Button>
                     </div>
+                  ) : (
+                    <ol className="space-y-2">
+                      <li className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
+                        <Share className="h-6 w-6 text-primary flex-shrink-0" />
+                        <span className="text-sm text-foreground">
+                          <strong>1.</strong> Appuyez sur <strong>Partager</strong> ⬆️
+                        </span>
+                      </li>
+                      <li className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
+                        <PlusSquare className="h-6 w-6 text-primary flex-shrink-0" />
+                        <span className="text-sm text-foreground">
+                          <strong>2.</strong> « Sur l'écran d'accueil »
+                        </span>
+                      </li>
+                      <li className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
+                        <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0" />
+                        <span className="text-sm text-foreground">
+                          <strong>3.</strong> « Ajouter » ✓
+                        </span>
+                      </li>
+                    </ol>
                   )}
-
-                  <p className="text-sm font-semibold text-foreground text-center">
-                    Installation sur iPhone / iPad en 3 étapes :
-                  </p>
-                  <ol className="space-y-3">
-                    <li className="flex items-start gap-3 bg-muted/40 rounded-lg p-3">
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center">
-                        1
-                      </span>
-                      <div className="text-sm flex-1">
-                        <p className="text-foreground">
-                          Appuyez sur l'icône <strong>Partager</strong> dans la barre de Safari
-                          (en bas sur iPhone, en haut sur iPad).
-                        </p>
-                        <div className="flex items-center gap-2 mt-1 text-primary">
-                          <Share className="h-5 w-5" />
-                          <span className="text-xs">icône carré + flèche vers le haut</span>
-                        </div>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3 bg-muted/40 rounded-lg p-3">
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center">
-                        2
-                      </span>
-                      <div className="text-sm flex-1">
-                        <p className="text-foreground">
-                          Faites défiler et choisissez <strong>« Sur l'écran d'accueil »</strong>.
-                        </p>
-                        <div className="flex items-center gap-2 mt-1 text-primary">
-                          <PlusSquare className="h-5 w-5" />
-                          <span className="text-xs">« Add to Home Screen »</span>
-                        </div>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3 bg-muted/40 rounded-lg p-3">
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center">
-                        3
-                      </span>
-                      <div className="text-sm flex-1">
-                        <p className="text-foreground">
-                          Confirmez avec <strong>« Ajouter »</strong> en haut à droite.
-                          L'icône apparaît sur votre écran d'accueil.
-                        </p>
-                      </div>
-                    </li>
-                  </ol>
                 </div>
               ) : (
                 <>
