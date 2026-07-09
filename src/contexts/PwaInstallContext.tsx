@@ -35,13 +35,17 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
   const [isPreviewHost, setIsPreviewHost] = useState(false);
 
   useEffect(() => {
-    setIsInstalled(window.matchMedia("(display-mode: standalone)").matches);
+    const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+    setIsInstalled(
+      window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true
+    );
 
     const hostname = window.location.hostname.toLowerCase();
     setIsPreviewHost(computeIsPreviewHost(hostname));
 
     const ua = navigator.userAgent.toLowerCase();
-    setIsIOS(/iphone|ipad|ipod/.test(ua));
+    const isAppleTouchDevice = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    setIsIOS(/iphone|ipad|ipod/.test(ua) || isAppleTouchDevice);
     setIsAndroid(/android/.test(ua));
   }, []);
 

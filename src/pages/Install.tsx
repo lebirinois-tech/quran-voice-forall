@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, Monitor, Apple, CheckCircle2, Share, PlusSquare, AlertTriangle } from 'lucide-react';
+import { Download, Smartphone, Monitor, Apple, CheckCircle2, Share, PlusSquare, ExternalLink } from 'lucide-react';
 import { apkDownloadUrl } from '@/lib/apkDownload';
 
 const Install = () => {
@@ -15,8 +15,8 @@ const Install = () => {
   const isIOSSafari = useMemo(() => {
     if (!isIOS) return false;
     const ua = navigator.userAgent;
-    // Exclude CriOS (Chrome), FxiOS (Firefox), EdgiOS (Edge), OPiOS (Opera)
-    return !/CriOS|FxiOS|EdgiOS|OPiOS|GSA/i.test(ua);
+    // Exclude Chrome/Firefox/Edge/Opera/Google app and common in-app browsers on iOS.
+    return !/CriOS|FxiOS|EdgiOS|OPiOS|GSA|FBAN|FBAV|Instagram|Line|DuckDuckGo/i.test(ua);
   }, [isIOS]);
 
   const platform: 'ios' | 'android' | 'desktop' = useMemo(() => {
@@ -74,6 +74,15 @@ const Install = () => {
 
   const openPublished = () => {
     window.open(publishedUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const copyPublishedForSafari = async () => {
+    try {
+      await navigator.clipboard.writeText(publishedUrl);
+      setStatus('copied-ios');
+    } catch {
+      window.prompt('Copiez ce lien et ouvrez-le dans Safari :', publishedUrl);
+    }
   };
 
   return (
@@ -142,36 +151,48 @@ const Install = () => {
               </div>
 
               {platform === 'ios' ? (
-                <>
-                  <Button
-                    onClick={async () => {
-                      if (!isIOSSafari) {
-                        try {
-                          await navigator.clipboard.writeText(publishedUrl);
-                          setStatus('copied-ios');
-                        } catch {
-                          window.prompt('Copiez ce lien et ouvrez-le dans Safari :', publishedUrl);
-                        }
-                        return;
-                      }
-                      if (navigator.share) {
-                        try {
-                          await navigator.share({ url: publishedUrl, title: 'Apprenons le Coran' });
-                        } catch { /* user cancelled */ }
-                      }
-                    }}
-                    size="lg"
-                    className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
-                  >
-                    <Download className="h-6 w-6" />
-                    Installer maintenant
-                  </Button>
-                  <p className="text-sm text-muted-foreground mt-3">
-                    {isIOSSafari
-                      ? "Menu Partager ⬆️ → « Sur l'écran d'accueil » → « Ajouter »."
-                      : "Ouvrez ce site dans Safari pour l'installer (limitation Apple)."}
-                  </p>
-                </>
+                <div className="space-y-4">
+                  {isIOSSafari ? (
+                    <>
+                      <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 text-left">
+                        <p className="font-semibold text-foreground mb-3 text-center">
+                          Installation iPhone avec Safari
+                        </p>
+                        <div className="space-y-3 text-sm text-foreground">
+                          <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">1</span>
+                            <span>Touchez le bouton <strong>Partager</strong> de Safari.</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">2</span>
+                            <span>Choisissez <strong>Sur l'écran d'accueil</strong>.</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">3</span>
+                            <span>Appuyez sur <strong>Ajouter</strong>.</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button onClick={openApp} size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 w-full sm:w-auto">
+                        <ExternalLink className="h-6 w-6" />
+                        Ouvrir l'application
+                      </Button>
+                      <p className="text-sm text-muted-foreground">
+                        Apple ne permet pas d'installer avec un bouton automatique comme Android.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Button onClick={copyPublishedForSafari} size="lg" className="gap-2 text-lg px-8 py-6 w-full sm:w-auto">
+                        <Apple className="h-6 w-6" />
+                        Copier le lien pour Safari
+                      </Button>
+                      <p className="text-sm text-muted-foreground">
+                        Sur iPhone, ouvrez le lien dans <strong>Safari</strong>, puis Partager → Sur l'écran d'accueil → Ajouter.
+                      </p>
+                    </>
+                  )}
+                </div>
               ) : (
                 <>
                   <Button
