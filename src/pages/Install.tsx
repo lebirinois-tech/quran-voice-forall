@@ -142,52 +142,36 @@ const Install = () => {
               </div>
 
               {platform === 'ios' ? (
-                <div className="text-left space-y-3">
-                  {!isIOSSafari ? (
-                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center">
-                      <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" />
-                      <p className="font-semibold text-destructive mb-2">Ouvrez ce site dans Safari</p>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Seul Safari peut installer l'app sur iPhone (limitation Apple).
-                      </p>
-                      <Button
-                        size="lg"
-                        className="w-full gap-2"
-                        onClick={async () => {
-                          try {
-                            await navigator.clipboard.writeText(publishedUrl);
-                            setStatus('copied-ios');
-                          } catch {
-                            window.prompt('Copiez ce lien et ouvrez-le dans Safari :', publishedUrl);
-                          }
-                        }}
-                      >
-                        Copier le lien pour Safari
-                      </Button>
-                    </div>
-                  ) : (
-                    <ol className="space-y-2">
-                      <li className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
-                        <Share className="h-6 w-6 text-primary flex-shrink-0" />
-                        <span className="text-sm text-foreground">
-                          <strong>1.</strong> Appuyez sur <strong>Partager</strong> ⬆️
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
-                        <PlusSquare className="h-6 w-6 text-primary flex-shrink-0" />
-                        <span className="text-sm text-foreground">
-                          <strong>2.</strong> « Sur l'écran d'accueil »
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
-                        <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0" />
-                        <span className="text-sm text-foreground">
-                          <strong>3.</strong> « Ajouter » ✓
-                        </span>
-                      </li>
-                    </ol>
-                  )}
-                </div>
+                <>
+                  <Button
+                    onClick={async () => {
+                      if (!isIOSSafari) {
+                        try {
+                          await navigator.clipboard.writeText(publishedUrl);
+                          setStatus('copied-ios');
+                        } catch {
+                          window.prompt('Copiez ce lien et ouvrez-le dans Safari :', publishedUrl);
+                        }
+                        return;
+                      }
+                      if (navigator.share) {
+                        try {
+                          await navigator.share({ url: publishedUrl, title: 'Apprenons le Coran' });
+                        } catch { /* user cancelled */ }
+                      }
+                    }}
+                    size="lg"
+                    className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
+                  >
+                    <Download className="h-6 w-6" />
+                    Installer maintenant
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    {isIOSSafari
+                      ? "Menu Partager ⬆️ → « Sur l'écran d'accueil » → « Ajouter »."
+                      : "Ouvrez ce site dans Safari pour l'installer (limitation Apple)."}
+                  </p>
+                </>
               ) : (
                 <>
                   <Button
