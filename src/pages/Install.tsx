@@ -2,13 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, Monitor, Apple, CheckCircle2 } from 'lucide-react';
+import { Download, Smartphone, Monitor, Apple, CheckCircle2, Share, PlusSquare, AlertTriangle } from 'lucide-react';
 import { apkDownloadUrl } from '@/lib/apkDownload';
 
 const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
   const publishedUrl = 'https://quran-voice-forall.lovable.app';
   const [status, setStatus] = useState<string | null>(null);
+
+  // On iOS, only Safari can install a PWA. Chrome/Firefox/Edge iOS all use WebKit
+  // but do NOT expose the "Add to Home Screen" action — Apple restriction.
+  const isIOSSafari = useMemo(() => {
+    if (!isIOS) return false;
+    const ua = navigator.userAgent;
+    // Exclude CriOS (Chrome), FxiOS (Firefox), EdgiOS (Edge), OPiOS (Opera)
+    return !/CriOS|FxiOS|EdgiOS|OPiOS|GSA/i.test(ua);
+  }, [isIOS]);
 
   const platform: 'ios' | 'android' | 'desktop' = useMemo(() => {
     if (isIOS) return 'ios';
@@ -52,21 +61,7 @@ const Install = () => {
       return;
     }
     if (platform === 'ios') {
-      try {
-        if ((navigator as any).share) {
-          await (navigator as any).share({ title: "Apprenons le Coran", url: publishedUrl });
-          setStatus('shared-ios');
-          return;
-        }
-      } catch {
-        /* cancelled */
-      }
-      try {
-        await navigator.clipboard.writeText(publishedUrl);
-        setStatus('copied-ios');
-      } catch {
-        window.prompt('Copiez ce lien et ouvrez-le dans Safari :', publishedUrl);
-      }
+      // iOS install is manual — do nothing here, instructions are shown below.
       return;
     }
     try {
