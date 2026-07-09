@@ -141,22 +141,100 @@ const Install = () => {
                 </div>
               </div>
 
-              <Button
-                onClick={handleInstall}
-                size="lg"
-                className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
-              >
-                <Download className="h-6 w-6" />
-                Installer maintenant
-              </Button>
+              {platform === 'ios' ? (
+                <div className="text-left space-y-4">
+                  {!isIOSSafari && (
+                    <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+                      <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-destructive mb-1">
+                          Ouvrez ce site dans Safari
+                        </p>
+                        <p className="text-muted-foreground">
+                          Apple n'autorise <strong>que Safari</strong> à installer une application
+                          sur l'écran d'accueil. Chrome, Firefox et Edge sur iPhone ne peuvent pas
+                          le faire. Copiez le lien puis ouvrez-le dans Safari.
+                        </p>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(publishedUrl);
+                              setStatus('copied-ios');
+                            } catch {
+                              window.prompt('Copiez ce lien et collez-le dans Safari :', publishedUrl);
+                            }
+                          }}
+                          className="mt-2 underline underline-offset-4 text-primary font-medium"
+                        >
+                          Copier le lien
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
-              <p className="text-sm text-muted-foreground mt-3">
-                {platform === 'ios'
-                  ? "Sur iOS, appuyez sur Partager ⬆️ puis « Sur l'écran d'accueil »."
-                  : deferredPrompt
-                    ? "L'invite d'installation va s'ouvrir automatiquement."
-                    : "Ouvrez ce site dans Chrome ou Edge pour l'installer."}
-              </p>
+                  <p className="text-sm font-semibold text-foreground text-center">
+                    Installation sur iPhone / iPad en 3 étapes :
+                  </p>
+                  <ol className="space-y-3">
+                    <li className="flex items-start gap-3 bg-muted/40 rounded-lg p-3">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center">
+                        1
+                      </span>
+                      <div className="text-sm flex-1">
+                        <p className="text-foreground">
+                          Appuyez sur l'icône <strong>Partager</strong> dans la barre de Safari
+                          (en bas sur iPhone, en haut sur iPad).
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-primary">
+                          <Share className="h-5 w-5" />
+                          <span className="text-xs">icône carré + flèche vers le haut</span>
+                        </div>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3 bg-muted/40 rounded-lg p-3">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center">
+                        2
+                      </span>
+                      <div className="text-sm flex-1">
+                        <p className="text-foreground">
+                          Faites défiler et choisissez <strong>« Sur l'écran d'accueil »</strong>.
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-primary">
+                          <PlusSquare className="h-5 w-5" />
+                          <span className="text-xs">« Add to Home Screen »</span>
+                        </div>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3 bg-muted/40 rounded-lg p-3">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center">
+                        3
+                      </span>
+                      <div className="text-sm flex-1">
+                        <p className="text-foreground">
+                          Confirmez avec <strong>« Ajouter »</strong> en haut à droite.
+                          L'icône apparaît sur votre écran d'accueil.
+                        </p>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+              ) : (
+                <>
+                  <Button
+                    onClick={handleInstall}
+                    size="lg"
+                    className="gap-2 text-lg px-8 py-6 w-full sm:w-auto"
+                  >
+                    <Download className="h-6 w-6" />
+                    Installer maintenant
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    {deferredPrompt
+                      ? "L'invite d'installation va s'ouvrir automatiquement."
+                      : "Ouvrez ce site dans Chrome ou Edge pour l'installer."}
+                  </p>
+                </>
+              )}
 
               {status === 'installed' && (
                 <p className="text-sm text-primary mt-3 font-medium">✓ Installation lancée</p>
@@ -174,11 +252,6 @@ const Install = () => {
               {status === 'copied-ios' && (
                 <p className="text-sm text-primary mt-3 font-medium">
                   ✓ Lien copié — ouvrez Safari et collez-le
-                </p>
-              )}
-              {status === 'shared-ios' && (
-                <p className="text-sm text-primary mt-3 font-medium">
-                  ✓ Choisissez « Sur l'écran d'accueil »
                 </p>
               )}
 
