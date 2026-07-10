@@ -5,8 +5,10 @@ import { getThemesForVerse } from '@/data/quranThemes';
 
 // Quran.com QPC v2 font + per-page verse data (open source, used by quran.com).
 // One font file per page (≈40-60 KB). Cached by the browser + Service Worker.
-const FONT_URL = (page: number) =>
-  `https://quran-com.s3.amazonaws.com/fonts/quran/hafs/v2/woff2/p${page}.woff2`;
+const FONT_URLS = (page: number) => [
+  `https://cdn.jsdelivr.net/gh/quran/quran.com-frontend-next@production/public/fonts/quran/hafs/v2/woff2/p${page}.woff2`,
+  `https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v2/woff2/p${page}.woff2`,
+];
 const API_URL = (page: number) =>
   `https://api.quran.com/api/v4/verses/by_page/${page}?words=true&word_fields=code_v2,line_number,page_number,position&per_page=300`;
 
@@ -31,15 +33,19 @@ const dataCache = new Map<number, Verse[]>();
 const loadFont = async (page: number): Promise<void> => {
   if (loadedFonts.has(page)) return;
   if (typeof FontFace === 'undefined') return;
-  try {
-    const face = new FontFace(`p${page}`, `url(${FONT_URL(page)}) format('woff2')`, {
-      display: 'swap',
-    });
-    const loaded = await face.load();
-    document.fonts.add(loaded);
-    loadedFonts.add(page);
-  } catch (e) {
-    console.warn(`QPC font for page ${page} failed:`, e);
+  const urls = FONT_URLS(page);
+  for (const url of urls) {
+    try {
+      const face = new FontFace(`p${page}`, `url(${url}) format('woff2')`, {
+        display: 'swap',
+      });
+      const loaded = await face.load();
+      document.fonts.add(loaded);
+      loadedFonts.add(page);
+      return;
+    } catch (e) {
+      console.warn(`QPC font for page ${page} failed at ${url}:`, e);
+    }
   }
 };
 
