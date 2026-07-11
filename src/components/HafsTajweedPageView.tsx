@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
@@ -16,6 +16,9 @@ interface HafsTajweedPageViewProps {
   currentVerse?: number;
   isAudioPlaying?: boolean;
   onVerseClick?: (verseNumber: number) => void;
+  onPlayPause?: () => void;
+  onNextVerse?: () => void;
+  onPreviousVerse?: () => void;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -31,8 +34,13 @@ export const HafsTajweedPageView = ({
   currentVerse,
   isAudioPlaying,
   onVerseClick,
+  onPlayPause,
+  onNextVerse,
+  onPreviousVerse,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
@@ -90,6 +98,15 @@ export const HafsTajweedPageView = ({
     },
     [currentPage, startPage, endPage]
   );
+
+  const goPrev = useCallback(() => {
+    manualNavRef.current = true;
+    setCurrentPage((cur) => (cur > startPage ? cur - 1 : cur));
+  }, [startPage]);
+  const goNext = useCallback(() => {
+    manualNavRef.current = true;
+    setCurrentPage((cur) => (cur < endPage ? cur + 1 : cur));
+  }, [endPage]);
 
   const pageVerses = useMemo(
     () => verses.filter((v) => (v.page ?? 1) === currentPage),
