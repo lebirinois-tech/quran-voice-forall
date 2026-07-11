@@ -55,37 +55,37 @@ const TEXT_DISPLAY_STYLES = [
     icon: '🟢'
   },
   { 
-    id: 'mushaf-hafs' as TextDisplayStyle, 
+    id: 'pages-hafs' as TextDisplayStyle, 
     name: 'Mushaf Hafs (pages) / مصحف حفص', 
-    description: 'Pages du Mushaf Hafs Tajweed — édition Médine',
+    description: 'Pages scan Hafs Tajweed — image uniquement',
     icon: '📖'
   },
   { 
-    id: 'mushaf-warsh' as TextDisplayStyle, 
+    id: 'pages-warsh' as TextDisplayStyle, 
     name: 'Mushaf Warsh (pages) / مصحف ورش', 
-    description: 'Pages du Mushaf Warsh — édition Médine',
+    description: 'Pages scan Warsh Tajweed — image uniquement',
     icon: '📜'
   },
   { 
-    id: 'mushaf-qalun' as TextDisplayStyle, 
+    id: 'pages-qalun' as TextDisplayStyle, 
     name: 'Mushaf Qalun (pages) / مصحف قالون', 
-    description: 'Pages Qalun — rendu Warsh en attendant une source publique',
+    description: 'Pages scan Qalun Tajweed — image uniquement',
     icon: '📗'
   },
   {
-    id: 'mushaf-hafs-video' as TextDisplayStyle,
+    id: 'pages-hafs-video' as TextDisplayStyle,
     name: 'Mushaf Hafs vidéo / مصحف حفص فيديو',
     description: 'Vidéo page par page (604 pages, son inclus) — archive.org',
     icon: '🎬'
   },
   {
-    id: 'mushaf-warsh-video' as TextDisplayStyle,
+    id: 'pages-warsh-video' as TextDisplayStyle,
     name: 'Mushaf Warsh vidéo / مصحف ورش فيديو',
     description: 'Vidéo Warsh page par page (604 pages, son inclus) — archive.org',
     icon: '🎬'
   },
   {
-    id: 'mushaf-qalun-video' as TextDisplayStyle,
+    id: 'pages-qalun-video' as TextDisplayStyle,
     name: 'Mushaf Qalun vidéo / مصحف قالون فيديو',
     description: 'Vidéo Qalun page par page (604 pages, son inclus) — archive.org',
     icon: '🎬'

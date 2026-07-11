@@ -82,13 +82,7 @@ const SurahReader = () => {
   );
 
   const effectiveDisplayStyle = appSettings.textDisplayStyle;
-  const isMushafImageMode =
-    appSettings.textDisplayStyle === 'mushaf-hafs' ||
-    appSettings.textDisplayStyle === 'mushaf-warsh' ||
-    appSettings.textDisplayStyle === 'mushaf-qalun' ||
-    appSettings.textDisplayStyle === 'mushaf-hafs-video' ||
-    appSettings.textDisplayStyle === 'mushaf-warsh-video' ||
-    appSettings.textDisplayStyle === 'mushaf-qalun-video';
+  const isMushafImageMode = appSettings.textDisplayStyle.startsWith('pages-');
   const isLoadingTextSource =
     (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
     (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
@@ -411,8 +405,7 @@ const SurahReader = () => {
         {/* Tajweed Legend - shown for all colored Tajweed modes */}
         {(appSettings.textDisplayStyle === 'tajweed' || 
           appSettings.textDisplayStyle === 'warsh-tajweed' ||
-          appSettings.textDisplayStyle === 'qalun-tajweed' ||
-          appSettings.textDisplayStyle === 'mushaf-hafs') && (
+          appSettings.textDisplayStyle === 'qalun-tajweed') && (
           <TajweedLegend />
         )}
 
@@ -421,13 +414,7 @@ const SurahReader = () => {
 
         <div className="max-w-3xl mx-auto">
           {/* Bismillah - only show for text modes */}
-          {surah.number !== 1 && surah.number !== 9 &&
-           appSettings.textDisplayStyle !== 'mushaf-hafs' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh' &&
-           appSettings.textDisplayStyle !== 'mushaf-qalun' &&
-           appSettings.textDisplayStyle !== 'mushaf-hafs-video' &&
-           appSettings.textDisplayStyle !== 'mushaf-warsh-video' &&
-           appSettings.textDisplayStyle !== 'mushaf-qalun-video' && (
+          {surah.number !== 1 && surah.number !== 9 && !isMushafImageMode && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
               <p className="font-amiri text-2xl md:text-3xl text-foreground">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -456,15 +443,15 @@ const SurahReader = () => {
               }
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               mushafType={
-                appSettings.textDisplayStyle === 'mushaf-hafs'
+                appSettings.textDisplayStyle === 'pages-hafs'
                   ? 'hafs'
-                  : appSettings.textDisplayStyle === 'mushaf-qalun'
+                  : appSettings.textDisplayStyle === 'pages-qalun'
                     ? 'qalun'
-                    : appSettings.textDisplayStyle === 'mushaf-warsh'
+                    : appSettings.textDisplayStyle === 'pages-warsh'
                       ? 'warsh'
-                      : appSettings.textDisplayStyle === 'mushaf-warsh-video'
+                      : appSettings.textDisplayStyle === 'pages-warsh-video'
                         ? 'warsh-video'
-                        : appSettings.textDisplayStyle === 'mushaf-qalun-video'
+                        : appSettings.textDisplayStyle === 'pages-qalun-video'
                           ? 'qalun-video'
                           : 'hafs-video'
               }

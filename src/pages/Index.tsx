@@ -188,25 +188,25 @@ const Index = () => {
               onClick={() => appSettings.onTextDisplayStyleChange('tajweed')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
-                appSettings.textDisplayStyle.startsWith('mushaf-')
+                appSettings.textDisplayStyle.startsWith('pages-')
                   ? 'text-muted-foreground hover:bg-muted'
                   : 'bg-primary text-primary-foreground shadow'
               )}
-              aria-pressed={!appSettings.textDisplayStyle.startsWith('mushaf-')}
+              aria-pressed={!appSettings.textDisplayStyle.startsWith('pages-')}
             >
               <FileText className="h-4 w-4" />
               <span>Versets <span className="opacity-70 text-xs">/ آيات</span></span>
             </button>
             <button
               type="button"
-              onClick={() => appSettings.onTextDisplayStyleChange('mushaf-hafs')}
+              onClick={() => appSettings.onTextDisplayStyleChange('pages-hafs')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
-                appSettings.textDisplayStyle.startsWith('mushaf-')
+                appSettings.textDisplayStyle.startsWith('pages-')
                   ? 'bg-primary text-primary-foreground shadow'
                   : 'text-muted-foreground hover:bg-muted'
               )}
-              aria-pressed={appSettings.textDisplayStyle.startsWith('mushaf-')}
+              aria-pressed={appSettings.textDisplayStyle.startsWith('pages-')}
             >
               <BookOpen className="h-4 w-4" />
               <span>Pages <span className="opacity-70 text-xs">/ صفحات</span></span>

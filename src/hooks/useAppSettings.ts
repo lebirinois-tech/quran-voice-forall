@@ -5,12 +5,12 @@ export type TextDisplayStyle =
   | 'tajweed'
   | 'warsh-tajweed'
   | 'qalun-tajweed'
-  | 'mushaf-hafs'
-  | 'mushaf-warsh'
-  | 'mushaf-qalun'
-  | 'mushaf-hafs-video'
-  | 'mushaf-warsh-video'
-  | 'mushaf-qalun-video';
+  | 'pages-hafs'
+  | 'pages-warsh'
+  | 'pages-qalun'
+  | 'pages-hafs-video'
+  | 'pages-warsh-video'
+  | 'pages-qalun-video';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 /**
@@ -19,14 +19,14 @@ export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
  */
 const STYLE_TO_RECITER: Record<TextDisplayStyle, ReciterId> = {
   'tajweed': 'husary',
-  'mushaf-hafs': 'husary',
-  'mushaf-hafs-video': 'husary',
+  'pages-hafs': 'husary',
+  'pages-hafs-video': 'husary',
   'warsh-tajweed': 'ibrahimDosaryWarsh',
-  'mushaf-warsh': 'ibrahimDosaryWarsh',
-  'mushaf-warsh-video': 'ibrahimDosaryWarsh',
+  'pages-warsh': 'ibrahimDosaryWarsh',
+  'pages-warsh-video': 'ibrahimDosaryWarsh',
   'qalun-tajweed': 'husaryQalunPerVerse',
-  'mushaf-qalun': 'husaryQalunPerVerse',
-  'mushaf-qalun-video': 'husaryQalunPerVerse',
+  'pages-qalun': 'husaryQalunPerVerse',
+  'pages-qalun-video': 'husaryQalunPerVerse',
 };
 
 const STORAGE_KEYS = {
@@ -57,21 +57,30 @@ export const useAppSettings = () => {
       'tajweed',
       'warsh-tajweed',
       'qalun-tajweed',
-      'mushaf-hafs',
-      'mushaf-warsh',
-      'mushaf-qalun',
-      'mushaf-hafs-video',
-      'mushaf-warsh-video',
-      'mushaf-qalun-video',
+      'pages-hafs',
+      'pages-warsh',
+      'pages-qalun',
+      'pages-hafs-video',
+      'pages-warsh-video',
+      'pages-qalun-video',
     ];
     const MIGRATIONS: Record<string, TextDisplayStyle> = {
       simple: 'tajweed',
       'warsh-text': 'warsh-tajweed',
       'qalun-text': 'qalun-tajweed',
       'mushaf-warsh-tajweed': 'warsh-tajweed',
+      'mushaf-hafs': 'pages-hafs',
+      'mushaf-warsh': 'pages-warsh',
+      'mushaf-qalun': 'pages-qalun',
+      'mushaf-hafs-video': 'pages-hafs-video',
+      'mushaf-warsh-video': 'pages-warsh-video',
+      'mushaf-qalun-video': 'pages-qalun-video',
     };
     if (saved && ALLOWED.includes(saved as TextDisplayStyle)) return saved as TextDisplayStyle;
-    if (saved && MIGRATIONS[saved]) return MIGRATIONS[saved];
+    if (saved && MIGRATIONS[saved]) {
+      localStorage.setItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE, MIGRATIONS[saved]);
+      return MIGRATIONS[saved];
+    }
     return 'tajweed';
   });
 
