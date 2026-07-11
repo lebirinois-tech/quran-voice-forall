@@ -45,7 +45,7 @@ const ARCHIVE_SOURCES = {
   },
 } as const;
 
-const CACHE_BUST = 'mushaf-scan-only-20260711-v4';
+const CACHE_BUST = 'hafs-image-only-20260711-v6';
 
 const withCacheBust = (url: string) => `${url}${url.includes('?') ? '&' : '?'}v=${CACHE_BUST}`;
 
@@ -60,10 +60,10 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
       // Ne jamais repasser par un rendu texte/police : les polices QPC encodées
       // peuvent afficher des lettres incohérentes si elles reçoivent du Unicode.
       return [
-        withCacheBust(`https://cdn.jsdelivr.net/gh/jahedev/tajweed-quran-pages@master/hafs/tajweed-${padded}.jpg`),
-        withCacheBust(`https://raw.githubusercontent.com/jahedev/tajweed-quran-pages/master/hafs/tajweed-${padded}.jpg`),
         withCacheBust(`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/easyquran.com/hafs-tajweed/${page}.jpg`),
         withCacheBust(`https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/easyquran.com/hafs-tajweed/${page}.jpg`),
+        withCacheBust(`https://cdn.jsdelivr.net/gh/jahedev/tajweed-quran-pages@master/hafs/tajweed-${padded}.jpg`),
+        withCacheBust(`https://raw.githubusercontent.com/jahedev/tajweed-quran-pages/master/hafs/tajweed-${padded}.jpg`),
       ];
     case 'qalun':
       // Mushaf Qalun Tajweed coloré — scans directs archive.org (moshaf-tajwed-qaloun)
