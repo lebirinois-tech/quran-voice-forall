@@ -68,6 +68,15 @@ export default defineConfig(({ mode }) => ({
               cacheableResponse: { statuses: [0, 200, 206] },
             },
           },
+          {
+            urlPattern: /^https:\/\/(?:cdn\.jsdelivr\.net\/gh\/jahedev\/tajweed-quran-pages|raw\.githubusercontent\.com\/jahedev\/tajweed-quran-pages)\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-mushaf-pages-cache",
+              expiration: { maxEntries: 700, maxAgeSeconds: 365 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
         ],
       },
     }),
