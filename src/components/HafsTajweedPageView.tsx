@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff, BookOpen, Sparkles, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { TafsirPanel } from './TafsirPanel';
+import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -41,6 +44,9 @@ export const HafsTajweedPageView = ({
   const surah = surahs.find((s) => s.number === surahNumber);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [menuVerse, setMenuVerse] = useState<number | null>(null);
+  const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
+  const [themeVerse, setThemeVerse] = useState<number | null>(null);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
@@ -238,7 +244,7 @@ export const HafsTajweedPageView = ({
               <span
                 key={v.number}
                 data-verse={v.number}
-                onClick={() => onVerseClick?.(v.number)}
+                onClick={() => setMenuVerse(v.number)}
                 title={
                   themes.length
                     ? themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' • ')
@@ -342,6 +348,122 @@ export const HafsTajweedPageView = ({
           )}
         </>
       )}
+
+      {/* Verse action menu */}
+      <Dialog open={menuVerse !== null} onOpenChange={(o) => !o && setMenuVerse(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              Verset {menuVerse} — {surah?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {menuVerse !== null && (() => {
+            const themes = getThemesForVerse(surahNumber, menuVerse);
+            return (
+              <div className="flex flex-col gap-2">
+                {themes.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pb-1">
+                    {themes.map((t) => (
+                      <span
+                        key={t.id}
+                        className="text-xs px-2 py-1 rounded-full border"
+                        style={{
+                          backgroundColor: `hsl(${t.hsl} / 0.18)`,
+                          borderColor: `hsl(${t.hsl} / 0.55)`,
+                        }}
+                      >
+                        {t.emoji} {t.labels.fr}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
+                    if (v) onVerseClick?.(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <Play className="h-4 w-4" />
+                  Écouter ce verset
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
+                    setTafsirVerse(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Tafsir (Al-Muyassar)
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
+                    setThemeVerse(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Tafsir thématique (Mawdou3i)
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setMenuVerse(null)}
+                  className="justify-start gap-2 text-muted-foreground"
+                >
+                  <X className="h-4 w-4" />
+                  Annuler
+                </Button>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Tafsir Al-Muyassar dialog */}
+      <Dialog open={tafsirVerse !== null} onOpenChange={(o) => !o && setTafsirVerse(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Tafsir — {surah?.name} · Verset {tafsirVerse}
+            </DialogTitle>
+          </DialogHeader>
+          {tafsirVerse !== null && (
+            <TafsirPanel
+              surahNumber={surahNumber}
+              verseNumber={tafsirVerse}
+              isOpen={true}
+              onToggle={() => setTafsirVerse(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Thematic tafsir dialog */}
+      <Dialog open={themeVerse !== null} onOpenChange={(o) => !o && setThemeVerse(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Tafsir thématique — {surah?.name} · Verset {themeVerse}
+            </DialogTitle>
+          </DialogHeader>
+          {themeVerse !== null && (
+            <ThematicTafsirPanel
+              surahNumber={surahNumber}
+              verseNumber={themeVerse}
+              isOpen={true}
+              onToggle={() => setThemeVerse(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
