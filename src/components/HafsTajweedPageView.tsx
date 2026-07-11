@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
+import { getThemesForVerse } from '@/data/quranThemes';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -192,11 +193,23 @@ export const HafsTajweedPageView = ({
             const html =
               versesTajweed[v.number] ||
               sanitizeTajweedHtml(applyAutoTajweed(v.text));
+            const themes = getThemesForVerse(surahNumber, v.number);
+            const primary = themes[0];
+            const themeBg = primary
+              ? themes.length > 1
+                ? `linear-gradient(135deg, hsl(${themes[0].hsl} / 0.22) 0%, hsl(${themes[1].hsl} / 0.22) 100%)`
+                : `hsl(${primary.hsl} / 0.20)`
+              : undefined;
             return (
               <span
                 key={v.number}
                 data-verse={v.number}
                 onClick={() => onVerseClick?.(v.number)}
+                title={
+                  themes.length
+                    ? themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' • ')
+                    : undefined
+                }
                 className={cn(
                   'inline transition-all cursor-pointer rounded-md px-1 -mx-1',
                   isCurrent &&
@@ -204,6 +217,14 @@ export const HafsTajweedPageView = ({
                       ? 'bg-primary/25 ring-2 ring-primary shadow-md'
                       : 'bg-primary/10 ring-1 ring-primary/40')
                 )}
+                style={
+                  !isCurrent && themeBg
+                    ? {
+                        background: themeBg,
+                        boxShadow: `inset 0 -2px 0 hsl(${primary.hsl} / 0.55)`,
+                      }
+                    : undefined
+                }
               >
                 <span dangerouslySetInnerHTML={{ __html: html }} />
                 <span className="inline-flex items-center justify-center mx-1 align-middle text-primary font-bold">

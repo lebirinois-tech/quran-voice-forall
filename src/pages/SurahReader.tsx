@@ -410,8 +410,8 @@ const SurahReader = () => {
           <TajweedLegend />
         )}
 
-        {/* Quranic themes legend — text modes only, never over Mushaf page scans. */}
-        {!isMushafImageMode && <ThemeLegend />}
+        {/* Quranic themes legend — text modes + Hafs pages (rendu texte thémé). */}
+        {(!isMushafImageMode || appSettings.textDisplayStyle === 'pages-hafs') && <ThemeLegend />}
 
         <div className="max-w-3xl mx-auto">
           {/* Bismillah - only show for text modes */}
