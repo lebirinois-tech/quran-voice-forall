@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff, BookOpen, Sparkles, X, Menu, Mic, Settings2, ArrowUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, ArrowUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
@@ -47,7 +47,6 @@ export const HafsTajweedPageView = ({
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
   const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
@@ -170,68 +169,42 @@ export const HafsTajweedPageView = ({
         isFullscreen && 'fixed inset-0 z-[2147483000] max-w-none bg-background overflow-y-auto p-3'
       )}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 px-2">
+      {/* Minimal header: page indicator + fullscreen toggle */}
+      <div className="flex items-center justify-between mb-2 px-2">
+        <span className="text-xs text-muted-foreground">
+          {surah?.name}
+          {currentVerse && pageVerses.some((v) => v.number === currentVerse) ? (
+            <> · <span className={cn('font-semibold', isAudioPlaying && 'text-primary')}>v. {currentVerse}</span></>
+          ) : null}
+        </span>
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Menu rapide"
-            className="h-8 w-8"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-          <div className="text-sm text-muted-foreground">
-            📖 Hafs Tajweed — {surah?.name}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">
-            Page {currentPage} / {endPage}
+          <span className="text-xs font-medium text-foreground">
+            Page {currentPage}/{endPage}
           </span>
           <Button
             type="button"
             size="icon"
-            variant="outline"
+            variant="ghost"
             onClick={() => setIsFullscreen((v) => !v)}
             aria-label={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
           </Button>
         </div>
       </div>
-
-      {/* Current verse pill */}
-      {currentVerse &&
-        pageVerses.some((v) => v.number === currentVerse) && (
-          <div
-            className={cn(
-              'mb-3 flex items-center justify-center gap-2 px-4 py-2 rounded-full border-2 transition-all',
-              isAudioPlaying
-                ? 'bg-primary/15 border-primary text-primary animate-pulse'
-                : 'bg-muted/50 border-border text-foreground'
-            )}
-          >
-            <span className="text-sm font-semibold">
-              🔊 Verset en cours : <span className="font-bold">{currentVerse}</span>
-            </span>
-          </div>
-        )}
 
       {/* Page card */}
       <div
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-6 md:p-8 overflow-y-auto"
+        className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-5 md:p-8 overflow-y-auto"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
-          // Adapts to viewport, leaves room for pagination + fixed AudioPlayer at bottom
-          maxHeight: isFullscreen ? 'calc(100dvh - 180px)' : 'calc(100dvh - 320px)',
-          minHeight: '40vh',
+          // Full page alone: leave room only for the single bottom bar (~80px)
+          maxHeight: isFullscreen ? 'calc(100dvh - 110px)' : 'calc(100dvh - 200px)',
+          minHeight: '55vh',
         }}
       >
         {showBismillah && (
@@ -302,40 +275,47 @@ export const HafsTajweedPageView = ({
         </div>
       </div>
 
-      {/* Pagination controls — RTL: previous on right, next on left */}
-      <div className="flex items-center justify-between mt-4 gap-3 mb-2">
+      {/* Single bottom bar: pagination arrows + one big menu button */}
+      <div
+        className={cn(
+          'flex items-center justify-center gap-3 mt-3',
+          isFullscreen &&
+            'fixed left-1/2 -translate-x-1/2 z-[2147483001] bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2'
+        )}
+        style={isFullscreen ? { bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' } : undefined}
+      >
         <Button
           type="button"
-          variant="outline"
-          onClick={goNext}
-          disabled={currentPage >= endPage}
-          className="flex-1"
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Page suivante
-        </Button>
-        <Button
-          type="button"
+          size="icon"
           variant="outline"
           onClick={goPrev}
           disabled={currentPage <= startPage}
-          className="flex-1"
+          aria-label="Page précédente"
+          className="h-11 w-11 rounded-full shrink-0"
         >
-          Page précédente
-          <ChevronRight className="h-4 w-4 ml-1" />
+          <ChevronRight className="h-5 w-5" />
+        </Button>
+        <Button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Ouvrir le menu (paramètres, audio, enregistrement)"
+          className="flex-1 max-w-xs h-12 rounded-full gap-2 shadow-lg text-base font-semibold"
+        >
+          <Menu className="h-5 w-5" />
+          Menu
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={goNext}
+          disabled={currentPage >= endPage}
+          aria-label="Page suivante"
+          className="h-11 w-11 rounded-full shrink-0"
+        >
+          <ChevronLeft className="h-5 w-5" />
         </Button>
       </div>
-
-      {/* Floating quick-menu button — always accessible above the AudioPlayer */}
-      <button
-        type="button"
-        onClick={() => setMenuOpen(true)}
-        aria-label="Menu rapide"
-        className="fixed left-4 z-[2147482500] h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-2xl border-2 border-background flex items-center justify-center active:scale-95 transition-transform"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 140px)' }}
-      >
-        <Menu className="h-5 w-5" />
-      </button>
 
       {/* Quick access Sheet: settings, audio, recording */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -460,50 +440,6 @@ export const HafsTajweedPageView = ({
           })()}
         </DialogContent>
       </Dialog>
-
-      {isFullscreen && (
-        <>
-          <div className="fixed top-3 left-3 z-[2147483001]">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => setShowControls((v) => !v)}
-              className="gap-1.5 rounded-full shadow-lg"
-              aria-label={showControls ? 'Masquer les contrôles' : 'Afficher les contrôles'}
-            >
-              {showControls ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              <span className="text-xs">{showControls ? 'Masquer' : 'Contrôles'}</span>
-            </Button>
-          </div>
-          {showControls && (
-            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[2147483001] flex items-center gap-1 rounded-full border-2 border-primary/30 bg-background/95 backdrop-blur px-3 py-2 shadow-2xl">
-              {onPreviousVerse && (
-                <Button type="button" size="icon" variant="ghost" onClick={onPreviousVerse} aria-label="Verset précédent">
-                  <SkipBack className="h-5 w-5" />
-                </Button>
-              )}
-              {onPlayPause && (
-                <Button type="button" size="icon" onClick={onPlayPause} aria-label={isAudioPlaying ? 'Pause' : 'Lecture'} className="h-11 w-11 rounded-full">
-                  {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                </Button>
-              )}
-              {onNextVerse && (
-                <Button type="button" size="icon" variant="ghost" onClick={onNextVerse} aria-label="Verset suivant">
-                  <SkipForward className="h-5 w-5" />
-                </Button>
-              )}
-              <div className="mx-1 h-6 w-px bg-border" />
-              <Button type="button" size="icon" variant="ghost" onClick={goPrev} disabled={currentPage <= startPage} aria-label="Page précédente">
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-              <Button type="button" size="icon" variant="ghost" onClick={goNext} disabled={currentPage >= endPage} aria-label="Page suivante">
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </div>
-          )}
-        </>
-      )}
 
       {/* Verse action menu */}
       <Dialog open={menuVerse !== null} onOpenChange={(o) => !o && setMenuVerse(null)}>
