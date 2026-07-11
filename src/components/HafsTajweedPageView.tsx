@@ -27,6 +27,7 @@ interface HafsTajweedPageViewProps {
   onNextVerse?: () => void;
   onPreviousVerse?: () => void;
   onPageRequest?: (page: number) => void;
+  onManualPageChange?: (page: number) => void;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -46,6 +47,7 @@ export const HafsTajweedPageView = ({
   onNextVerse,
   onPreviousVerse,
   onPageRequest,
+  onManualPageChange,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -123,11 +125,12 @@ export const HafsTajweedPageView = ({
       manualNavRef.current = true;
       if (p >= startPage && p <= endPage) {
         setCurrentPage(p);
+        onManualPageChange?.(p);
       } else {
         onPageRequest?.(p);
       }
     },
-    [currentPage, onPageRequest, startPage, endPage]
+    [currentPage, onManualPageChange, onPageRequest, startPage, endPage]
   );
 
   const goPrev = useCallback(() => {
