@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
+import { HAFS_MUSHAF_VERSION } from '@/lib/hafsMushafVersion';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
 
@@ -45,7 +46,9 @@ const ARCHIVE_SOURCES = {
   },
 } as const;
 
-const CACHE_BUST = 'hafs-image-only-20260711-v6';
+// Aligned with HAFS_MUSHAF_VERSION so bumping the shared constant forces
+// every Hafs page URL to change and existing caches to miss.
+const CACHE_BUST = HAFS_MUSHAF_VERSION;
 
 const withCacheBust = (url: string) => `${url}${url.includes('?') ? '&' : '?'}v=${CACHE_BUST}`;
 
