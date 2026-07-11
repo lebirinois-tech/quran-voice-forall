@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, ArrowUp, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, ArrowUp, RotateCcw, MoreHorizontal, FolderOpen } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
@@ -181,6 +181,17 @@ export const HafsTajweedPageView = ({
 
   const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
+  // Count distinct themes across the current page for the decorative header.
+  const pageThemesCount = useMemo(() => {
+    const set = new Set<string>();
+    pageVerses.forEach((v) => {
+      getThemesForVerse(surahNumber, v.number).forEach((t) => set.add(t.id));
+    });
+    return set.size;
+  }, [pageVerses, surahNumber]);
+
+  const isSurahStartPage = currentPage === startPage;
+
   return (
     <div
       className={cn(
@@ -235,6 +246,32 @@ export const HafsTajweedPageView = ({
           >
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </p>
+        )}
+
+        {isSurahStartPage && surah && (
+          <div className="mb-5 select-none" dir="rtl">
+            <div
+              className="relative flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2"
+              style={{
+                borderColor: 'hsl(43, 65%, 45%)',
+                background:
+                  'linear-gradient(90deg, hsl(43, 55%, 88%) 0%, hsl(43, 65%, 78%) 50%, hsl(43, 55%, 88%) 100%)',
+                boxShadow: 'inset 0 0 0 1px hsl(43, 65%, 65%)',
+              }}
+            >
+              <div className="flex flex-col items-center text-[10px] leading-tight text-foreground/80 min-w-[52px]">
+                <span>عدد المواضيع</span>
+                <span className="text-base font-bold text-foreground">{pageThemesCount}</span>
+              </div>
+              <div className="flex-1 text-center font-amiri text-2xl md:text-3xl font-bold text-foreground tracking-wide">
+                سورة {surah.nameArabic ?? surah.name}
+              </div>
+              <div className="flex flex-col items-center text-[10px] leading-tight text-foreground/80 min-w-[52px]">
+                <span>عدد الآيات</span>
+                <span className="text-base font-bold text-foreground">{verses.length}</span>
+              </div>
+            </div>
+          </div>
         )}
 
         <div
@@ -296,45 +333,61 @@ export const HafsTajweedPageView = ({
         </div>
       </div>
 
-      {/* Single bottom bar: pagination arrows + one big menu button (always fixed, above audio player) */}
+      {/* Compact bottom bar inspired by the reference: fullscreen · menu · play · mic
+          Page navigation stays available via swipe and the arrows in the header. */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-[45] flex items-center justify-center gap-3 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2"
+        className="fixed left-1/2 -translate-x-1/2 z-[45] flex items-center justify-around gap-4 bg-background/95 backdrop-blur border border-primary/25 rounded-full shadow-2xl px-6 py-2"
         style={{
           bottom: isFullscreen
             ? 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
             : 'calc(env(safe-area-inset-bottom, 0px) + 120px)',
+          minWidth: 'min(360px, 90vw)',
         }}
       >
         <Button
           type="button"
           size="icon"
-          variant="outline"
-          onClick={goNext}
-          disabled={currentPage >= 604}
-          aria-label="Page suivante"
-          className="h-11 w-11 rounded-full shrink-0"
+          variant="ghost"
+          onClick={() => setIsFullscreen((v) => !v)}
+          aria-label={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
+          className="h-10 w-10 rounded-full text-primary"
         >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <Button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          aria-label="Ouvrir le menu (paramètres, audio, enregistrement)"
-          className="h-12 px-6 rounded-full gap-2 shadow-lg text-base font-semibold"
-        >
-          <Menu className="h-5 w-5" />
-          Menu
+          {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <FolderOpen className="h-5 w-5" />}
         </Button>
         <Button
           type="button"
           size="icon"
-          variant="outline"
-          onClick={goPrev}
-          disabled={currentPage <= 1}
-          aria-label="Page précédente"
-          className="h-11 w-11 rounded-full shrink-0"
+          variant="ghost"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Ouvrir le menu"
+          className="h-10 w-10 rounded-full text-primary"
         >
-          <ChevronRight className="h-5 w-5" />
+          <MoreHorizontal className="h-6 w-6" />
+        </Button>
+        {onPlayPause && (
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={onPlayPause}
+            aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
+            className="h-12 w-12 rounded-full border-2 border-dashed border-primary text-primary hover:bg-primary/10"
+          >
+            {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+          </Button>
+        )}
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          onClick={() => {
+            const v = currentVerse ?? pageVerses[0]?.number;
+            if (v) setRecorderVerse(v);
+          }}
+          aria-label="Enregistrer"
+          className="h-10 w-10 rounded-full text-destructive"
+        >
+          <Mic className="h-5 w-5" />
         </Button>
       </div>
 
