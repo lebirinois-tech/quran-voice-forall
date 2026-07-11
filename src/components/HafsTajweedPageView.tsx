@@ -239,7 +239,7 @@ export const HafsTajweedPageView = ({
         <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text text-3xl md:text-4xl leading-loose text-justify text-foreground"
+          className="quran-text tajweed-text text-4xl md:text-5xl lg:text-6xl font-bold leading-loose text-justify text-foreground"
           style={{ wordSpacing: '0.15em' }}
         >
           {pageVerses.map((v) => {
