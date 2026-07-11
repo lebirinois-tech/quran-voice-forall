@@ -174,12 +174,10 @@ const SurahReader = () => {
 
   const handleNavigateToPage = (pageNum: number) => {
     const targetSurah = getSurahForPage(pageNum);
-    const targetSurahMeta = surahs.find((s) => s.number === targetSurah);
-    const targetVerse = targetSurahMeta
-      ? getFirstVerseOfPage(targetSurah, pageNum, targetSurahMeta.versesCount)
-      : 1;
 
-    quranAudio.playVerseAt(targetSurah, targetVerse);
+    // Navigation by page should first change the visible Mushaf page. If audio
+    // is already playing, the page-sync effect below restarts it at the first
+    // verse of the displayed page after the correct verse data is loaded.
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
@@ -202,22 +200,34 @@ const SurahReader = () => {
     return { first: pageVerses[0].number, last: pageVerses[pageVerses.length - 1].number };
   }, [isMushafMode, currentMushafPage, verses]);
 
-  // In Mushaf mode: when the user swipes to a new page while audio is playing,
-  // jump verse playback to that page's range.
+  // In Mushaf mode: when the user changes page while audio is playing, jump the
+  // continuous playback to the first verse of the visible page. Do NOT force a
+  // page repeat range here; otherwise the audio stays locked on that page.
   useEffect(() => {
     if (!isMushafMode || !currentPageVerseRange) return;
     if (!quranAudio.isPlaying) return;
     const { first, last } = currentPageVerseRange;
     if (quranAudio.currentVerse >= first && quranAudio.currentVerse <= last) return;
+    if (quranAudio.repeatSettings.mode === 'range') {
+      quranAudio.setRepeatMode('none', 1);
+    }
     quranAudio.playVerse(first);
-    quranAudio.setRepeatMode('range', 1, first, last);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPageVerseRange?.first, currentPageVerseRange?.last, isMushafMode]);
+  }, [
+    currentPageVerseRange,
+    isMushafMode,
+    quranAudio.currentVerse,
+    quranAudio.isPlaying,
+    quranAudio.playVerse,
+    quranAudio.repeatSettings.mode,
+    quranAudio.setRepeatMode,
+  ]);
 
   const handlePlayRequest = useCallback(() => {
     if (isMushafMode && currentPageVerseRange) {
+      if (quranAudio.repeatSettings.mode === 'range') {
+        quranAudio.setRepeatMode('none', 1);
+      }
       quranAudio.playVerse(currentPageVerseRange.first);
-      quranAudio.setRepeatMode('range', 1, currentPageVerseRange.first, currentPageVerseRange.last);
     } else {
       // In text mode: detect first visible verse and start from there
       if (!quranAudio.isPlaying && verses.length > 0) {
@@ -441,6 +451,7 @@ const SurahReader = () => {
               onPlayPause={() => (quranAudio.isPlaying ? quranAudio.pause() : handlePlayRequest())}
               onNextVerse={quranAudio.nextVerse}
               onPreviousVerse={quranAudio.previousVerse}
+              onPageRequest={handleNavigateToPage}
             />
           )}
 
