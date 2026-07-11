@@ -230,7 +230,7 @@ export const HafsTajweedPageView = ({
         {showBismillah && (
           <p
             dir="rtl"
-            className="text-center font-amiri text-3xl md:text-4xl text-foreground mb-6"
+            className="text-center font-amiri text-4xl md:text-5xl font-bold text-foreground mb-6"
           >
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </p>
@@ -239,7 +239,7 @@ export const HafsTajweedPageView = ({
         <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text text-3xl md:text-4xl leading-loose text-justify text-foreground"
+          className="quran-text tajweed-text text-4xl md:text-5xl lg:text-6xl font-bold leading-loose text-justify text-foreground"
           style={{ wordSpacing: '0.15em' }}
         >
           {pageVerses.map((v) => {
