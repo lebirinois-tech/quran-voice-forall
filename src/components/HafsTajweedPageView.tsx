@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff, BookOpen, Sparkles, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { TafsirPanel } from './TafsirPanel';
+import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -41,6 +44,9 @@ export const HafsTajweedPageView = ({
   const surah = surahs.find((s) => s.number === surahNumber);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [menuVerse, setMenuVerse] = useState<number | null>(null);
+  const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
+  const [themeVerse, setThemeVerse] = useState<number | null>(null);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
