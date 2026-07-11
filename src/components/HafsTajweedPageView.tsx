@@ -143,22 +143,39 @@ export const HafsTajweedPageView = ({
     const dx = e.changedTouches[0].clientX - sx;
     const dy = e.changedTouches[0].clientY - sy;
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) goToPage(currentPage + 1);
-    else goToPage(currentPage - 1);
+    if (dx < 0) goNext();
+    else goPrev();
   };
 
   const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div
+      className={cn(
+        'w-full max-w-3xl mx-auto',
+        isFullscreen && 'fixed inset-0 z-[2147483000] max-w-none bg-background overflow-y-auto p-3'
+      )}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-3 px-2">
         <div className="text-sm text-muted-foreground">
           📖 Mushaf Hafs Tajweed — {surah?.name}
         </div>
-        <span className="text-sm font-medium text-foreground">
-          Page {currentPage} / {endPage}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">
+            Page {currentPage} / {endPage}
+          </span>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={() => setIsFullscreen((v) => !v)}
+            aria-label={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
+            className="h-8 w-8"
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
 
       {/* Current verse pill */}
