@@ -53,11 +53,14 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   const padded = padPage3(page);
   switch (mushafType) {
     case 'hafs':
-      // Hafs Tajweed coloré, édition Médine (KFGQPC) — miroirs jsDelivr + easyquran
+      // Hafs Tajweed coloré — source haute définition (1792×2560) pour rester lisible
+      // sur mobile, tablette et application installée. Les anciennes images QuranHub
+      // étaient trop petites (486×738), ce qui rendait le texte flou/illisible.
       return [
+        `https://cdn.jsdelivr.net/gh/jahedev/tajweed-quran-pages@master/hafs/tajweed-${padded}.jpg`,
+        `https://raw.githubusercontent.com/jahedev/tajweed-quran-pages/master/hafs/tajweed-${padded}.jpg`,
         `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/easyquran.com/hafs-tajweed/${page}.jpg`,
         `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/easyquran.com/hafs-tajweed/${page}.jpg`,
-        `https://easyquran.com/wp-content/uploads/2022/09/${page}-scaled.jpg`,
       ];
     case 'qalun':
       // Mushaf Qalun Tajweed coloré — scans directs archive.org (moshaf-tajwed-qaloun)
