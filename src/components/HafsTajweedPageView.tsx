@@ -202,9 +202,11 @@ export const HafsTajweedPageView = ({
         className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-5 md:p-8 overflow-y-auto"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
-          // Full page alone: leave room only for the single bottom bar (~80px)
-          maxHeight: isFullscreen ? 'calc(100dvh - 110px)' : 'calc(100dvh - 200px)',
-          minHeight: '55vh',
+          // Leave room for the fixed bottom control bar (~90px) + audio player (~110px in normal mode)
+          maxHeight: isFullscreen
+            ? 'calc(100dvh - 110px)'
+            : 'calc(100dvh - 240px)',
+          minHeight: '50vh',
         }}
       >
         {showBismillah && (
@@ -275,14 +277,14 @@ export const HafsTajweedPageView = ({
         </div>
       </div>
 
-      {/* Single bottom bar: pagination arrows + one big menu button */}
+      {/* Single bottom bar: pagination arrows + one big menu button (always fixed, above audio player) */}
       <div
-        className={cn(
-          'flex items-center justify-center gap-3 mt-3',
-          isFullscreen &&
-            'fixed left-1/2 -translate-x-1/2 z-[2147483001] bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2'
-        )}
-        style={isFullscreen ? { bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' } : undefined}
+        className="fixed left-1/2 -translate-x-1/2 z-[2147483001] flex items-center justify-center gap-3 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2"
+        style={{
+          bottom: isFullscreen
+            ? 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
+            : 'calc(env(safe-area-inset-bottom, 0px) + 120px)',
+        }}
       >
         <Button
           type="button"
@@ -299,7 +301,7 @@ export const HafsTajweedPageView = ({
           type="button"
           onClick={() => setMenuOpen(true)}
           aria-label="Ouvrir le menu (paramètres, audio, enregistrement)"
-          className="flex-1 max-w-xs h-12 rounded-full gap-2 shadow-lg text-base font-semibold"
+          className="h-12 px-6 rounded-full gap-2 shadow-lg text-base font-semibold"
         >
           <Menu className="h-5 w-5" />
           Menu
