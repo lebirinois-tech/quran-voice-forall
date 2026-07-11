@@ -278,8 +278,9 @@ export const HafsTajweedPageView = ({
       {/* Pagination controls — RTL: previous on right, next on left */}
       <div className="flex items-center justify-between mt-4 gap-3">
         <Button
+          type="button"
           variant="outline"
-          onClick={() => goToPage(currentPage + 1)}
+          onClick={goNext}
           disabled={currentPage >= endPage}
           className="flex-1"
         >
@@ -287,8 +288,9 @@ export const HafsTajweedPageView = ({
           Page suivante
         </Button>
         <Button
+          type="button"
           variant="outline"
-          onClick={() => goToPage(currentPage - 1)}
+          onClick={goPrev}
           disabled={currentPage <= startPage}
           className="flex-1"
         >
@@ -296,6 +298,50 @@ export const HafsTajweedPageView = ({
           <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
+
+      {isFullscreen && (
+        <>
+          <div className="fixed top-3 left-3 z-[2147483001]">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setShowControls((v) => !v)}
+              className="gap-1.5 rounded-full shadow-lg"
+              aria-label={showControls ? 'Masquer les contrôles' : 'Afficher les contrôles'}
+            >
+              {showControls ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <span className="text-xs">{showControls ? 'Masquer' : 'Contrôles'}</span>
+            </Button>
+          </div>
+          {showControls && (
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[2147483001] flex items-center gap-1 rounded-full border-2 border-primary/30 bg-background/95 backdrop-blur px-3 py-2 shadow-2xl">
+              {onPreviousVerse && (
+                <Button type="button" size="icon" variant="ghost" onClick={onPreviousVerse} aria-label="Verset précédent">
+                  <SkipBack className="h-5 w-5" />
+                </Button>
+              )}
+              {onPlayPause && (
+                <Button type="button" size="icon" onClick={onPlayPause} aria-label={isAudioPlaying ? 'Pause' : 'Lecture'} className="h-11 w-11 rounded-full">
+                  {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                </Button>
+              )}
+              {onNextVerse && (
+                <Button type="button" size="icon" variant="ghost" onClick={onNextVerse} aria-label="Verset suivant">
+                  <SkipForward className="h-5 w-5" />
+                </Button>
+              )}
+              <div className="mx-1 h-6 w-px bg-border" />
+              <Button type="button" size="icon" variant="ghost" onClick={goPrev} disabled={currentPage <= startPage} aria-label="Page précédente">
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+              <Button type="button" size="icon" variant="ghost" onClick={goNext} disabled={currentPage >= endPage} aria-label="Page suivante">
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
