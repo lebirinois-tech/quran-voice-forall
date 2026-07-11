@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { PwaInstallProvider } from "@/contexts/PwaInstallContext";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
+import { FloatingResetButton } from "@/components/FloatingResetButton";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import SurahReader from "./pages/SurahReader";
@@ -78,6 +79,7 @@ const App = () => (
         <Toaster />
         <Sonner position="top-center" />
         {!isPreviewRuntime && <UpdatePrompt />}
+        <FloatingResetButton />
         <AppErrorBoundary>
           <PwaInstallProvider>
             <BrowserRouter>
