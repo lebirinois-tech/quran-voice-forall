@@ -1,13 +1,12 @@
-import { Link } from "react-router-dom";
 import { RotateCcw } from "lucide-react";
 
 export const FloatingResetButton = () => (
-  <Link
-    to="/reset"
+  <a
+    href="/reset"
     aria-label="Réinitialiser l'application"
-    className="fixed bottom-4 right-4 z-[9999] flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-2 ring-primary/40 hover:brightness-110 active:scale-95"
+    className="fixed bottom-4 right-4 z-[2147483647] flex items-center gap-2 rounded-full border-2 border-primary-foreground bg-primary px-5 py-4 text-base font-bold text-primary-foreground shadow-2xl ring-4 ring-primary/40 hover:brightness-110 active:scale-95"
   >
     <RotateCcw className="h-4 w-4" />
     Réinitialiser
-  </Link>
+  </a>
 );
