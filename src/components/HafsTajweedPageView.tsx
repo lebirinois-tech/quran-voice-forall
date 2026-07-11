@@ -244,7 +244,7 @@ export const HafsTajweedPageView = ({
               <span
                 key={v.number}
                 data-verse={v.number}
-                onClick={() => onVerseClick?.(v.number)}
+                onClick={() => setMenuVerse(v.number)}
                 title={
                   themes.length
                     ? themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' • ')
