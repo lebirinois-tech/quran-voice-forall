@@ -298,7 +298,7 @@ export const HafsTajweedPageView = ({
 
       {/* Single bottom bar: pagination arrows + one big menu button (always fixed, above audio player) */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-[2147483001] flex items-center justify-center gap-3 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2"
+        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center justify-center gap-3 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2"
         style={{
           bottom: isFullscreen
             ? 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
