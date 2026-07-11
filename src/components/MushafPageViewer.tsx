@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
-import { getThemesForVerse } from '@/data/quranThemes';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
 
@@ -46,8 +45,12 @@ const ARCHIVE_SOURCES = {
   },
 } as const;
 
+const CACHE_BUST = 'mushaf-scan-only-20260711-v4';
+
+const withCacheBust = (url: string) => `${url}${url.includes('?') ? '&' : '?'}v=${CACHE_BUST}`;
+
 const getArchivePageUrl = (id: string, page: number) =>
-  `https://archive.org/download/${id}/page/n${page - 1}_w1200.jpg`;
+  withCacheBust(`https://archive.org/download/${id}/page/n${page - 1}_w1200.jpg`);
 
 const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   const padded = padPage3(page);
@@ -57,10 +60,10 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
       // Ne jamais repasser par un rendu texte/police : les polices QPC encodées
       // peuvent afficher des lettres incohérentes si elles reçoivent du Unicode.
       return [
-        `https://cdn.jsdelivr.net/gh/jahedev/tajweed-quran-pages@master/hafs/tajweed-${padded}.jpg`,
-        `https://raw.githubusercontent.com/jahedev/tajweed-quran-pages/master/hafs/tajweed-${padded}.jpg`,
-        `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/easyquran.com/hafs-tajweed/${page}.jpg`,
-        `https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/easyquran.com/hafs-tajweed/${page}.jpg`,
+        withCacheBust(`https://cdn.jsdelivr.net/gh/jahedev/tajweed-quran-pages@master/hafs/tajweed-${padded}.jpg`),
+        withCacheBust(`https://raw.githubusercontent.com/jahedev/tajweed-quran-pages/master/hafs/tajweed-${padded}.jpg`),
+        withCacheBust(`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/easyquran.com/hafs-tajweed/${page}.jpg`),
+        withCacheBust(`https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/easyquran.com/hafs-tajweed/${page}.jpg`),
       ];
     case 'qalun':
       // Mushaf Qalun Tajweed coloré — scans directs archive.org (moshaf-tajwed-qaloun)
@@ -389,60 +392,7 @@ export const MushafPageViewer = ({
         )}
       </div>
 
-      {/* In archive mode the scanned pagination doesn't match the 604-page mapping,
-          so we list every verse of the surah colored by theme (Tafsir Mawdou'i). */}
-      {isArchiveMode && surah && (
-        <div className="mt-4 p-3 bg-card/60 rounded-lg border border-border/60">
-          <p className="text-[11px] text-muted-foreground mb-2 text-center">
-            🎨 Versets de la sourate {surah.name} colorés par thème (Tafsir Mawdou'i)
-            {onVerseClick && ' — cliquez pour écouter'}
-          </p>
-          <div className="flex flex-wrap gap-1.5 justify-center py-1 max-h-48 overflow-y-auto">
-            {Array.from({ length: surah.versesCount }, (_, i) => i + 1).map((vn) => {
-              const themes = getThemesForVerse(surahNumber, vn);
-              const primary = themes[0];
-              const isCurrent = currentVerse === vn;
-              const bg = primary ? `hsl(${primary.hsl} / 0.20)` : 'hsl(var(--muted))';
-              const border = primary ? `hsl(${primary.hsl})` : 'hsl(var(--border))';
-              const fg = primary ? `hsl(${primary.hsl})` : 'hsl(var(--foreground))';
-              return (
-                <button
-                  key={vn}
-                  type="button"
-                  onClick={() => onVerseClick?.(vn)}
-                  title={primary ? `${primary.emoji} ${primary.labels.fr}` : `Verset ${vn}`}
-                  className={cn(
-                    "px-2.5 py-1 rounded-full text-xs font-semibold border-2 transition-all hover:scale-105",
-                    isCurrent && "scale-125 ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/50 animate-pulse font-bold z-10 relative"
-                  )}
-                  style={
-                    isCurrent
-                      ? { backgroundColor: `hsl(var(--primary) / 0.25)`, borderColor: `hsl(var(--primary))`, color: `hsl(var(--primary))` }
-                      : { backgroundColor: bg, borderColor: border, color: fg }
-                  }
-                >
-                  {primary?.emoji ?? ''} {vn}
-                </button>
-              );
-            })}
-          </div>
-          {onVerseClick && (
-            <div className="mt-2 flex justify-center">
-              <Button
-                type="button"
-                variant="default"
-                size="sm"
-                onClick={() => onVerseClick(1)}
-                className="gap-2"
-              >
-                ▶️ Écouter la sourate en entier
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Verse strip — Hafs pages stay image-only; only verse buttons below may be colored. */}
+      {/* Verse strip — page scans stay image-only; only verse buttons below may be highlighted. */}
       {!isArchiveMode && pageVerseNumbers && pageVerseNumbers.length > 0 && (
         <div className="mt-4 p-3 bg-card/60 rounded-lg border border-border/60">
           <p className="text-[11px] text-muted-foreground mb-2 text-center">
