@@ -230,7 +230,7 @@ export const HafsTajweedPageView = ({
         {showBismillah && (
           <p
             dir="rtl"
-            className="text-center font-amiri text-3xl md:text-4xl text-foreground mb-6"
+            className="text-center font-amiri text-4xl md:text-5xl font-bold text-foreground mb-6"
           >
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </p>
