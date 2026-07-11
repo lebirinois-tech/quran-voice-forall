@@ -403,8 +403,6 @@ export const MushafPageViewer = ({
             className="flex flex-nowrap gap-1.5 justify-start overflow-x-auto scroll-smooth py-1"
           >
             {pageVerseNumbers.map((vn) => {
-              const themes = getThemesForVerse(surahNumber, vn);
-              const primary = themes[0];
               const isCurrent = currentVerse === vn;
               const bg = 'hsl(var(--muted))';
               const border = 'hsl(var(--border))';
@@ -415,7 +413,7 @@ export const MushafPageViewer = ({
                   ref={isCurrent ? currentVerseBtnRef : undefined}
                   type="button"
                   onClick={() => onVerseClick?.(vn)}
-                  title={`Verset ${vn}${primary ? ` · ${primary.labels.fr}` : ''}`}
+                  title={`Verset ${vn}`}
                   className={cn(
                     "px-2.5 py-1 rounded-full text-xs font-semibold border-2 transition-all hover:scale-105",
                     isCurrent && "scale-125 ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/50 animate-pulse font-bold z-10 relative"
