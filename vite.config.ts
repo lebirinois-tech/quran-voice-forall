@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: ({ request, url }) => request.mode === "navigate" && !url.pathname.startsWith("/~oauth"),
             handler: "NetworkFirst",
             options: {
-              cacheName: "quran-navigation-cache",
+              cacheName: "quran-navigation-cache-v6",
               networkTimeoutSeconds: 4,
               expiration: { maxEntries: 20, maxAgeSeconds: 7 * 24 * 60 * 60 },
             },
@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: ({ url }) => /\/assets\/.*\.(?:js|css|woff2?|ttf)$/.test(url.pathname),
             handler: "CacheFirst",
             options: {
-              cacheName: "quran-assets-cache",
+              cacheName: "quran-assets-cache-v6",
               expiration: { maxEntries: 80, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },
           },
@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/api\.alquran\.cloud\/v1\//,
             handler: "NetworkFirst",
             options: {
-              cacheName: "quran-api-cache",
+              cacheName: "quran-api-cache-v6",
               networkTimeoutSeconds: 6,
               expiration: { maxEntries: 800, maxAgeSeconds: 30 * 24 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200] },
@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/(?:everyayah\.com|archive\.org)\//,
             handler: "CacheFirst",
             options: {
-              cacheName: "quran-audio-cache",
+              cacheName: "quran-audio-cache-v6",
               expiration: { maxEntries: 2000, maxAgeSeconds: 365 * 24 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200, 206] },
             },
@@ -73,7 +73,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/(?:cdn\.jsdelivr\.net\/gh\/jahedev\/tajweed-quran-pages|raw\.githubusercontent\.com\/jahedev\/tajweed-quran-pages)\//,
             handler: "CacheFirst",
             options: {
-              cacheName: "quran-mushaf-pages-cache",
+              cacheName: "quran-mushaf-pages-cache-v6",
               expiration: { maxEntries: 700, maxAgeSeconds: 365 * 24 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200] },
             },

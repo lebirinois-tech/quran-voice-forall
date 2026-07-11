@@ -3,7 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 
-const APP_SHELL_VERSION = "2026-07-11-installed-mushaf-clean-v5";
+const APP_SHELL_VERSION = "2026-07-11-installed-hafs-image-only-v6";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
 const APP_SHELL_RELOAD_KEY = "quran-app-shell-reload-version";
 
@@ -15,6 +15,7 @@ const APP_CACHE_NAME_MATCHERS = [
   "quran-mushaf-pages-cache",
   "quran-pages-cache",
   "quran-api-cache",
+    "vite-precache",
 ];
 
 const normalizeOldMushafSettings = () => {
