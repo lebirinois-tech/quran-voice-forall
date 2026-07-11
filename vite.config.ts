@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => ({
       manifest: false,
       devOptions: { enabled: false },
       workbox: {
+        importScripts: ["sw-cleanup.js"],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

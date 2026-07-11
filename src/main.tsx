@@ -3,38 +3,72 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 
-const APP_SHELL_VERSION = "2026-07-11-pages-scan-only-v4";
+const APP_SHELL_VERSION = "2026-07-11-installed-mushaf-clean-v5";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
+const APP_SHELL_RELOAD_KEY = "quran-app-shell-reload-version";
+
+const APP_CACHE_NAME_MATCHERS = [
+  "workbox-precache",
+  "precache",
+  "quran-navigation-cache",
+  "quran-assets-cache",
+  "quran-mushaf-pages-cache",
+  "quran-pages-cache",
+  "quran-api-cache",
+];
+
+const normalizeOldMushafSettings = () => {
+  const savedDisplayStyle = localStorage.getItem("quran-text-display-style");
+  const migrations: Record<string, string> = {
+    "mushaf-hafs": "pages-hafs",
+    "mushaf-warsh": "pages-warsh",
+    "mushaf-qalun": "pages-qalun",
+    "mushaf-hafs-video": "pages-hafs-video",
+    "mushaf-warsh-video": "pages-warsh-video",
+    "mushaf-qalun-video": "pages-qalun-video",
+  };
+
+  if (savedDisplayStyle && migrations[savedDisplayStyle]) {
+    localStorage.setItem("quran-text-display-style", migrations[savedDisplayStyle]);
+  }
+};
 
 const refreshStaleAppShellCaches = async () => {
   try {
-    if (localStorage.getItem(APP_SHELL_VERSION_KEY) === APP_SHELL_VERSION) return;
+    normalizeOldMushafSettings();
+    if (localStorage.getItem(APP_SHELL_VERSION_KEY) === APP_SHELL_VERSION) return false;
 
     if ("caches" in window) {
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames
-          .filter((name) =>
-            name.includes("workbox-precache") ||
-            name.includes("precache") ||
-            name.includes("quran-navigation-cache") ||
-            name.includes("quran-assets-cache") ||
-            name.includes("quran-mushaf-pages-cache") ||
-            name.includes("quran-pages-cache") ||
-            name.includes("quran-api-cache")
-          )
+          .filter((name) => APP_CACHE_NAME_MATCHERS.some((matcher) => name.includes(matcher)))
           .map((name) => caches.delete(name))
       );
     }
 
+    let hadController = false;
     if ("serviceWorker" in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.update().catch(() => undefined)));
+      hadController = Boolean(navigator.serviceWorker.controller || registrations.length > 0);
+      await Promise.all(registrations.map((registration) => registration.unregister().catch(() => false)));
     }
 
     localStorage.setItem(APP_SHELL_VERSION_KEY, APP_SHELL_VERSION);
+
+    if (hadController && sessionStorage.getItem(APP_SHELL_RELOAD_KEY) !== APP_SHELL_VERSION) {
+      sessionStorage.setItem(APP_SHELL_RELOAD_KEY, APP_SHELL_VERSION);
+      const freshUrl = new URL(window.location.href);
+      freshUrl.searchParams.set("fresh", APP_SHELL_VERSION);
+      window.location.replace(freshUrl.toString());
+      return true;
+    }
+
+    sessionStorage.removeItem(APP_SHELL_RELOAD_KEY);
+    return false;
   } catch (error) {
     console.warn("App shell cache refresh skipped:", error);
+    return false;
   }
 };
 
@@ -84,8 +118,9 @@ if (isInIframe || isPreviewHost || window.location.search.includes("sw=off")) {
   });
 }
 
-try {
-  void refreshStaleAppShellCaches();
+const startApp = async () => {
+  const reloadingForFreshShell = await refreshStaleAppShellCaches();
+  if (reloadingForFreshShell) return;
 
   // ─── First-run initialization ─────────────────────────────────────────────
   // Ensure every app option has a sensible default written to localStorage at
@@ -129,6 +164,8 @@ try {
   // Pré-charge les datasets Tafsir bundle (AR Al-Muyassar + FR Al-Montada)
   // pour qu'ils soient disponibles immédiatement et hors-ligne.
   preloadOfflineTafsir();
-} catch (error) {
+};
+
+startApp().catch((error) => {
   showStartupFallback(error);
-}
+});
