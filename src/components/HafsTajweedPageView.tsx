@@ -348,6 +348,122 @@ export const HafsTajweedPageView = ({
           )}
         </>
       )}
+
+      {/* Verse action menu */}
+      <Dialog open={menuVerse !== null} onOpenChange={(o) => !o && setMenuVerse(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              Verset {menuVerse} — {surah?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {menuVerse !== null && (() => {
+            const themes = getThemesForVerse(surahNumber, menuVerse);
+            return (
+              <div className="flex flex-col gap-2">
+                {themes.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pb-1">
+                    {themes.map((t) => (
+                      <span
+                        key={t.id}
+                        className="text-xs px-2 py-1 rounded-full border"
+                        style={{
+                          backgroundColor: `hsl(${t.hsl} / 0.18)`,
+                          borderColor: `hsl(${t.hsl} / 0.55)`,
+                        }}
+                      >
+                        {t.emoji} {t.labels.fr}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
+                    if (v) onVerseClick?.(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <Play className="h-4 w-4" />
+                  Écouter ce verset
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
+                    setTafsirVerse(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Tafsir (Al-Muyassar)
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
+                    setThemeVerse(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Tafsir thématique (Mawdou3i)
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setMenuVerse(null)}
+                  className="justify-start gap-2 text-muted-foreground"
+                >
+                  <X className="h-4 w-4" />
+                  Annuler
+                </Button>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Tafsir Al-Muyassar dialog */}
+      <Dialog open={tafsirVerse !== null} onOpenChange={(o) => !o && setTafsirVerse(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Tafsir — {surah?.name} · Verset {tafsirVerse}
+            </DialogTitle>
+          </DialogHeader>
+          {tafsirVerse !== null && (
+            <TafsirPanel
+              surahNumber={surahNumber}
+              verseNumber={tafsirVerse}
+              isOpen={true}
+              onToggle={() => setTafsirVerse(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Thematic tafsir dialog */}
+      <Dialog open={themeVerse !== null} onOpenChange={(o) => !o && setThemeVerse(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Tafsir thématique — {surah?.name} · Verset {themeVerse}
+            </DialogTitle>
+          </DialogHeader>
+          {themeVerse !== null && (
+            <ThematicTafsirPanel
+              surahNumber={surahNumber}
+              verseNumber={themeVerse}
+              isOpen={true}
+              onToggle={() => setThemeVerse(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
