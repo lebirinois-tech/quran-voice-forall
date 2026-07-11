@@ -4,16 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* KFGQPC Uthmanic Script - King Fahd Complex Official Quran Font with Color Tajweed */
-@font-face {
-  font-family: 'KFGQPC Hafs Uthmanic Script';
-  src: url('https://cdn.jsdelivr.net/gh/AbuYusof/Quran-Fonts-HAFS-Uthmanic-Colored-By-Tajweed-Ruls@main/hafs-color/KFGQPC%20HAFS%20Uthmanic%20Script%20Bold%2013.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/gh/AbuYusof/Quran-Fonts-HAFS-Uthmanic-Colored-By-Tajweed-Ruls@main/hafs-color/KFGQPC%20HAFS%20Uthmanic%20Script%20Bold%2013.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* KFGQPC Warsh Uthmanic Script - King Fahd Complex Official Warsh Font */
 @font-face {
   font-family: 'warsh10';
@@ -137,9 +127,9 @@
     line-height: 2.2;
   }
 
-  /* Arabic Quran text with KFGQPC Uthmanic Script - Professional Tajweed colors built into font */
+  /* Arabic Quran text — use Unicode-safe Amiri to avoid broken QPC glyph codes */
   .quran-text {
-    font-family: 'KFGQPC Hafs Uthmanic Script', 'Amiri', serif;
+    font-family: 'Amiri', serif;
     direction: rtl;
     line-height: 2.5;
     letter-spacing: 0;
@@ -151,7 +141,7 @@
   }
 
   .font-uthmanic {
-    font-family: 'KFGQPC Hafs Uthmanic Script', 'Amiri', serif;
+    font-family: 'Amiri', serif;
   }
 
   .font-warsh {

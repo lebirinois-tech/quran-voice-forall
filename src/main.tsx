@@ -3,6 +3,37 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 
+const APP_SHELL_VERSION = "2026-07-11-mushaf-hafs-hd-image";
+const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
+
+const refreshStaleAppShellCaches = async () => {
+  try {
+    if (localStorage.getItem(APP_SHELL_VERSION_KEY) === APP_SHELL_VERSION) return;
+
+    if ("caches" in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter((name) =>
+            name.includes("workbox-precache") ||
+            name.includes("quran-navigation-cache") ||
+            name.includes("quran-assets-cache")
+          )
+          .map((name) => caches.delete(name))
+      );
+    }
+
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.update().catch(() => undefined)));
+    }
+
+    localStorage.setItem(APP_SHELL_VERSION_KEY, APP_SHELL_VERSION);
+  } catch (error) {
+    console.warn("App shell cache refresh skipped:", error);
+  }
+};
+
 function showStartupFallback(error?: unknown) {
   const root = document.getElementById("root");
   if (!root) return;
@@ -50,6 +81,8 @@ if (isInIframe || isPreviewHost || window.location.search.includes("sw=off")) {
 }
 
 try {
+  void refreshStaleAppShellCaches();
+
   // ─── First-run initialization ─────────────────────────────────────────────
   // Ensure every app option has a sensible default written to localStorage at
   // install time so the user never lands on an "empty" configuration.
