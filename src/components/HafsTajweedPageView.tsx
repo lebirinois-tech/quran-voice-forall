@@ -432,6 +432,17 @@ export const HafsTajweedPageView = ({
                 {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 {isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
               </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 mt-2"
+                onClick={() => {
+                  setMenuOpen(false);
+                  window.location.href = '/reset';
+                }}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Réinitialiser l'application
+              </Button>
             </section>
           </div>
         </SheetContent>
