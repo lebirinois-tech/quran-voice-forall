@@ -26,6 +26,7 @@ interface HafsTajweedPageViewProps {
   onPlayPause?: () => void;
   onNextVerse?: () => void;
   onPreviousVerse?: () => void;
+  onPageRequest?: (page: number) => void;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -44,6 +45,7 @@ export const HafsTajweedPageView = ({
   onPlayPause,
   onNextVerse,
   onPreviousVerse,
+  onPageRequest,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -93,7 +95,8 @@ export const HafsTajweedPageView = ({
     }
   }, [surahNumber, initialPage, startPage, endPage]);
 
-  // Clamp current page if verses arrive later
+  // Clamp current page if verses arrive later, but allow edge navigation to ask
+  // the parent to open the previous/next sourate when the page is outside this sourate.
   useEffect(() => {
     if (currentPage < startPage) setCurrentPage(startPage);
     else if (currentPage > endPage) setCurrentPage(endPage);
@@ -103,23 +106,36 @@ export const HafsTajweedPageView = ({
     onPageChange?.(currentPage);
   }, [currentPage, onPageChange]);
 
+  // In continuous audio, follow the verse page automatically instead of keeping
+  // the display on the first page while playback advances.
+  useEffect(() => {
+    if (!currentVerse || !isAudioPlaying) return;
+    const versePage = verses.find((v) => v.number === currentVerse)?.page;
+    if (!versePage || versePage === currentPage) return;
+    if (versePage >= startPage && versePage <= endPage) {
+      setCurrentPage(versePage);
+    }
+  }, [currentVerse, currentPage, endPage, isAudioPlaying, startPage, verses]);
+
   const goToPage = useCallback(
     (p: number) => {
-      if (p < startPage || p > endPage || p === currentPage) return;
+      if (p < 1 || p > 604 || p === currentPage) return;
       manualNavRef.current = true;
-      setCurrentPage(p);
+      if (p >= startPage && p <= endPage) {
+        setCurrentPage(p);
+      } else {
+        onPageRequest?.(p);
+      }
     },
-    [currentPage, startPage, endPage]
+    [currentPage, onPageRequest, startPage, endPage]
   );
 
   const goPrev = useCallback(() => {
-    manualNavRef.current = true;
-    setCurrentPage((cur) => (cur > startPage ? cur - 1 : cur));
-  }, [startPage]);
+    goToPage(currentPage - 1);
+  }, [currentPage, goToPage]);
   const goNext = useCallback(() => {
-    manualNavRef.current = true;
-    setCurrentPage((cur) => (cur < endPage ? cur + 1 : cur));
-  }, [endPage]);
+    goToPage(currentPage + 1);
+  }, [currentPage, goToPage]);
 
   const pageVerses = useMemo(
     () => verses.filter((v) => (v.page ?? 1) === currentPage),
@@ -179,7 +195,7 @@ export const HafsTajweedPageView = ({
         </span>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-foreground">
-            Page {currentPage}/{endPage}
+            Page {currentPage}/604
           </span>
           <Button
             type="button"
@@ -291,7 +307,7 @@ export const HafsTajweedPageView = ({
           size="icon"
           variant="outline"
           onClick={goPrev}
-          disabled={currentPage <= startPage}
+          disabled={currentPage <= 1}
           aria-label="Page précédente"
           className="h-11 w-11 rounded-full shrink-0"
         >
@@ -311,7 +327,7 @@ export const HafsTajweedPageView = ({
           size="icon"
           variant="outline"
           onClick={goNext}
-          disabled={currentPage >= endPage}
+          disabled={currentPage >= 604}
           aria-label="Page suivante"
           className="h-11 w-11 rounded-full shrink-0"
         >
@@ -363,10 +379,10 @@ export const HafsTajweedPageView = ({
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Navigation</h4>
               <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={() => { goPrev(); }} disabled={currentPage <= startPage} className="flex-1">
+                <Button variant="outline" onClick={() => { goPrev(); }} disabled={currentPage <= 1} className="flex-1">
                   <ChevronRight className="h-4 w-4 mr-1" /> Précédente
                 </Button>
-                <Button variant="outline" onClick={() => { goNext(); }} disabled={currentPage >= endPage} className="flex-1">
+                <Button variant="outline" onClick={() => { goNext(); }} disabled={currentPage >= 604} className="flex-1">
                   Suivante <ChevronLeft className="h-4 w-4 ml-1" />
                 </Button>
               </div>
