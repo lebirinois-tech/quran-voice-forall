@@ -8,7 +8,7 @@ import {
   HAFS_CACHE_URL_MARKER,
 } from "./lib/hafsMushafVersion";
 
-const APP_SHELL_VERSION = "2026-07-11-installed-hafs-image-only-v6";
+const APP_SHELL_VERSION = "2026-07-11-hafs-tajweed-themes-v7";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
 const APP_SHELL_RELOAD_KEY = "quran-app-shell-reload-version";
 

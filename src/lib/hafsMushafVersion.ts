@@ -5,7 +5,7 @@
 //   1. New image URLs (via ?v= cache-buster) → browsers refetch pages.
 //   2. Purge of any Cache Storage entries that pinned the previous version.
 //   3. Purge of the app-shell caches that may embed old HTML/JS references.
-export const HAFS_MUSHAF_VERSION = "2026-07-11-hafs-image-only-v6";
+export const HAFS_MUSHAF_VERSION = "2026-07-11-hafs-tajweed-themes-v7";
 
 // Storage key that records the last version applied on this device.
 export const HAFS_MUSHAF_VERSION_KEY = "quran-hafs-mushaf-version";
