@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music } from 'lucide-react';
+import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music, RotateCcw } from 'lucide-react';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -116,12 +116,18 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-6">
         {/* Auth Section */}
-        <section className="mb-6 flex justify-end animate-fade-in">
+        <section className="mb-6 flex items-center justify-between gap-3 animate-fade-in">
+          <Link to="/reset">
+            <Button variant="outline" size="sm" className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              Réinitialiser
+            </Button>
+          </Link>
           {authLoading ? (
             <div className="h-10 w-24 bg-muted animate-pulse rounded-lg" />
           ) : isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="text-sm text-muted-foreground flex min-w-0 items-center gap-2 truncate">
                 <User className="h-4 w-4" />
                 {user?.email?.split('@')[0]}
               </span>
@@ -403,6 +409,13 @@ const Index = () => {
               <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
               {isChecking ? 'Vérification...' : 'Rechercher une mise à jour'}
             </Button>
+            {/* Reset Button */}
+            <Link to="/reset">
+              <Button variant="outline" className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Réinitialiser l'application
+              </Button>
+            </Link>
           </div>
           
           <p className="text-sm text-muted-foreground">
