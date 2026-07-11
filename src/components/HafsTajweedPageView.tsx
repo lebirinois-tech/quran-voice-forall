@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff, BookOpen, Sparkles, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, Eye, EyeOff, BookOpen, Sparkles, X, Menu, Mic, Settings2, ArrowUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
@@ -7,10 +7,12 @@ import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 import { VerseCard } from './VerseCard';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { VerseRecorder } from './VerseRecorder';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -51,6 +53,8 @@ export const HafsTajweedPageView = ({
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
   const { reciter, textDisplayStyle, fontSize } = useAppSettings();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [recorderVerse, setRecorderVerse] = useState<number | null>(null);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
@@ -168,8 +172,20 @@ export const HafsTajweedPageView = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3 px-2">
-        <div className="text-sm text-muted-foreground">
-          📖 Mushaf Hafs Tajweed — {surah?.name}
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Menu rapide"
+            className="h-8 w-8"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+          <div className="text-sm text-muted-foreground">
+            📖 Hafs Tajweed — {surah?.name}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-foreground">
@@ -213,8 +229,9 @@ export const HafsTajweedPageView = ({
         className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-6 md:p-8 overflow-y-auto"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
-          maxHeight: '75vh',
-          minHeight: '60vh',
+          // Adapts to viewport, leaves room for pagination + fixed AudioPlayer at bottom
+          maxHeight: isFullscreen ? 'calc(100dvh - 180px)' : 'calc(100dvh - 320px)',
+          minHeight: '40vh',
         }}
       >
         {showBismillah && (
@@ -286,7 +303,7 @@ export const HafsTajweedPageView = ({
       </div>
 
       {/* Pagination controls — RTL: previous on right, next on left */}
-      <div className="flex items-center justify-between mt-4 gap-3">
+      <div className="flex items-center justify-between mt-4 gap-3 mb-2">
         <Button
           type="button"
           variant="outline"
@@ -308,6 +325,141 @@ export const HafsTajweedPageView = ({
           <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
+
+      {/* Floating quick-menu button — always accessible above the AudioPlayer */}
+      <button
+        type="button"
+        onClick={() => setMenuOpen(true)}
+        aria-label="Menu rapide"
+        className="fixed left-4 z-[2147482500] h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-2xl border-2 border-background flex items-center justify-center active:scale-95 transition-transform"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 140px)' }}
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Quick access Sheet: settings, audio, recording */}
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="left" className="w-[85vw] sm:w-[400px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Menu rapide</SheetTitle>
+            <SheetDescription>Paramètres, audio et enregistrement</SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-4 space-y-4">
+            <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Audio</h4>
+              <div className="flex items-center gap-2">
+                {onPreviousVerse && (
+                  <Button size="icon" variant="outline" onClick={onPreviousVerse} aria-label="Verset précédent">
+                    <SkipBack className="h-4 w-4" />
+                  </Button>
+                )}
+                {onPlayPause && (
+                  <Button
+                    size="icon"
+                    onClick={() => { onPlayPause(); }}
+                    className="h-11 w-11 rounded-full"
+                    aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
+                  >
+                    {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                  </Button>
+                )}
+                {onNextVerse && (
+                  <Button size="icon" variant="outline" onClick={onNextVerse} aria-label="Verset suivant">
+                    <SkipForward className="h-4 w-4" />
+                  </Button>
+                )}
+                <span className="text-xs text-muted-foreground ml-auto">
+                  {currentVerse ? `Verset ${currentVerse}` : '—'}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Vitesse, répétition et récitateur sont dans le lecteur en bas d'écran.
+              </p>
+            </section>
+
+            <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Navigation</h4>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => { goPrev(); }} disabled={currentPage <= startPage} className="flex-1">
+                  <ChevronRight className="h-4 w-4 mr-1" /> Précédente
+                </Button>
+                <Button variant="outline" onClick={() => { goNext(); }} disabled={currentPage >= endPage} className="flex-1">
+                  Suivante <ChevronLeft className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Enregistrement (Hifz)</h4>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                onClick={() => {
+                  const v = currentVerse ?? pageVerses[0]?.number;
+                  if (v) {
+                    setMenuOpen(false);
+                    setRecorderVerse(v);
+                  }
+                }}
+              >
+                <Mic className="h-4 w-4" />
+                Enregistrer le verset {currentVerse ?? pageVerses[0]?.number ?? ''}
+              </Button>
+            </section>
+
+            <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Paramètres</h4>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                onClick={() => {
+                  setMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                <ArrowUp className="h-4 w-4" />
+                Aller aux paramètres (haut de page)
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 mt-2"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setIsFullscreen((v) => !v);
+                }}
+              >
+                {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
+              </Button>
+            </section>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Recorder dialog */}
+      <Dialog open={recorderVerse !== null} onOpenChange={(o) => !o && setRecorderVerse(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Enregistrement — {surah?.name} · Verset {recorderVerse}
+            </DialogTitle>
+          </DialogHeader>
+          {recorderVerse !== null && (() => {
+            const v = verses.find((x) => x.number === recorderVerse);
+            if (!v) return null;
+            return (
+              <VerseRecorder
+                surahNumber={surahNumber}
+                verseNumber={v.number}
+                verseText={v.text}
+                reciter={reciter}
+                pageVerses={pageVerses.map((pv) => ({ number: pv.number, text: pv.text }))}
+              />
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
 
       {isFullscreen && (
         <>
