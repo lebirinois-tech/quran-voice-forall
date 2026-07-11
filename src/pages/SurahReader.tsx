@@ -57,6 +57,7 @@ const SurahReader = () => {
   const { saveProgress, getSurahProgress } = useReadingProgress();
   const [lastSavedVerse, setLastSavedVerse] = useState<number | null>(null);
   const [currentMushafPage, setCurrentMushafPage] = useState<number | null>(null);
+  const [manualAudioPageRequest, setManualAudioPageRequest] = useState<number | null>(null);
   // Verse range whose text should be hidden during active memorization (per page).
   const [hidingRange, setHidingRange] = useState<{ pageNum: number; start: number; end: number } | null>(null);
 
@@ -174,15 +175,22 @@ const SurahReader = () => {
 
   const handleNavigateToPage = (pageNum: number) => {
     const targetSurah = getSurahForPage(pageNum);
-    const targetSurahMeta = surahs.find((s) => s.number === targetSurah);
-    const targetVerse = targetSurahMeta
-      ? getFirstVerseOfPage(targetSurah, pageNum, targetSurahMeta.versesCount)
-      : 1;
 
-    quranAudio.playVerseAt(targetSurah, targetVerse);
+    // Navigation by page should first change the visible Mushaf page. If audio
+    // is already playing, the page-sync effect below restarts it at the first
+    // verse of the displayed page after the correct verse data is loaded.
+    if (quranAudio.isPlaying) {
+      setManualAudioPageRequest(pageNum);
+    }
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
   };
+
+  const handleManualMushafPageChange = useCallback((pageNum: number) => {
+    if (quranAudio.isPlaying) {
+      setManualAudioPageRequest(pageNum);
+    }
+  }, [quranAudio.isPlaying]);
 
   const handleNavigateToJuz = (juzNum: number) => {
     const juz = juzMapping[juzNum];
@@ -202,22 +210,38 @@ const SurahReader = () => {
     return { first: pageVerses[0].number, last: pageVerses[pageVerses.length - 1].number };
   }, [isMushafMode, currentMushafPage, verses]);
 
-  // In Mushaf mode: when the user swipes to a new page while audio is playing,
-  // jump verse playback to that page's range.
+  // In Mushaf mode: only when the user manually changes page while audio is
+  // playing, jump continuous playback to that page. Natural audio progression is
+  // handled inside the page view, so it can move forward page by page normally.
   useEffect(() => {
     if (!isMushafMode || !currentPageVerseRange) return;
+    if (manualAudioPageRequest !== currentMushafPage) return;
+    setManualAudioPageRequest(null);
     if (!quranAudio.isPlaying) return;
     const { first, last } = currentPageVerseRange;
     if (quranAudio.currentVerse >= first && quranAudio.currentVerse <= last) return;
+    if (quranAudio.repeatSettings.mode === 'range') {
+      quranAudio.setRepeatMode('none', 1);
+    }
     quranAudio.playVerse(first);
-    quranAudio.setRepeatMode('range', 1, first, last);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPageVerseRange?.first, currentPageVerseRange?.last, isMushafMode]);
+  }, [
+    currentPageVerseRange,
+    currentMushafPage,
+    isMushafMode,
+    manualAudioPageRequest,
+    quranAudio.currentVerse,
+    quranAudio.isPlaying,
+    quranAudio.playVerse,
+    quranAudio.repeatSettings.mode,
+    quranAudio.setRepeatMode,
+  ]);
 
   const handlePlayRequest = useCallback(() => {
     if (isMushafMode && currentPageVerseRange) {
+      if (quranAudio.repeatSettings.mode === 'range') {
+        quranAudio.setRepeatMode('none', 1);
+      }
       quranAudio.playVerse(currentPageVerseRange.first);
-      quranAudio.setRepeatMode('range', 1, currentPageVerseRange.first, currentPageVerseRange.last);
     } else {
       // In text mode: detect first visible verse and start from there
       if (!quranAudio.isPlaying && verses.length > 0) {
@@ -441,6 +465,8 @@ const SurahReader = () => {
               onPlayPause={() => (quranAudio.isPlaying ? quranAudio.pause() : handlePlayRequest())}
               onNextVerse={quranAudio.nextVerse}
               onPreviousVerse={quranAudio.previousVerse}
+              onPageRequest={handleNavigateToPage}
+              onManualPageChange={handleManualMushafPageChange}
             />
           )}
 
