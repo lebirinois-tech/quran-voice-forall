@@ -53,9 +53,9 @@ const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   const padded = padPage3(page);
   switch (mushafType) {
     case 'hafs':
-      // Hafs Tajweed coloré — source haute définition (1792×2560) pour rester lisible
-      // sur mobile, tablette et application installée. Les anciennes images QuranHub
-      // étaient trop petites (486×738), ce qui rendait le texte flou/illisible.
+      // Hafs Tajweed coloré — uniquement en image scan HD.
+      // Ne jamais repasser par un rendu texte/police : les polices QPC encodées
+      // peuvent afficher des lettres incohérentes si elles reçoivent du Unicode.
       return [
         `https://cdn.jsdelivr.net/gh/jahedev/tajweed-quran-pages@master/hafs/tajweed-${padded}.jpg`,
         `https://raw.githubusercontent.com/jahedev/tajweed-quran-pages/master/hafs/tajweed-${padded}.jpg`,
@@ -335,7 +335,7 @@ export const MushafPageViewer = ({
           </>
         ) : (
           <AspectRatio
-            ratio={3 / 4}
+            ratio={7 / 10}
             className={cn(
               "rounded-xl overflow-hidden border border-border shadow-lg",
               "bg-[hsl(40,45%,92%)]",
@@ -357,13 +357,15 @@ export const MushafPageViewer = ({
               </div>
             ) : (
               <img
+                key={imageSrc}
                 src={imageSrc}
                 alt={`Page ${currentPage} - ${mushafType}`}
                 className={cn(
                   "w-full h-full object-contain transition-opacity duration-300",
-                  "mix-blend-multiply",
                   isLoading ? "opacity-0" : "opacity-100"
                 )}
+                loading="eager"
+                decoding="async"
                 referrerPolicy="no-referrer"
                 draggable={false}
                 onLoad={handleImageLoad}
@@ -440,11 +442,11 @@ export const MushafPageViewer = ({
         </div>
       )}
 
-      {/* Themed verse strip — shows each verse on this page with its theme color (Hafs only) */}
+      {/* Verse strip — Hafs pages stay image-only; only verse buttons below may be colored. */}
       {!isArchiveMode && pageVerseNumbers && pageVerseNumbers.length > 0 && (
         <div className="mt-4 p-3 bg-card/60 rounded-lg border border-border/60">
           <p className="text-[11px] text-muted-foreground mb-2 text-center">
-            🎨 Versets de cette page colorés par thème (cliquez pour écouter)
+            Versets de cette page (cliquez pour écouter)
           </p>
           <div
             data-verse-strip
@@ -454,16 +456,16 @@ export const MushafPageViewer = ({
               const themes = getThemesForVerse(surahNumber, vn);
               const primary = themes[0];
               const isCurrent = currentVerse === vn;
-              const bg = primary ? `hsl(${primary.hsl} / 0.20)` : 'hsl(var(--muted))';
-              const border = primary ? `hsl(${primary.hsl})` : 'hsl(var(--border))';
-              const fg = primary ? `hsl(${primary.hsl})` : 'hsl(var(--foreground))';
+              const bg = 'hsl(var(--muted))';
+              const border = 'hsl(var(--border))';
+              const fg = 'hsl(var(--foreground))';
               return (
                 <button
                   key={vn}
                   ref={isCurrent ? currentVerseBtnRef : undefined}
                   type="button"
                   onClick={() => onVerseClick?.(vn)}
-                  title={primary ? `${primary.emoji} ${primary.labels.fr}` : `Verset ${vn}`}
+                  title={`Verset ${vn}${primary ? ` · ${primary.labels.fr}` : ''}`}
                   className={cn(
                     "px-2.5 py-1 rounded-full text-xs font-semibold border-2 transition-all hover:scale-105",
                     isCurrent && "scale-125 ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/50 animate-pulse font-bold z-10 relative"
@@ -474,7 +476,7 @@ export const MushafPageViewer = ({
                       : { backgroundColor: bg, borderColor: border, color: fg }
                   }
                 >
-                  {primary?.emoji ?? ''} {vn}
+                  {vn}
                 </button>
               );
             })}
