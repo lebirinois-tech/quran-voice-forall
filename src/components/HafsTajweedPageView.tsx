@@ -185,7 +185,7 @@ export const HafsTajweedPageView = ({
     <div
       className={cn(
         'w-full max-w-3xl mx-auto',
-        isFullscreen && 'fixed inset-0 z-[2147483000] max-w-none bg-background overflow-y-auto p-3'
+        isFullscreen && 'fixed inset-0 z-[45] h-[100dvh] max-w-none bg-background overflow-y-auto p-3'
       )}
     >
       {/* Minimal header: page indicator + fullscreen toggle */}
@@ -230,7 +230,8 @@ export const HafsTajweedPageView = ({
         {showBismillah && (
           <p
             dir="rtl"
-            className="text-center font-amiri text-4xl md:text-5xl font-bold text-foreground mb-6"
+            className="text-center font-amiri text-4xl md:text-5xl font-extrabold text-foreground mb-6"
+            style={{ fontWeight: 800 }}
           >
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </p>
@@ -239,8 +240,8 @@ export const HafsTajweedPageView = ({
         <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text text-4xl md:text-5xl lg:text-6xl font-bold leading-loose text-justify text-foreground"
-          style={{ wordSpacing: '0.15em' }}
+          className="quran-text tajweed-text text-4xl md:text-5xl lg:text-6xl font-extrabold leading-loose text-justify text-foreground [&_span]:font-bold"
+          style={{ wordSpacing: '0.15em', fontWeight: 800 }}
         >
           {pageVerses.map((v) => {
             const isCurrent = currentVerse === v.number;
@@ -297,7 +298,7 @@ export const HafsTajweedPageView = ({
 
       {/* Single bottom bar: pagination arrows + one big menu button (always fixed, above audio player) */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center justify-center gap-3 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2"
+        className="fixed left-1/2 -translate-x-1/2 z-[45] flex items-center justify-center gap-3 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-3 py-2"
         style={{
           bottom: isFullscreen
             ? 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
@@ -308,12 +309,12 @@ export const HafsTajweedPageView = ({
           type="button"
           size="icon"
           variant="outline"
-          onClick={goPrev}
-          disabled={currentPage <= 1}
-          aria-label="Page précédente"
+          onClick={goNext}
+          disabled={currentPage >= 604}
+          aria-label="Page suivante"
           className="h-11 w-11 rounded-full shrink-0"
         >
-          <ChevronRight className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <Button
           type="button"
@@ -328,12 +329,12 @@ export const HafsTajweedPageView = ({
           type="button"
           size="icon"
           variant="outline"
-          onClick={goNext}
-          disabled={currentPage >= 604}
-          aria-label="Page suivante"
+          onClick={goPrev}
+          disabled={currentPage <= 1}
+          aria-label="Page précédente"
           className="h-11 w-11 rounded-full shrink-0"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
