@@ -1,8 +1,6 @@
 const QURAN_APP_CLEANUP_VERSION = "2026-07-11-installed-mushaf-clean-v5";
 
 const APP_CACHE_MATCHERS = [
-  "workbox-precache",
-  "precache",
   "quran-navigation-cache",
   "quran-assets-cache",
   "quran-mushaf-pages-cache",
