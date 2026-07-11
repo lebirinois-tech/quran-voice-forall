@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { VerseRecorder } from '@/components/VerseRecorder';
 import { MushafPageViewer } from '@/components/MushafPageViewer';
+import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { TajweedLegend } from '@/components/TajweedLegend';
@@ -425,8 +426,23 @@ const SurahReader = () => {
             </div>
           )}
 
-          {/* Mushaf Image Viewer Mode (only modes with real page images) */}
-          {isMushafImageMode && (
+          {/* Hafs pages = rendu texte Tajweed inline (stable, offline, surbrillance précise) */}
+          {isMushafImageMode && appSettings.textDisplayStyle === 'pages-hafs' && (
+            <HafsTajweedPageView
+              key={`hafs-text-${num}-${searchParams.get('page') || 'default'}`}
+              surahNumber={num}
+              verses={verses}
+              versesTajweed={versesTajweed}
+              initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
+              onPageChange={setCurrentMushafPage}
+              currentVerse={quranAudio.currentVerse}
+              isAudioPlaying={quranAudio.isPlaying}
+              onVerseClick={(vn) => quranAudio.playVerse(vn)}
+            />
+          )}
+
+          {/* Autres modes Mushaf (Warsh/Qalun scans + vidéos) */}
+          {isMushafImageMode && appSettings.textDisplayStyle !== 'pages-hafs' && (
             <MushafPageViewer
               key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
@@ -443,9 +459,7 @@ const SurahReader = () => {
               }
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               mushafType={
-                appSettings.textDisplayStyle === 'pages-hafs'
-                  ? 'hafs'
-                  : appSettings.textDisplayStyle === 'pages-qalun'
+                appSettings.textDisplayStyle === 'pages-qalun'
                     ? 'qalun'
                     : appSettings.textDisplayStyle === 'pages-warsh'
                       ? 'warsh'
