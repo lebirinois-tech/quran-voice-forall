@@ -9,6 +9,8 @@ import { getThemesForVerse } from '@/data/quranThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
+import { VerseCard } from './VerseCard';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -47,6 +49,8 @@ export const HafsTajweedPageView = ({
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
   const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
+  const [detailVerse, setDetailVerse] = useState<number | null>(null);
+  const { reciter, textDisplayStyle, fontSize } = useAppSettings();
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
@@ -394,6 +398,18 @@ export const HafsTajweedPageView = ({
                   onClick={() => {
                     const v = menuVerse;
                     setMenuVerse(null);
+                    setDetailVerse(v);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Détails du verset (traduction, partage…)
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const v = menuVerse;
+                    setMenuVerse(null);
                     setTafsirVerse(v);
                   }}
                   className="justify-start gap-2"
@@ -422,6 +438,37 @@ export const HafsTajweedPageView = ({
                   Annuler
                 </Button>
               </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Full verse-mode content (translation, TTS, share, download, bookmark) */}
+      <Dialog open={detailVerse !== null} onOpenChange={(o) => !o && setDetailVerse(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {surah?.name} · Verset {detailVerse}
+            </DialogTitle>
+          </DialogHeader>
+          {detailVerse !== null && (() => {
+            const v = verses.find((x) => x.number === detailVerse);
+            if (!v) return null;
+            return (
+              <VerseCard
+                verse={v}
+                surahNumber={surahNumber}
+                reciter={reciter}
+                textDisplayStyle={textDisplayStyle}
+                fontSize={fontSize}
+                tajweedHtml={versesTajweed[v.number]}
+                pageNumber={v.page}
+                isPlaying={isAudioPlaying && currentVerse === v.number}
+                onPlay={() => {
+                  setDetailVerse(null);
+                  onVerseClick?.(v.number);
+                }}
+              />
             );
           })()}
         </DialogContent>
