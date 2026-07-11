@@ -1,4 +1,4 @@
-const QURAN_APP_CLEANUP_VERSION = "2026-07-11-installed-hafs-image-only-v6";
+const QURAN_APP_CLEANUP_VERSION = "2026-07-11-hafs-tajweed-themes-v7";
 
 const APP_CACHE_MATCHERS = [
   "workbox-precache",
