@@ -416,8 +416,8 @@ const SurahReader = () => {
           <TajweedLegend />
         )}
 
-        {/* Quranic themes legend — visible in all modes */}
-        <ThemeLegend />
+        {/* Quranic themes legend — text modes only, never over Mushaf page scans. */}
+        {!isMushafImageMode && <ThemeLegend />}
 
         <div className="max-w-3xl mx-auto">
           {/* Bismillah - only show for text modes */}
@@ -471,7 +471,7 @@ const SurahReader = () => {
             />
           )}
 
-          {/* Text-based display modes (Tajweed / Simple / Warsh / Qalun) */}
+          {/* Text-based display modes (Tajweed / Warsh / Qalun). Mushaf page modes must never render VerseCard text. */}
           {!isMushafImageMode && (
             <>
               {/* Loading State */}
