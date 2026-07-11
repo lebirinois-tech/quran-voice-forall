@@ -69,15 +69,18 @@ export const useAppSettings = () => {
       'warsh-text': 'warsh-tajweed',
       'qalun-text': 'qalun-tajweed',
       'mushaf-warsh-tajweed': 'warsh-tajweed',
-      'mushaf-hafs': 'tajweed',
-      'mushaf-warsh': 'tajweed',
-      'mushaf-qalun': 'tajweed',
+      'mushaf-hafs': 'pages-hafs',
+      'mushaf-warsh': 'pages-warsh',
+      'mushaf-qalun': 'pages-qalun',
       'mushaf-hafs-video': 'pages-hafs-video',
       'mushaf-warsh-video': 'pages-warsh-video',
       'mushaf-qalun-video': 'pages-qalun-video',
     };
     if (saved && ALLOWED.includes(saved as TextDisplayStyle)) return saved as TextDisplayStyle;
-    if (saved && MIGRATIONS[saved]) return MIGRATIONS[saved];
+    if (saved && MIGRATIONS[saved]) {
+      localStorage.setItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE, MIGRATIONS[saved]);
+      return MIGRATIONS[saved];
+    }
     return 'tajweed';
   });
 

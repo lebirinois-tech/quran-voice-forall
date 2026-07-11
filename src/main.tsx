@@ -3,7 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 
-const APP_SHELL_VERSION = "2026-07-11-mushaf-image-only-v2";
+const APP_SHELL_VERSION = "2026-07-11-pages-scan-only-v4";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
 
 const refreshStaleAppShellCaches = async () => {
@@ -16,9 +16,11 @@ const refreshStaleAppShellCaches = async () => {
         cacheNames
           .filter((name) =>
             name.includes("workbox-precache") ||
+            name.includes("precache") ||
             name.includes("quran-navigation-cache") ||
             name.includes("quran-assets-cache") ||
             name.includes("quran-mushaf-pages-cache") ||
+            name.includes("quran-pages-cache") ||
             name.includes("quran-api-cache")
           )
           .map((name) => caches.delete(name))
