@@ -2,6 +2,11 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
+import {
+  HAFS_MUSHAF_VERSION,
+  HAFS_MUSHAF_VERSION_KEY,
+  HAFS_CACHE_URL_MARKER,
+} from "./lib/hafsMushafVersion";
 
 const APP_SHELL_VERSION = "2026-07-11-installed-hafs-image-only-v6";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
@@ -37,6 +42,7 @@ const normalizeOldMushafSettings = () => {
 const refreshStaleAppShellCaches = async () => {
   try {
     normalizeOldMushafSettings();
+    await refreshStaleHafsMushafCaches();
     if (localStorage.getItem(APP_SHELL_VERSION_KEY) === APP_SHELL_VERSION) return false;
 
     if ("caches" in window) {
@@ -70,6 +76,39 @@ const refreshStaleAppShellCaches = async () => {
   } catch (error) {
     console.warn("App shell cache refresh skipped:", error);
     return false;
+  }
+};
+
+// Force-refresh Hafs Mushaf image caches on every new HAFS_MUSHAF_VERSION.
+// Runs independently of APP_SHELL_VERSION so a Hafs-only bump still purges
+// stale page images on devices that already have the latest app shell.
+const refreshStaleHafsMushafCaches = async () => {
+  try {
+    if (localStorage.getItem(HAFS_MUSHAF_VERSION_KEY) === HAFS_MUSHAF_VERSION) return;
+
+    if ("caches" in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(async (cacheName) => {
+          const cache = await caches.open(cacheName);
+          const requests = await cache.keys();
+          await Promise.all(
+            requests
+              .filter((request) => {
+                const url = request.url;
+                if (!url.includes(HAFS_CACHE_URL_MARKER)) return false;
+                // Keep entries already keyed on the current version.
+                return !url.includes(`v=${HAFS_MUSHAF_VERSION}`);
+              })
+              .map((request) => cache.delete(request))
+          );
+        })
+      );
+    }
+
+    localStorage.setItem(HAFS_MUSHAF_VERSION_KEY, HAFS_MUSHAF_VERSION);
+  } catch (error) {
+    console.warn("Hafs Mushaf cache refresh skipped:", error);
   }
 };
 
