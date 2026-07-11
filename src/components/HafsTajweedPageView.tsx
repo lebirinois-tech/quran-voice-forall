@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, ArrowUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, ArrowUp, RotateCcw } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
@@ -218,14 +218,13 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-5 md:p-8 overflow-y-auto"
+        className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-3 md:p-6 overflow-y-auto"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
-          // Leave room for the fixed bottom control bar (~90px) + audio player (~110px in normal mode)
           maxHeight: isFullscreen
-            ? 'calc(100dvh - 110px)'
-            : 'calc(100dvh - 240px)',
-          minHeight: '50vh',
+            ? 'calc(100dvh - 90px)'
+            : 'calc(100dvh - 220px)',
+          minHeight: 'calc(100dvh - 240px)',
         }}
       >
         {showBismillah && (
@@ -240,14 +239,14 @@ export const HafsTajweedPageView = ({
         <div
           dir="rtl"
           lang="ar"
-          className="quran-text text-3xl md:text-4xl leading-loose text-justify text-foreground"
+          className="quran-text tajweed-text text-3xl md:text-4xl leading-loose text-justify text-foreground"
           style={{ wordSpacing: '0.15em' }}
         >
           {pageVerses.map((v) => {
             const isCurrent = currentVerse === v.number;
-            const html =
-              versesTajweed[v.number] ||
-              sanitizeTajweedHtml(applyAutoTajweed(v.text));
+            // Always use the same auto-tajweed coloring as verse mode for
+            // consistent, richer rule highlighting.
+            const html = sanitizeTajweedHtml(applyAutoTajweed(v.text));
             const themes = getThemesForVerse(surahNumber, v.number);
             const primary = themes[0];
             const themeBg = primary
