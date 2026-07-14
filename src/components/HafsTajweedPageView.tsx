@@ -335,7 +335,7 @@ export const HafsTajweedPageView = ({
 
       {/* Persistent bottom controls: RTL page navigation + menu above the audio player. */}
       <div
-        className="fixed left-2 right-2 z-[60] mx-auto flex max-w-md items-center justify-between gap-2 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-2 py-2"
+        className="fixed left-2 right-2 z-[45] mx-auto flex max-w-md items-center justify-between gap-2 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-2 py-2"
         style={{
           bottom: isFullscreen
             ? 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
@@ -419,7 +419,7 @@ export const HafsTajweedPageView = ({
 
       {/* Quick access Sheet: settings, audio, recording */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-[85vw] sm:w-[400px] overflow-y-auto">
+        <SheetContent side="bottom" className="z-[70] max-h-[82dvh] rounded-t-2xl overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
           <SheetHeader>
             <SheetTitle>Menu rapide</SheetTitle>
             <SheetDescription>Paramètres, audio et enregistrement</SheetDescription>
