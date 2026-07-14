@@ -506,15 +506,11 @@ const SurahReader = () => {
               }
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               mushafType={
-                appSettings.textDisplayStyle === 'pages-qalun'
-                    ? 'qalun'
-                    : appSettings.textDisplayStyle === 'pages-warsh'
-                      ? 'warsh'
-                      : appSettings.textDisplayStyle === 'pages-warsh-video'
-                        ? 'warsh-video'
-                        : appSettings.textDisplayStyle === 'pages-qalun-video'
-                          ? 'qalun-video'
-                          : 'hafs-video'
+                appSettings.textDisplayStyle === 'pages-warsh-video'
+                  ? 'warsh-video'
+                  : appSettings.textDisplayStyle === 'pages-qalun-video'
+                    ? 'qalun-video'
+                    : 'hafs-video'
               }
             />
           )}
