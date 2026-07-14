@@ -333,34 +333,46 @@ export const HafsTajweedPageView = ({
         </div>
       </div>
 
-      {/* Compact bottom bar inspired by the reference: fullscreen · menu · play · mic
-          Page navigation stays available via swipe and the arrows in the header. */}
+      {/* Persistent bottom controls: RTL page navigation + menu above the audio player. */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-[45] flex items-center justify-around gap-4 bg-background/95 backdrop-blur border border-primary/25 rounded-full shadow-2xl px-6 py-2"
+        className="fixed left-2 right-2 z-[45] mx-auto flex max-w-md items-center justify-between gap-2 bg-background/95 backdrop-blur border-2 border-primary/30 rounded-full shadow-2xl px-2 py-2"
         style={{
           bottom: isFullscreen
             ? 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
-            : 'calc(env(safe-area-inset-bottom, 0px) + 120px)',
-          minWidth: 'min(360px, 90vw)',
+            : 'calc(env(safe-area-inset-bottom, 0px) + 150px)',
         }}
       >
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={goNext}
+          disabled={currentPage >= 604}
+          aria-label="Page suivante"
+          title="Page suivante"
+          className="h-12 w-12 shrink-0 rounded-full border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
         <Button
           type="button"
           size="icon"
           variant="ghost"
           onClick={() => setIsFullscreen((v) => !v)}
           aria-label={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
-          className="h-10 w-10 rounded-full text-primary"
+          title={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
+          className="h-10 w-10 shrink-0 rounded-full text-primary"
         >
           {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <FolderOpen className="h-5 w-5" />}
         </Button>
         <Button
           type="button"
           size="icon"
-          variant="ghost"
+          variant="outline"
           onClick={() => setMenuOpen(true)}
           aria-label="Ouvrir le menu"
-          className="h-10 w-10 rounded-full text-primary"
+          title="Menu"
+          className="h-12 w-12 shrink-0 rounded-full border-primary/40 bg-card text-primary shadow-md"
         >
           <MoreHorizontal className="h-6 w-6" />
         </Button>
@@ -371,9 +383,10 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             onClick={onPlayPause}
             aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
-            className="h-12 w-12 rounded-full border-2 border-dashed border-primary text-primary hover:bg-primary/10"
+              title={isAudioPlaying ? 'Pause' : 'Lecture'}
+              className="h-10 w-10 shrink-0 rounded-full border-2 border-dashed border-primary text-primary hover:bg-primary/10"
           >
-            {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+            {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </Button>
         )}
         <Button
@@ -385,15 +398,28 @@ export const HafsTajweedPageView = ({
             if (v) setRecorderVerse(v);
           }}
           aria-label="Enregistrer"
-          className="h-10 w-10 rounded-full text-destructive"
+          title="Enregistrer"
+          className="h-10 w-10 shrink-0 rounded-full text-destructive"
         >
           <Mic className="h-5 w-5" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={goPrev}
+          disabled={currentPage <= 1}
+          aria-label="Page précédente"
+          title="Page précédente"
+          className="h-12 w-12 shrink-0 rounded-full border-primary/40 bg-card text-primary disabled:opacity-40"
+        >
+          <ChevronRight className="h-6 w-6" />
         </Button>
       </div>
 
       {/* Quick access Sheet: settings, audio, recording */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-[85vw] sm:w-[400px] overflow-y-auto">
+        <SheetContent side="bottom" className="z-[70] max-h-[82dvh] rounded-t-2xl overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
           <SheetHeader>
             <SheetTitle>Menu rapide</SheetTitle>
             <SheetDescription>Paramètres, audio et enregistrement</SheetDescription>
