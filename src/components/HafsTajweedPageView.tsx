@@ -284,7 +284,13 @@ export const HafsTajweedPageView = ({
             const isCurrent = currentVerse === v.number;
             // Always use the same auto-tajweed coloring as verse mode for
             // consistent, richer rule highlighting.
-            const html = sanitizeTajweedHtml(applyAutoTajweed(v.text));
+            // Prefer the pre-computed Tajweed HTML from the API (Hafs) or
+            // the qiraat variant (Warsh/Qalun) when available; otherwise
+            // fall back to auto-Tajweed on the plain text.
+            const providedTajweed = versesTajweed?.[v.number];
+            const html = providedTajweed
+              ? sanitizeTajweedHtml(providedTajweed)
+              : sanitizeTajweedHtml(applyAutoTajweed(v.text));
             const themes = getThemesForVerse(surahNumber, v.number);
             const primary = themes[0];
             const themeBg = primary
