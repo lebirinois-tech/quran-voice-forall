@@ -76,11 +76,13 @@ const SurahReader = () => {
   const { verses, versesTajweed, isLoading: isLoadingVerses, error, isOffline } = useQuranData(num);
   const { warshVerses, isLoading: isLoadingWarsh } = useWarshData(
     num,
-    appSettings.textDisplayStyle === 'warsh-tajweed'
+    appSettings.textDisplayStyle === 'warsh-tajweed' ||
+      appSettings.textDisplayStyle === 'pages-warsh'
   );
   const { qalunVerses, isLoading: isLoadingQalun } = useQalunData(
     num,
-    appSettings.textDisplayStyle === 'qalun-tajweed'
+    appSettings.textDisplayStyle === 'qalun-tajweed' ||
+      appSettings.textDisplayStyle === 'pages-qalun'
   );
 
   const effectiveDisplayStyle = appSettings.textDisplayStyle;
@@ -450,13 +452,26 @@ const SurahReader = () => {
             </div>
           )}
 
-          {/* Hafs pages = rendu texte Tajweed inline (stable, offline, surbrillance précise) */}
-          {isMushafImageMode && appSettings.textDisplayStyle === 'pages-hafs' && (
+          {/* Hafs / Warsh / Qalun pages = rendu texte Tajweed inline (stable, offline, surbrillance précise) */}
+          {isMushafImageMode &&
+            (appSettings.textDisplayStyle === 'pages-hafs' ||
+              appSettings.textDisplayStyle === 'pages-warsh' ||
+              appSettings.textDisplayStyle === 'pages-qalun') && (
             <HafsTajweedPageView
-              key={`hafs-text-${num}-${searchParams.get('page') || 'default'}`}
+              key={`${appSettings.textDisplayStyle}-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
               verses={verses}
-              versesTajweed={versesTajweed}
+              versesTajweed={
+                appSettings.textDisplayStyle === 'pages-warsh'
+                  ? warshVerses
+                  : appSettings.textDisplayStyle === 'pages-qalun'
+                    ? qalunVerses
+                    : versesTajweed
+              }
+              preferProvidedTajweed={
+                appSettings.textDisplayStyle === 'pages-warsh' ||
+                appSettings.textDisplayStyle === 'pages-qalun'
+              }
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}
               currentVerse={quranAudio.currentVerse}
@@ -470,8 +485,11 @@ const SurahReader = () => {
             />
           )}
 
-          {/* Autres modes Mushaf (Warsh/Qalun scans + vidéos) */}
-          {isMushafImageMode && appSettings.textDisplayStyle !== 'pages-hafs' && (
+          {/* Autres modes Mushaf (vidéos uniquement — Warsh/Qalun scans remplacés par rendu texte) */}
+          {isMushafImageMode &&
+            appSettings.textDisplayStyle !== 'pages-hafs' &&
+            appSettings.textDisplayStyle !== 'pages-warsh' &&
+            appSettings.textDisplayStyle !== 'pages-qalun' && (
             <MushafPageViewer
               key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
@@ -488,15 +506,11 @@ const SurahReader = () => {
               }
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               mushafType={
-                appSettings.textDisplayStyle === 'pages-qalun'
-                    ? 'qalun'
-                    : appSettings.textDisplayStyle === 'pages-warsh'
-                      ? 'warsh'
-                      : appSettings.textDisplayStyle === 'pages-warsh-video'
-                        ? 'warsh-video'
-                        : appSettings.textDisplayStyle === 'pages-qalun-video'
-                          ? 'qalun-video'
-                          : 'hafs-video'
+                appSettings.textDisplayStyle === 'pages-warsh-video'
+                  ? 'warsh-video'
+                  : appSettings.textDisplayStyle === 'pages-qalun-video'
+                    ? 'qalun-video'
+                    : 'hafs-video'
               }
             />
           )}
