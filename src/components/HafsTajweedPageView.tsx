@@ -18,6 +18,12 @@ interface HafsTajweedPageViewProps {
   surahNumber: number;
   verses: Verse[];
   versesTajweed: Record<number, string>;
+  /**
+   * When true, use the pre-computed Tajweed HTML from `versesTajweed` instead
+   * of auto-Tajweed on `v.text`. Used for Warsh/Qalun where the qiraat variant
+   * already ships coloured HTML.
+   */
+  preferProvidedTajweed?: boolean;
   initialPage?: number;
   onPageChange?: (page: number) => void;
   currentVerse?: number;
@@ -38,6 +44,7 @@ export const HafsTajweedPageView = ({
   surahNumber,
   verses,
   versesTajweed,
+  preferProvidedTajweed = false,
   initialPage,
   onPageChange,
   currentVerse,
@@ -284,13 +291,13 @@ export const HafsTajweedPageView = ({
             const isCurrent = currentVerse === v.number;
             // Always use the same auto-tajweed coloring as verse mode for
             // consistent, richer rule highlighting.
-            // Prefer the pre-computed Tajweed HTML from the API (Hafs) or
-            // the qiraat variant (Warsh/Qalun) when available; otherwise
-            // fall back to auto-Tajweed on the plain text.
+            // Hafs: rely on auto-Tajweed for consistent, rich rule highlighting.
+            // Warsh/Qalun: use the pre-computed coloured HTML from the qiraat source.
             const providedTajweed = versesTajweed?.[v.number];
-            const html = providedTajweed
-              ? sanitizeTajweedHtml(providedTajweed)
-              : sanitizeTajweedHtml(applyAutoTajweed(v.text));
+            const html =
+              preferProvidedTajweed && providedTajweed
+                ? sanitizeTajweedHtml(providedTajweed)
+                : sanitizeTajweedHtml(applyAutoTajweed(v.text));
             const themes = getThemesForVerse(surahNumber, v.number);
             const primary = themes[0];
             const themeBg = primary
