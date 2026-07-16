@@ -45,6 +45,7 @@ interface AudioPlayerProps {
   onRepeatPauseChange?: (next: Partial<RepeatPauseSettings>) => void;
   surahName?: string;
   className?: string;
+  embedded?: boolean;
 }
 
 export const AudioPlayer = ({
@@ -72,6 +73,7 @@ export const AudioPlayer = ({
   onRepeatPauseChange,
   surahName,
   className,
+  embedded = false,
 }: AudioPlayerProps) => {
   const verseProgress = ((currentVerse) / totalVerses) * 100;
   const [isDownloading, setIsDownloading] = useState(false);
@@ -169,11 +171,12 @@ export const AudioPlayer = ({
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated z-40",
-      "p-4 animate-slide-in",
+      embedded
+        ? "relative bg-card border border-border shadow-soft rounded-2xl p-3"
+        : "fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated z-40 p-4 animate-slide-in",
       className
     )}>
-      <div className="container mx-auto max-w-2xl">
+      <div className={cn(embedded ? "w-full" : "container mx-auto max-w-2xl")}>
         {/* Audio Progress bar (current verse audio) */}
         <div 
           className="mb-2 cursor-pointer group"
