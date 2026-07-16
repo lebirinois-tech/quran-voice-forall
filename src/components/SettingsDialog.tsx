@@ -24,6 +24,8 @@ interface SettingsDialogProps {
   onTextDisplayStyleChange: (style: TextDisplayStyle) => void;
   fontSize: FontSize;
   onFontSizeChange: (size: FontSize) => void;
+  triggerClassName?: string;
+  triggerLabel?: string;
 }
 
 const BACKGROUND_COLORS = [
@@ -108,6 +110,8 @@ export const SettingsDialog = ({
   onTextDisplayStyleChange,
   fontSize,
   onFontSizeChange,
+  triggerClassName,
+  triggerLabel,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
@@ -180,11 +184,12 @@ export const SettingsDialog = ({
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="text-primary-foreground hover:bg-primary-foreground/10"
+          size={triggerLabel ? 'default' : 'icon'}
+          className={cn('text-primary-foreground hover:bg-primary-foreground/10', triggerClassName)}
           aria-label="Paramètres"
         >
           <Settings className="h-5 w-5" />
+          {triggerLabel && <span>{triggerLabel}</span>}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-card border-border max-h-[85vh] overflow-y-auto">
