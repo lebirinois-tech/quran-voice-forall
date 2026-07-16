@@ -14,6 +14,7 @@ import { RECITERS, RECITER_IDS, QIRAAT_LABELS, ReciterId, QiraatId, getSafeRecit
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { AudioCacheSettings } from './AudioCacheSettings';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface SettingsDialogProps {
   reciter: ReciterId;
