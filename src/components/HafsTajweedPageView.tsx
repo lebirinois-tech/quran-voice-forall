@@ -36,6 +36,7 @@ interface HafsTajweedPageViewProps {
   onManualPageChange?: (page: number) => void;
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
+  settingsControls?: ReactNode;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -59,6 +60,7 @@ export const HafsTajweedPageView = ({
   onManualPageChange,
   audioControls,
   voiceControls,
+  settingsControls,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -456,6 +458,7 @@ export const HafsTajweedPageView = ({
 
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Paramètres</h4>
+              {settingsControls && <div className="mb-2">{settingsControls}</div>}
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
