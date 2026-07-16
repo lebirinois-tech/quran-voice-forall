@@ -7,6 +7,7 @@ import { MushafPageViewer } from '@/components/MushafPageViewer';
 import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
+import { SettingsDialog } from '@/components/SettingsDialog';
 import { TajweedLegend } from '@/components/TajweedLegend';
 import { ThemeLegend } from '@/components/ThemeLegend';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
@@ -316,28 +317,87 @@ const SurahReader = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background pattern-islamic pb-32" style={{ backgroundColor: appSettings.backgroundColor }}>
-      <Header 
-        showBackButton 
-        onBack={handleGoHome}
-        onAccessibilityToggle={() => setIsAccessibilityMode(!isAccessibilityMode)}
-        isAccessibilityMode={isAccessibilityMode}
-        isContinuousMode={voiceCommands.isContinuousMode}
-        onToggleContinuous={voiceCommands.toggleContinuousMode}
-        reciter={appSettings.reciter}
-        onReciterChange={appSettings.onReciterChange}
-        backgroundColor={appSettings.backgroundColor}
-        onBackgroundColorChange={appSettings.onBackgroundColorChange}
-        textDisplayStyle={appSettings.textDisplayStyle}
-        onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
-        fontSize={appSettings.fontSize}
-        onFontSizeChange={appSettings.onFontSizeChange}
-      />
+  const voiceCommandControls = (
+    <VoiceCommandButton
+      isListening={voiceCommands.isListening}
+      isContinuousMode={voiceCommands.isContinuousMode}
+      isAwaitingCommand={voiceCommands.isAwaitingCommand}
+      isSupported={voiceCommands.isSupported}
+      onToggle={voiceCommands.toggleListening}
+      transcript={voiceCommands.transcript}
+      voiceLang={voiceCommands.voiceLang}
+      onLangChange={voiceCommands.setVoiceLang}
+    />
+  );
 
-      <main className="container mx-auto px-4 py-6">
+  const audioPlayerControls = (
+    <AudioPlayer
+      isPlaying={quranAudio.isPlaying}
+      isLoading={quranAudio.isLoading}
+      currentVerse={quranAudio.currentVerse}
+      totalVerses={verses.length || 1}
+      progress={quranAudio.progress}
+      reciter={quranAudio.reciter}
+      surahNumber={num}
+      repeatSettings={quranAudio.repeatSettings}
+      currentRepeatCount={quranAudio.currentRepeatCount}
+      playbackSpeed={quranAudio.playbackSpeed}
+      onPlay={handlePlayRequest}
+      onPause={quranAudio.pause}
+      onNext={quranAudio.nextVerse}
+      onPrevious={quranAudio.previousVerse}
+      onReciterChange={appSettings.onReciterChange}
+      onSeek={quranAudio.seek}
+      onRepeatModeChange={quranAudio.setRepeatMode}
+      onSpeedChange={quranAudio.changeSpeed}
+      repeatPause={quranAudio.repeatPause}
+      isPausingForRepeat={quranAudio.isPausingForRepeat}
+      pauseRemainingSec={quranAudio.pauseRemainingSec}
+      onRepeatPauseChange={quranAudio.setRepeatPauseSettings}
+      surahName={`${surah.name} - ${surah.nameArabic}`}
+      embedded={isMushafMode}
+    />
+  );
+
+  const mushafSettingsControls = (
+    <SettingsDialog
+      reciter={appSettings.reciter}
+      onReciterChange={appSettings.onReciterChange}
+      backgroundColor={appSettings.backgroundColor}
+      onBackgroundColorChange={appSettings.onBackgroundColorChange}
+      textDisplayStyle={appSettings.textDisplayStyle}
+      onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+      fontSize={appSettings.fontSize}
+      onFontSizeChange={appSettings.onFontSizeChange}
+      triggerLabel="Ouvrir les paramètres"
+      triggerClassName="w-full justify-start gap-2 border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
+    />
+  );
+
+  return (
+    <div className={`min-h-screen bg-background pattern-islamic ${isMushafMode ? 'pb-20' : 'pb-32'}`} style={{ backgroundColor: appSettings.backgroundColor }}>
+      {!isMushafMode && (
+        <Header 
+          showBackButton 
+          onBack={handleGoHome}
+          onAccessibilityToggle={() => setIsAccessibilityMode(!isAccessibilityMode)}
+          isAccessibilityMode={isAccessibilityMode}
+          isContinuousMode={voiceCommands.isContinuousMode}
+          onToggleContinuous={voiceCommands.toggleContinuousMode}
+          reciter={appSettings.reciter}
+          onReciterChange={appSettings.onReciterChange}
+          backgroundColor={appSettings.backgroundColor}
+          onBackgroundColorChange={appSettings.onBackgroundColorChange}
+          textDisplayStyle={appSettings.textDisplayStyle}
+          onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+          fontSize={appSettings.fontSize}
+          onFontSizeChange={appSettings.onFontSizeChange}
+        />
+      )}
+
+      <main className={isMushafMode ? 'px-1 py-1' : 'container mx-auto px-4 py-6'}>
         {/* Surah Header */}
-        <div className="text-center mb-8 animate-fade-in">
+        {!isMushafMode && <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block mb-4">
             <div className="surah-badge w-16 h-20 flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto">
               {surah.number}
@@ -352,10 +412,10 @@ const SurahReader = () => {
           <p className="text-muted-foreground">
             {surah.englishName} • {surah.versesCount} versets
           </p>
-        </div>
+        </div>}
 
         {/* Quick Navigation */}
-        <div className="max-w-lg mx-auto mb-6 animate-fade-in">
+        {!isMushafMode && <div className="max-w-lg mx-auto mb-6 animate-fade-in">
           <div className="grid grid-cols-2 gap-3">
             {/* Page Navigation */}
             <div className="bg-card border border-border rounded-xl p-3">
@@ -427,7 +487,7 @@ const SurahReader = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Tajweed Legend - shown for all colored Tajweed modes */}
         {(appSettings.textDisplayStyle === 'tajweed' || 
@@ -437,9 +497,9 @@ const SurahReader = () => {
         )}
 
         {/* Quranic themes legend — text modes + Hafs pages (rendu texte thémé). */}
-        {(!isMushafImageMode || appSettings.textDisplayStyle === 'pages-hafs') && <ThemeLegend />}
+        {!isMushafMode && (!isMushafImageMode || appSettings.textDisplayStyle === 'pages-hafs') && <ThemeLegend />}
 
-        <div className="max-w-3xl mx-auto">
+        <div className={isMushafMode ? 'mx-auto w-full max-w-3xl' : 'max-w-3xl mx-auto'}>
           {/* Bismillah - only show for text modes */}
           {surah.number !== 1 && surah.number !== 9 && !isMushafImageMode && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
@@ -482,6 +542,9 @@ const SurahReader = () => {
               onPreviousVerse={quranAudio.previousVerse}
               onPageRequest={handleNavigateToPage}
               onManualPageChange={handleManualMushafPageChange}
+              audioControls={audioPlayerControls}
+              voiceControls={voiceCommandControls}
+              settingsControls={mushafSettingsControls}
             />
           )}
 
@@ -680,45 +743,10 @@ const SurahReader = () => {
       </main>
 
       {/* Voice Command Button */}
-      <div className="fixed bottom-28 right-4 z-50">
-        <VoiceCommandButton
-          isListening={voiceCommands.isListening}
-          isContinuousMode={voiceCommands.isContinuousMode}
-          isAwaitingCommand={voiceCommands.isAwaitingCommand}
-          isSupported={voiceCommands.isSupported}
-          onToggle={voiceCommands.toggleListening}
-          transcript={voiceCommands.transcript}
-          voiceLang={voiceCommands.voiceLang}
-          onLangChange={voiceCommands.setVoiceLang}
-        />
-      </div>
+      {!isMushafMode && <div className="fixed bottom-28 right-4 z-50">{voiceCommandControls}</div>}
 
       {/* Audio Player — visible in all modes (verse-by-verse playback) */}
-      <AudioPlayer
-          isPlaying={quranAudio.isPlaying}
-          isLoading={quranAudio.isLoading}
-          currentVerse={quranAudio.currentVerse}
-          totalVerses={verses.length || 1}
-          progress={quranAudio.progress}
-          reciter={quranAudio.reciter}
-          surahNumber={num}
-          repeatSettings={quranAudio.repeatSettings}
-          currentRepeatCount={quranAudio.currentRepeatCount}
-          playbackSpeed={quranAudio.playbackSpeed}
-          onPlay={handlePlayRequest}
-          onPause={quranAudio.pause}
-          onNext={quranAudio.nextVerse}
-          onPrevious={quranAudio.previousVerse}
-          onReciterChange={appSettings.onReciterChange}
-          onSeek={quranAudio.seek}
-          onRepeatModeChange={quranAudio.setRepeatMode}
-          onSpeedChange={quranAudio.changeSpeed}
-          repeatPause={quranAudio.repeatPause}
-          isPausingForRepeat={quranAudio.isPausingForRepeat}
-          pauseRemainingSec={quranAudio.pauseRemainingSec}
-          onRepeatPauseChange={quranAudio.setRepeatPauseSettings}
-          surahName={`${surah.name} - ${surah.nameArabic}`}
-      />
+      {!isMushafMode && audioPlayerControls}
     </div>
   );
 };
