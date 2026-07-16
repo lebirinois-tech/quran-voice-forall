@@ -193,7 +193,7 @@ export const SettingsDialog = ({
           {triggerLabel && <span>{triggerLabel}</span>}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-card border-border max-h-[85vh] overflow-y-auto">
+      <DialogContent className="z-[120] sm:max-w-md bg-card border-border max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-foreground flex items-center gap-2 text-base">
             <Settings className="h-4 w-4" />
