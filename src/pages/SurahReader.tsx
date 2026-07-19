@@ -375,7 +375,10 @@ const SurahReader = () => {
   );
 
   return (
-    <div className={`min-h-screen bg-background pattern-islamic ${isMushafMode ? 'pb-20' : 'pb-32'}`} style={{ backgroundColor: appSettings.backgroundColor }}>
+    <div
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen bg-background pattern-islamic pb-32'}
+      style={{ backgroundColor: appSettings.backgroundColor }}
+    >
       {!isMushafMode && (
         <Header 
           showBackButton 
@@ -395,7 +398,7 @@ const SurahReader = () => {
         />
       )}
 
-      <main className={isMushafMode ? 'px-1 py-1' : 'container mx-auto px-4 py-6'}>
+      <main className={isMushafMode ? 'h-[100dvh] overflow-hidden p-0' : 'container mx-auto px-4 py-6'}>
         {/* Surah Header */}
         {!isMushafMode && <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block mb-4">
