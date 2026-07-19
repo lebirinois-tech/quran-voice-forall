@@ -194,61 +194,21 @@ export const HafsTajweedPageView = ({
 
   const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
-  // Count distinct themes across the current page for the decorative header.
-  const pageThemesCount = useMemo(() => {
-    const set = new Set<string>();
-    pageVerses.forEach((v) => {
-      getThemesForVerse(surahNumber, v.number).forEach((t) => set.add(t.id));
-    });
-    return set.size;
-  }, [pageVerses, surahNumber]);
-
-  const isSurahStartPage = currentPage === startPage;
-
   return (
     <div
       className={cn(
-        'w-full max-w-3xl mx-auto',
-        isFullscreen && 'fixed inset-0 z-[60] h-[100dvh] max-w-none bg-background overflow-y-auto p-2'
+        'fixed inset-0 z-[45] h-[100dvh] w-screen bg-background overflow-hidden',
+        isFullscreen && 'z-[60]'
       )}
     >
-      {/* Minimal header: page indicator + fullscreen toggle */}
-      <div className="flex items-center justify-between mb-2 px-2">
-        <span className="text-xs text-muted-foreground">
-          {surah?.name}
-          {currentVerse && pageVerses.some((v) => v.number === currentVerse) ? (
-            <> · <span className={cn('font-semibold', isAudioPlaying && 'text-primary')}>v. {currentVerse}</span></>
-          ) : null}
-        </span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-foreground">
-            Page {currentPage}/604
-          </span>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            onClick={() => setIsFullscreen((v) => !v)}
-            aria-label={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
-            className="h-7 w-7"
-          >
-            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          </Button>
-        </div>
-      </div>
-
-      {/* Page card */}
+      {/* Page seule : aucune barre persistante, seules les commandes à la demande restent en bas. */}
       <div
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative rounded-2xl border-2 border-primary/20 shadow-soft p-3 md:p-6 overflow-y-auto"
+        className="relative h-[100dvh] w-full overflow-y-auto px-3 pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] md:px-6"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
-          maxHeight: isFullscreen
-            ? 'calc(100dvh - 72px)'
-            : 'calc(100dvh - 112px)',
-          minHeight: isFullscreen ? 'calc(100dvh - 72px)' : 'calc(100dvh - 128px)',
         }}
       >
         {showBismillah && (
@@ -261,36 +221,10 @@ export const HafsTajweedPageView = ({
           </p>
         )}
 
-        {isSurahStartPage && surah && (
-          <div className="mb-5 select-none" dir="rtl">
-            <div
-              className="relative flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2"
-              style={{
-                borderColor: 'hsl(43, 65%, 45%)',
-                background:
-                  'linear-gradient(90deg, hsl(43, 55%, 88%) 0%, hsl(43, 65%, 78%) 50%, hsl(43, 55%, 88%) 100%)',
-                boxShadow: 'inset 0 0 0 1px hsl(43, 65%, 65%)',
-              }}
-            >
-              <div className="flex flex-col items-center text-[10px] leading-tight text-foreground/80 min-w-[52px]">
-                <span>عدد المواضيع</span>
-                <span className="text-base font-bold text-foreground">{pageThemesCount}</span>
-              </div>
-              <div className="flex-1 text-center font-amiri text-2xl md:text-3xl font-bold text-foreground tracking-wide">
-                سورة {surah.nameArabic ?? surah.name}
-              </div>
-              <div className="flex flex-col items-center text-[10px] leading-tight text-foreground/80 min-w-[52px]">
-                <span>عدد الآيات</span>
-                <span className="text-base font-bold text-foreground">{verses.length}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text text-4xl md:text-5xl lg:text-6xl font-extrabold leading-loose text-justify text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto max-w-4xl text-4xl md:text-5xl lg:text-6xl font-extrabold leading-loose text-justify text-foreground [&_span]:font-bold"
           style={{ wordSpacing: '0.15em', fontWeight: 800 }}
         >
           {pageVerses.map((v) => {
@@ -357,11 +291,11 @@ export const HafsTajweedPageView = ({
         type="button"
         onClick={() => setMenuOpen(true)}
         aria-label="Ouvrir les commandes"
-        className="fixed left-1/2 z-[80] h-12 -translate-x-1/2 rounded-full border-2 border-primary/30 bg-background/95 px-5 text-primary shadow-2xl backdrop-blur hover:bg-background"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)' }}
+        size="icon"
+        className="fixed left-1/2 z-[80] h-14 w-14 -translate-x-1/2 rounded-full border-2 border-primary/30 bg-background/90 text-primary shadow-2xl backdrop-blur hover:bg-background"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)' }}
       >
-        <Menu className="h-5 w-5" />
-        Commandes
+        <Menu className="h-6 w-6" />
       </Button>
 
       {/* Quick access Sheet: settings, audio, recording */}
@@ -375,6 +309,10 @@ export const HafsTajweedPageView = ({
           <div className="mt-4 space-y-4">
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Pages</h4>
+              <div className="mb-2 text-center text-sm font-medium text-foreground">
+                {surah?.name} · Page {currentPage}/604
+                {currentVerse ? ` · Verset ${currentVerse}` : ''}
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="default"
