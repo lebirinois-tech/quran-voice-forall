@@ -209,7 +209,7 @@ export const HafsTajweedPageView = ({
       if (!available) return;
       // Recherche binaire de la plus grande taille de police qui tient dans l'écran.
       const viewportWidth = viewport.clientWidth;
-      const maxPx = Math.min(52, Math.max(20, viewportWidth * 0.085));
+      const maxPx = Math.max(24, Math.min(72, viewportWidth * 0.22));
       const minPx = 9;
       let best = minPx;
       let lo = minPx;
