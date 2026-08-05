@@ -64,7 +64,8 @@ export const HafsTajweedPageView = ({
   settingsControls,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(containerRef);
+
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
   const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
