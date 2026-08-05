@@ -319,7 +319,7 @@ export const HafsTajweedPageView = ({
           style={{
             wordSpacing: '0.12em',
             fontWeight: 800,
-            fontSize: 'calc(clamp(1.5rem, 6.2vw, 3.25rem) * var(--mushaf-fit, 1))',
+            fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
             overflowWrap: 'break-word',
           }}
         >
