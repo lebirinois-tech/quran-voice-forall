@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -192,91 +192,6 @@ export const HafsTajweedPageView = ({
     }
   }, [currentVerse, currentPage]);
 
-  // Ajustement déterministe : cherche la plus grande taille qui garde tout le
-  // texte dans le cadre. On n'observe volontairement pas le texte lui-même :
-  // sa taille dépend de la police et créait auparavant une boucle de mesures.
-  const frameRef = useRef<HTMLDivElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const boxRef = useRef<HTMLDivElement | null>(null);
-  const quranTextRef = useRef<HTMLDivElement | null>(null);
-  // Taille de police calculée : conservée en état pour que React ne réécrase
-  // pas la valeur mesurée à chaque rendu (cause des versets coupés).
-  const [fontPx, setFontPx] = useState<number | null>(null);
-  // Interligne adaptatif : sur les pages courtes, on étire les lignes pour
-  // remplir le cadre au lieu de laisser un vide en haut et en bas.
-  useLayoutEffect(() => {
-    const box = boxRef.current;
-    const text = quranTextRef.current;
-    if (!box || !text) return;
-
-    const MIN_PX = 13;
-    const MAX_PX = 30;
-    let raf = 0;
-    let steps = 0;
-    let last = -1;
-
-    const measure = () => {
-      const style = window.getComputedStyle(box);
-      const available =
-        box.clientHeight -
-        parseFloat(style.paddingTop || '0') -
-        parseFloat(style.paddingBottom || '0');
-      const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
-      const bismillahHeight = bismillah
-        ? bismillah.getBoundingClientRect().height +
-          parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
-        : 0;
-      const used =
-        Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
-      return { available, used };
-    };
-
-    // Boucle d'ajustement proportionnelle : mesure ce qui est réellement peint,
-    // puis corrige la taille jusqu'à remplir le cadre sans le dépasser.
-    const adjust = () => {
-      if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
-      const { available, used } = measure();
-      if (available <= 0 || used <= 0) return;
-      const target = available - 8;
-      const current =
-        parseFloat(window.getComputedStyle(text).fontSize || '0') || MIN_PX;
-      if (Math.abs(used - target) <= 10) {
-        steps = 0;
-        return;
-      }
-      if (steps > 14) return;
-      steps += 1;
-      const ratio = Math.sqrt(Math.max(0.3, Math.min(2.5, target / used)));
-      let next = Math.round(Math.min(MAX_PX, Math.max(MIN_PX, current * ratio)) * 10) / 10;
-      if (next === last) return;
-      last = next;
-      if (Math.abs(next - current) < 0.2) return;
-      setFontPx(next);
-    };
-
-    const schedule = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(adjust);
-    };
-
-    schedule();
-    const observer = new ResizeObserver(schedule);
-    observer.observe(box);
-    observer.observe(text);
-    const timers = [300, 900, 2000, 4000].map((d) => window.setTimeout(schedule, d));
-    document.fonts?.ready.then(schedule).catch(() => undefined);
-    window.addEventListener('orientationchange', schedule);
-    window.addEventListener('resize', schedule);
-    return () => {
-      cancelAnimationFrame(raf);
-      observer.disconnect();
-      timers.forEach((t) => window.clearTimeout(t));
-      window.removeEventListener('orientationchange', schedule);
-      window.removeEventListener('resize', schedule);
-    };
-  }, [currentPage, pageVerses, isFullscreen, showMenuButton]);
-
-
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
@@ -329,11 +244,9 @@ export const HafsTajweedPageView = ({
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
-          ref={frameRef}
-          className="mx-auto h-full w-full max-w-4xl overflow-hidden"
+          className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
         >
           <div
-            ref={contentRef}
             className="relative h-full w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
             style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
@@ -349,11 +262,9 @@ export const HafsTajweedPageView = ({
               {toArabicDigits(currentPage)} · Page {currentPage} / 604
             </div>
             <div
-              ref={boxRef}
               className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                fontSize: fontPx ? `${fontPx}px` : 'clamp(0.7rem, 2.8vw, 1.2rem)',
                 paddingInline: '0.5em',
                 paddingBlock: '0.5em',
               }}
@@ -373,17 +284,15 @@ export const HafsTajweedPageView = ({
               )}
 
               <div
-          ref={quranTextRef}
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-4xl font-extrabold text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(15px,4.4cqw,34px)] font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
-            lineHeight: 1.6,
+            lineHeight: 1.72,
             flexShrink: 0,
             fontWeight: 800,
-            fontSize: '1em',
             overflowWrap: 'break-word',
           }}
         >
