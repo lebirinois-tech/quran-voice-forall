@@ -100,6 +100,8 @@ export const MushafPageViewer = ({
   pageVerseNumbers,
   onVerseClick,
 }: MushafPageViewerProps) => {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef);
   const surah = surahs.find(s => s.number === surahNumber);
   // Archive-mode Mushafs (Warsh/Qalun) use their own scanned pagination (1..N),
   // independent of the 604-page Madina standard. Hafs keeps the standard mapping.
