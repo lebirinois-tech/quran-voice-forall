@@ -241,7 +241,7 @@ export const HafsTajweedPageView = ({
             : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
         )}
         style={{
-          backgroundColor: 'hsl(40, 45%, 92%)',
+          backgroundColor: 'hsl(195, 80%, 96%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
         }}
       >
@@ -257,7 +257,7 @@ export const HafsTajweedPageView = ({
             <div
               className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-0.5 text-[11px] font-semibold"
               style={{
-                backgroundColor: 'hsl(40, 45%, 92%)',
+                backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
                 color: 'hsl(43, 62%, 30%)',
               }}
