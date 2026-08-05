@@ -218,6 +218,10 @@ export const HafsTajweedPageView = ({
     };
 
     raf = requestAnimationFrame(fit);
+    // Le texte arabe et ses polices arrivent souvent après le premier rendu :
+    // on relance l'ajustement plusieurs fois pour rester exact.
+    const timers = [120, 350, 800, 1600, 3000].map((d) => window.setTimeout(fit, d));
+    document.fonts?.ready.then(fit).catch(() => undefined);
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(fit);
@@ -226,6 +230,7 @@ export const HafsTajweedPageView = ({
     window.addEventListener('orientationchange', fit);
     return () => {
       cancelAnimationFrame(raf);
+      timers.forEach((t) => window.clearTimeout(t));
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
     };
