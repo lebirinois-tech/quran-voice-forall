@@ -197,54 +197,45 @@ export const HafsTajweedPageView = ({
   const frameRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
+  const quranTextRef = useRef<HTMLDivElement | null>(null);
   // Taille de police calculée : conservée en état pour que React ne réécrase
   // pas la valeur mesurée à chaque rendu (cause des versets coupés).
   const [fontPx, setFontPx] = useState<number | null>(null);
   useLayoutEffect(() => {
     const viewport = containerRef.current;
-    const content = contentRef.current;
     const box = boxRef.current;
-    if (!viewport || !content || !box) return;
+    const quranText = quranTextRef.current;
+    if (!viewport || !box || !quranText) return;
 
     let raf = 0;
     const fit = () => {
-      const cs = window.getComputedStyle(viewport);
+      const boxStyle = window.getComputedStyle(box);
       const available =
-        viewport.clientHeight -
-        parseFloat(cs.paddingTop || '0') -
-        parseFloat(cs.paddingBottom || '0');
-      if (!available) return;
-      content.style.width = '100%';
-      content.style.marginLeft = '0px';
-      content.style.transform = 'none';
-      const measure = () => Math.max(content.scrollHeight, content.getBoundingClientRect().height);
-      // Seule la police varie : le cadre reste toujours à pleine largeur.
-      // La recherche descend suffisamment bas pour les pages les plus chargées,
-      // sans jamais réduire géométriquement toute la page avec transform: scale().
-      // Modèle de référence (محفظ الوحيين) : texte plus compact, plus de lignes
-      // par page. On plafonne donc nettement la taille maximale.
-      // Le modèle affiche ~15-17 lignes par page : la police reste petite
-      // (≈4,7 % de la largeur sur mobile, plafonnée pour le desktop).
-      // Ajustement automatique à l'appareil : la borne haute dépend à la fois de
-      // la largeur et de la hauteur utiles, donc de l'écran et de l'orientation.
-      const maxPx = Math.max(
-        10,
-        Math.min(38, viewport.clientWidth * 0.075, available * 0.07)
-      );
-      // La mesure se fait sans hauteur imposée, sinon le contenu paraît toujours plein.
-      box.style.minHeight = '0px';
-      let best = 5;
-      let lo = 5;
+        box.clientHeight -
+        parseFloat(boxStyle.paddingTop || '0') -
+        parseFloat(boxStyle.paddingBottom || '0');
+      if (available <= 0 || box.clientWidth <= 0) return;
+
+      const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
+      const bismillahHeight = bismillah
+        ? bismillah.getBoundingClientRect().height + parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
+        : 0;
+      const textAvailable = Math.max(1, available - bismillahHeight);
+      const maxPx = Math.max(15, Math.min(34, box.clientWidth * 0.072));
+      const minPx = 8;
+      const fits = () => quranText.scrollHeight <= textAvailable + 1;
+
+      let best = minPx;
+      let lo = minPx;
       let hi = maxPx;
       box.style.fontSize = `${maxPx}px`;
-      box.style.setProperty('--mushaf-line-height', '2');
-      if (measure() <= available - 6) {
+      if (fits()) {
         best = maxPx;
       } else {
-        for (let i = 0; i < 16 && hi - lo > 0.2; i++) {
+        for (let i = 0; i < 18 && hi - lo > 0.1; i++) {
           const mid = (lo + hi) / 2;
           box.style.fontSize = `${mid}px`;
-          if (measure() <= available - 6) {
+          if (fits()) {
             best = mid;
             lo = mid;
           } else {
@@ -252,11 +243,9 @@ export const HafsTajweedPageView = ({
           }
         }
       }
-      // Marge de confort réduite : le texte occupe mieux le cadre.
-      const finalPx = Math.max(5, best * 0.98);
+      // Une petite réserve évite qu'une ligne sorte après le chargement final de la police.
+      const finalPx = Math.max(minPx, best * 0.97);
       box.style.fontSize = `${finalPx}px`;
-      // Une fois la police trouvée, le cadre remplit la hauteur de l'appareil.
-      box.style.minHeight = `${Math.max(0, available - 12)}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
 
@@ -340,16 +329,16 @@ export const HafsTajweedPageView = ({
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
           ref={frameRef}
-          className="mx-auto my-auto w-full max-w-4xl overflow-hidden"
+          className="mx-auto h-full w-full max-w-4xl overflow-hidden"
         >
           <div
             ref={contentRef}
-            className="w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
+            className="h-full w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
             style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
             <div
               ref={boxRef}
-              className="flex w-full flex-col items-center justify-center rounded-lg border"
+              className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
                 fontSize: fontPx ? `${fontPx}px` : 'clamp(0.7rem, 2.8vw, 1.2rem)',
@@ -359,6 +348,7 @@ export const HafsTajweedPageView = ({
             >
               {showBismillah && (
                 <p
+                  data-bismillah
                   dir="rtl"
                   className="mb-[0.55em] w-full text-center font-amiri font-extrabold text-foreground"
                   style={{
@@ -371,13 +361,14 @@ export const HafsTajweedPageView = ({
               )}
 
               <div
+          ref={quranTextRef}
           dir="rtl"
           lang="ar"
           className="quran-text tajweed-text mx-auto w-full max-w-4xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'center',
-            lineHeight: 'var(--mushaf-line-height, 2)',
+            lineHeight: 1.8,
             fontWeight: 800,
             fontSize: '1em',
             overflowWrap: 'break-word',
