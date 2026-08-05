@@ -71,6 +71,8 @@ export const HafsTajweedPageView = ({
   const { reciter, textDisplayStyle, fontSize } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [recorderVerse, setRecorderVerse] = useState<number | null>(null);
+  // Bouton d'appel du menu : masquable pour libérer toute la page.
+  const [showMenuButton, setShowMenuButton] = useState(true);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
