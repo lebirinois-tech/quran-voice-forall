@@ -191,11 +191,13 @@ export const HafsTajweedPageView = ({
   // entière tienne dans l'écran (sans défilement) sur tous les formats.
   const frameRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const boxRef = useRef<HTMLDivElement | null>(null);
   useLayoutEffect(() => {
     const viewport = containerRef.current;
     const frame = frameRef.current;
     const content = contentRef.current;
-    if (!viewport || !frame || !content) return;
+    const box = boxRef.current;
+    if (!viewport || !frame || !content || !box) return;
 
     let raf = 0;
     const fit = () => {
@@ -205,18 +207,29 @@ export const HafsTajweedPageView = ({
         parseFloat(cs.paddingTop || '0') -
         parseFloat(cs.paddingBottom || '0');
       if (!available) return;
-      let scale = 1;
-      // La largeur est compensée (100/scale) pour que la page réduite
-      // continue d'occuper toute la largeur de l'écran.
-      const apply = (s: number) => {
-        content.style.transform = `scale(${s})`;
-      };
-      apply(1);
-      const natural = content.offsetHeight;
-      if (!natural) return;
-      scale = Math.max(0.3, Math.min(1, (available - 6) / natural));
-      apply(scale);
-      frame.style.height = `${Math.min(available, content.getBoundingClientRect().height)}px`;
+      // Recherche binaire de la plus grande taille de police qui tient dans l'écran.
+      const viewportWidth = viewport.clientWidth;
+      const maxPx = Math.min(52, Math.max(20, viewportWidth * 0.085));
+      const minPx = 9;
+      let best = minPx;
+      let lo = minPx;
+      let hi = maxPx;
+      box.style.fontSize = `${maxPx}px`;
+      if (content.offsetHeight <= available - 6) {
+        best = maxPx;
+      } else {
+        for (let i = 0; i < 12 && hi - lo > 0.4; i++) {
+          const mid = (lo + hi) / 2;
+          box.style.fontSize = `${mid}px`;
+          if (content.offsetHeight <= available - 6) {
+            best = mid;
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+      }
+      box.style.fontSize = `${best}px`;
     };
 
     raf = requestAnimationFrame(fit);
