@@ -228,7 +228,24 @@ export const HafsTajweedPageView = ({
           ? bismillah.getBoundingClientRect().height +
             parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
           : 0;
-        return quranText.scrollHeight + bismillahHeight;
+        // Mesure fiable de la hauteur réelle du texte : en flex, scrollHeight
+        // peut sous-estimer le contenu qui déborde. On prend le maximum entre
+        // scrollHeight, la boîte et le bas du dernier fragment de texte.
+        const topRect = quranText.getBoundingClientRect();
+        let contentBottom = topRect.top;
+        const range = document.createRange();
+        range.selectNodeContents(quranText);
+        const rects = range.getClientRects();
+        for (let i = 0; i < rects.length; i++) {
+          contentBottom = Math.max(contentBottom, rects[i].bottom);
+        }
+        range.detach?.();
+        const textHeight = Math.max(
+          quranText.scrollHeight,
+          topRect.height,
+          contentBottom - topRect.top
+        );
+        return textHeight + bismillahHeight;
       };
 
       if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
@@ -257,8 +274,6 @@ export const HafsTajweedPageView = ({
       }
 
       const finalPx = Math.max(minPx, Math.min(maxPx, f));
-      // eslint-disable-next-line no-console
-      console.log('[fit]', { finalPx, maxPx, w: box.clientWidth, h: box.clientHeight, used: usedAt(), avail: availableAt() });
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
@@ -383,6 +398,7 @@ export const HafsTajweedPageView = ({
             textAlign: 'justify',
             textAlignLast: 'center',
             lineHeight: 1.8,
+            flexShrink: 0,
             fontWeight: 800,
             fontSize: '1em',
             overflowWrap: 'break-word',
