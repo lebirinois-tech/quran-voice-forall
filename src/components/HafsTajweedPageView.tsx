@@ -214,6 +214,18 @@ export const HafsTajweedPageView = ({
         scale = Math.max(0.4, scale * Math.min(0.97, Math.sqrt((available - 8) / needed)));
         frame.style.setProperty('--mushaf-fit', String(scale));
       }
+      // Puis on regagne l'espace restant pour remplir l'écran au maximum.
+      for (let i = 0; i < 12; i++) {
+        const needed = frame.scrollHeight;
+        if (scale >= 1 || needed > available - 8) break;
+        const next = Math.min(1, scale * 1.04);
+        frame.style.setProperty('--mushaf-fit', String(next));
+        if (frame.scrollHeight > available - 8) {
+          frame.style.setProperty('--mushaf-fit', String(scale));
+          break;
+        }
+        scale = next;
+      }
       setFitScale(scale);
     };
 
