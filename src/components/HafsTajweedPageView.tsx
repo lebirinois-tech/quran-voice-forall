@@ -464,7 +464,7 @@ export const HafsTajweedPageView = ({
           className="quran-text tajweed-text mx-auto w-full max-w-4xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
-            textAlignLast: 'center',
+            textAlignLast: 'justify',
             lineHeight: lineHeightVal,
             flexShrink: 0,
             fontWeight: 800,
@@ -473,7 +473,16 @@ export const HafsTajweedPageView = ({
           }}
         >
           {themeGroups.map((group, gi) => (
-            <span key={`g-${gi}`}>
+            <span
+              key={`g-${gi}`}
+              // Bande thématique continue sur toute la largeur (comme le Mushaf de référence)
+              style={{
+                display: 'block',
+                background: group.theme ? `hsl(${group.theme.hsl} / 0.18)` : undefined,
+                textAlign: 'justify',
+                textAlignLast: gi === themeGroups.length - 1 ? 'right' : 'justify',
+              }}
+            >
               {group.verses.map((v) => {
                 const isCurrent = currentVerse === v.number;
                 const providedTajweed = versesTajweed?.[v.number];
@@ -492,13 +501,7 @@ export const HafsTajweedPageView = ({
                         : undefined
                     }
                     style={
-                      group.theme && !isCurrent
-                        ? {
-                            background: `hsl(${group.theme.hsl} / 0.18)`,
-                            boxDecorationBreak: 'clone',
-                            WebkitBoxDecorationBreak: 'clone',
-                          }
-                        : { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
+                      { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
                     }
                     className={cn(
                       'inline transition-all cursor-pointer rounded-sm',
