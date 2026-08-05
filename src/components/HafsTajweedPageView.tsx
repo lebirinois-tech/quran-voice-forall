@@ -226,6 +226,7 @@ export const HafsTajweedPageView = ({
         }
         scale = next;
       }
+      console.log('FIT', scale, frame.scrollHeight, available);
       setFitScale(scale);
     };
 
