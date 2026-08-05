@@ -70,7 +70,15 @@ export const BuildVersionBadge = ({ className }: { className?: string }) => {
             Vérifier
           </Button>
           {!loading && !unknown && !upToDate && (
-            <Button size="sm" className="h-7 px-2" onClick={checkForUpdate} disabled={isChecking}>
+            <Button
+              size="sm"
+              className="h-7 px-2"
+              onClick={async () => {
+                await checkForUpdate();
+                window.location.reload();
+              }}
+              disabled={isChecking}
+            >
               {isChecking ? 'Mise à jour…' : 'Mettre à jour'}
             </Button>
           )}
