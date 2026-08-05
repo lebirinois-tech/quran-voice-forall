@@ -3,11 +3,14 @@ import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack,
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
+import { juzMapping } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 import { VerseCard } from './VerseCard';
@@ -35,6 +38,8 @@ interface HafsTajweedPageViewProps {
   onPreviousVerse?: () => void;
   onPageRequest?: (page: number) => void;
   onManualPageChange?: (page: number) => void;
+  onNavigateToSurah?: (surah: number) => void;
+  onNavigateToJuz?: (juz: number) => void;
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
@@ -59,6 +64,8 @@ export const HafsTajweedPageView = ({
   onPreviousVerse,
   onPageRequest,
   onManualPageChange,
+  onNavigateToSurah,
+  onNavigateToJuz,
   audioControls,
   voiceControls,
   settingsControls,
@@ -76,6 +83,7 @@ export const HafsTajweedPageView = ({
   const [recorderVerse, setRecorderVerse] = useState<number | null>(null);
   // Bouton d'appel du menu : masquable pour libérer toute la page.
   const [showMenuButton, setShowMenuButton] = useState(true);
+  const [pageInput, setPageInput] = useState('');
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
@@ -479,6 +487,86 @@ export const HafsTajweedPageView = ({
                   Page précédente
                   <ChevronRight className="h-5 w-5" />
                 </Button>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                Navigation — الانتقال
+              </h4>
+              <div className="space-y-2 rounded-2xl border border-border bg-card p-3">
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Sourate — السورة</label>
+                  <Select
+                    value={String(surahNumber)}
+                    onValueChange={(v) => {
+                      setMenuOpen(false);
+                      onNavigateToSurah?.(Number(v));
+                    }}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Choisir une sourate" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[120] max-h-72">
+                      {surahs.map((s) => (
+                        <SelectItem key={s.number} value={String(s.number)}>
+                          {s.number}. {s.name} — {s.nameArabic}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Page (1-604) — الصفحة</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={604}
+                      inputMode="numeric"
+                      value={pageInput}
+                      onChange={(e) => setPageInput(e.target.value)}
+                      placeholder={String(currentPage)}
+                      className="h-11"
+                    />
+                    <Button
+                      className="h-11"
+                      onClick={() => {
+                        const p = parseInt(pageInput, 10);
+                        if (p >= 1 && p <= 604) {
+                          setPageInput('');
+                          setMenuOpen(false);
+                          goToPage(p);
+                        }
+                      }}
+                    >
+                      Aller
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Juz (1-30) — الجزء</label>
+                  <Select
+                    value=""
+                    onValueChange={(v) => {
+                      setMenuOpen(false);
+                      onNavigateToJuz?.(Number(v));
+                    }}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Choisir un Juz" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[120] max-h-72">
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map((j) => (
+                        <SelectItem key={j} value={String(j)}>
+                          Juz {j} — {juzMapping[j]?.name ?? ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </section>
 
