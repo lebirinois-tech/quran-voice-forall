@@ -297,6 +297,36 @@ export const HafsTajweedPageView = ({
     };
   }, [currentPage, pageVerses, isFullscreen, showMenuButton]);
 
+  // Contrôle après le rendu React : certains assemblages de spans Tajweed
+  // changent brutalement de nombre de lignes à une taille précise. Cette passe
+  // valide la hauteur réellement peinte et réduit seulement en cas de besoin.
+  useLayoutEffect(() => {
+    if (fontPx === null) return;
+    const box = boxRef.current;
+    const text = quranTextRef.current;
+    if (!box || !text) return;
+
+    const raf = requestAnimationFrame(() => {
+      const style = window.getComputedStyle(box);
+      const available =
+        box.clientHeight -
+        parseFloat(style.paddingTop || '0') -
+        parseFloat(style.paddingBottom || '0');
+      const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
+      const bismillahHeight = bismillah
+        ? bismillah.getBoundingClientRect().height +
+          parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
+        : 0;
+      const used = Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
+      if (used > available - 4 && fontPx > 12) {
+        const ratio = Math.sqrt(Math.max(0.25, (available - 8) / used));
+        const reduced = Math.max(12, Math.floor(fontPx * ratio * 10) / 10);
+        setFontPx(reduced < fontPx ? reduced : Math.max(12, fontPx - 0.5));
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [fontPx, currentPage, pageVerses]);
+
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
