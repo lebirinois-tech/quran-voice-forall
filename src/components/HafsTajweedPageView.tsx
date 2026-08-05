@@ -342,40 +342,18 @@ export const HafsTajweedPageView = ({
               <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-4xl font-extrabold leading-loose text-center text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-4xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
-            wordSpacing: '0.12em',
+            textAlign: 'justify',
+            textAlignLast: 'center',
+            lineHeight: 2,
             fontWeight: 800,
             fontSize: '1em',
             overflowWrap: 'break-word',
           }}
         >
           {themeGroups.map((group, gi) => (
-            <div
-              key={`g-${gi}`}
-              className="rounded-lg px-2 py-1 my-1"
-              style={
-                group.theme
-                  ? {
-                      background: `hsl(${group.theme.hsl} / 0.07)`,
-                      boxShadow: `inset 0 0 0 1px hsl(${group.theme.hsl} / 0.3)`,
-                    }
-                  : undefined
-              }
-            >
-              {group.theme && (
-                <div
-                  className="mb-1 flex items-center justify-center gap-1 rounded-full px-2 py-0.5 text-[0.62rem] font-semibold leading-tight"
-                  style={{
-                    background: `hsl(${group.theme.hsl} / 0.3)`,
-                    color: `hsl(${group.theme.hsl})`,
-                  }}
-                >
-                  <span>{group.theme.emoji}</span>
-                  <span>{group.theme.labels.ar}</span>
-                  <span className="opacity-70">· {group.theme.labels.fr}</span>
-                </div>
-              )}
+            <span key={`g-${gi}`}>
               {group.verses.map((v) => {
                 const isCurrent = currentVerse === v.number;
                 const providedTajweed = versesTajweed?.[v.number];
@@ -393,8 +371,17 @@ export const HafsTajweedPageView = ({
                         ? `${group.theme.emoji} ${group.theme.labels.fr} · ${group.theme.labels.ar}`
                         : undefined
                     }
+                    style={
+                      group.theme && !isCurrent
+                        ? {
+                            background: `hsl(${group.theme.hsl} / 0.18)`,
+                            boxDecorationBreak: 'clone',
+                            WebkitBoxDecorationBreak: 'clone',
+                          }
+                        : { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
+                    }
                     className={cn(
-                      'inline transition-all cursor-pointer rounded-md px-1 -mx-1',
+                      'inline transition-all cursor-pointer rounded-sm',
                       isCurrent &&
                         (isAudioPlaying
                           ? 'bg-primary/25 ring-2 ring-primary shadow-md'
@@ -408,7 +395,7 @@ export const HafsTajweedPageView = ({
                   </span>
                 );
               })}
-            </div>
+            </span>
           ))}
           {pageVerses.length === 0 && (
             <p className="text-center text-muted-foreground text-base">
