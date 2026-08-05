@@ -222,7 +222,7 @@ export const HafsTajweedPageView = ({
       // par page. On plafonne donc nettement la taille maximale.
       // Le modèle affiche ~15-17 lignes par page : la police reste petite
       // (≈4,7 % de la largeur sur mobile, plafonnée pour le desktop).
-      const maxPx = Math.max(11, Math.min(21, viewport.clientWidth * 0.047));
+      const maxPx = Math.max(13, Math.min(26, viewport.clientWidth * 0.056));
       let best = 5;
       let lo = 5;
       let hi = maxPx;
@@ -242,8 +242,8 @@ export const HafsTajweedPageView = ({
           }
         }
       }
-      // Marge de confort : on garde ~6% de respiration pour éviter tout débordement.
-      const finalPx = Math.max(5, best * 0.9);
+      // Marge de confort réduite : le texte occupe mieux le cadre.
+      const finalPx = Math.max(5, best * 0.96);
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
@@ -312,7 +312,7 @@ export const HafsTajweedPageView = ({
         className={cn(
           'relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
           showMenuButton
-            ? 'pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)]'
+            ? 'pb-[calc(env(safe-area-inset-bottom,0px)+3.75rem)]'
             : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
         )}
         style={{
@@ -422,19 +422,73 @@ export const HafsTajweedPageView = ({
         </div>
       </div>
 
-      {/* Bouton d'appel unique, placé sous le cadre et masquable à la demande. */}
+      {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
       {showMenuButton ? (
-        <Button
-        type="button"
-        onClick={() => setMenuOpen(true)}
-        onDoubleClick={() => setShowMenuButton(false)}
-        aria-label="Ouvrir les commandes"
-        size="icon"
-        className="fixed left-1/2 z-[80] h-14 w-14 -translate-x-1/2 rounded-full border-2 border-primary/30 bg-background/90 text-primary shadow-2xl backdrop-blur hover:bg-background"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)' }}
+        <div
+          className="fixed left-1/2 z-[80] flex -translate-x-1/2 items-center gap-2 rounded-full border border-primary/25 bg-background/90 px-2 py-1.5 shadow-2xl backdrop-blur"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
-          <Menu className="h-6 w-6" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Page suivante"
+            onClick={goNext}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Verset précédent"
+            onClick={() => onPreviousVerse?.()}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            <SkipBack className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
+            onClick={() => onPlayPause?.()}
+            className="h-12 w-12 rounded-full shadow-lg"
+          >
+            {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Verset suivant"
+            onClick={() => onNextVerse?.()}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            <SkipForward className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Page précédente"
+            onClick={goPrev}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Ouvrir les commandes"
+            onClick={() => setMenuOpen(true)}
+            onDoubleClick={() => setShowMenuButton(false)}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
       ) : (
         <button
           type="button"
