@@ -311,6 +311,7 @@ export const HafsTajweedPageView = ({
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         'fixed inset-0 z-[45] h-[100dvh] w-screen bg-background overflow-hidden',
         isFullscreen && 'z-[60]'
