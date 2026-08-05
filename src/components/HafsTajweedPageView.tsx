@@ -269,8 +269,8 @@ export const HafsTajweedPageView = ({
               style={
                 group.theme
                   ? {
-                      background: `hsl(${group.theme.hsl} / 0.16)`,
-                      boxShadow: `inset 0 0 0 1px hsl(${group.theme.hsl} / 0.35)`,
+                      background: `hsl(${group.theme.hsl} / 0.07)`,
+                      boxShadow: `inset 0 0 0 1px hsl(${group.theme.hsl} / 0.3)`,
                     }
                   : undefined
               }
