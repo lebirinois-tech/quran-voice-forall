@@ -304,7 +304,7 @@ export const HafsTajweedPageView = ({
       ref={rootRef}
       className={cn(
         'fixed inset-0 z-[70] h-[100dvh] w-screen bg-background overflow-hidden',
-        isFullscreen && 'z-[60]'
+        isFullscreen && 'z-[75]'
       )}
     >
       {/* Page seule : aucune barre persistante, seules les commandes à la demande restent en bas. */}
