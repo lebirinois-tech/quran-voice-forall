@@ -12,6 +12,7 @@ import { surahs, surahPageStart, juzMapping } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Search, BookOpen, FileText, Layers, Download, User, LogIn, LogOut, History, RefreshCw, Music, RotateCcw } from 'lucide-react';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
+import { BuildVersionBadge } from '@/components/BuildVersionBadge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -418,6 +419,8 @@ const Index = () => {
             </Link>
           </div>
           
+          <BuildVersionBadge className="mb-4" />
+
           <p className="text-sm text-muted-foreground">
             Quran Accès Pour Tous © {new Date().getFullYear()}
           </p>

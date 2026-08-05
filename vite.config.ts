@@ -4,8 +4,15 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
+const BUILD_TIME = new Date().toISOString();
+const BUILD_ID = `${BUILD_TIME.slice(0, 16).replace(/[-:T]/g, "")}`;
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(BUILD_ID),
+    __APP_BUILD_TIME__: JSON.stringify(BUILD_TIME),
+  },
   server: {
     host: "::",
     port: 8080,
@@ -16,6 +23,17 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    {
+      name: "emit-version-json",
+      apply: "build" as const,
+      generateBundle(this: any) {
+        this.emitFile({
+          type: "asset",
+          fileName: "version.json",
+          source: JSON.stringify({ buildId: BUILD_ID, buildTime: BUILD_TIME }),
+        });
+      },
+    },
     VitePWA({
       strategies: "generateSW",
       filename: "sw.js",
