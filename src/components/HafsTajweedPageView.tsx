@@ -339,7 +339,7 @@ export const HafsTajweedPageView = ({
           >
             {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
             <div
-              className="pointer-events-none absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 rounded-full border px-3 py-0.5 text-[11px] font-semibold"
+              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-0.5 text-[11px] font-semibold"
               style={{
                 backgroundColor: 'hsl(40, 45%, 92%)',
                 borderColor: 'hsl(43, 62%, 45%)',
