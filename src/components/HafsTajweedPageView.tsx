@@ -158,6 +158,21 @@ export const HafsTajweedPageView = ({
     [verses, currentPage]
   );
 
+  // Group consecutive verses sharing the same thematic tafsir (Tafsir Mawdou'i)
+  const themeGroups = useMemo(() => {
+    const groups: { theme: ReturnType<typeof getThemesForVerse>[number] | null; verses: typeof pageVerses }[] = [];
+    for (const v of pageVerses) {
+      const theme = getThemesForVerse(surahNumber, v.number)[0] ?? null;
+      const last = groups[groups.length - 1];
+      if (last && (last.theme?.id ?? null) === (theme?.id ?? null)) {
+        last.verses.push(v);
+      } else {
+        groups.push({ theme, verses: [v] });
+      }
+    }
+    return groups;
+  }, [pageVerses, surahNumber]);
+
   // Auto-scroll current verse into view
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
