@@ -225,7 +225,7 @@ export const HafsTajweedPageView = ({
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
     };
-  }, [currentPage, pageVerses, showBismillahDep, isFullscreen]);
+  }, [currentPage, pageVerses, isFullscreen]);
 
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
