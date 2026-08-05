@@ -241,7 +241,7 @@ export const HafsTajweedPageView = ({
             : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
         )}
         style={{
-          backgroundColor: 'hsl(40, 45%, 92%)',
+          backgroundColor: 'hsl(195, 80%, 96%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
         }}
       >
