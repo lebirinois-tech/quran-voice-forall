@@ -318,6 +318,47 @@ export const HafsTajweedPageView = ({
     return () => cancelAnimationFrame(raf);
   }, [fontPx, currentPage, pageVerses]);
 
+  // Garde-fou permanent contre les changements tardifs de police/Tajweed.
+  // Il ne réagrandit jamais le texte, donc il ne peut pas créer d'oscillation.
+  useEffect(() => {
+    const box = boxRef.current;
+    const text = quranTextRef.current;
+    if (!box || !text) return;
+    let raf = 0;
+    const shrinkIfNeeded = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const style = window.getComputedStyle(box);
+        const available =
+          box.clientHeight -
+          parseFloat(style.paddingTop || '0') -
+          parseFloat(style.paddingBottom || '0');
+        const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
+        const bismillahHeight = bismillah
+          ? bismillah.getBoundingClientRect().height +
+            parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
+          : 0;
+        const used = Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
+        if (used <= available - 4) return;
+        setFontPx((current) => {
+          if (current === null || current <= 12) return current;
+          const ratio = Math.sqrt(Math.max(0.25, (available - 8) / used));
+          return Math.max(12, Math.floor(current * ratio * 10) / 10);
+        });
+      });
+    };
+    const observer = new ResizeObserver(shrinkIfNeeded);
+    observer.observe(text);
+    const timers = [500, 1200, 2500, 5000].map((delay) =>
+      window.setTimeout(shrinkIfNeeded, delay)
+    );
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [currentPage, pageVerses]);
+
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
