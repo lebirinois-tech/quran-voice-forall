@@ -493,12 +493,11 @@ export const HafsTajweedPageView = ({
           {themeGroups.map((group, gi) => (
             <span
               key={`g-${gi}`}
-              // Bande thématique continue sur toute la largeur (comme le Mushaf de référence)
               style={{
-                display: 'block',
+                display: 'inline',
                 background: group.theme ? `hsl(${group.theme.hsl} / 0.18)` : undefined,
-                textAlign: 'justify',
-                textAlignLast: gi === themeGroups.length - 1 ? 'right' : 'justify',
+                boxDecorationBreak: 'clone',
+                WebkitBoxDecorationBreak: 'clone',
               }}
             >
               {group.verses.map((v) => {
