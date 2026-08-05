@@ -230,6 +230,7 @@ export const HafsTajweedPageView = ({
         }
       }
       box.style.fontSize = `${best}px`;
+      console.log('FIT', best, maxPx, available, content.offsetHeight);
     };
 
     raf = requestAnimationFrame(fit);
