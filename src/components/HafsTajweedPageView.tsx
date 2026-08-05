@@ -242,7 +242,7 @@ export const HafsTajweedPageView = ({
         const available = availableAt();
         const used = usedAt();
         if (available <= 0 || used <= 0) break;
-        const target = available * 0.97;
+        const target = available * 0.93;
         const ratio = target / used;
         if (ratio > 0.995 && ratio < 1.05) break;
         f = Math.max(minPx, Math.min(maxPx, f * ratio));
@@ -252,7 +252,7 @@ export const HafsTajweedPageView = ({
       // Sécurité : on réduit tant que le contenu déborde encore.
       for (let i = 0; i < 30; i++) {
         box.style.fontSize = `${f}px`;
-        if (usedAt() <= availableAt() + 1 || f <= minPx) break;
+        if (usedAt() <= availableAt() - 2 || f <= minPx) break;
         f = Math.max(minPx, f * 0.96);
       }
 
