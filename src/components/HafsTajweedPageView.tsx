@@ -284,17 +284,35 @@ export const HafsTajweedPageView = ({
     // du cadre sont ensuite surveillées indépendamment du contenu.
     const timers = [250, 1500, 4500].map((delay) => window.setTimeout(fit, delay));
     document.fonts?.ready.then(fit).catch(() => undefined);
+    // Surveillance : si le contenu final ne remplit pas (ou déborde) le cadre
+    // après le rendu des spans Tajweed, on relance un ajustement complet.
+    let checks = 0;
+    const watchdog = window.setInterval(() => {
+      checks += 1;
+      if (checks > 20) {
+        window.clearInterval(watchdog);
+        return;
+      }
+      if (box.clientHeight <= 0) return;
+      const style = window.getComputedStyle(box);
+      const available =
+        box.clientHeight - parseFloat(style.paddingTop || '0') - parseFloat(style.paddingBottom || '0');
+      const used = Math.max(quranText.scrollHeight, quranText.getBoundingClientRect().height);
+      if (Math.abs(available - used) > 14) fit();
+    }, 700);
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(fit);
     });
     ro.observe(viewport);
+    ro.observe(box);
     window.addEventListener('orientationchange', fit);
     window.addEventListener('resize', fit);
     window.visualViewport?.addEventListener('resize', fit);
     return () => {
       cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
+      window.clearInterval(watchdog);
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
       window.removeEventListener('resize', fit);
