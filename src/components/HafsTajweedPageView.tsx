@@ -228,8 +228,8 @@ export const HafsTajweedPageView = ({
         10,
         Math.min(38, viewport.clientWidth * 0.075, available * 0.07)
       );
-      // Le cadre occupe toute la hauteur disponible sur l'appareil.
-      box.style.minHeight = `${Math.max(0, available - 12)}px`;
+      // La mesure se fait sans hauteur imposée, sinon le contenu paraît toujours plein.
+      box.style.minHeight = '0px';
       let best = 5;
       let lo = 5;
       let hi = maxPx;
@@ -252,6 +252,8 @@ export const HafsTajweedPageView = ({
       // Marge de confort réduite : le texte occupe mieux le cadre.
       const finalPx = Math.max(5, best * 0.98);
       box.style.fontSize = `${finalPx}px`;
+      // Une fois la police trouvée, le cadre remplit la hauteur de l'appareil.
+      box.style.minHeight = `${Math.max(0, available - 12)}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
 
