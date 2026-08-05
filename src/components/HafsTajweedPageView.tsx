@@ -216,19 +216,20 @@ export const HafsTajweedPageView = ({
       content.style.marginLeft = '0px';
       content.style.transform = 'none';
       frame.style.height = '';
+      const measure = () => Math.max(content.scrollHeight, content.offsetHeight);
       // Plus grande taille de police (recherche binaire) qui tient dans l'écran.
-      const maxPx = Math.max(18, Math.min(46, viewport.clientWidth * 0.085));
+      const maxPx = Math.max(14, Math.min(42, viewport.clientWidth * 0.08));
       let best = 8;
       let lo = 8;
       let hi = maxPx;
       box.style.fontSize = `${maxPx}px`;
-      if (content.offsetHeight <= available - 6) {
+      if (measure() <= available - 10) {
         best = maxPx;
       } else {
-        for (let i = 0; i < 12 && hi - lo > 0.3; i++) {
+        for (let i = 0; i < 16 && hi - lo > 0.2; i++) {
           const mid = (lo + hi) / 2;
           box.style.fontSize = `${mid}px`;
-          if (content.offsetHeight <= available - 6) {
+          if (measure() <= available - 10) {
             best = mid;
             lo = mid;
           } else {
@@ -237,13 +238,13 @@ export const HafsTajweedPageView = ({
         }
       }
       box.style.fontSize = `${best}px`;
-      setFontPx(best);
+      setFontPx((prev) => (prev !== null && Math.abs(prev - best) < 0.2 ? prev : best));
 
       // Filet de sécurité : si la page dépasse encore (polices arabes hautes,
       // bandeaux thématiques), on met à l'échelle pour qu'elle tienne à 100 %.
-      const naturalHeight = content.offsetHeight;
+      const naturalHeight = measure();
       if (naturalHeight > available) {
-        const scale = Math.max(0.4, (available - 4) / naturalHeight);
+        const scale = Math.max(0.35, (available - 8) / naturalHeight);
         content.style.transform = `scale(${scale})`;
         content.style.transformOrigin = 'top center';
         frame.style.height = `${Math.ceil(naturalHeight * scale)}px`;
@@ -253,7 +254,11 @@ export const HafsTajweedPageView = ({
       }
     };
 
-    raf = requestAnimationFrame(fit);
+    // Double passe : la première mesure, la seconde confirme après reflow.
+    raf = requestAnimationFrame(() => {
+      fit();
+      raf = requestAnimationFrame(fit);
+    });
     // Le texte arabe et ses polices arrivent souvent après le premier rendu :
     // on relance l'ajustement plusieurs fois pour rester exact.
     const timers = [120, 350, 800, 1600, 3000].map((d) => window.setTimeout(fit, d));
@@ -270,7 +275,7 @@ export const HafsTajweedPageView = ({
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
     };
-  }, [currentPage, pageVerses, isFullscreen]);
+  }, [currentPage, pageVerses, isFullscreen, showMenuButton]);
 
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
