@@ -206,26 +206,31 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative h-[100dvh] w-full overflow-y-auto px-3 pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] md:px-6"
+        className="relative h-[100dvh] w-full overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
+          paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
         }}
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
-        <div className="mx-auto flex min-h-[calc(100dvh-6.5rem)] w-full max-w-4xl items-center justify-center">
+        <div className="mx-auto flex min-h-[calc(100dvh-7.5rem)] w-full max-w-4xl items-center justify-center">
           <div
-            className="w-full rounded-xl border-2 p-1.5 shadow-md"
+            className="mx-auto w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
             style={{ borderColor: 'hsl(43, 62%, 45%)' }}
           >
             <div
-              className="flex w-full flex-col items-center justify-center rounded-lg border px-3 py-5 md:px-6 md:py-8"
-              style={{ borderColor: 'hsl(43, 55%, 58%)' }}
+              className="flex w-full flex-col items-center justify-center rounded-lg border"
+              style={{
+                borderColor: 'hsl(43, 55%, 58%)',
+                paddingInline: 'clamp(0.5rem, 3.5vw, 1.75rem)',
+                paddingBlock: 'clamp(0.875rem, 4vw, 2rem)',
+              }}
             >
               {showBismillah && (
                 <p
                   dir="rtl"
-                  className="text-center font-amiri text-4xl md:text-5xl font-extrabold text-foreground mb-6"
-                  style={{ fontWeight: 800 }}
+                  className="w-full text-center font-amiri font-extrabold text-foreground mb-5 md:mb-6"
+                  style={{ fontWeight: 800, fontSize: 'clamp(1.6rem, 7vw, 3rem)' }}
                 >
                   بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                 </p>
@@ -234,8 +239,13 @@ export const HafsTajweedPageView = ({
               <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-4xl text-4xl md:text-5xl lg:text-6xl font-extrabold leading-loose text-center text-foreground [&_span]:font-bold"
-          style={{ wordSpacing: '0.15em', fontWeight: 800 }}
+          className="quran-text tajweed-text mx-auto w-full max-w-4xl font-extrabold leading-loose text-center text-foreground [&_span]:font-bold"
+          style={{
+            wordSpacing: '0.12em',
+            fontWeight: 800,
+            fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
+            overflowWrap: 'break-word',
+          }}
         >
           {pageVerses.map((v) => {
             const isCurrent = currentVerse === v.number;
