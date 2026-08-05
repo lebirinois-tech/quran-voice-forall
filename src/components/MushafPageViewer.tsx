@@ -233,7 +233,13 @@ export const MushafPageViewer = ({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div
+      ref={rootRef}
+      className={cn(
+        'w-full max-w-3xl mx-auto',
+        isFullscreen && 'fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-background p-2'
+      )}
+    >
       {/* Page Info Header */}
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="text-sm text-muted-foreground">
