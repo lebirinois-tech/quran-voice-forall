@@ -285,13 +285,18 @@ export const HafsTajweedPageView = ({
     });
     // Le texte arabe et ses polices arrivent souvent après le premier rendu :
     // on relance l'ajustement plusieurs fois pour rester exact.
-    const timers = [120, 350, 800, 1600, 3000].map((d) => window.setTimeout(fit, d));
+    const timers = [120, 350, 800, 1600, 3000, 5000, 8000].map((d) =>
+      window.setTimeout(fit, d)
+    );
     document.fonts?.ready.then(fit).catch(() => undefined);
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(fit);
     });
     ro.observe(viewport);
+    // La police arabe (Amiri) arrive après le premier rendu et fait grandir le
+    // texte : on observe aussi le bloc de texte pour réajuster à ce moment-là.
+    ro.observe(quranText);
     window.addEventListener('orientationchange', fit);
     window.addEventListener('resize', fit);
     window.visualViewport?.addEventListener('resize', fit);
