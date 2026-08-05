@@ -272,11 +272,15 @@ export const HafsTajweedPageView = ({
     });
     ro.observe(viewport);
     window.addEventListener('orientationchange', fit);
+    window.addEventListener('resize', fit);
+    window.visualViewport?.addEventListener('resize', fit);
     return () => {
       cancelAnimationFrame(raf);
       timers.forEach((t) => window.clearTimeout(t));
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
+      window.removeEventListener('resize', fit);
+      window.visualViewport?.removeEventListener('resize', fit);
     };
   }, [currentPage, pageVerses, isFullscreen, showMenuButton]);
 
