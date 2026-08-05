@@ -118,9 +118,12 @@ export const HafsTajweedPageView = ({
   // Clamp current page if verses arrive later, but allow edge navigation to ask
   // the parent to open the previous/next sourate when the page is outside this sourate.
   useEffect(() => {
-    if (currentPage < startPage) setCurrentPage(startPage);
-    else if (currentPage > endPage) setCurrentPage(endPage);
-  }, [startPage, endPage, currentPage]);
+    setCurrentPage((p) => {
+      if (p < startPage) return startPage;
+      if (p > endPage) return endPage;
+      return p;
+    });
+  }, [startPage, endPage]);
 
   useEffect(() => {
     onPageChange?.(currentPage);
