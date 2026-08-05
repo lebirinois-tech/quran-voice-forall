@@ -620,7 +620,7 @@ export const HafsTajweedPageView = ({
                 className="w-full justify-start gap-2"
                 onClick={() => {
                   setMenuOpen(false);
-                  setIsFullscreen((v) => !v);
+                  toggleFullscreen();
                 }}
               >
                 {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
