@@ -218,7 +218,9 @@ export const HafsTajweedPageView = ({
       // Seule la police varie : le cadre reste toujours à pleine largeur.
       // La recherche descend suffisamment bas pour les pages les plus chargées,
       // sans jamais réduire géométriquement toute la page avec transform: scale().
-      const maxPx = Math.max(18, Math.min(42, viewport.clientWidth * 0.085));
+      // Modèle de référence (محفظ الوحيين) : texte plus compact, plus de lignes
+      // par page. On plafonne donc nettement la taille maximale.
+      const maxPx = Math.max(13, Math.min(26, viewport.clientWidth * 0.058));
       let best = 5;
       let lo = 5;
       let hi = maxPx;
@@ -238,8 +240,10 @@ export const HafsTajweedPageView = ({
           }
         }
       }
-      box.style.fontSize = `${best}px`;
-      setFontPx((prev) => (prev !== null && Math.abs(prev - best) < 0.2 ? prev : best));
+      // Marge de confort : on garde ~6% de respiration pour éviter tout débordement.
+      const finalPx = Math.max(5, best * 0.94);
+      box.style.fontSize = `${finalPx}px`;
+      setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
 
     // Double passe : la première mesure, la seconde confirme après reflow.
@@ -329,7 +333,7 @@ export const HafsTajweedPageView = ({
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                fontSize: fontPx ? `${fontPx}px` : 'clamp(1rem, 5vw, 2.5rem)',
+                fontSize: fontPx ? `${fontPx}px` : 'clamp(0.8rem, 3.4vw, 1.5rem)',
                 paddingInline: '0.5em',
                 paddingBlock: '0.5em',
               }}
