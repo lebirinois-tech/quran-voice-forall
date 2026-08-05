@@ -211,20 +211,30 @@ export const HafsTajweedPageView = ({
           backgroundColor: 'hsl(40, 45%, 92%)',
         }}
       >
-        {showBismillah && (
-          <p
-            dir="rtl"
-            className="text-center font-amiri text-4xl md:text-5xl font-extrabold text-foreground mb-6"
-            style={{ fontWeight: 800 }}
+        {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
+        <div className="mx-auto flex min-h-[calc(100dvh-6.5rem)] w-full max-w-4xl items-center justify-center">
+          <div
+            className="w-full rounded-xl border-2 p-1.5 shadow-md"
+            style={{ borderColor: 'hsl(43, 62%, 45%)' }}
           >
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-          </p>
-        )}
+            <div
+              className="flex w-full flex-col items-center justify-center rounded-lg border px-3 py-5 md:px-6 md:py-8"
+              style={{ borderColor: 'hsl(43, 55%, 58%)' }}
+            >
+              {showBismillah && (
+                <p
+                  dir="rtl"
+                  className="text-center font-amiri text-4xl md:text-5xl font-extrabold text-foreground mb-6"
+                  style={{ fontWeight: 800 }}
+                >
+                  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                </p>
+              )}
 
-        <div
+              <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto max-w-4xl text-4xl md:text-5xl lg:text-6xl font-extrabold leading-loose text-justify text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-4xl text-4xl md:text-5xl lg:text-6xl font-extrabold leading-loose text-center text-foreground [&_span]:font-bold"
           style={{ wordSpacing: '0.15em', fontWeight: 800 }}
         >
           {pageVerses.map((v) => {
@@ -283,6 +293,9 @@ export const HafsTajweedPageView = ({
               Aucun verset sur cette page pour cette sourate.
             </p>
           )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
