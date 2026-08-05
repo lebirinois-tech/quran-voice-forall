@@ -222,7 +222,14 @@ export const HafsTajweedPageView = ({
       // par page. On plafonne donc nettement la taille maximale.
       // Le modèle affiche ~15-17 lignes par page : la police reste petite
       // (≈4,7 % de la largeur sur mobile, plafonnée pour le desktop).
-      const maxPx = Math.max(13, Math.min(26, viewport.clientWidth * 0.056));
+      // Ajustement automatique à l'appareil : la borne haute dépend à la fois de
+      // la largeur et de la hauteur utiles, donc de l'écran et de l'orientation.
+      const maxPx = Math.max(
+        10,
+        Math.min(38, viewport.clientWidth * 0.075, available * 0.07)
+      );
+      // Le cadre occupe toute la hauteur disponible sur l'appareil.
+      box.style.minHeight = `${Math.max(0, available - 12)}px`;
       let best = 5;
       let lo = 5;
       let hi = maxPx;
@@ -243,7 +250,7 @@ export const HafsTajweedPageView = ({
         }
       }
       // Marge de confort réduite : le texte occupe mieux le cadre.
-      const finalPx = Math.max(5, best * 0.96);
+      const finalPx = Math.max(5, best * 0.98);
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
