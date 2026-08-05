@@ -204,114 +204,18 @@ export const HafsTajweedPageView = ({
   const [fontPx, setFontPx] = useState<number | null>(null);
   // Interligne adaptatif : sur les pages courtes, on étire les lignes pour
   // remplir le cadre au lieu de laisser un vide en haut et en bas.
-  const [lineHeightVal, setLineHeightVal] = useState(1.5);
   useLayoutEffect(() => {
-    const viewport = containerRef.current;
-    const box = boxRef.current;
-    const quranText = quranTextRef.current;
-    if (!viewport || !box || !quranText) return;
-
-    let raf = 0;
-    const fit = () => {
-      if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
-
-      const minPx = 16;
-      const maxPx = Math.min(30, Math.max(22, box.clientWidth * 0.082));
-      const BASE_LH = 1.5;
-      const MAX_LH = 2.6;
-      const measure = (size: number) => {
-        box.style.fontSize = `${size}px`;
-        quranText.style.lineHeight = String(BASE_LH);
-        // Force le navigateur à terminer la mise en page avant la mesure.
-        void quranText.offsetHeight;
-        const boxStyle = window.getComputedStyle(box);
-        const available =
-          box.clientHeight -
-          parseFloat(boxStyle.paddingTop || '0') -
-          parseFloat(boxStyle.paddingBottom || '0');
-        const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
-        const bismillahHeight = bismillah
-          ? bismillah.getBoundingClientRect().height +
-            parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
-          : 0;
-        return {
-          available,
-          used: Math.max(quranText.scrollHeight, quranText.getBoundingClientRect().height) +
-            bismillahHeight,
-        };
-      };
-
-      let low = minPx;
-      let high = maxPx;
-      let best = minPx;
-      // Une marge fixe de 6 px protège les jambages arabes et le dernier verset.
-      for (let i = 0; i < 12; i++) {
-        const candidate = (low + high) / 2;
-        const { available, used } = measure(candidate);
-        if (used <= available - 6) {
-          best = candidate;
-          low = candidate;
-        } else {
-          high = candidate;
-        }
-      }
-
-      // Vérification finale après l'arrondi des glyphes par le navigateur.
-      let finalPx = Math.floor(best * 10) / 10;
-      for (let i = 0; i < 8; i++) {
-        const { available, used } = measure(finalPx);
-        if (used <= available - 4 || finalPx <= minPx) break;
-        finalPx = Math.max(minPx, finalPx - 0.5);
-      }
-      box.style.fontSize = `${finalPx}px`;
-      // Remplissage vertical : étire l'interligne si de l'espace reste libre.
-      const { available, used } = measure(finalPx);
-      const targetLh =
-        used > 0
-          ? Math.min(MAX_LH, Math.max(BASE_LH, (BASE_LH * (available - 8)) / used))
-          : BASE_LH;
-      quranText.style.lineHeight = String(targetLh);
-      setLineHeightVal((prev) => (Math.abs(prev - targetLh) < 0.02 ? prev : targetLh));
-      setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
-    };
-
-    // Double passe : la première mesure, la seconde confirme après reflow.
-    raf = requestAnimationFrame(() => {
-      fit();
-      raf = requestAnimationFrame(fit);
-    });
-    // Une passe après le chargement de la police arabe suffit ; les dimensions
-    // du cadre sont ensuite surveillées indépendamment du contenu.
-    const timers = [250, 1500, 4500].map((delay) => window.setTimeout(fit, delay));
-    document.fonts?.ready.then(fit).catch(() => undefined);
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(fit);
-    });
-    ro.observe(viewport);
-    window.addEventListener('orientationchange', fit);
-    window.addEventListener('resize', fit);
-    window.visualViewport?.addEventListener('resize', fit);
-    return () => {
-      cancelAnimationFrame(raf);
-      timers.forEach((timer) => window.clearTimeout(timer));
-      ro.disconnect();
-      window.removeEventListener('orientationchange', fit);
-      window.removeEventListener('resize', fit);
-      window.visualViewport?.removeEventListener('resize', fit);
-    };
-  }, [currentPage, pageVerses, isFullscreen, showMenuButton]);
-
-  // Contrôle après le rendu React : certains assemblages de spans Tajweed
-  // changent brutalement de nombre de lignes à une taille précise. Cette passe
-  // valide la hauteur réellement peinte et réduit seulement en cas de besoin.
-  useLayoutEffect(() => {
-    if (fontPx === null) return;
     const box = boxRef.current;
     const text = quranTextRef.current;
     if (!box || !text) return;
 
-    const raf = requestAnimationFrame(() => {
+    const MIN_PX = 13;
+    const MAX_PX = 30;
+    let raf = 0;
+    let steps = 0;
+    let last = -1;
+
+    const measure = () => {
       const style = window.getComputedStyle(box);
       const available =
         box.clientHeight -
@@ -322,56 +226,56 @@ export const HafsTajweedPageView = ({
         ? bismillah.getBoundingClientRect().height +
           parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
         : 0;
-      const used = Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
-      if (used > available - 4 && fontPx > 16) {
-        const ratio = Math.sqrt(Math.max(0.25, (available - 8) / used));
-        const reduced = Math.max(16, Math.floor(fontPx * ratio * 10) / 10);
-        setFontPx(reduced < fontPx ? reduced : Math.max(16, fontPx - 0.5));
-      }
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [fontPx, currentPage, pageVerses]);
-
-  // Garde-fou permanent contre les changements tardifs de police/Tajweed.
-  // Il ne réagrandit jamais le texte, donc il ne peut pas créer d'oscillation.
-  useEffect(() => {
-    const box = boxRef.current;
-    const text = quranTextRef.current;
-    if (!box || !text) return;
-    let raf = 0;
-    const shrinkIfNeeded = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const style = window.getComputedStyle(box);
-        const available =
-          box.clientHeight -
-          parseFloat(style.paddingTop || '0') -
-          parseFloat(style.paddingBottom || '0');
-        const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
-        const bismillahHeight = bismillah
-          ? bismillah.getBoundingClientRect().height +
-            parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
-          : 0;
-        const used = Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
-        if (used <= available - 4) return;
-        setFontPx((current) => {
-          if (current === null || current <= 16) return current;
-          const ratio = Math.sqrt(Math.max(0.25, (available - 8) / used));
-          return Math.max(16, Math.floor(current * ratio * 10) / 10);
-        });
-      });
+      const used =
+        Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
+      return { available, used };
     };
-    const observer = new ResizeObserver(shrinkIfNeeded);
+
+    // Boucle d'ajustement proportionnelle : mesure ce qui est réellement peint,
+    // puis corrige la taille jusqu'à remplir le cadre sans le dépasser.
+    const adjust = () => {
+      if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
+      const { available, used } = measure();
+      if (available <= 0 || used <= 0) return;
+      const target = available - 8;
+      const current =
+        parseFloat(window.getComputedStyle(text).fontSize || '0') || MIN_PX;
+      if (Math.abs(used - target) <= 10) {
+        steps = 0;
+        return;
+      }
+      if (steps > 14) return;
+      steps += 1;
+      const ratio = Math.sqrt(Math.max(0.3, Math.min(2.5, target / used)));
+      let next = Math.round(Math.min(MAX_PX, Math.max(MIN_PX, current * ratio)) * 10) / 10;
+      if (next === last) return;
+      last = next;
+      if (Math.abs(next - current) < 0.2) return;
+      setFontPx(next);
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(adjust);
+    };
+
+    schedule();
+    const observer = new ResizeObserver(schedule);
+    observer.observe(box);
     observer.observe(text);
-    const timers = [500, 1200, 2500, 5000].map((delay) =>
-      window.setTimeout(shrinkIfNeeded, delay)
-    );
+    const timers = [300, 900, 2000, 4000].map((d) => window.setTimeout(schedule, d));
+    document.fonts?.ready.then(schedule).catch(() => undefined);
+    window.addEventListener('orientationchange', schedule);
+    window.addEventListener('resize', schedule);
     return () => {
       cancelAnimationFrame(raf);
       observer.disconnect();
-      timers.forEach((timer) => window.clearTimeout(timer));
+      timers.forEach((t) => window.clearTimeout(t));
+      window.removeEventListener('orientationchange', schedule);
+      window.removeEventListener('resize', schedule);
     };
-  }, [currentPage, pageVerses]);
+  }, [currentPage, pageVerses, isFullscreen, showMenuButton]);
+
 
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
@@ -465,7 +369,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
-            lineHeight: lineHeightVal,
+            lineHeight: 1.6,
             flexShrink: 0,
             fontWeight: 800,
             fontSize: '1em',
@@ -475,12 +379,11 @@ export const HafsTajweedPageView = ({
           {themeGroups.map((group, gi) => (
             <span
               key={`g-${gi}`}
-              // Bande thématique continue sur toute la largeur (comme le Mushaf de référence)
               style={{
-                display: 'block',
+                display: 'inline',
                 background: group.theme ? `hsl(${group.theme.hsl} / 0.18)` : undefined,
-                textAlign: 'justify',
-                textAlignLast: gi === themeGroups.length - 1 ? 'right' : 'justify',
+                boxDecorationBreak: 'clone',
+                WebkitBoxDecorationBreak: 'clone',
               }}
             >
               {group.verses.map((v) => {
