@@ -311,7 +311,16 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
+        onClick={(e) => {
+          // Un appui hors texte fait apparaître / disparaître le bouton de menu.
+          if (e.target === e.currentTarget) setShowMenuButton((v) => !v);
+        }}
+        className={cn(
+          'relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
+          showMenuButton
+            ? 'pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)]'
+            : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
+        )}
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
@@ -419,17 +428,29 @@ export const HafsTajweedPageView = ({
         </div>
       </div>
 
-      {/* One reliable call button: all commands appear only on demand. */}
-      <Button
+      {/* Bouton d'appel unique, placé sous le cadre et masquable à la demande. */}
+      {showMenuButton ? (
+        <Button
         type="button"
         onClick={() => setMenuOpen(true)}
+        onDoubleClick={() => setShowMenuButton(false)}
         aria-label="Ouvrir les commandes"
         size="icon"
         className="fixed left-1/2 z-[80] h-14 w-14 -translate-x-1/2 rounded-full border-2 border-primary/30 bg-background/90 text-primary shadow-2xl backdrop-blur hover:bg-background"
         style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)' }}
-      >
-        <Menu className="h-6 w-6" />
-      </Button>
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowMenuButton(true)}
+          aria-label="Afficher le bouton des commandes"
+          className="fixed bottom-0 left-1/2 z-[80] h-8 w-24 -translate-x-1/2 rounded-t-full bg-primary/15"
+        >
+          <span className="mx-auto block h-1 w-10 rounded-full bg-primary/60" />
+        </button>
+      )}
 
       {/* Quick access Sheet: settings, audio, recording */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
