@@ -268,7 +268,11 @@ export const HafsTajweedPageView = ({
         }}
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
-        <div className="mx-auto flex min-h-[calc(100dvh-7.5rem)] w-full max-w-4xl items-center justify-center">
+        <div
+          ref={frameRef}
+          className="mx-auto flex w-full max-w-4xl items-center justify-center"
+          style={{ ['--mushaf-fit' as string]: String(fitScale) }}
+        >
           <div
             className="mx-auto w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
             style={{ borderColor: 'hsl(43, 62%, 45%)' }}
@@ -277,15 +281,18 @@ export const HafsTajweedPageView = ({
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: 'clamp(0.5rem, 3.5vw, 1.75rem)',
-                paddingBlock: 'clamp(0.875rem, 4vw, 2rem)',
+                paddingInline: 'calc(clamp(0.5rem, 3.5vw, 1.75rem) * var(--mushaf-fit, 1))',
+                paddingBlock: 'calc(clamp(0.875rem, 4vw, 2rem) * var(--mushaf-fit, 1))',
               }}
             >
               {showBismillah && (
                 <p
                   dir="rtl"
                   className="w-full text-center font-amiri font-extrabold text-foreground mb-5 md:mb-6"
-                  style={{ fontWeight: 800, fontSize: 'clamp(1.6rem, 7vw, 3rem)' }}
+                  style={{
+                    fontWeight: 800,
+                    fontSize: 'calc(clamp(1.6rem, 7vw, 3rem) * var(--mushaf-fit, 1))',
+                  }}
                 >
                   بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                 </p>
@@ -298,7 +305,7 @@ export const HafsTajweedPageView = ({
           style={{
             wordSpacing: '0.12em',
             fontWeight: 800,
-            fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
+            fontSize: 'calc(clamp(1.5rem, 6.2vw, 3.25rem) * var(--mushaf-fit, 1))',
             overflowWrap: 'break-word',
           }}
         >
