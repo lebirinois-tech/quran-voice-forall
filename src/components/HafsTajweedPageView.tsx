@@ -222,7 +222,7 @@ export const HafsTajweedPageView = ({
         scale = next;
       }
       apply(scale);
-      frame.style.height = `${Math.min(available, content.offsetHeight * scale)}px`;
+      frame.style.height = `${Math.min(available, content.getBoundingClientRect().height)}px`;
     };
 
     raf = requestAnimationFrame(fit);
