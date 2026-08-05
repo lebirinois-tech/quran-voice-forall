@@ -209,43 +209,54 @@ export const HafsTajweedPageView = ({
 
     let raf = 0;
     const fit = () => {
-      const boxStyle = window.getComputedStyle(box);
-      const available =
-        box.clientHeight -
-        parseFloat(boxStyle.paddingTop || '0') -
-        parseFloat(boxStyle.paddingBottom || '0');
-      if (available <= 0 || box.clientWidth <= 0) return;
+      const minPx = 9;
+      const maxPx = Math.max(16, Math.min(34, box.clientWidth * 0.072));
 
-      const maxPx = Math.max(15, Math.min(34, box.clientWidth * 0.072));
-      const minPx = 8;
-      const fits = () => {
+      // Hauteur réellement disponible (recalculée à chaque mesure, car le
+      // padding du cadre est exprimé en em et varie avec la police).
+      const availableAt = () => {
+        const cs = window.getComputedStyle(box);
+        return (
+          box.clientHeight -
+          parseFloat(cs.paddingTop || '0') -
+          parseFloat(cs.paddingBottom || '0')
+        );
+      };
+      const usedAt = () => {
         const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
         const bismillahHeight = bismillah
-          ? bismillah.getBoundingClientRect().height + parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
+          ? bismillah.getBoundingClientRect().height +
+            parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
           : 0;
-        return quranText.scrollHeight + bismillahHeight <= available + 1;
+        return quranText.scrollHeight + bismillahHeight;
       };
 
-      let best = minPx;
-      let lo = minPx;
-      let hi = maxPx;
-      box.style.fontSize = `${maxPx}px`;
-      if (fits()) {
-        best = maxPx;
-      } else {
-        for (let i = 0; i < 18 && hi - lo > 0.1; i++) {
-          const mid = (lo + hi) / 2;
-          box.style.fontSize = `${mid}px`;
-          if (fits()) {
-            best = mid;
-            lo = mid;
-          } else {
-            hi = mid;
-          }
-        }
+      if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
+
+      // Convergence proportionnelle : bien plus fiable qu'une recherche
+      // binaire, car la hauteur du texte croît quasi linéairement avec la
+      // police. On part du maximum puis on ajuste par ratio.
+      let f = maxPx;
+      for (let i = 0; i < 8; i++) {
+        box.style.fontSize = `${f}px`;
+        const available = availableAt();
+        const used = usedAt();
+        if (available <= 0 || used <= 0) break;
+        const target = available * 0.97;
+        const ratio = target / used;
+        if (ratio > 0.995 && ratio < 1.05) break;
+        f = Math.max(minPx, Math.min(maxPx, f * ratio));
+        if (f >= maxPx && ratio > 1) break; // déjà au plafond
       }
-      // Une petite réserve évite qu'une ligne sorte après le chargement final de la police.
-      const finalPx = Math.max(minPx, best * 0.97);
+
+      // Sécurité : on réduit tant que le contenu déborde encore.
+      for (let i = 0; i < 30; i++) {
+        box.style.fontSize = `${f}px`;
+        if (usedAt() <= availableAt() + 1 || f <= minPx) break;
+        f = Math.max(minPx, f * 0.96);
+      }
+
+      const finalPx = Math.max(minPx, Math.min(maxPx, f));
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
