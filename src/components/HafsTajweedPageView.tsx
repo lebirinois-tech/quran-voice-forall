@@ -187,6 +187,46 @@ export const HafsTajweedPageView = ({
     }
   }, [currentVerse, currentPage]);
 
+  // Ajustement automatique : réduit la taille du texte jusqu'à ce que la page
+  // entière tienne dans l'écran (sans défilement) sur tous les formats.
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const [fitScale, setFitScale] = useState(1);
+  useLayoutEffect(() => {
+    const viewport = containerRef.current;
+    const frame = frameRef.current;
+    if (!viewport || !frame) return;
+
+    let raf = 0;
+    const fit = () => {
+      const available = viewport.clientHeight;
+      if (!available) return;
+      let scale = 1;
+      setFitScale(1);
+      frame.style.setProperty('--mushaf-fit', '1');
+      // quelques passes de réduction progressive
+      for (let i = 0; i < 24; i++) {
+        const needed = frame.scrollHeight;
+        if (needed <= available - 8 || scale <= 0.4) break;
+        scale = Math.max(0.4, scale * Math.min(0.97, Math.sqrt((available - 8) / needed)));
+        frame.style.setProperty('--mushaf-fit', String(scale));
+      }
+      setFitScale(scale);
+    };
+
+    raf = requestAnimationFrame(fit);
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(fit);
+    });
+    ro.observe(viewport);
+    window.addEventListener('orientationchange', fit);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('orientationchange', fit);
+    };
+  }, [currentPage, pageVerses, showBismillahDep, isFullscreen]);
+
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
