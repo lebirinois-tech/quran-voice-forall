@@ -213,14 +213,14 @@ export const HafsTajweedPageView = ({
       frame.style.height = '';
       // Plus grande taille de police (recherche binaire) qui tient dans l'écran.
       const maxPx = Math.max(18, Math.min(46, viewport.clientWidth * 0.085));
-      let best = 10;
-      let lo = 10;
+      let best = 8;
+      let lo = 8;
       let hi = maxPx;
       box.style.fontSize = `${maxPx}px`;
       if (content.offsetHeight <= available - 6) {
         best = maxPx;
       } else {
-        for (let i = 0; i < 10 && hi - lo > 0.5; i++) {
+        for (let i = 0; i < 12 && hi - lo > 0.3; i++) {
           const mid = (lo + hi) / 2;
           box.style.fontSize = `${mid}px`;
           if (content.offsetHeight <= available - 6) {
@@ -232,6 +232,19 @@ export const HafsTajweedPageView = ({
         }
       }
       box.style.fontSize = `${best}px`;
+
+      // Filet de sécurité : si la page dépasse encore (polices arabes hautes,
+      // bandeaux thématiques), on met à l'échelle pour qu'elle tienne à 100 %.
+      const naturalHeight = content.offsetHeight;
+      if (naturalHeight > available) {
+        const scale = Math.max(0.4, (available - 4) / naturalHeight);
+        content.style.transform = `scale(${scale})`;
+        content.style.transformOrigin = 'top center';
+        frame.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+      } else {
+        content.style.transform = 'none';
+        frame.style.height = '';
+      }
     };
 
     raf = requestAnimationFrame(fit);
@@ -287,7 +300,7 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative flex h-[100dvh] w-full flex-col justify-center overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
+        className="relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
@@ -296,7 +309,7 @@ export const HafsTajweedPageView = ({
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
           ref={frameRef}
-          className="mx-auto w-full max-w-4xl overflow-hidden"
+          className="mx-auto my-auto w-full max-w-4xl overflow-hidden"
         >
           <div
             ref={contentRef}
