@@ -204,7 +204,6 @@ export const HafsTajweedPageView = ({
   const [fontPx, setFontPx] = useState<number | null>(null);
   // Interligne adaptatif : sur les pages courtes, on étire les lignes pour
   // remplir le cadre au lieu de laisser un vide en haut et en bas.
-  const [lineHeightVal, setLineHeightVal] = useState(1.5);
   useLayoutEffect(() => {
     const box = boxRef.current;
     const text = quranTextRef.current;
@@ -370,7 +369,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
-            lineHeight: lineHeightVal,
+            lineHeight: 1.6,
             flexShrink: 0,
             fontWeight: 800,
             fontSize: '1em',
