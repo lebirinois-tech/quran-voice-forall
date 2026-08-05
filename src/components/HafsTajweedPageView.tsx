@@ -284,19 +284,19 @@ export const HafsTajweedPageView = ({
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
           ref={frameRef}
-          className="mx-auto flex w-full max-w-4xl items-center justify-center"
-          style={{ ['--mushaf-fit' as string]: String(fitScale) }}
+          className="mx-auto w-full max-w-4xl overflow-hidden"
         >
           <div
-            className="mx-auto w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
-            style={{ borderColor: 'hsl(43, 62%, 45%)' }}
+            ref={contentRef}
+            className="w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
+            style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
             <div
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: 'calc(clamp(0.5rem, 3.5vw, 1.75rem) * var(--mushaf-fit, 1))',
-                paddingBlock: 'calc(clamp(0.875rem, 4vw, 2rem) * var(--mushaf-fit, 1))',
+                paddingInline: 'clamp(0.5rem, 3.5vw, 1.75rem)',
+                paddingBlock: 'clamp(0.875rem, 4vw, 2rem)',
               }}
             >
               {showBismillah && (
@@ -305,7 +305,7 @@ export const HafsTajweedPageView = ({
                   className="w-full text-center font-amiri font-extrabold text-foreground mb-5 md:mb-6"
                   style={{
                     fontWeight: 800,
-                    fontSize: 'calc(clamp(1.6rem, 7vw, 3rem) * var(--mushaf-fit, 1))',
+                    fontSize: 'clamp(1.6rem, 7vw, 3rem)',
                   }}
                 >
                   بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
