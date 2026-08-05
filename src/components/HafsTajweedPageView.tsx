@@ -303,7 +303,7 @@ export const HafsTajweedPageView = ({
     <div
       ref={rootRef}
       className={cn(
-        'fixed inset-0 z-[45] h-[100dvh] w-screen bg-background overflow-hidden',
+        'fixed inset-0 z-[70] h-[100dvh] w-screen bg-background overflow-hidden',
         isFullscreen && 'z-[60]'
       )}
     >
@@ -334,9 +334,20 @@ export const HafsTajweedPageView = ({
         >
           <div
             ref={contentRef}
-            className="h-full w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
+            className="relative h-full w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
             style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
+            {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
+            <div
+              className="pointer-events-none absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 rounded-full border px-3 py-0.5 text-[11px] font-semibold"
+              style={{
+                backgroundColor: 'hsl(40, 45%, 92%)',
+                borderColor: 'hsl(43, 62%, 45%)',
+                color: 'hsl(43, 62%, 30%)',
+              }}
+            >
+              {toArabicDigits(currentPage)} · Page {currentPage} / 604
+            </div>
             <div
               ref={boxRef}
               className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border"
