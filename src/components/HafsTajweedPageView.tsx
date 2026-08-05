@@ -213,14 +213,14 @@ export const HafsTajweedPageView = ({
       frame.style.height = '';
       // Plus grande taille de police (recherche binaire) qui tient dans l'écran.
       const maxPx = Math.max(18, Math.min(46, viewport.clientWidth * 0.085));
-      let best = 10;
-      let lo = 10;
+      let best = 8;
+      let lo = 8;
       let hi = maxPx;
       box.style.fontSize = `${maxPx}px`;
       if (content.offsetHeight <= available - 6) {
         best = maxPx;
       } else {
-        for (let i = 0; i < 10 && hi - lo > 0.5; i++) {
+        for (let i = 0; i < 12 && hi - lo > 0.3; i++) {
           const mid = (lo + hi) / 2;
           box.style.fontSize = `${mid}px`;
           if (content.offsetHeight <= available - 6) {
@@ -232,6 +232,19 @@ export const HafsTajweedPageView = ({
         }
       }
       box.style.fontSize = `${best}px`;
+
+      // Filet de sécurité : si la page dépasse encore (polices arabes hautes,
+      // bandeaux thématiques), on met à l'échelle pour qu'elle tienne à 100 %.
+      const naturalHeight = content.offsetHeight;
+      if (naturalHeight > available) {
+        const scale = Math.max(0.4, (available - 4) / naturalHeight);
+        content.style.transform = `scale(${scale})`;
+        content.style.transformOrigin = 'top center';
+        frame.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+      } else {
+        content.style.transform = 'none';
+        frame.style.height = '';
+      }
     };
 
     raf = requestAnimationFrame(fit);
@@ -244,6 +257,7 @@ export const HafsTajweedPageView = ({
       raf = requestAnimationFrame(fit);
     });
     ro.observe(viewport);
+    ro.observe(box);
     window.addEventListener('orientationchange', fit);
     return () => {
       cancelAnimationFrame(raf);
