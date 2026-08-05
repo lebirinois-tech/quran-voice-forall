@@ -465,7 +465,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'center',
-            lineHeight: 1.5,
+            lineHeight: lineHeightVal,
             flexShrink: 0,
             fontWeight: 800,
             fontSize: '1em',
