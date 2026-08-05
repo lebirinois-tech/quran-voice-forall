@@ -207,21 +207,31 @@ export const HafsTajweedPageView = ({
         parseFloat(cs.paddingTop || '0') -
         parseFloat(cs.paddingBottom || '0');
       if (!available) return;
-      // 1) Hauteur naturelle à pleine largeur, sans mise à l'échelle.
       content.style.width = '100%';
       content.style.marginLeft = '0px';
       content.style.transform = 'none';
-      const natural = content.offsetHeight;
-      if (!natural) return;
-      const scale = Math.max(0.3, Math.min(1, (available - 6) / natural));
-      // 2) On élargit la page proportionnellement pour qu'après réduction
-      //    elle occupe toujours toute la largeur de l'écran.
-      if (scale < 1) {
-        content.style.width = `${100 / scale}%`;
-        content.style.marginLeft = `${-((100 / scale - 100) / 2)}%`;
+      frame.style.height = '';
+      // Plus grande taille de police (recherche binaire) qui tient dans l'écran.
+      const maxPx = Math.max(18, Math.min(46, viewport.clientWidth * 0.085));
+      let best = 10;
+      let lo = 10;
+      let hi = maxPx;
+      box.style.fontSize = `${maxPx}px`;
+      if (content.offsetHeight <= available - 6) {
+        best = maxPx;
+      } else {
+        for (let i = 0; i < 10 && hi - lo > 0.5; i++) {
+          const mid = (lo + hi) / 2;
+          box.style.fontSize = `${mid}px`;
+          if (content.offsetHeight <= available - 6) {
+            best = mid;
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
       }
-      content.style.transform = `scale(${scale})`;
-      frame.style.height = `${Math.min(available, content.getBoundingClientRect().height)}px`;
+      box.style.fontSize = `${best}px`;
     };
 
     raf = requestAnimationFrame(fit);
