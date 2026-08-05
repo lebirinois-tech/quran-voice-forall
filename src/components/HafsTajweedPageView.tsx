@@ -495,7 +495,7 @@ export const HafsTajweedPageView = ({
                     )}
                   >
                     <span dangerouslySetInnerHTML={{ __html: html }} />
-                    <span className="inline-flex items-center justify-center mx-1 align-middle text-primary font-bold">
+                    <span className="mx-[0.2em] inline-flex items-center justify-center align-middle text-primary font-bold">
                       ۝{toArabicDigits(v.number)}
                     </span>{' '}
                   </span>
