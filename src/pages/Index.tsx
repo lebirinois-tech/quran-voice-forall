@@ -418,6 +418,8 @@ const Index = () => {
             </Link>
           </div>
           
+          <BuildVersionBadge className="mb-4" />
+
           <p className="text-sm text-muted-foreground">
             Quran Accès Pour Tous © {new Date().getFullYear()}
           </p>
