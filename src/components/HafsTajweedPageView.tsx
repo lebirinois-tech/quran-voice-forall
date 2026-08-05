@@ -208,17 +208,20 @@ export const HafsTajweedPageView = ({
       let scale = 1;
       // La largeur est compensée (100/scale) pour que la page réduite
       // continue d'occuper toute la largeur de l'écran.
-      for (let i = 0; i < 4; i++) {
-        content.style.width = `${100 / scale}%`;
-        content.style.transform = `scale(${scale})`;
+      const apply = (s: number) => {
+        content.style.width = `${100 / s}%`;
+        content.style.marginLeft = `${-((100 / s - 100) / 2)}%`;
+        content.style.transform = `scale(${s})`;
+      };
+      for (let i = 0; i < 5; i++) {
+        apply(scale);
         const natural = content.offsetHeight;
         if (!natural) return;
-        const next = Math.max(0.3, Math.min(1, (available - 6) / natural));
+        const next = Math.max(0.3, Math.min(1, ((available - 6) / natural) * scale));
         if (Math.abs(next - scale) < 0.01) break;
         scale = next;
       }
-      content.style.width = `${100 / scale}%`;
-      content.style.transform = `scale(${scale})`;
+      apply(scale);
       frame.style.height = `${Math.min(available, content.offsetHeight * scale)}px`;
     };
 
