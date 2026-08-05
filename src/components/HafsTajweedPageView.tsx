@@ -198,7 +198,11 @@ export const HafsTajweedPageView = ({
 
     let raf = 0;
     const fit = () => {
-      const available = viewport.clientHeight;
+      const cs = window.getComputedStyle(viewport);
+      const available =
+        viewport.clientHeight -
+        parseFloat(cs.paddingTop || '0') -
+        parseFloat(cs.paddingBottom || '0');
       if (!available) return;
       let scale = 1;
       setFitScale(1);
