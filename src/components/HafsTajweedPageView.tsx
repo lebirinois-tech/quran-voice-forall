@@ -498,6 +498,16 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
+            aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            onClick={toggleFullscreen}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
             aria-label="Ouvrir les commandes"
             onClick={() => setMenuOpen(true)}
             onDoubleClick={() => setShowMenuButton(false)}
