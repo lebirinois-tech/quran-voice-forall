@@ -244,7 +244,7 @@ export const HafsTajweedPageView = ({
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
-          className="mx-auto h-full w-full max-w-4xl overflow-hidden"
+          className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
         >
           <div
             className="relative h-full w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
@@ -286,7 +286,7 @@ export const HafsTajweedPageView = ({
               <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-4xl text-[15px] font-extrabold text-foreground sm:text-[17px] lg:text-[18px] [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(15px,4.4cqw,34px)] font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
