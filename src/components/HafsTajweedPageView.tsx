@@ -257,6 +257,8 @@ export const HafsTajweedPageView = ({
       }
 
       const finalPx = Math.max(minPx, Math.min(maxPx, f));
+      // eslint-disable-next-line no-console
+      console.log('[fit]', { finalPx, maxPx, w: box.clientWidth, h: box.clientHeight, used: usedAt(), avail: availableAt() });
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
