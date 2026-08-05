@@ -257,7 +257,6 @@ export const HafsTajweedPageView = ({
       raf = requestAnimationFrame(fit);
     });
     ro.observe(viewport);
-    ro.observe(box);
     window.addEventListener('orientationchange', fit);
     return () => {
       cancelAnimationFrame(raf);
