@@ -199,10 +199,9 @@ export const HafsTajweedPageView = ({
   const [fontPx, setFontPx] = useState<number | null>(null);
   useLayoutEffect(() => {
     const viewport = containerRef.current;
-    const frame = frameRef.current;
     const content = contentRef.current;
     const box = boxRef.current;
-    if (!viewport || !frame || !content || !box) return;
+    if (!viewport || !content || !box) return;
 
     let raf = 0;
     const fit = () => {
@@ -215,21 +214,23 @@ export const HafsTajweedPageView = ({
       content.style.width = '100%';
       content.style.marginLeft = '0px';
       content.style.transform = 'none';
-      frame.style.height = '';
-      const measure = () => Math.max(content.scrollHeight, content.offsetHeight);
-      // Plus grande taille de police (recherche binaire) qui tient dans l'écran.
-      const maxPx = Math.max(14, Math.min(42, viewport.clientWidth * 0.08));
-      let best = 8;
-      let lo = 8;
+      const measure = () => Math.max(content.scrollHeight, content.getBoundingClientRect().height);
+      // Seule la police varie : le cadre reste toujours à pleine largeur.
+      // La recherche descend suffisamment bas pour les pages les plus chargées,
+      // sans jamais réduire géométriquement toute la page avec transform: scale().
+      const maxPx = Math.max(18, Math.min(42, viewport.clientWidth * 0.085));
+      let best = 5;
+      let lo = 5;
       let hi = maxPx;
       box.style.fontSize = `${maxPx}px`;
-      if (measure() <= available - 10) {
+      box.style.setProperty('--mushaf-line-height', '1.82');
+      if (measure() <= available - 6) {
         best = maxPx;
       } else {
         for (let i = 0; i < 16 && hi - lo > 0.2; i++) {
           const mid = (lo + hi) / 2;
           box.style.fontSize = `${mid}px`;
-          if (measure() <= available - 10) {
+          if (measure() <= available - 6) {
             best = mid;
             lo = mid;
           } else {
@@ -239,19 +240,6 @@ export const HafsTajweedPageView = ({
       }
       box.style.fontSize = `${best}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - best) < 0.2 ? prev : best));
-
-      // Filet de sécurité : si la page dépasse encore (polices arabes hautes,
-      // bandeaux thématiques), on met à l'échelle pour qu'elle tienne à 100 %.
-      const naturalHeight = measure();
-      if (naturalHeight > available) {
-        const scale = Math.max(0.35, (available - 8) / naturalHeight);
-        content.style.transform = `scale(${scale})`;
-        content.style.transformOrigin = 'top center';
-        frame.style.height = `${Math.ceil(naturalHeight * scale)}px`;
-      } else {
-        content.style.transform = 'none';
-        frame.style.height = '';
-      }
     };
 
     // Double passe : la première mesure, la seconde confirme après reflow.
@@ -349,7 +337,7 @@ export const HafsTajweedPageView = ({
               {showBismillah && (
                 <p
                   dir="rtl"
-                  className="w-full text-center font-amiri font-extrabold text-foreground mb-5 md:mb-6"
+                  className="mb-[0.55em] w-full text-center font-amiri font-extrabold text-foreground"
                   style={{
                     fontWeight: 800,
                     fontSize: '1.05em',
@@ -366,7 +354,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'center',
-            lineHeight: 2,
+            lineHeight: 'var(--mushaf-line-height, 1.82)',
             fontWeight: 800,
             fontSize: '1em',
             overflowWrap: 'break-word',
