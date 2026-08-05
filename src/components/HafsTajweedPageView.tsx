@@ -192,8 +192,9 @@ export const HafsTajweedPageView = ({
     }
   }, [currentVerse, currentPage]);
 
-  // Ajustement automatique : réduit la taille du texte jusqu'à ce que la page
-  // entière tienne dans l'écran (sans défilement) sur tous les formats.
+  // Ajustement déterministe : cherche la plus grande taille qui garde tout le
+  // texte dans le cadre. On n'observe volontairement pas le texte lui-même :
+  // sa taille dépend de la police et créait auparavant une boucle de mesures.
   const frameRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
@@ -209,71 +210,53 @@ export const HafsTajweedPageView = ({
 
     let raf = 0;
     const fit = () => {
-      const minPx = 9;
-      const maxPx = Math.max(16, Math.min(34, box.clientWidth * 0.072));
+      if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
 
-      // Hauteur réellement disponible (recalculée à chaque mesure, car le
-      // padding du cadre est exprimé en em et varie avec la police).
-      const availableAt = () => {
-        const cs = window.getComputedStyle(box);
-        return (
+      const minPx = 12;
+      const maxPx = Math.min(28, Math.max(20, box.clientWidth * 0.075));
+      const measure = (size: number) => {
+        box.style.fontSize = `${size}px`;
+        // Force le navigateur à terminer la mise en page avant la mesure.
+        void quranText.offsetHeight;
+        const boxStyle = window.getComputedStyle(box);
+        const available =
           box.clientHeight -
-          parseFloat(cs.paddingTop || '0') -
-          parseFloat(cs.paddingBottom || '0')
-        );
-      };
-      const usedAt = () => {
+          parseFloat(boxStyle.paddingTop || '0') -
+          parseFloat(boxStyle.paddingBottom || '0');
         const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
         const bismillahHeight = bismillah
           ? bismillah.getBoundingClientRect().height +
             parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
           : 0;
-        // Mesure fiable de la hauteur réelle du texte : en flex, scrollHeight
-        // peut sous-estimer le contenu qui déborde. On prend le maximum entre
-        // scrollHeight, la boîte et le bas du dernier fragment de texte.
-        const topRect = quranText.getBoundingClientRect();
-        let contentBottom = topRect.top;
-        const range = document.createRange();
-        range.selectNodeContents(quranText);
-        const rects = range.getClientRects();
-        for (let i = 0; i < rects.length; i++) {
-          contentBottom = Math.max(contentBottom, rects[i].bottom);
-        }
-        range.detach?.();
-        const textHeight = Math.max(
-          quranText.scrollHeight,
-          topRect.height,
-          contentBottom - topRect.top
-        );
-        return textHeight + bismillahHeight;
+        return {
+          available,
+          used: Math.max(quranText.scrollHeight, quranText.getBoundingClientRect().height) +
+            bismillahHeight,
+        };
       };
 
-      if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
+      let low = minPx;
+      let high = maxPx;
+      let best = minPx;
+      // Une marge fixe de 6 px protège les jambages arabes et le dernier verset.
+      for (let i = 0; i < 12; i++) {
+        const candidate = (low + high) / 2;
+        const { available, used } = measure(candidate);
+        if (used <= available - 6) {
+          best = candidate;
+          low = candidate;
+        } else {
+          high = candidate;
+        }
+      }
 
-      // Convergence proportionnelle : bien plus fiable qu'une recherche
-      // binaire, car la hauteur du texte croît quasi linéairement avec la
-      // police. On part du maximum puis on ajuste par ratio.
-      let f = maxPx;
+      // Vérification finale après l'arrondi des glyphes par le navigateur.
+      let finalPx = Math.floor(best * 10) / 10;
       for (let i = 0; i < 8; i++) {
-        box.style.fontSize = `${f}px`;
-        const available = availableAt();
-        const used = usedAt();
-        if (available <= 0 || used <= 0) break;
-        const target = available * 0.93;
-        const ratio = target / used;
-        if (ratio > 0.995 && ratio < 1.05) break;
-        f = Math.max(minPx, Math.min(maxPx, f * ratio));
-        if (f >= maxPx && ratio > 1) break; // déjà au plafond
+        const { available, used } = measure(finalPx);
+        if (used <= available - 4 || finalPx <= minPx) break;
+        finalPx = Math.max(minPx, finalPx - 0.5);
       }
-
-      // Sécurité : on réduit tant que le contenu déborde encore.
-      for (let i = 0; i < 30; i++) {
-        box.style.fontSize = `${f}px`;
-        if (usedAt() <= availableAt() - 2 || f <= minPx) break;
-        f = Math.max(minPx, f * 0.96);
-      }
-
-      const finalPx = Math.max(minPx, Math.min(maxPx, f));
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
@@ -283,26 +266,21 @@ export const HafsTajweedPageView = ({
       fit();
       raf = requestAnimationFrame(fit);
     });
-    // Le texte arabe et ses polices arrivent souvent après le premier rendu :
-    // on relance l'ajustement plusieurs fois pour rester exact.
-    const timers = [120, 350, 800, 1600, 3000, 5000, 8000].map((d) =>
-      window.setTimeout(fit, d)
-    );
+    // Une passe après le chargement de la police arabe suffit ; les dimensions
+    // du cadre sont ensuite surveillées indépendamment du contenu.
+    const timer = window.setTimeout(fit, 250);
     document.fonts?.ready.then(fit).catch(() => undefined);
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(fit);
     });
     ro.observe(viewport);
-    // La police arabe (Amiri) arrive après le premier rendu et fait grandir le
-    // texte : on observe aussi le bloc de texte pour réajuster à ce moment-là.
-    ro.observe(quranText);
     window.addEventListener('orientationchange', fit);
     window.addEventListener('resize', fit);
     window.visualViewport?.addEventListener('resize', fit);
     return () => {
       cancelAnimationFrame(raf);
-      timers.forEach((t) => window.clearTimeout(t));
+      window.clearTimeout(timer);
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
       window.removeEventListener('resize', fit);
