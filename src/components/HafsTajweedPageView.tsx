@@ -12,6 +12,7 @@ import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 import { VerseCard } from './VerseCard';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
 
 interface HafsTajweedPageViewProps {
