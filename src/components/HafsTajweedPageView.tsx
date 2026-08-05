@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -187,6 +187,72 @@ export const HafsTajweedPageView = ({
     }
   }, [currentVerse, currentPage]);
 
+  // Ajustement automatique : réduit la taille du texte jusqu'à ce que la page
+  // entière tienne dans l'écran (sans défilement) sur tous les formats.
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    const viewport = containerRef.current;
+    const frame = frameRef.current;
+    const content = contentRef.current;
+    const box = boxRef.current;
+    if (!viewport || !frame || !content || !box) return;
+
+    let raf = 0;
+    const fit = () => {
+      const cs = window.getComputedStyle(viewport);
+      const available =
+        viewport.clientHeight -
+        parseFloat(cs.paddingTop || '0') -
+        parseFloat(cs.paddingBottom || '0');
+      if (!available) return;
+      content.style.width = '100%';
+      content.style.marginLeft = '0px';
+      content.style.transform = 'none';
+      frame.style.height = '';
+      // Plus grande taille de police (recherche binaire) qui tient dans l'écran.
+      const maxPx = Math.max(18, Math.min(46, viewport.clientWidth * 0.085));
+      let best = 10;
+      let lo = 10;
+      let hi = maxPx;
+      box.style.fontSize = `${maxPx}px`;
+      if (content.offsetHeight <= available - 6) {
+        best = maxPx;
+      } else {
+        for (let i = 0; i < 10 && hi - lo > 0.5; i++) {
+          const mid = (lo + hi) / 2;
+          box.style.fontSize = `${mid}px`;
+          if (content.offsetHeight <= available - 6) {
+            best = mid;
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+      }
+      box.style.fontSize = `${best}px`;
+    };
+
+    raf = requestAnimationFrame(fit);
+    // Le texte arabe et ses polices arrivent souvent après le premier rendu :
+    // on relance l'ajustement plusieurs fois pour rester exact.
+    const timers = [120, 350, 800, 1600, 3000].map((d) => window.setTimeout(fit, d));
+    document.fonts?.ready.then(fit).catch(() => undefined);
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(fit);
+    });
+    ro.observe(viewport);
+    window.addEventListener('orientationchange', fit);
+    return () => {
+      cancelAnimationFrame(raf);
+      timers.forEach((t) => window.clearTimeout(t));
+      ro.disconnect();
+      window.removeEventListener('orientationchange', fit);
+    };
+  }, [currentPage, pageVerses, isFullscreen]);
+
   // Swipe (RTL: swipe left = next page)
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
@@ -221,31 +287,40 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative h-[100dvh] w-full overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
+        className="relative flex h-[100dvh] w-full flex-col justify-center overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
         }}
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
-        <div className="mx-auto flex min-h-[calc(100dvh-7.5rem)] w-full max-w-4xl items-center justify-center">
+        <div
+          ref={frameRef}
+          className="mx-auto w-full max-w-4xl overflow-hidden"
+        >
           <div
-            className="mx-auto w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
-            style={{ borderColor: 'hsl(43, 62%, 45%)' }}
+            ref={contentRef}
+            className="w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
+            style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
             <div
+              ref={boxRef}
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: 'clamp(0.5rem, 3.5vw, 1.75rem)',
-                paddingBlock: 'clamp(0.875rem, 4vw, 2rem)',
+                fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
+                paddingInline: '0.5em',
+                paddingBlock: '0.5em',
               }}
             >
               {showBismillah && (
                 <p
                   dir="rtl"
                   className="w-full text-center font-amiri font-extrabold text-foreground mb-5 md:mb-6"
-                  style={{ fontWeight: 800, fontSize: 'clamp(1.6rem, 7vw, 3rem)' }}
+                  style={{
+                    fontWeight: 800,
+                    fontSize: '1.05em',
+                  }}
                 >
                   بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                 </p>
@@ -258,7 +333,7 @@ export const HafsTajweedPageView = ({
           style={{
             wordSpacing: '0.12em',
             fontWeight: 800,
-            fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
+            fontSize: '1em',
             overflowWrap: 'break-word',
           }}
         >
