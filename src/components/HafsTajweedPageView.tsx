@@ -3,11 +3,14 @@ import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack,
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
+import { juzMapping } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 import { VerseCard } from './VerseCard';
@@ -35,6 +38,8 @@ interface HafsTajweedPageViewProps {
   onPreviousVerse?: () => void;
   onPageRequest?: (page: number) => void;
   onManualPageChange?: (page: number) => void;
+  onNavigateToSurah?: (surah: number) => void;
+  onNavigateToJuz?: (juz: number) => void;
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
@@ -59,6 +64,8 @@ export const HafsTajweedPageView = ({
   onPreviousVerse,
   onPageRequest,
   onManualPageChange,
+  onNavigateToSurah,
+  onNavigateToJuz,
   audioControls,
   voiceControls,
   settingsControls,
@@ -76,6 +83,7 @@ export const HafsTajweedPageView = ({
   const [recorderVerse, setRecorderVerse] = useState<number | null>(null);
   // Bouton d'appel du menu : masquable pour libérer toute la page.
   const [showMenuButton, setShowMenuButton] = useState(true);
+  const [pageInput, setPageInput] = useState('');
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
