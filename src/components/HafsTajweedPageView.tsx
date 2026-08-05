@@ -220,12 +220,14 @@ export const HafsTajweedPageView = ({
       // sans jamais réduire géométriquement toute la page avec transform: scale().
       // Modèle de référence (محفظ الوحيين) : texte plus compact, plus de lignes
       // par page. On plafonne donc nettement la taille maximale.
-      const maxPx = Math.max(13, Math.min(26, viewport.clientWidth * 0.058));
+      // Le modèle affiche ~15-17 lignes par page : la police reste petite
+      // (≈4,7 % de la largeur sur mobile, plafonnée pour le desktop).
+      const maxPx = Math.max(11, Math.min(21, viewport.clientWidth * 0.047));
       let best = 5;
       let lo = 5;
       let hi = maxPx;
       box.style.fontSize = `${maxPx}px`;
-      box.style.setProperty('--mushaf-line-height', '1.82');
+      box.style.setProperty('--mushaf-line-height', '2');
       if (measure() <= available - 6) {
         best = maxPx;
       } else {
@@ -241,7 +243,7 @@ export const HafsTajweedPageView = ({
         }
       }
       // Marge de confort : on garde ~6% de respiration pour éviter tout débordement.
-      const finalPx = Math.max(5, best * 0.94);
+      const finalPx = Math.max(5, best * 0.9);
       box.style.fontSize = `${finalPx}px`;
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
@@ -333,7 +335,7 @@ export const HafsTajweedPageView = ({
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                fontSize: fontPx ? `${fontPx}px` : 'clamp(0.8rem, 3.4vw, 1.5rem)',
+                fontSize: fontPx ? `${fontPx}px` : 'clamp(0.7rem, 2.8vw, 1.2rem)',
                 paddingInline: '0.5em',
                 paddingBlock: '0.5em',
               }}
@@ -358,7 +360,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'center',
-            lineHeight: 'var(--mushaf-line-height, 1.82)',
+            lineHeight: 'var(--mushaf-line-height, 2)',
             fontWeight: 800,
             fontSize: '1em',
             overflowWrap: 'break-word',
