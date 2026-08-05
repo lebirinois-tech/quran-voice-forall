@@ -265,7 +265,7 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative h-[100dvh] w-full overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
+        className="relative flex h-[100dvh] w-full flex-col justify-center overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
