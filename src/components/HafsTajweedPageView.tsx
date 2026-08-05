@@ -202,6 +202,9 @@ export const HafsTajweedPageView = ({
   // Taille de police calculée : conservée en état pour que React ne réécrase
   // pas la valeur mesurée à chaque rendu (cause des versets coupés).
   const [fontPx, setFontPx] = useState<number | null>(null);
+  // Interligne adaptatif : sur les pages courtes, on étire les lignes pour
+  // remplir le cadre au lieu de laisser un vide en haut et en bas.
+  const [lineHeightVal, setLineHeightVal] = useState(1.5);
   useLayoutEffect(() => {
     const viewport = containerRef.current;
     const box = boxRef.current;
@@ -213,9 +216,12 @@ export const HafsTajweedPageView = ({
       if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
 
       const minPx = 16;
-      const maxPx = Math.min(26, Math.max(20, box.clientWidth * 0.072));
+      const maxPx = Math.min(30, Math.max(22, box.clientWidth * 0.082));
+      const BASE_LH = 1.5;
+      const MAX_LH = 2.6;
       const measure = (size: number) => {
         box.style.fontSize = `${size}px`;
+        quranText.style.lineHeight = String(BASE_LH);
         // Force le navigateur à terminer la mise en page avant la mesure.
         void quranText.offsetHeight;
         const boxStyle = window.getComputedStyle(box);
@@ -258,6 +264,14 @@ export const HafsTajweedPageView = ({
         finalPx = Math.max(minPx, finalPx - 0.5);
       }
       box.style.fontSize = `${finalPx}px`;
+      // Remplissage vertical : étire l'interligne si de l'espace reste libre.
+      const { available, used } = measure(finalPx);
+      const targetLh =
+        used > 0
+          ? Math.min(MAX_LH, Math.max(BASE_LH, (BASE_LH * (available - 8)) / used))
+          : BASE_LH;
+      quranText.style.lineHeight = String(targetLh);
+      setLineHeightVal((prev) => (Math.abs(prev - targetLh) < 0.02 ? prev : targetLh));
       setFontPx((prev) => (prev !== null && Math.abs(prev - finalPx) < 0.2 ? prev : finalPx));
     };
 
@@ -451,7 +465,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'center',
-            lineHeight: 1.5,
+            lineHeight: lineHeightVal,
             flexShrink: 0,
             fontWeight: 800,
             fontSize: '1em',
