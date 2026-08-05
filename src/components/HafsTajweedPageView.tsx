@@ -247,57 +247,66 @@ export const HafsTajweedPageView = ({
             overflowWrap: 'break-word',
           }}
         >
-          {pageVerses.map((v) => {
-            const isCurrent = currentVerse === v.number;
-            // Always use the same auto-tajweed coloring as verse mode for
-            // consistent, richer rule highlighting.
-            // Hafs: rely on auto-Tajweed for consistent, rich rule highlighting.
-            // Warsh/Qalun: use the pre-computed coloured HTML from the qiraat source.
-            const providedTajweed = versesTajweed?.[v.number];
-            const html =
-              preferProvidedTajweed && providedTajweed
-                ? sanitizeTajweedHtml(providedTajweed)
-                : sanitizeTajweedHtml(applyAutoTajweed(v.text));
-            const themes = getThemesForVerse(surahNumber, v.number);
-            const primary = themes[0];
-            const themeBg = primary
-              ? themes.length > 1
-                ? `linear-gradient(135deg, hsl(${themes[0].hsl} / 0.22) 0%, hsl(${themes[1].hsl} / 0.22) 100%)`
-                : `hsl(${primary.hsl} / 0.20)`
-              : undefined;
-            return (
-              <span
-                key={v.number}
-                data-verse={v.number}
-                onClick={() => setMenuVerse(v.number)}
-                title={
-                  themes.length
-                    ? themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' • ')
-                    : undefined
-                }
-                className={cn(
-                  'inline transition-all cursor-pointer rounded-md px-1 -mx-1',
-                  isCurrent &&
-                    (isAudioPlaying
-                      ? 'bg-primary/25 ring-2 ring-primary shadow-md'
-                      : 'bg-primary/10 ring-1 ring-primary/40')
-                )}
-                style={
-                  !isCurrent && themeBg
-                    ? {
-                        background: themeBg,
-                        boxShadow: `inset 0 -2px 0 hsl(${primary.hsl} / 0.55)`,
-                      }
-                    : undefined
-                }
-              >
-                <span dangerouslySetInnerHTML={{ __html: html }} />
-                <span className="inline-flex items-center justify-center mx-1 align-middle text-primary font-bold">
-                  ۝{toArabicDigits(v.number)}
-                </span>{' '}
-              </span>
-            );
-          })}
+          {themeGroups.map((group, gi) => (
+            <div
+              key={`g-${gi}`}
+              className="rounded-lg px-2 py-1 my-1"
+              style={
+                group.theme
+                  ? {
+                      background: `hsl(${group.theme.hsl} / 0.16)`,
+                      boxShadow: `inset 0 0 0 1px hsl(${group.theme.hsl} / 0.35)`,
+                    }
+                  : undefined
+              }
+            >
+              {group.theme && (
+                <div
+                  className="mb-1 flex items-center justify-center gap-1 rounded-full px-2 py-0.5 text-[0.62rem] font-semibold leading-tight"
+                  style={{
+                    background: `hsl(${group.theme.hsl} / 0.3)`,
+                    color: `hsl(${group.theme.hsl})`,
+                  }}
+                >
+                  <span>{group.theme.emoji}</span>
+                  <span>{group.theme.labels.ar}</span>
+                  <span className="opacity-70">· {group.theme.labels.fr}</span>
+                </div>
+              )}
+              {group.verses.map((v) => {
+                const isCurrent = currentVerse === v.number;
+                const providedTajweed = versesTajweed?.[v.number];
+                const html =
+                  preferProvidedTajweed && providedTajweed
+                    ? sanitizeTajweedHtml(providedTajweed)
+                    : sanitizeTajweedHtml(applyAutoTajweed(v.text));
+                return (
+                  <span
+                    key={v.number}
+                    data-verse={v.number}
+                    onClick={() => setMenuVerse(v.number)}
+                    title={
+                      group.theme
+                        ? `${group.theme.emoji} ${group.theme.labels.fr} · ${group.theme.labels.ar}`
+                        : undefined
+                    }
+                    className={cn(
+                      'inline transition-all cursor-pointer rounded-md px-1 -mx-1',
+                      isCurrent &&
+                        (isAudioPlaying
+                          ? 'bg-primary/25 ring-2 ring-primary shadow-md'
+                          : 'bg-primary/10 ring-1 ring-primary/40')
+                    )}
+                  >
+                    <span dangerouslySetInnerHTML={{ __html: html }} />
+                    <span className="inline-flex items-center justify-center mx-1 align-middle text-primary font-bold">
+                      ۝{toArabicDigits(v.number)}
+                    </span>{' '}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
           {pageVerses.length === 0 && (
             <p className="text-center text-muted-foreground text-base">
               Aucun verset sur cette page pour cette sourate.
