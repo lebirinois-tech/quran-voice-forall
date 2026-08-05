@@ -268,7 +268,7 @@ export const HafsTajweedPageView = ({
     });
     // Une passe après le chargement de la police arabe suffit ; les dimensions
     // du cadre sont ensuite surveillées indépendamment du contenu.
-    const timer = window.setTimeout(fit, 250);
+    const timers = [250, 1500, 4500].map((delay) => window.setTimeout(fit, delay));
     document.fonts?.ready.then(fit).catch(() => undefined);
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
@@ -280,7 +280,7 @@ export const HafsTajweedPageView = ({
     window.visualViewport?.addEventListener('resize', fit);
     return () => {
       cancelAnimationFrame(raf);
-      window.clearTimeout(timer);
+      timers.forEach((timer) => window.clearTimeout(timer));
       ro.disconnect();
       window.removeEventListener('orientationchange', fit);
       window.removeEventListener('resize', fit);
