@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { stripLeadingBasmala, stripLeadingBasmalaHtml, surahHasHeaderBasmala } from '@/lib/basmala';
 
 interface QuranApiVerse {
   number: number;
@@ -74,6 +75,21 @@ const parseTajweedText = (text: string): string => {
   return result;
 };
 
+// Retire la Basmala dupliquée du premier verset (elle est déjà affichée en en-tête)
+const removeDuplicateBasmala = (
+  surahNumber: number,
+  verses: Verse[],
+  tajweed: Record<number, string>
+): { verses: Verse[]; tajweed: Record<number, string> } => {
+  if (!surahHasHeaderBasmala(surahNumber)) return { verses, tajweed };
+  const cleanedVerses = verses.map((v) =>
+    v.number === 1 ? { ...v, text: stripLeadingBasmala(v.text) } : v
+  );
+  const cleanedTajweed = { ...tajweed };
+  if (cleanedTajweed[1]) cleanedTajweed[1] = stripLeadingBasmalaHtml(cleanedTajweed[1]);
+  return { verses: cleanedVerses, tajweed: cleanedTajweed };
+};
+
 export const useQuranData = (surahNumber: number) => {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [versesTajweed, setVersesTajweed] = useState<Record<number, string>>({});
@@ -114,11 +130,12 @@ export const useQuranData = (surahNumber: number) => {
             });
           }
 
-          setVerses(combinedVerses);
-          setVersesTajweed(tajweedMap);
-
           // Cache for offline use
           saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
+
+          const cleaned = removeDuplicateBasmala(surahNumber, combinedVerses, tajweedMap);
+          setVerses(cleaned.verses);
+          setVersesTajweed(cleaned.tajweed);
         } else {
           throw new Error('Failed to fetch Quran data');
         }
@@ -128,8 +145,9 @@ export const useQuranData = (surahNumber: number) => {
         // Try loading from offline cache
         const cached = loadSurahFromCache(surahNumber);
         if (cached) {
-          setVerses(cached.verses);
-          setVersesTajweed(cached.tajweed);
+          const cleaned = removeDuplicateBasmala(surahNumber, cached.verses, cached.tajweed);
+          setVerses(cleaned.verses);
+          setVersesTajweed(cleaned.tajweed);
           setIsOffline(true);
           setError(null);
         } else {

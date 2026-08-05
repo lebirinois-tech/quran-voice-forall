@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { stripLeadingBasmala, surahHasHeaderBasmala } from '@/lib/basmala';
 
 interface WarshVerse {
   id: number;
@@ -68,6 +69,9 @@ const getSurahVerses = (data: WarshVerse[], surahNumber: number): Record<number,
     .forEach((v) => {
       surahVerses[v.aya_no] = v.aya_text;
     });
+  if (surahHasHeaderBasmala(surahNumber) && surahVerses[1]) {
+    surahVerses[1] = stripLeadingBasmala(surahVerses[1]);
+  }
   return surahVerses;
 };
 
