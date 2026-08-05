@@ -302,11 +302,13 @@ export const HafsTajweedPageView = ({
             style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
             <div
+              ref={boxRef}
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: 'clamp(0.5rem, 3.5vw, 1.75rem)',
-                paddingBlock: 'clamp(0.875rem, 4vw, 2rem)',
+                fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
+                paddingInline: '0.5em',
+                paddingBlock: '0.5em',
               }}
             >
               {showBismillah && (
@@ -315,7 +317,7 @@ export const HafsTajweedPageView = ({
                   className="w-full text-center font-amiri font-extrabold text-foreground mb-5 md:mb-6"
                   style={{
                     fontWeight: 800,
-                    fontSize: 'clamp(1.6rem, 7vw, 3rem)',
+                    fontSize: '1.05em',
                   }}
                 >
                   بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
