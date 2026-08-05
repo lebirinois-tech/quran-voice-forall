@@ -268,29 +268,20 @@ export const HafsTajweedPageView = ({
     });
     // Une passe après le chargement de la police arabe suffit ; les dimensions
     // du cadre sont ensuite surveillées indépendamment du contenu.
-    const timers = [250, 800, 1600].map((delay) => window.setTimeout(fit, delay));
+    const timer = window.setTimeout(fit, 250);
     document.fonts?.ready.then(fit).catch(() => undefined);
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(fit);
     });
     ro.observe(viewport);
-    // Les spans Tajweed peuvent être remplacés après l'arrivée des données.
-    // MutationObserver détecte ce changement sans la boucle provoquée par un
-    // ResizeObserver posé sur un texte dont nous modifions nous-mêmes la taille.
-    const mutations = new MutationObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(fit);
-    });
-    mutations.observe(quranText, { childList: true, subtree: true, characterData: true });
     window.addEventListener('orientationchange', fit);
     window.addEventListener('resize', fit);
     window.visualViewport?.addEventListener('resize', fit);
     return () => {
       cancelAnimationFrame(raf);
-      timers.forEach((timer) => window.clearTimeout(timer));
+      window.clearTimeout(timer);
       ro.disconnect();
-      mutations.disconnect();
       window.removeEventListener('orientationchange', fit);
       window.removeEventListener('resize', fit);
       window.visualViewport?.removeEventListener('resize', fit);
