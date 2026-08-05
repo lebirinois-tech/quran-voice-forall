@@ -510,7 +510,7 @@ export const HafsTajweedPageView = ({
                     <SelectContent className="z-[120] max-h-72">
                       {surahs.map((s) => (
                         <SelectItem key={s.number} value={String(s.number)}>
-                          {s.number}. {s.name} — {s.arabicName}
+                          {s.number}. {s.name} — {s.nameArabic}
                         </SelectItem>
                       ))}
                     </SelectContent>
