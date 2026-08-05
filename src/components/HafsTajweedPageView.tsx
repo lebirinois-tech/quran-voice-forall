@@ -216,14 +216,15 @@ export const HafsTajweedPageView = ({
         parseFloat(boxStyle.paddingBottom || '0');
       if (available <= 0 || box.clientWidth <= 0) return;
 
-      const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
-      const bismillahHeight = bismillah
-        ? bismillah.getBoundingClientRect().height + parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
-        : 0;
-      const textAvailable = Math.max(1, available - bismillahHeight);
       const maxPx = Math.max(15, Math.min(34, box.clientWidth * 0.072));
       const minPx = 8;
-      const fits = () => quranText.scrollHeight <= textAvailable + 1;
+      const fits = () => {
+        const bismillah = box.querySelector<HTMLElement>('[data-bismillah]');
+        const bismillahHeight = bismillah
+          ? bismillah.getBoundingClientRect().height + parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
+          : 0;
+        return quranText.scrollHeight + bismillahHeight <= available + 1;
+      };
 
       let best = minPx;
       let lo = minPx;
