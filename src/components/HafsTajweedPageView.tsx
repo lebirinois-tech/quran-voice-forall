@@ -300,7 +300,7 @@ export const HafsTajweedPageView = ({
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative flex h-[100dvh] w-full flex-col justify-center overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
+        className="relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pb-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]"
         style={{
           backgroundColor: 'hsl(40, 45%, 92%)',
           paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
@@ -309,7 +309,7 @@ export const HafsTajweedPageView = ({
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
           ref={frameRef}
-          className="mx-auto w-full max-w-4xl overflow-hidden"
+          className="mx-auto my-auto w-full max-w-4xl overflow-hidden"
         >
           <div
             ref={contentRef}
