@@ -190,11 +190,12 @@ export const HafsTajweedPageView = ({
   // Ajustement automatique : réduit la taille du texte jusqu'à ce que la page
   // entière tienne dans l'écran (sans défilement) sur tous les formats.
   const frameRef = useRef<HTMLDivElement | null>(null);
-  const [fitScale, setFitScale] = useState(1);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   useLayoutEffect(() => {
     const viewport = containerRef.current;
     const frame = frameRef.current;
-    if (!viewport || !frame) return;
+    const content = contentRef.current;
+    if (!viewport || !frame || !content) return;
 
     let raf = 0;
     const fit = () => {
@@ -205,29 +206,20 @@ export const HafsTajweedPageView = ({
         parseFloat(cs.paddingBottom || '0');
       if (!available) return;
       let scale = 1;
-      setFitScale(1);
-      frame.style.setProperty('--mushaf-fit', '1');
-      // quelques passes de réduction progressive
-      for (let i = 0; i < 24; i++) {
-        const needed = frame.scrollHeight;
-        if (needed <= available - 8 || scale <= 0.4) break;
-        scale = Math.max(0.4, scale * Math.min(0.97, Math.sqrt((available - 8) / needed)));
-        frame.style.setProperty('--mushaf-fit', String(scale));
-      }
-      // Puis on regagne l'espace restant pour remplir l'écran au maximum.
-      for (let i = 0; i < 12; i++) {
-        const needed = frame.scrollHeight;
-        if (scale >= 1 || needed > available - 8) break;
-        const next = Math.min(1, scale * 1.04);
-        frame.style.setProperty('--mushaf-fit', String(next));
-        if (frame.scrollHeight > available - 8) {
-          frame.style.setProperty('--mushaf-fit', String(scale));
-          break;
-        }
+      // La largeur est compensée (100/scale) pour que la page réduite
+      // continue d'occuper toute la largeur de l'écran.
+      for (let i = 0; i < 4; i++) {
+        content.style.width = `${100 / scale}%`;
+        content.style.transform = `scale(${scale})`;
+        const natural = content.offsetHeight;
+        if (!natural) return;
+        const next = Math.max(0.3, Math.min(1, (available - 6) / natural));
+        if (Math.abs(next - scale) < 0.01) break;
         scale = next;
       }
-      console.log('FIT', scale, frame.scrollHeight, available);
-      setFitScale(scale);
+      content.style.width = `${100 / scale}%`;
+      content.style.transform = `scale(${scale})`;
+      frame.style.height = `${Math.min(available, content.offsetHeight * scale)}px`;
     };
 
     raf = requestAnimationFrame(fit);
