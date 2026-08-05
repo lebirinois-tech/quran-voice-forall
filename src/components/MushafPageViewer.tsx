@@ -253,6 +253,16 @@ export const MushafPageViewer = ({
         <span className="text-sm font-medium text-foreground">
           Page {currentPage} / {maxPage}
         </span>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+          onClick={toggleFullscreen}
+          className="h-8 w-8 rounded-full text-primary"
+        >
+          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </Button>
       </div>
 
       {/* Currently playing verse indicator — only meaningful for standard 604-page mapping (Hafs) */}
