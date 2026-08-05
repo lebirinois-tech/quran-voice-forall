@@ -192,6 +192,9 @@ export const HafsTajweedPageView = ({
   const frameRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
+  // Taille de police calculée : conservée en état pour que React ne réécrase
+  // pas la valeur mesurée à chaque rendu (cause des versets coupés).
+  const [fontPx, setFontPx] = useState<number | null>(null);
   useLayoutEffect(() => {
     const viewport = containerRef.current;
     const frame = frameRef.current;
@@ -232,6 +235,7 @@ export const HafsTajweedPageView = ({
         }
       }
       box.style.fontSize = `${best}px`;
+      setFontPx(best);
 
       // Filet de sécurité : si la page dépasse encore (polices arabes hautes,
       // bandeaux thématiques), on met à l'échelle pour qu'elle tienne à 100 %.
@@ -321,7 +325,7 @@ export const HafsTajweedPageView = ({
               className="flex w-full flex-col items-center justify-center rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                fontSize: 'clamp(1.5rem, 6.2vw, 3.25rem)',
+                fontSize: fontPx ? `${fontPx}px` : 'clamp(1rem, 5vw, 2.5rem)',
                 paddingInline: '0.5em',
                 paddingBlock: '0.5em',
               }}
