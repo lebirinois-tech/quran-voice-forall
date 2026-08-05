@@ -212,8 +212,8 @@ export const HafsTajweedPageView = ({
     const fit = () => {
       if (box.clientHeight <= 0 || box.clientWidth <= 0) return;
 
-      const minPx = 12;
-      const maxPx = Math.min(28, Math.max(20, box.clientWidth * 0.075));
+      const minPx = 16;
+      const maxPx = Math.min(26, Math.max(20, box.clientWidth * 0.072));
       const measure = (size: number) => {
         box.style.fontSize = `${size}px`;
         // Force le navigateur à terminer la mise en page avant la mesure.
@@ -309,10 +309,10 @@ export const HafsTajweedPageView = ({
           parseFloat(window.getComputedStyle(bismillah).marginBottom || '0')
         : 0;
       const used = Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
-      if (used > available - 4 && fontPx > 12) {
+      if (used > available - 4 && fontPx > 16) {
         const ratio = Math.sqrt(Math.max(0.25, (available - 8) / used));
-        const reduced = Math.max(12, Math.floor(fontPx * ratio * 10) / 10);
-        setFontPx(reduced < fontPx ? reduced : Math.max(12, fontPx - 0.5));
+        const reduced = Math.max(16, Math.floor(fontPx * ratio * 10) / 10);
+        setFontPx(reduced < fontPx ? reduced : Math.max(16, fontPx - 0.5));
       }
     });
     return () => cancelAnimationFrame(raf);
@@ -341,9 +341,9 @@ export const HafsTajweedPageView = ({
         const used = Math.max(text.scrollHeight, text.getBoundingClientRect().height) + bismillahHeight;
         if (used <= available - 4) return;
         setFontPx((current) => {
-          if (current === null || current <= 12) return current;
+          if (current === null || current <= 16) return current;
           const ratio = Math.sqrt(Math.max(0.25, (available - 8) / used));
-          return Math.max(12, Math.floor(current * ratio * 10) / 10);
+          return Math.max(16, Math.floor(current * ratio * 10) / 10);
         });
       });
     };
@@ -451,7 +451,7 @@ export const HafsTajweedPageView = ({
           style={{
             textAlign: 'justify',
             textAlignLast: 'center',
-            lineHeight: 1.8,
+            lineHeight: 1.5,
             flexShrink: 0,
             fontWeight: 800,
             fontSize: '1em',
