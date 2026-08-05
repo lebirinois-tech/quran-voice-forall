@@ -12,6 +12,7 @@ import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 import { VerseCard } from './VerseCard';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
 
 interface HafsTajweedPageViewProps {
@@ -63,7 +64,9 @@ export const HafsTajweedPageView = ({
   settingsControls,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef);
+
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
   const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
@@ -308,6 +311,7 @@ export const HafsTajweedPageView = ({
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         'fixed inset-0 z-[45] h-[100dvh] w-screen bg-background overflow-hidden',
         isFullscreen && 'z-[60]'
@@ -494,6 +498,16 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
+            aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            onClick={toggleFullscreen}
+            className="h-10 w-10 rounded-full text-primary"
+          >
+            {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
             aria-label="Ouvrir les commandes"
             onClick={() => setMenuOpen(true)}
             onDoubleClick={() => setShowMenuButton(false)}
@@ -617,7 +631,7 @@ export const HafsTajweedPageView = ({
                 className="w-full justify-start gap-2"
                 onClick={() => {
                   setMenuOpen(false);
-                  setIsFullscreen((v) => !v);
+                  toggleFullscreen();
                 }}
               >
                 {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}

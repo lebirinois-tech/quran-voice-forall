@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '@/lib/utils';
 import { getVersePage, surahs } from '@/data/surahs';
+import { useFullscreen } from '@/hooks/useFullscreen';
 import { HAFS_MUSHAF_VERSION } from '@/lib/hafsMushafVersion';
 
 type MushafType = 'hafs' | 'warsh' | 'qalun' | 'hafs-video' | 'warsh-video' | 'qalun-video';
@@ -99,6 +100,8 @@ export const MushafPageViewer = ({
   pageVerseNumbers,
   onVerseClick,
 }: MushafPageViewerProps) => {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef);
   const surah = surahs.find(s => s.number === surahNumber);
   // Archive-mode Mushafs (Warsh/Qalun) use their own scanned pagination (1..N),
   // independent of the 604-page Madina standard. Hafs keeps the standard mapping.
@@ -230,7 +233,13 @@ export const MushafPageViewer = ({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div
+      ref={rootRef}
+      className={cn(
+        'w-full max-w-3xl mx-auto',
+        isFullscreen && 'fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-background p-2'
+      )}
+    >
       {/* Page Info Header */}
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="text-sm text-muted-foreground">
@@ -244,6 +253,16 @@ export const MushafPageViewer = ({
         <span className="text-sm font-medium text-foreground">
           Page {currentPage} / {maxPage}
         </span>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+          onClick={toggleFullscreen}
+          className="h-8 w-8 rounded-full text-primary"
+        >
+          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </Button>
       </div>
 
       {/* Currently playing verse indicator — only meaningful for standard 604-page mapping (Hafs) */}
