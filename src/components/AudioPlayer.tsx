@@ -312,7 +312,7 @@ export const AudioPlayer = ({
                     <span className="text-xs font-bold">{playbackSpeed}x</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-48" align="end">
+                <PopoverContent className="w-48 z-[130] pointer-events-auto" align="end">
                   <div className="space-y-2">
                     <h4 className="font-medium text-sm">Vitesse de lecture</h4>
                     <div className="grid grid-cols-4 gap-1">
@@ -350,7 +350,7 @@ export const AudioPlayer = ({
                         <span className="text-[11px] font-medium">Répéter</span>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-72" align="end">
+                    <PopoverContent className="w-72 z-[130] pointer-events-auto" align="end">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-2">
                           <div>
@@ -414,7 +414,7 @@ export const AudioPlayer = ({
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72" align="end">
+                <PopoverContent className="w-72 z-[130] pointer-events-auto" align="end">
                   <div className="space-y-4">
                     <h4 className="font-medium text-sm">Mode de répétition</h4>
                     
@@ -529,7 +529,7 @@ export const AudioPlayer = ({
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56" align="end">
+              <PopoverContent className="w-56 z-[130] pointer-events-auto" align="end">
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm mb-3">Télécharger l'audio</h4>
                   <Button
