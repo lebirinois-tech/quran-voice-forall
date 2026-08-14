@@ -468,7 +468,7 @@ export const MushafPageViewer = ({
       {/* Quick page navigation */}
       <div className="flex flex-col items-center justify-center gap-1 mt-4">
         <span className="text-xs text-muted-foreground">
-          ← Glissez vers la gauche/droite pour changer de page →
+          ← Glissez de la gauche vers la droite pour la page suivante →
         </span>
         {!isArchiveMode && (
           <span className="text-xs text-muted-foreground">
