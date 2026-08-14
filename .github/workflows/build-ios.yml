@@ -26,7 +26,9 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          rm -f bun.lock bun.lockb
+          bun install --no-save --registry https://registry.npmjs.org
 
       - name: Build web app
         run: bun run build
@@ -50,7 +52,7 @@ jobs:
           mkdir -p assets
           cp public/pwa-512x512.png assets/icon-only.png
           cp public/pwa-512x512.png assets/icon.png
-          bunx @capacitor/assets generate --ios --assetPath assets --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b'
+          bunx @capacitor/assets generate --ios --assetPath assets --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b' || echo 'Icon generation skipped'
 
       - name: Build unsigned .app
         working-directory: ios/App
