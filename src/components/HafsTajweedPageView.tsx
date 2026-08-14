@@ -261,7 +261,7 @@ export const HafsTajweedPageView = ({
           className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
         >
           <div
-            className="relative h-full w-full rounded-xl border-2 p-1 shadow-md sm:p-1.5"
+            className="relative h-full w-full rounded-xl border-2 p-0.5 shadow-md sm:p-1"
             style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
             {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
@@ -279,8 +279,8 @@ export const HafsTajweedPageView = ({
               className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: '0.5em',
-                paddingBlock: '0.5em',
+                paddingInline: '0.3em',
+                paddingBlock: '0.35em',
               }}
             >
               {showBismillah && (
@@ -300,11 +300,11 @@ export const HafsTajweedPageView = ({
               <div
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(15px,4.4cqw,34px)] font-extrabold text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(18px,5.9cqw,42px)] font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
-            lineHeight: 1.72,
+            lineHeight: 1.95,
             flexShrink: 0,
             fontWeight: 800,
             overflowWrap: 'break-word',
