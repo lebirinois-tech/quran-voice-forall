@@ -269,7 +269,7 @@ export const MushafPageViewer = ({
           {mushafType === 'warsh-video' && '🎬 Mushaf Warsh vidéo'}
           {mushafType === 'qalun-video' && '🎬 Mushaf Qalun vidéo'}
         </div>
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-base font-bold text-foreground">
           Page {currentPage} / {maxPage}
         </span>
         <Button
