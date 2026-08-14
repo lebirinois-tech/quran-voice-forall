@@ -56,6 +56,15 @@ const withCacheBust = (url: string) => `${url}${url.includes('?') ? '&' : '?'}v=
 const getArchivePageUrl = (id: string, page: number) =>
   withCacheBust(`https://archive.org/download/${id}/page/n${page - 1}_w1200.jpg`);
 
+// Video pages on archive.org: several naming/serving variants exist per item.
+// We try them in order so the page loads automatically without user action.
+const getVideoUrls = (id: string, page: number): string[] => [
+  `https://archive.org/download/${id}/${padPage3(page)}.mp4`,
+  `https://archive.org/download/${id}/${page}.mp4`,
+  `https://archive.org/serve/${id}/${padPage3(page)}.mp4`,
+  `https://ia801509.us.archive.org/BookReader/BookReaderJSIA.php?id=${id}`,
+].slice(0, 3);
+
 const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   const padded = padPage3(page);
   switch (mushafType) {
