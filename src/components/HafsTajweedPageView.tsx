@@ -174,16 +174,19 @@ export const HafsTajweedPageView = ({
     [verses, currentPage]
   );
 
-  // Group consecutive verses sharing the same thematic tafsir (Tafsir Mawdou'i)
+  // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
+  // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
   const themeGroups = useMemo(() => {
-    const groups: { theme: ReturnType<typeof getThemesForVerse>[number] | null; verses: typeof pageVerses }[] = [];
+    type Themes = ReturnType<typeof getThemesForVerse>;
+    const groups: { themes: Themes; key: string; verses: typeof pageVerses }[] = [];
     for (const v of pageVerses) {
-      const theme = getThemesForVerse(surahNumber, v.number)[0] ?? null;
+      const themes = getThemesForVerse(surahNumber, v.number);
+      const key = themes.map((t) => t.id).join('+');
       const last = groups[groups.length - 1];
-      if (last && (last.theme?.id ?? null) === (theme?.id ?? null)) {
+      if (last && last.key === key) {
         last.verses.push(v);
       } else {
-        groups.push({ theme, verses: [v] });
+        groups.push({ themes, key, verses: [v] });
       }
     }
     return groups;
