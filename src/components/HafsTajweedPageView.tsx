@@ -206,7 +206,7 @@ export const HafsTajweedPageView = ({
     }
   }, [currentVerse, currentPage]);
 
-  // Swipe (RTL: swipe left = next page)
+  // Swipe right (left-to-right) advances to the next page, swipe left goes back.
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
@@ -222,7 +222,7 @@ export const HafsTajweedPageView = ({
     const dx = e.changedTouches[0].clientX - sx;
     const dy = e.changedTouches[0].clientY - sy;
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) goNext();
+    if (dx > 0) goNext();
     else goPrev();
   };
 

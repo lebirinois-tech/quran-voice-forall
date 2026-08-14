@@ -214,8 +214,7 @@ export const MushafPageViewer = ({
     }
   }, [currentVerse, isAudioPlaying]);
 
-  // Note: in RTL Arabic reading, swiping LEFT advances to the next page,
-  // swiping RIGHT goes back to the previous page (book opens right-to-left).
+  // Swipe right (left-to-right) advances to the next page, swipe left goes back.
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
     touchStartXRef.current = t.clientX;
@@ -231,8 +230,8 @@ export const MushafPageViewer = ({
     const dx = t.clientX - startX;
     const dy = t.clientY - startY;
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) goToPage(currentPage + 1); // swipe left → next page
-    else goToPage(currentPage - 1);        // swipe right → previous page
+    if (dx > 0) goToPage(currentPage + 1); // swipe left-to-right → next page
+    else goToPage(currentPage - 1);        // swipe right-to-left → previous page
   };
 
   const handleImageLoad = () => { setIsLoading(false); setImageError(false); };
@@ -469,7 +468,7 @@ export const MushafPageViewer = ({
       {/* Quick page navigation */}
       <div className="flex flex-col items-center justify-center gap-1 mt-4">
         <span className="text-xs text-muted-foreground">
-          ← Glissez vers la gauche/droite pour changer de page →
+          ← Glissez de la gauche vers la droite pour la page suivante →
         </span>
         {!isArchiveMode && (
           <span className="text-xs text-muted-foreground">
