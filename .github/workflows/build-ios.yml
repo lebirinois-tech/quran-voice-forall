@@ -71,3 +71,15 @@ jobs:
         with:
           name: quran-acces-pour-tous-ipa
           path: artifacts/quran-acces-pour-tous-unsigned.ipa
+
+      - name: Create / Update "latest-ios" Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-ios
+          name: "Dernière version IPA (non signée)"
+          body: "IPA iOS non signé généré automatiquement depuis le dernier commit. Nécessite un compte Apple Developer pour être installé sur un iPhone physique."
+          files: artifacts/quran-acces-pour-tous-unsigned.ipa
+          prerelease: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
