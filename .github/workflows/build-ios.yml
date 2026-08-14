@@ -1,0 +1,71 @@
+name: Build iOS App (unsigned)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build web app
+        run: bun run build
+
+      - name: Prepare native iOS config
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+          delete config.server;
+          fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2) + '\n');
+          NODE
+
+      - name: Add iOS platform
+        run: |
+          bunx cap add ios
+          bunx cap sync ios
+
+      - name: Generate iOS app icons
+        run: |
+          mkdir -p assets
+          cp public/pwa-512x512.png assets/icon-only.png
+          cp public/pwa-512x512.png assets/icon.png
+          bunx @capacitor/assets generate --ios --assetPath assets --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b'
+
+      - name: Build unsigned .app
+        working-directory: ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
+            -sdk iphoneos -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p artifacts/Payload
+          cp -R ios/App/build/Build/Products/Release-iphoneos/App.app artifacts/Payload/
+          cd artifacts && zip -qr quran-acces-pour-tous-unsigned.ipa Payload && rm -rf Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-acces-pour-tous-ipa
+          path: artifacts/quran-acces-pour-tous-unsigned.ipa
