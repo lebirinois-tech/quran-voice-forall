@@ -174,16 +174,19 @@ export const HafsTajweedPageView = ({
     [verses, currentPage]
   );
 
-  // Group consecutive verses sharing the same thematic tafsir (Tafsir Mawdou'i)
+  // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
+  // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
   const themeGroups = useMemo(() => {
-    const groups: { theme: ReturnType<typeof getThemesForVerse>[number] | null; verses: typeof pageVerses }[] = [];
+    type Themes = ReturnType<typeof getThemesForVerse>;
+    const groups: { themes: Themes; key: string; verses: typeof pageVerses }[] = [];
     for (const v of pageVerses) {
-      const theme = getThemesForVerse(surahNumber, v.number)[0] ?? null;
+      const themes = getThemesForVerse(surahNumber, v.number);
+      const key = themes.map((t) => t.id).join('+');
       const last = groups[groups.length - 1];
-      if (last && (last.theme?.id ?? null) === (theme?.id ?? null)) {
+      if (last && last.key === key) {
         last.verses.push(v);
       } else {
-        groups.push({ theme, verses: [v] });
+        groups.push({ themes, key, verses: [v] });
       }
     }
     return groups;
@@ -307,12 +310,23 @@ export const HafsTajweedPageView = ({
             overflowWrap: 'break-word',
           }}
         >
-          {themeGroups.map((group, gi) => (
+          {themeGroups.map((group, gi) => {
+            const primary = group.themes[0] ?? null;
+            const secondary = group.themes[1] ?? null;
+            const themeTitle = group.themes.length
+              ? group.themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' | ')
+              : undefined;
+            return (
             <span
               key={`g-${gi}`}
               style={{
                 display: 'inline',
-                background: group.theme ? `hsl(${group.theme.hsl} / 0.18)` : undefined,
+                // Same primary/secondary logic as the verse view (Tafsir Mawdou'i)
+                background: primary
+                  ? secondary
+                    ? `linear-gradient(135deg, hsl(${primary.hsl} / 0.18) 0%, hsl(${secondary.hsl} / 0.18) 100%)`
+                    : `hsl(${primary.hsl} / 0.18)`
+                  : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
@@ -329,11 +343,7 @@ export const HafsTajweedPageView = ({
                     key={v.number}
                     data-verse={v.number}
                     onClick={() => setMenuVerse(v.number)}
-                    title={
-                      group.theme
-                        ? `${group.theme.emoji} ${group.theme.labels.fr} · ${group.theme.labels.ar}`
-                        : undefined
-                    }
+                    title={themeTitle}
                     style={
                       { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
                     }
@@ -353,7 +363,8 @@ export const HafsTajweedPageView = ({
                 );
               })}
             </span>
-          ))}
+            );
+          })}
           {pageVerses.length === 0 && (
             <p className="text-center text-muted-foreground text-base">
               Aucun verset sur cette page pour cette sourate.
