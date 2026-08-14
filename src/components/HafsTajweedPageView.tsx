@@ -241,29 +241,56 @@ export const HafsTajweedPageView = ({
     if (!frame || !text) return;
 
     let raf = 0;
+    let cancelled = false;
     const fit = () => {
       const available = frame.clientHeight - 16;
       if (available <= 0) return;
+      const bismillah = frame.querySelector('[data-bismillah]') as HTMLElement | null;
+      const extra = bismillah ? bismillah.offsetHeight + 12 : 0;
+      const target = Math.max(0, available - extra);
+      if (target <= 0) return;
+
       // Mesure la hauteur du texte à interligne de référence.
       text.style.lineHeight = '1.95';
       const base = text.scrollHeight;
       if (base <= 0) return;
-      const bismillah = frame.querySelector('[data-bismillah]') as HTMLElement | null;
-      const extra = bismillah ? bismillah.offsetHeight + 12 : 0;
-      const target = 1.95 * ((available - extra) / base);
-      const next = Math.min(3.4, Math.max(1.6, Number(target.toFixed(3))));
+
+      // Première estimation puis 2 itérations de correction (le nombre de
+      // lignes peut changer quand l'interligne change).
+      let next = Math.min(4.2, Math.max(1.5, (1.95 * target) / base));
+      for (let i = 0; i < 3; i++) {
+        text.style.lineHeight = String(next);
+        const h = text.scrollHeight;
+        if (h <= 0) break;
+        if (Math.abs(h - target) <= 2) break;
+        next = Math.min(4.2, Math.max(1.5, next * (target / h)));
+      }
+      next = Number(next.toFixed(3));
       text.style.lineHeight = String(next);
-      setLineHeight(next);
+      if (!cancelled) setLineHeight(next);
     };
 
-    raf = requestAnimationFrame(fit);
-    const ro = new ResizeObserver(() => {
+    const schedule = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(fit);
+      raf = requestAnimationFrame(() => requestAnimationFrame(fit));
+    };
+
+    schedule();
+    // Les polices arabes changent le nombre de lignes : re-mesurer après leur
+    // chargement, ainsi qu'après un court délai (rendu tardif des versets).
+    const t1 = window.setTimeout(schedule, 150);
+    const t2 = window.setTimeout(schedule, 600);
+    (document as any).fonts?.ready?.then?.(() => schedule());
+
+    const ro = new ResizeObserver(() => {
+      schedule();
     });
     ro.observe(frame);
     return () => {
+      cancelled = true;
       cancelAnimationFrame(raf);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
       ro.disconnect();
     };
   }, [currentPage, verses, showBismillah, surahNumber]);
