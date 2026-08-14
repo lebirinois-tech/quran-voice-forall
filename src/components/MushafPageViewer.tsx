@@ -185,6 +185,14 @@ export const MushafPageViewer = ({
     setImageSrc(getPageUrls(effectivePage, mushafType)[0] ?? '');
   }, [currentPage, mushafType]);
 
+  // Reset video source chain whenever the page or mushaf changes
+  useEffect(() => {
+    if (!isVideoMode) return;
+    setVideoSrcIndex(0);
+    setVideoLoading(true);
+    setVideoError(false);
+  }, [currentPage, mushafType, isVideoMode]);
+
   const goToPage = useCallback((newPage: number) => {
     if (newPage < 1 || newPage > maxPage || newPage === currentPage) return;
     hasManuallyNavigatedRef.current = true;
