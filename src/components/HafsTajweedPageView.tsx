@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -227,6 +227,46 @@ export const HafsTajweedPageView = ({
   };
 
   const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
+
+  // ---- Remplissage vertical de la page --------------------------------
+  // La taille de police reste identique sur toutes les pages (régularité du
+  // Mushaf) ; seul l'interligne s'étire pour que le texte occupe le cadre.
+  const frameRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const [lineHeight, setLineHeight] = useState(1.95);
+
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    const text = textRef.current;
+    if (!frame || !text) return;
+
+    let raf = 0;
+    const fit = () => {
+      const available = frame.clientHeight - 16;
+      if (available <= 0) return;
+      // Mesure la hauteur du texte à interligne de référence.
+      text.style.lineHeight = '1.95';
+      const base = text.scrollHeight;
+      if (base <= 0) return;
+      const bismillah = frame.querySelector('[data-bismillah]') as HTMLElement | null;
+      const extra = bismillah ? bismillah.offsetHeight + 12 : 0;
+      const target = 1.95 * ((available - extra) / base);
+      const next = Math.min(3.4, Math.max(1.6, Number(target.toFixed(3))));
+      text.style.lineHeight = String(next);
+      setLineHeight(next);
+    };
+
+    raf = requestAnimationFrame(fit);
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(fit);
+    });
+    ro.observe(frame);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [currentPage, verses, showBismillah, surahNumber]);
 
   return (
     <div
