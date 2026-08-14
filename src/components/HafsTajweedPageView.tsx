@@ -334,10 +334,15 @@ export const HafsTajweedPageView = ({
               {group.verses.map((v) => {
                 const isCurrent = currentVerse === v.number;
                 const providedTajweed = versesTajweed?.[v.number];
-                const html =
-                  preferProvidedTajweed && providedTajweed
-                    ? sanitizeTajweedHtml(providedTajweed)
-                    : sanitizeTajweedHtml(applyAutoTajweed(v.text));
+                // Warsh / Qalun : le texte de la qirâa est fourni en texte brut.
+                // On lui applique alors les couleurs Tajweed automatiques pour
+                // obtenir le même rendu coloré que Hafs, sans perdre la variante.
+                const source =
+                  preferProvidedTajweed && providedTajweed ? providedTajweed : v.text;
+                const alreadyColoured = /<span[\s>]/i.test(source);
+                const html = alreadyColoured
+                  ? sanitizeTajweedHtml(source)
+                  : sanitizeTajweedHtml(applyAutoTajweed(source));
                 return (
                   <span
                     key={v.number}
