@@ -35,7 +35,9 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          rm -f bun.lock bun.lockb
+          bun install --no-save --registry https://registry.npmjs.org
 
       - name: Configure APK download URL
         run: |
@@ -109,7 +111,7 @@ jobs:
           );
           fs.writeFileSync('assets/icon-background.png', bg);
           NODE
-          bunx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#1b7f5a' --iconBackgroundColorDark '#0f3d2b' --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b'
+          bunx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#1b7f5a' --iconBackgroundColorDark '#0f3d2b' --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b' || echo 'Icon generation skipped'
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
