@@ -119,6 +119,9 @@ export const MushafPageViewer = ({
   const isVideoMode = mushafType === 'hafs-video' || mushafType === 'warsh-video' || mushafType === 'qalun-video';
   const videoSource = isVideoMode ? VIDEO_SOURCES[mushafType as keyof typeof VIDEO_SOURCES] : null;
   const [loopPage, setLoopPage] = useState(false);
+  const [videoSrcIndex, setVideoSrcIndex] = useState(0);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
 
   const { start: surahStartPage, end: surahEndPage } = useMemo(
     () => (isArchiveMode
