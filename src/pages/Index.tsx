@@ -188,6 +188,51 @@ const Index = () => {
           </p>
         </section>
 
+        {/* Installation Section */}
+        <section className="mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.05s' }}>
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-4 text-center flex items-center justify-center gap-2">
+              <Download className="h-5 w-5 text-primary" />
+              <span>Installer l'application <span className="text-sm font-normal text-muted-foreground">/ تثبيت التطبيق</span></span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* PWA Install */}
+              <Link to="/install" className="block">
+                <div className="bg-primary/10 hover:bg-primary/15 border border-primary/20 rounded-xl p-4 text-center transition-colors h-full flex flex-col items-center justify-center gap-2">
+                  <Smartphone className="h-6 w-6 text-primary" />
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">PWA / Site</p>
+                    <p className="text-xs text-muted-foreground">Installer sur téléphone</p>
+                  </div>
+                </div>
+              </Link>
+              {/* APK Download */}
+              <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer" className="block">
+                <div className="bg-secondary/10 hover:bg-secondary/15 border border-secondary/20 rounded-xl p-4 text-center transition-colors h-full flex flex-col items-center justify-center gap-2">
+                  <Download className="h-6 w-6 text-secondary" />
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">Android APK</p>
+                    <p className="text-xs text-muted-foreground">Télécharger l'APK</p>
+                  </div>
+                </div>
+              </a>
+              {/* IPA Download */}
+              <a href={ipaDownloadUrl} target="_blank" rel="noopener noreferrer" className="block">
+                <div className="bg-accent/10 hover:bg-accent/15 border border-accent/20 rounded-xl p-4 text-center transition-colors h-full flex flex-col items-center justify-center gap-2">
+                  <Apple className="h-6 w-6 text-accent" />
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">iOS IPA</p>
+                    <p className="text-xs text-muted-foreground">IPA non signé</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              L'APK s'installe directement sur Android. L'IPA nécessite une signature Apple Developer pour un iPhone physique.
+            </p>
+          </div>
+        </section>
+
         {/* Mode de lecture : Versets / Pages */}
         <section className="mb-6 max-w-md mx-auto animate-fade-in">
           <div className="bg-card border border-border rounded-xl p-2 flex gap-2">
