@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apkDownloadUrl } from '@/lib/apkDownload';
+import { ipaDownloadUrl } from '@/lib/ipaDownload';
 
 const Index = () => {
   const navigate = useNavigate();
