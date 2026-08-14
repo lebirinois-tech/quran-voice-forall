@@ -105,4 +105,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Cible large : compatible avec les WebViews Android anciennes (Android 6+)
+    target: ["es2015", "chrome61", "safari11", "firefox60", "edge18"],
+    cssTarget: "chrome61",
+  },
 }));

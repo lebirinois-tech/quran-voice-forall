@@ -66,6 +66,33 @@ jobs:
           bunx cap add android
           bunx cap sync android
 
+      - name: Widen Android compatibility (minSdk 23 = Android 6+)
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'android/variables.gradle';
+          let src = fs.readFileSync(p, 'utf8');
+          src = src.replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 23');
+          if (!/minSdkVersion/.test(src)) {
+            src = src.replace('ext {', 'ext {\n    minSdkVersion = 23');
+          }
+          fs.writeFileSync(p, src);
+          console.log(src);
+          NODE
+          # APK universel (toutes les architectures CPU), pas de split par ABI
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'android/app/build.gradle';
+          let src = fs.readFileSync(p, 'utf8');
+          if (!src.includes('universalApk')) {
+            src = src.replace(
+              /android\s*\{/,
+              `android {\n    splits { abi { enable false; universalApk true } }\n    packagingOptions { jniLibs { useLegacyPackaging true } }`
+            );
+            fs.writeFileSync(p, src);
+          }
+          NODE
+
       - name: Generate Android app icons
         run: |
           mkdir -p assets
