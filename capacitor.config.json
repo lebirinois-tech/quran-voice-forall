@@ -8,5 +8,9 @@
   "server": {
     "androidScheme": "https",
     "cleartext": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": false
   }
 }
