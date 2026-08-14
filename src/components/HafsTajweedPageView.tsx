@@ -316,6 +316,7 @@ export const HafsTajweedPageView = ({
               {toArabicDigits(currentPage)} · Page {currentPage} / 604
             </div>
             <div
+              ref={frameRef}
               className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
@@ -338,13 +339,14 @@ export const HafsTajweedPageView = ({
               )}
 
               <div
+          ref={textRef}
           dir="rtl"
           lang="ar"
           className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(18px,5.9cqw,42px)] font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
-            lineHeight: 1.95,
+            lineHeight,
             flexShrink: 0,
             fontWeight: 800,
             overflowWrap: 'break-word',
