@@ -56,6 +56,15 @@ const withCacheBust = (url: string) => `${url}${url.includes('?') ? '&' : '?'}v=
 const getArchivePageUrl = (id: string, page: number) =>
   withCacheBust(`https://archive.org/download/${id}/page/n${page - 1}_w1200.jpg`);
 
+// Video pages on archive.org: several naming/serving variants exist per item.
+// We try them in order so the page loads automatically without user action.
+const getVideoUrls = (id: string, page: number): string[] => [
+  `https://archive.org/download/${id}/${padPage3(page)}.mp4`,
+  `https://archive.org/download/${id}/${page}.mp4`,
+  `https://archive.org/serve/${id}/${padPage3(page)}.mp4`,
+  `https://ia801509.us.archive.org/BookReader/BookReaderJSIA.php?id=${id}`,
+].slice(0, 3);
+
 const getPageUrls = (page: number, mushafType: MushafType): string[] => {
   const padded = padPage3(page);
   switch (mushafType) {
@@ -110,6 +119,9 @@ export const MushafPageViewer = ({
   const isVideoMode = mushafType === 'hafs-video' || mushafType === 'warsh-video' || mushafType === 'qalun-video';
   const videoSource = isVideoMode ? VIDEO_SOURCES[mushafType as keyof typeof VIDEO_SOURCES] : null;
   const [loopPage, setLoopPage] = useState(false);
+  const [videoSrcIndex, setVideoSrcIndex] = useState(0);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
 
   const { start: surahStartPage, end: surahEndPage } = useMemo(
     () => (isArchiveMode
@@ -172,6 +184,14 @@ export const MushafPageViewer = ({
     const effectivePage = isArchiveMode ? currentPage + (archive?.fatihaOffset ?? 0) : currentPage;
     setImageSrc(getPageUrls(effectivePage, mushafType)[0] ?? '');
   }, [currentPage, mushafType]);
+
+  // Reset video source chain whenever the page or mushaf changes
+  useEffect(() => {
+    if (!isVideoMode) return;
+    setVideoSrcIndex(0);
+    setVideoLoading(true);
+    setVideoError(false);
+  }, [currentPage, mushafType, isVideoMode]);
 
   const goToPage = useCallback((newPage: number) => {
     if (newPage < 1 || newPage > maxPage || newPage === currentPage) return;
@@ -344,18 +364,62 @@ export const MushafPageViewer = ({
               </Button>
             </div>
             <AspectRatio ratio={3 / 4} className="rounded-xl overflow-hidden border border-border shadow-lg bg-black">
-              <video
-                key={`${mushafType}-${currentPage}`}
-                src={`https://archive.org/download/${videoSource!.id}/${padPage3(currentPage)}.mp4`}
-                controls
-                playsInline
-                preload="metadata"
-                loop={loopPage}
-                onEnded={() => {
-                  if (!loopPage && currentPage < maxPage) goToPage(currentPage + 1);
-                }}
-                className="w-full h-full object-contain bg-black"
-              />
+              <>
+                {videoLoading && !videoError && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/60 text-white">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span className="text-xs">Téléchargement de la page… جارٍ التحميل</span>
+                  </div>
+                )}
+                {videoError && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/70 text-white p-4">
+                    <p className="text-sm text-center">Vidéo indisponible pour cette page</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setVideoSrcIndex(0); setVideoError(false); setVideoLoading(true); }}
+                    >
+                      Réessayer
+                    </Button>
+                  </div>
+                )}
+                <video
+                  key={`${mushafType}-${currentPage}-${videoSrcIndex}`}
+                  src={getVideoUrls(videoSource!.id, currentPage)[videoSrcIndex]}
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="auto"
+                  loop={loopPage}
+                  onLoadedData={() => { setVideoLoading(false); setVideoError(false); }}
+                  onCanPlay={() => setVideoLoading(false)}
+                  onError={() => {
+                    const sources = getVideoUrls(videoSource!.id, currentPage);
+                    if (videoSrcIndex + 1 < sources.length) {
+                      setVideoSrcIndex(videoSrcIndex + 1);
+                      setVideoLoading(true);
+                    } else {
+                      setVideoLoading(false);
+                      setVideoError(true);
+                    }
+                  }}
+                  onEnded={() => {
+                    if (!loopPage && currentPage < maxPage) goToPage(currentPage + 1);
+                  }}
+                  className="w-full h-full object-contain bg-black"
+                />
+                {/* Préchargement automatique de la page suivante */}
+                {currentPage < maxPage && (
+                  <video
+                    key={`prefetch-${mushafType}-${currentPage}`}
+                    src={getVideoUrls(videoSource!.id, currentPage + 1)[0]}
+                    preload="auto"
+                    muted
+                    playsInline
+                    className="hidden"
+                  />
+                )}
+              </>
             </AspectRatio>
           </>
         ) : (
