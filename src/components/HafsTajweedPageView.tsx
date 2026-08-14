@@ -333,11 +333,11 @@ export const HafsTajweedPageView = ({
           >
             {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
             <div
-              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-0.5 text-[11px] font-semibold"
+              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border px-4 py-1 text-base font-bold shadow-sm"
               style={{
                 backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
-                color: 'hsl(43, 62%, 30%)',
+                color: 'hsl(43, 62%, 25%)',
               }}
             >
               {toArabicDigits(currentPage)} · Page {currentPage} / 604
