@@ -391,7 +391,6 @@ export const MushafPageViewer = ({
                   playsInline
                   preload="auto"
                   loop={loopPage}
-                  crossOrigin="anonymous"
                   onLoadedData={() => { setVideoLoading(false); setVideoError(false); }}
                   onCanPlay={() => setVideoLoading(false)}
                   onError={() => {
