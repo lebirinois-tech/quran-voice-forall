@@ -91,6 +91,8 @@ export const HafsTajweedPageView = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
   const [loopScope, setLoopScope] = useState(false);
+  const [activeScope, setActiveScope] = useState<'verse' | 'page' | 'surah' | 'juz'>('verse');
+
 
   const [recorderVerse, setRecorderVerse] = useState<number | null>(null);
   // Bouton d'appel du menu : masquable pour libérer toute la page.
