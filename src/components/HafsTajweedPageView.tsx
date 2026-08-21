@@ -235,12 +235,24 @@ export const HafsTajweedPageView = ({
   const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
   // ---- Remplissage vertical de la page --------------------------------
-  // La taille de police reste identique sur toutes les pages (régularité du
-  // Mushaf) ; seul l'interligne s'étire pour que le texte occupe le cadre.
+  // Boucle correctrice pilotée par l'état : à chaque rendu on mesure le texte
+  // réellement affiché et on ajuste interligne + échelle de police jusqu'à ce
+  // qu'il remplisse le cadre sans jamais déborder.
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [lineHeight, setLineHeight] = useState(1.95);
   const [fontScale, setFontScale] = useState(1);
+  const iterRef = useRef(0);
+
+  const MIN_LH = 1.25;
+  const MAX_LH = 2.9;
+  const MIN_SC = 0.35;
+  const MAX_SC = 1.6;
+
+  // Reset du compteur d'itérations quand le contenu change.
+  useLayoutEffect(() => {
+    iterRef.current = 0;
+  }, [currentPage, verses, showBismillah, surahNumber]);
 
   useLayoutEffect(() => {
     const frame = frameRef.current;
@@ -248,78 +260,77 @@ export const HafsTajweedPageView = ({
     if (!frame || !text) return;
 
     let raf = 0;
-    let cancelled = false;
-    const fit = () => {
-      const available = frame.clientHeight - 8;
+    const measure = () => {
+      const frameEl = frameRef.current;
+      const textEl = textRef.current;
+      if (!frameEl || !textEl) return;
+      const available = frameEl.clientHeight - 8;
       if (available <= 0) return;
-      const bismillah = frame.querySelector('[data-bismillah]') as HTMLElement | null;
+      const bismillah = frameEl.querySelector('[data-bismillah]') as HTMLElement | null;
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
-      const target = Math.max(0, available - extra);
-      if (target <= 0) return;
+      const target = available - extra;
+      const h = textEl.scrollHeight;
+      if (target <= 0 || h <= 0) return;
 
-      // Ajustement combiné : interligne + échelle de police, pour que le texte
-      // remplisse le cadre sans vide, quelle que soit la longueur de la page.
-      let lh = 1.95;
-      let sc = 1;
-      const apply = () => {
-        text.style.lineHeight = String(lh);
-        text.style.setProperty('--qscale', String(sc));
-      };
-      apply();
+      const ratio = target / h;
+      const overflow = h > target + 1;
+      // Convergé : remplissage correct et pas de débordement.
+      if (!overflow && ratio < 1.03) return;
+      if (iterRef.current > 40 && !overflow) return;
+      if (iterRef.current > 120) return;
+      iterRef.current += 1;
 
-      for (let i = 0; i < 6; i++) {
-        const h = text.scrollHeight;
-        if (h <= 0) break;
-        const ratio = target / h;
-        if (Math.abs(h - target) <= 2) break;
-        const step = Math.sqrt(ratio);
-        lh = Math.min(2.9, Math.max(1.35, lh * step));
-        sc = Math.min(1.6, Math.max(0.45, sc * step));
-        apply();
-      }
-      // Sécurité : ne jamais déborder du cadre.
-      let guard = 0;
-      while (text.scrollHeight > target && guard < 60) {
-        sc = Math.max(0.35, sc * 0.96);
-        lh = Math.max(1.25, lh * 0.985);
-        apply();
-        guard++;
-      }
+      const step = overflow
+        ? Math.max(0.9, Math.sqrt(ratio))
+        : Math.min(1.08, Math.sqrt(ratio));
 
-      lh = Number(lh.toFixed(3));
-      sc = Number(sc.toFixed(3));
-      if (!cancelled) {
-        setLineHeight(lh);
-        setFontScale(sc);
-      }
+      const nextLh = Math.min(MAX_LH, Math.max(MIN_LH, lineHeight * step));
+      const nextSc = Math.min(MAX_SC, Math.max(MIN_SC, fontScale * step));
+
+      const lhCapped = Math.abs(nextLh - lineHeight) < 0.001;
+      const scCapped = Math.abs(nextSc - fontScale) < 0.001;
+      if (lhCapped && scCapped) return; // bornes atteintes
+
+      setLineHeight(Number(nextLh.toFixed(3)));
+      setFontScale(Number(nextSc.toFixed(3)));
     };
-
 
     const schedule = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => requestAnimationFrame(fit));
+      raf = requestAnimationFrame(measure);
     };
 
     schedule();
-    // Les polices arabes et le chargement tardif des versets changent le
-    // nombre de lignes : re-mesurer plusieurs fois puis à chaque mutation.
-    const timers = [80, 300, 800, 1500, 2500].map((d) => window.setTimeout(schedule, d));
-    (document as any).fonts?.ready?.then?.(() => schedule());
+    const timers = [100, 400, 1000, 2000].map((d) =>
+      window.setTimeout(() => {
+        iterRef.current = 0;
+        schedule();
+      }, d)
+    );
+    (document as any).fonts?.ready?.then?.(() => {
+      iterRef.current = 0;
+      schedule();
+    });
 
     const ro = new ResizeObserver(() => {
+      iterRef.current = 0;
       schedule();
     });
     ro.observe(frame);
-    const mo = new MutationObserver(() => schedule());
+    const mo = new MutationObserver(() => {
+      iterRef.current = 0;
+      schedule();
+    });
     mo.observe(text, { childList: true, subtree: true, characterData: true });
+
     return () => {
-      cancelled = true;
       cancelAnimationFrame(raf);
       timers.forEach((t) => window.clearTimeout(t));
       ro.disconnect();
       mo.disconnect();
     };
-  }, [currentPage, verses, showBismillah, surahNumber]);
+  }, [currentPage, verses, showBismillah, surahNumber, lineHeight, fontScale]);
+
 
 
   return (
