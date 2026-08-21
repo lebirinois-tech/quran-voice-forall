@@ -276,13 +276,15 @@ export const HafsTajweedPageView = ({
       const overflow = h > target + 1;
       // Convergé : remplissage correct et pas de débordement.
       if (!overflow && ratio < 1.03) return;
-      if (iterRef.current > 40 && !overflow) return;
-      if (iterRef.current > 120) return;
+      if (!overflow && iterRef.current > 40) return;
+      if (overflow && iterRef.current > 300) return;
+      if (iterRef.current > 300) return;
       iterRef.current += 1;
 
       const step = overflow
-        ? Math.max(0.9, Math.sqrt(ratio))
+        ? Math.max(0.8, Math.sqrt(ratio))
         : Math.min(1.08, Math.sqrt(ratio));
+
 
       const nextLh = Math.min(MAX_LH, Math.max(MIN_LH, lineHeight * step));
       const nextSc = Math.min(MAX_SC, Math.max(MIN_SC, fontScale * step));
