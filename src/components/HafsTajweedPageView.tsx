@@ -191,6 +191,42 @@ export const HafsTajweedPageView = ({
     [surahNumber, pageVerses]
   );
 
+  // Plages de lecture disponibles : verset, page, sourate, juz.
+  const playScopes = useMemo(() => {
+    const fallback = pageVerses[0]?.number ?? 1;
+    const verse = currentVerse ?? fallback;
+    const juzVerses = verses.filter((v) => getJuzForVerse(surahNumber, v.number) === currentJuz);
+    const surahEnd = verses.length ? verses[verses.length - 1].number : verse;
+    return {
+      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية` },
+      page: {
+        start: pageVerses[0]?.number ?? verse,
+        end: pageVerses[pageVerses.length - 1]?.number ?? verse,
+        label: `Page ${currentPage} — الصفحة`,
+      },
+      surah: {
+        start: verses[0]?.number ?? 1,
+        end: surahEnd,
+        label: `Sourate ${surah?.name ?? surahNumber} — السورة`,
+      },
+      juz: {
+        start: juzVerses[0]?.number ?? verse,
+        end: juzVerses[juzVerses.length - 1]?.number ?? verse,
+        label: `Juz ${currentJuz} — الجزء`,
+      },
+    };
+  }, [pageVerses, currentVerse, verses, surahNumber, currentJuz, currentPage, surah]);
+
+  const startScope = useCallback(
+    (key: keyof typeof playScopes) => {
+      const scope = playScopes[key];
+      setScopeOpen(false);
+      onPlayRange?.(scope.start, scope.end, loopScope);
+    },
+    [playScopes, loopScope, onPlayRange]
+  );
+
+
 
   // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
   // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
