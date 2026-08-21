@@ -174,6 +174,12 @@ export const HafsTajweedPageView = ({
     [verses, currentPage]
   );
 
+  const currentJuz = useMemo(
+    () => getJuzForVerse(surahNumber, pageVerses[0]?.number ?? 1),
+    [surahNumber, pageVerses]
+  );
+
+
   // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
   // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
   const themeGroups = useMemo(() => {
