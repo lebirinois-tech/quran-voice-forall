@@ -418,7 +418,7 @@ export const HafsTajweedPageView = ({
           ref={textRef}
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(18px,5.9cqw,42px)] font-extrabold text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(22px,7.2cqw,54px)] font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
