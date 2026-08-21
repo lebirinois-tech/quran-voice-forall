@@ -347,13 +347,13 @@ export const VerseCard = ({
         isEvenPage 
           ? "bg-primary/5 dark:bg-primary/10" 
           : "bg-secondary/5 dark:bg-secondary/10",
-        isPlaying && "verse-playing ring-2 ring-primary/40",
+        isPlaying && "verse-playing ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/30 scale-[1.01]",
         isHighlighted && !isPlaying && "verse-highlight ring-2 ring-primary/20",
         "animate-fade-in"
       )}
       style={{
         animationDelay: `${verse.number * 0.05}s`,
-        ...(primaryTheme
+        ...(primaryTheme && !isPlaying
           ? {
               borderLeft: `4px solid hsl(${primaryTheme.hsl})`,
               backgroundColor: `hsl(${primaryTheme.hsl} / 0.08)`,

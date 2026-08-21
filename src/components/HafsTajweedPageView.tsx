@@ -525,8 +525,8 @@ export const HafsTajweedPageView = ({
                       'inline transition-colors cursor-pointer rounded-sm',
                       isCurrent &&
                         (isAudioPlaying
-                          ? 'bg-primary/25 ring-2 ring-primary shadow-md'
-                          : 'bg-primary/10 ring-1 ring-primary/40')
+                          ? 'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40 animate-pulse'
+                          : 'bg-primary/20 ring-2 ring-primary/60')
                     )}
                   >
                     <span dangerouslySetInnerHTML={{ __html: html }} />
