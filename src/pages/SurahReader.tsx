@@ -492,15 +492,22 @@ const SurahReader = () => {
           </div>
         </div>}
 
-        {/* Tajweed Legend - shown for all colored Tajweed modes */}
+        {/* Tajweed Legend - shown for all colored Tajweed modes (versets + pages) */}
         {(appSettings.textDisplayStyle === 'tajweed' || 
           appSettings.textDisplayStyle === 'warsh-tajweed' ||
-          appSettings.textDisplayStyle === 'qalun-tajweed') && (
+          appSettings.textDisplayStyle === 'qalun-tajweed' ||
+          appSettings.textDisplayStyle === 'pages-hafs' ||
+          appSettings.textDisplayStyle === 'pages-warsh' ||
+          appSettings.textDisplayStyle === 'pages-qalun') && (
           <TajweedLegend />
         )}
 
-        {/* Quranic themes legend — text modes + Hafs pages (rendu texte thémé). */}
-        {!isMushafMode && (!isMushafImageMode || appSettings.textDisplayStyle === 'pages-hafs') && <ThemeLegend />}
+        {/* Quranic themes legend — text modes + Hafs/Warsh/Qalun pages (rendu texte thémé). */}
+        {!isMushafMode &&
+          (!isMushafImageMode ||
+            appSettings.textDisplayStyle === 'pages-hafs' ||
+            appSettings.textDisplayStyle === 'pages-warsh' ||
+            appSettings.textDisplayStyle === 'pages-qalun') && <ThemeLegend />}
 
         <div className={isMushafMode ? 'mx-auto w-full max-w-3xl' : 'max-w-3xl mx-auto'}>
           {/* Bismillah - only show for text modes */}
