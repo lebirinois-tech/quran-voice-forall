@@ -366,12 +366,12 @@ export const HafsTajweedPageView = ({
               </button>
             </div>
 
-            {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
+            {/* Numéro de page façon Mushaf, centré en haut du cadre */}
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Choisir une page"
-              className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 rounded-full border px-4 py-1 text-base font-bold shadow-sm"
+              className="mx-auto mb-1.5 mt-0.5 w-fit rounded-full border px-4 py-1 text-base font-bold shadow-sm"
               style={{
                 backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
