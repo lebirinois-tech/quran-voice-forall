@@ -68,6 +68,8 @@ export const HafsTajweedPageView = ({
   onManualPageChange,
   onNavigateToSurah,
   onNavigateToJuz,
+  playbackSpeed = 1,
+  onSpeedChange,
   audioControls,
   voiceControls,
   settingsControls,
