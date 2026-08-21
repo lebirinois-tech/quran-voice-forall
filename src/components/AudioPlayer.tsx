@@ -320,44 +320,9 @@ export const AudioPlayer = ({
           </div>
 
 
-          {/* Speed, Repeat & Download Buttons */}
+          {/* Repeat & Download Buttons */}
           <div className="flex-1 flex flex-wrap justify-end gap-0.5 sm:gap-1">
-            {/* Speed Control */}
-            {onSpeedChange && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      "rounded-full",
-                      playbackSpeed !== 1 && "text-primary bg-primary/10"
-                    )}
-                    aria-label="Vitesse de lecture"
-                  >
-                    <span className="text-xs font-bold">{playbackSpeed}x</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 z-[130] pointer-events-auto" align="end">
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">Vitesse de lecture</h4>
-                    <div className="grid grid-cols-4 gap-1">
-                      {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
-                        <Button
-                          key={speed}
-                          variant={playbackSpeed === speed ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => onSpeedChange(speed)}
-                          className="text-xs px-2"
-                        >
-                          {speed}x
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
+
 
             {/* Pause-to-repeat (after reciter) */}
             {onRepeatPauseChange && (
