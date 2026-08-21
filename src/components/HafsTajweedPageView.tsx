@@ -638,15 +638,34 @@ export const HafsTajweedPageView = ({
           {onPlayRange && (
             <Button
               type="button"
-              size="icon"
-              variant="ghost"
-              aria-label="Choix de la lecture : verset, page, sourate, juz"
-              onClick={() => setScopeOpen(true)}
-              className="h-9 w-9 shrink-0 rounded-full text-primary"
+              variant="outline"
+              aria-label={`Plage de lecture : ${playScopes[activeScope].label}`}
+              title="Appui : lancer la plage · Double-appui : plus d'options"
+              onClick={() => startScope(activeScope)}
+              onDoubleClick={() => setScopeOpen(true)}
+              className="h-9 shrink-0 gap-1 rounded-full border-primary/40 px-2 text-[11px] font-bold text-primary"
             >
-              <ListMusic className="h-5 w-5" />
+              <ListMusic className="h-4 w-4" />
+              {{ verse: 'Verset', page: 'Page', surah: 'Sourate', juz: 'Juz' }[activeScope]}
             </Button>
           )}
+          {onPlayRange && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label="Changer la plage de lecture"
+              onClick={() =>
+                setActiveScope((s) =>
+                  s === 'verse' ? 'page' : s === 'page' ? 'surah' : s === 'surah' ? 'juz' : 'verse'
+                )
+              }
+              className="h-9 w-8 shrink-0 rounded-full text-primary"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+
 
           {onSpeedChange && (
             <Button
