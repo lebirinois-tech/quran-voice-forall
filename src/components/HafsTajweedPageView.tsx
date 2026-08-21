@@ -920,7 +920,46 @@ export const HafsTajweedPageView = ({
         </SheetContent>
       </Sheet>
 
+      {/* Choix de la portée de lecture : verset, page, sourate, juz */}
+      <Dialog open={scopeOpen} onOpenChange={setScopeOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Choix de la lecture — اختيار القراءة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {(['verse', 'page', 'surah', 'juz'] as const).map((key) => {
+              const scope = playScopes[key];
+              return (
+                <Button
+                  key={key}
+                  variant="outline"
+                  className="h-12 w-full justify-between text-sm"
+                  onClick={() => startScope(key)}
+                >
+                  <span className="flex items-center gap-2">
+                    <Play className="h-4 w-4 text-primary" />
+                    {scope.label}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {scope.start === scope.end ? `v. ${scope.start}` : `v. ${scope.start}–${scope.end}`}
+                  </span>
+                </Button>
+              );
+            })}
+            <Button
+              variant={loopScope ? 'default' : 'ghost'}
+              className="h-11 w-full justify-center gap-2 text-sm"
+              onClick={() => setLoopScope((v) => !v)}
+            >
+              <Repeat className="h-4 w-4" />
+              Répéter en boucle {loopScope ? '(activé)' : '(désactivé)'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Recorder dialog */}
+
       <Dialog open={recorderVerse !== null} onOpenChange={(o) => !o && setRecorderVerse(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
