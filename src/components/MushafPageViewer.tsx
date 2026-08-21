@@ -384,6 +384,18 @@ export const MushafPageViewer = ({
                     </Button>
                   </div>
                 )}
+                {currentVerse && (
+                  <div
+                    className={cn(
+                      'pointer-events-none absolute top-2 left-1/2 z-20 -translate-x-1/2 rounded-full border-2 px-4 py-1.5 text-sm font-bold shadow-lg backdrop-blur',
+                      isAudioPlaying
+                        ? 'animate-pulse border-primary bg-primary/30 text-primary-foreground shadow-primary/50'
+                        : 'border-border bg-background/80 text-foreground'
+                    )}
+                  >
+                    🔊 Verset {currentVerse}
+                  </div>
+                )}
                 <video
                   key={`${mushafType}-${currentPage}-${videoSrcIndex}`}
                   src={getVideoUrls(videoSource!.id, currentPage)[videoSrcIndex]}
@@ -407,8 +419,12 @@ export const MushafPageViewer = ({
                   onEnded={() => {
                     if (!loopPage && currentPage < maxPage) goToPage(currentPage + 1);
                   }}
-                  className="w-full h-full object-contain bg-black"
+                  className={cn(
+                    'w-full h-full object-contain bg-black transition-all',
+                    isAudioPlaying && currentVerse && 'ring-4 ring-inset ring-primary'
+                  )}
                 />
+
                 {/* Préchargement automatique de la page suivante */}
                 {currentPage < maxPage && (
                   <video
