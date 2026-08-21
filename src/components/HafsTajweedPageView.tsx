@@ -470,7 +470,7 @@ export const HafsTajweedPageView = ({
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             textAlign: 'justify',
             textAlignLast: 'start',
-            wordSpacing: '-0.08em',
+            wordSpacing: '-0.14em',
             
             lineHeight,
             flexShrink: 0,
@@ -530,7 +530,7 @@ export const HafsTajweedPageView = ({
                     )}
                   >
                     <span dangerouslySetInnerHTML={{ __html: html }} />
-                    <span className="mx-[0.2em] inline-flex items-center justify-center align-middle text-primary font-bold">
+                    <span className="mx-[0.02em] inline-flex items-center justify-center align-middle text-primary font-bold">
                       ۝{toArabicDigits(v.number)}
                     </span>{' '}
                   </span>
