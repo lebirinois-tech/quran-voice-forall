@@ -437,8 +437,10 @@ export const HafsTajweedPageView = ({
           ref={textRef}
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(22px,7.2cqw,54px)] font-extrabold text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
+            ['--qscale' as any]: fontScale,
+            fontSize: 'calc(clamp(22px, 7.2cqw, 54px) * var(--qscale, 1))',
             textAlign: 'justify',
             textAlignLast: 'justify',
             lineHeight,
@@ -446,6 +448,7 @@ export const HafsTajweedPageView = ({
             fontWeight: 800,
             overflowWrap: 'break-word',
           }}
+
         >
           {themeGroups.map((group, gi) => {
             const primary = group.themes[0] ?? null;
