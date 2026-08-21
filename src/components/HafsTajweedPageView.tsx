@@ -469,7 +469,7 @@ export const HafsTajweedPageView = ({
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             textAlign: 'justify',
-            textAlignLast: 'justify',
+            textAlignLast: 'start',
             wordSpacing: '-0.08em',
             
             lineHeight,
