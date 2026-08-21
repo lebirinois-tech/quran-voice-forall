@@ -557,7 +557,7 @@ export const HafsTajweedPageView = ({
       {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
       {showMenuButton ? (
         <div
-          className="fixed left-1/2 z-[80] flex -translate-x-1/2 items-center gap-2 rounded-full border border-primary/25 bg-background/90 px-2 py-1.5 shadow-2xl backdrop-blur"
+          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-center gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
           <Button
@@ -566,7 +566,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Page suivante"
             onClick={goNext}
-            className="h-10 w-10 rounded-full text-primary"
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -576,7 +576,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Verset précédent"
             onClick={() => onPreviousVerse?.()}
-            className="h-10 w-10 rounded-full text-primary"
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <SkipBack className="h-5 w-5" />
           </Button>
@@ -585,7 +585,7 @@ export const HafsTajweedPageView = ({
             size="icon"
             aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
             onClick={() => onPlayPause?.()}
-            className="h-12 w-12 rounded-full shadow-lg"
+            className="h-11 w-11 shrink-0 rounded-full shadow-lg"
           >
             {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
           </Button>
@@ -610,7 +610,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Verset suivant"
             onClick={() => onNextVerse?.()}
-            className="h-10 w-10 rounded-full text-primary"
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <SkipForward className="h-5 w-5" />
           </Button>
@@ -620,7 +620,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Page précédente"
             onClick={goPrev}
-            className="h-10 w-10 rounded-full text-primary"
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
@@ -630,7 +630,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
             onClick={toggleFullscreen}
-            className="h-10 w-10 rounded-full text-primary"
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
           </Button>
@@ -641,7 +641,7 @@ export const HafsTajweedPageView = ({
             aria-label="Ouvrir les commandes"
             onClick={() => setMenuOpen(true)}
             onDoubleClick={() => setShowMenuButton(false)}
-            className="h-10 w-10 rounded-full text-primary"
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <Menu className="h-5 w-5" />
           </Button>
