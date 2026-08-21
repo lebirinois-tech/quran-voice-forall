@@ -200,24 +200,43 @@ export const HafsTajweedPageView = ({
     const juzVerses = verses.filter((v) => getJuzForVerse(surahNumber, v.number) === currentJuz);
     const surahEnd = verses.length ? verses[verses.length - 1].number : verse;
     return {
-      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية` },
+      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية`, short: `V${verse}` },
       page: {
         start: pageVerses[0]?.number ?? verse,
         end: pageVerses[pageVerses.length - 1]?.number ?? verse,
         label: `Page ${currentPage} — الصفحة`,
+        short: `P${currentPage}`,
       },
       surah: {
         start: verses[0]?.number ?? 1,
         end: surahEnd,
         label: `Sourate ${surah?.name ?? surahNumber} — السورة`,
+        short: `S${surahNumber}`,
       },
       juz: {
         start: juzVerses[0]?.number ?? verse,
         end: juzVerses[juzVerses.length - 1]?.number ?? verse,
         label: `Juz ${currentJuz} — الجزء`,
+        short: `J${currentJuz}`,
       },
     };
   }, [pageVerses, currentVerse, verses, surahNumber, currentJuz, currentPage, surah]);
+
+  const scopeDetailLabel = useMemo(() => {
+    const scope = playScopes[activeScope];
+    const start = scope.start;
+    const end = scope.end;
+    if (activeScope === 'verse') {
+      return `Verset ${start}`;
+    }
+    if (activeScope === 'page') {
+      return `Page ${currentPage}, V${start}–${end}`;
+    }
+    if (activeScope === 'surah') {
+      return `Sourate ${surahNumber}, V${start}–${end}`;
+    }
+    return `Juz ${currentJuz}, V${start}–${end}`;
+  }, [playScopes, activeScope, currentPage, surahNumber, currentJuz]);
 
   const startScope = useCallback(
     (key: keyof typeof playScopes) => {
@@ -638,18 +657,22 @@ export const HafsTajweedPageView = ({
             {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
           </Button>
           {onPlayRange && (
-            <Button
+            <button
               type="button"
-              variant="outline"
               aria-label={`Plage de lecture : ${playScopes[activeScope].label}`}
               title="Appui : lancer la plage · Double-appui : plus d'options"
               onClick={() => startScope(activeScope)}
               onDoubleClick={() => setScopeOpen(true)}
-              className="h-9 shrink-0 gap-1 rounded-full border-primary/40 px-2 text-[11px] font-bold text-primary"
+              className="flex h-9 shrink-0 flex-col items-center justify-center rounded-full border border-primary/40 bg-background px-2.5 text-primary"
             >
-              <ListMusic className="h-4 w-4" />
-              {{ verse: 'Verset', page: 'Page', surah: 'Sourate', juz: 'Juz' }[activeScope]}
-            </Button>
+              <span className="flex items-center gap-1 text-[10px] font-bold leading-none">
+                <ListMusic className="h-3 w-3" />
+                {{ verse: 'Verset', page: 'Page', surah: 'Sourate', juz: 'Juz' }[activeScope]}
+              </span>
+              <span className="mt-0.5 text-[9px] leading-none text-muted-foreground">
+                {scopeDetailLabel}
+              </span>
+            </button>
           )}
           {onPlayRange && (
             <Button
@@ -667,7 +690,6 @@ export const HafsTajweedPageView = ({
               <ChevronRight className="h-4 w-4" />
             </Button>
           )}
-
 
           {onSpeedChange && (
             <Button
