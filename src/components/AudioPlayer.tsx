@@ -292,7 +292,33 @@ export const AudioPlayer = ({
             >
               <SkipForward className="h-5 w-5" />
             </Button>
+
+            {/* Vitesse visible à côté du bouton lecture */}
+            {onSpeedChange && (
+              <Select
+                value={String(playbackSpeed)}
+                onValueChange={(v) => onSpeedChange(Number(v))}
+              >
+                <SelectTrigger
+                  className={cn(
+                    "h-8 w-[64px] rounded-full px-2 text-xs font-bold",
+                    playbackSpeed !== 1 && "text-primary border-primary bg-primary/10"
+                  )}
+                  aria-label="Vitesse de lecture"
+                >
+                  <SelectValue>{playbackSpeed}x</SelectValue>
+                </SelectTrigger>
+                <SelectContent className="z-[130] min-w-[80px]">
+                  {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
+                    <SelectItem key={speed} value={String(speed)} className="text-xs">
+                      {speed}x
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
+
 
           {/* Speed, Repeat & Download Buttons */}
           <div className="flex-1 flex flex-wrap justify-end gap-0.5 sm:gap-1">
