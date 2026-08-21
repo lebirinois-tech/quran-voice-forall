@@ -40,6 +40,8 @@ interface HafsTajweedPageViewProps {
   onManualPageChange?: (page: number) => void;
   onNavigateToSurah?: (surah: number) => void;
   onNavigateToJuz?: (juz: number) => void;
+  playbackSpeed?: number;
+  onSpeedChange?: (speed: number) => void;
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
