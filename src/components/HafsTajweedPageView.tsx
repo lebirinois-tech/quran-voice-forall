@@ -235,103 +235,113 @@ export const HafsTajweedPageView = ({
   const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
   // ---- Remplissage vertical de la page --------------------------------
-  // Boucle correctrice pilotée par l'état : à chaque rendu on mesure le texte
-  // réellement affiché et on ajuste interligne + échelle de police jusqu'à ce
-  // qu'il remplisse le cadre sans jamais déborder.
+  // Recherche binaire déterministe : on cherche la plus grande échelle de
+  // police qui tient dans le cadre, puis on étire l'interligne pour combler
+  // l'espace restant. Aucun débordement possible, rendu régulier.
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [lineHeight, setLineHeight] = useState(1.95);
-  const [fontScale, setFontScale] = useState(1);
-  const iterRef = useRef(0);
+  const [fontPx, setFontPx] = useState(0); // 0 = pas encore mesuré
 
-  const MIN_LH = 1.25;
-  const MAX_LH = 2.9;
-  const MIN_SC = 0.35;
-  const MAX_SC = 1.6;
-
-  // Reset du compteur d'itérations quand le contenu change.
-  useLayoutEffect(() => {
-    iterRef.current = 0;
-  }, [currentPage, verses, showBismillah, surahNumber]);
+  const MIN_LH = 1.4;
+  const MAX_LH = 2.6;
+  const MIN_PX = 14;
+  const MAX_PX = 64;
+  const BASE_LH = 1.9;
+  const sigRef = useRef('');
 
   useLayoutEffect(() => {
-    const frame = frameRef.current;
-    const text = textRef.current;
-    if (!frame || !text) return;
+    sigRef.current = '';
+  }, [currentPage, surahNumber]);
 
-    let raf = 0;
-    const measure = () => {
+  useLayoutEffect(() => {
+    const measure = (force = false) => {
       const frameEl = frameRef.current;
       const textEl = textRef.current;
       if (!frameEl || !textEl) return;
+      const content = (textEl.textContent || '').trim();
+      if (content.length < 5) return;
+
       const available = frameEl.clientHeight - 8;
       if (available <= 0) return;
       const bismillah = frameEl.querySelector('[data-bismillah]') as HTMLElement | null;
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
       const target = available - extra;
-      const h = textEl.scrollHeight;
-      if (target <= 0 || h <= 0) return;
+      if (target <= 0) return;
 
-      const ratio = target / h;
-      const overflow = h > target + 1;
-      // Convergé : remplissage correct et pas de débordement.
-      if (!overflow && ratio < 1.03) return;
-      if (!overflow && iterRef.current > 40) return;
-      if (overflow && iterRef.current > 300) return;
-      if (iterRef.current > 300) return;
-      iterRef.current += 1;
+      // Ne recalculer que si le contenu ou les dimensions ont changé.
+      const sig = `${content.length}|${textEl.clientWidth}|${target}`;
+      if (!force && sig === sigRef.current) return;
+      sigRef.current = sig;
 
-      const step = overflow
-        ? Math.max(0.8, Math.sqrt(ratio))
-        : Math.min(1.08, Math.sqrt(ratio));
+      const prevLh = textEl.style.lineHeight;
+      const prevFs = textEl.style.fontSize;
 
+      // Tailles en pixels (mesure synchrone fiable, pas d'unités de conteneur).
+      const heightAt = (px: number, lh: number) => {
+        textEl.style.fontSize = `${px}px`;
+        textEl.style.lineHeight = String(lh);
+        return textEl.scrollHeight;
+      };
 
-      const nextLh = Math.min(MAX_LH, Math.max(MIN_LH, lineHeight * step));
-      const nextSc = Math.min(MAX_SC, Math.max(MIN_SC, fontScale * step));
+      // 1) Plus grande taille de police qui tient dans le cadre.
+      let lo = MIN_PX;
+      let hi = MAX_PX;
+      if (heightAt(MAX_PX, BASE_LH) <= target) {
+        lo = MAX_PX;
+      } else {
+        for (let i = 0; i < 12; i++) {
+          const mid = (lo + hi) / 2;
+          if (heightAt(mid, BASE_LH) <= target) lo = mid;
+          else hi = mid;
+        }
+      }
+      const px = Math.floor(lo * 10) / 10;
 
-      const lhCapped = Math.abs(nextLh - lineHeight) < 0.001;
-      const scCapped = Math.abs(nextSc - fontScale) < 0.001;
-      if (lhCapped && scCapped) return; // bornes atteintes
+      // 2) Étirer l'interligne pour combler le vide restant, sans déborder.
+      let lhLo = MIN_LH;
+      let lhHi = MAX_LH;
+      if (heightAt(px, MAX_LH) <= target) {
+        lhLo = MAX_LH;
+      } else {
+        for (let i = 0; i < 12; i++) {
+          const mid = (lhLo + lhHi) / 2;
+          if (heightAt(px, mid) <= target) lhLo = mid;
+          else lhHi = mid;
+        }
+      }
+      const lh = Number(lhLo.toFixed(3));
 
-      setLineHeight(Number(nextLh.toFixed(3)));
-      setFontScale(Number(nextSc.toFixed(3)));
+      textEl.style.fontSize = prevFs;
+      textEl.style.lineHeight = prevLh;
+
+      setFontPx((cur) => (Math.abs(cur - px) < 0.2 ? cur : px));
+      setLineHeight((cur) => (Math.abs(cur - lh) < 0.01 ? cur : lh));
     };
 
-    const schedule = () => {
+    let raf = 0;
+    const schedule = (force = false) => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(measure);
+      raf = requestAnimationFrame(() => measure(force));
     };
 
-    schedule();
-    const timers = [100, 400, 1000, 2000].map((d) =>
-      window.setTimeout(() => {
-        iterRef.current = 0;
-        schedule();
-      }, d)
-    );
-    (document as any).fonts?.ready?.then?.(() => {
-      iterRef.current = 0;
-      schedule();
-    });
+    schedule(true);
+    // Le contenu (versets, tajweed) et les polices arrivent de façon asynchrone :
+    // on surveille en continu la signature du contenu, sans recalcul inutile.
+    const poll = window.setInterval(() => schedule(false), 250);
+    (document as any).fonts?.ready?.then?.(() => schedule(true));
 
-    const ro = new ResizeObserver(() => {
-      iterRef.current = 0;
-      schedule();
-    });
-    ro.observe(frame);
-    const mo = new MutationObserver(() => {
-      iterRef.current = 0;
-      schedule();
-    });
-    mo.observe(text, { childList: true, subtree: true, characterData: true });
+    const frameEl = frameRef.current;
+    const ro = frameEl ? new ResizeObserver(() => schedule(true)) : null;
+    if (frameEl && ro) ro.observe(frameEl);
 
     return () => {
       cancelAnimationFrame(raf);
-      timers.forEach((t) => window.clearTimeout(t));
-      ro.disconnect();
-      mo.disconnect();
+      window.clearInterval(poll);
+      ro?.disconnect();
     };
-  }, [currentPage, verses, showBismillah, surahNumber, lineHeight, fontScale]);
+  }, []);
+
 
 
 
@@ -454,10 +464,11 @@ export const HafsTajweedPageView = ({
           lang="ar"
           className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
-            ['--qscale' as any]: fontScale,
-            fontSize: 'calc(clamp(22px, 7.2cqw, 54px) * var(--qscale, 1))',
+            fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             textAlign: 'justify',
             textAlignLast: 'justify',
+            wordSpacing: '-0.08em',
+            
             lineHeight,
             flexShrink: 0,
             fontWeight: 800,
