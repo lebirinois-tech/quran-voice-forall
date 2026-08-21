@@ -287,3 +287,6 @@
 .tajweed-text {
   color: hsl(var(--foreground));
 }
+
+/* Gel des transitions pendant la mesure d'ajustement de page */
+.fit-measuring, .fit-measuring * { transition: none !important; animation: none !important; }
