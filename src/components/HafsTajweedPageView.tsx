@@ -240,6 +240,7 @@ export const HafsTajweedPageView = ({
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [lineHeight, setLineHeight] = useState(1.95);
+  const [fontScale, setFontScale] = useState(1);
 
   useLayoutEffect(() => {
     const frame = frameRef.current;
@@ -249,32 +250,50 @@ export const HafsTajweedPageView = ({
     let raf = 0;
     let cancelled = false;
     const fit = () => {
-      const available = frame.clientHeight - 16;
+      const available = frame.clientHeight - 8;
       if (available <= 0) return;
       const bismillah = frame.querySelector('[data-bismillah]') as HTMLElement | null;
-      const extra = bismillah ? bismillah.offsetHeight + 12 : 0;
+      const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
       const target = Math.max(0, available - extra);
       if (target <= 0) return;
 
-      // Mesure la hauteur du texte à interligne de référence.
-      text.style.lineHeight = '1.95';
-      const base = text.scrollHeight;
-      if (base <= 0) return;
+      // Ajustement combiné : interligne + échelle de police, pour que le texte
+      // remplisse le cadre sans vide, quelle que soit la longueur de la page.
+      let lh = 1.95;
+      let sc = 1;
+      const apply = () => {
+        text.style.lineHeight = String(lh);
+        text.style.setProperty('--qscale', String(sc));
+      };
+      apply();
 
-      // Première estimation puis 2 itérations de correction (le nombre de
-      // lignes peut changer quand l'interligne change).
-      let next = Math.min(3.4, Math.max(1.7, (1.95 * target) / base));
-      for (let i = 0; i < 3; i++) {
-        text.style.lineHeight = String(next);
+      for (let i = 0; i < 6; i++) {
         const h = text.scrollHeight;
         if (h <= 0) break;
+        const ratio = target / h;
         if (Math.abs(h - target) <= 2) break;
-        next = Math.min(3.4, Math.max(1.7, next * (target / h)));
+        const step = Math.sqrt(ratio);
+        lh = Math.min(2.9, Math.max(1.55, lh * step));
+        sc = Math.min(1.6, Math.max(0.75, sc * step));
+        apply();
       }
-      next = Number(next.toFixed(3));
-      text.style.lineHeight = String(next);
-      if (!cancelled) setLineHeight(next);
+      // Sécurité : ne jamais déborder.
+      let guard = 0;
+      while (text.scrollHeight > target && guard < 12) {
+        sc = Math.max(0.6, sc * 0.97);
+        lh = Math.max(1.4, lh * 0.98);
+        apply();
+        guard++;
+      }
+
+      lh = Number(lh.toFixed(3));
+      sc = Number(sc.toFixed(3));
+      if (!cancelled) {
+        setLineHeight(lh);
+        setFontScale(sc);
+      }
     };
+
 
     const schedule = () => {
       cancelAnimationFrame(raf);
@@ -418,8 +437,10 @@ export const HafsTajweedPageView = ({
           ref={textRef}
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(22px,7.2cqw,54px)] font-extrabold text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
+            ['--qscale' as any]: fontScale,
+            fontSize: 'calc(clamp(22px, 7.2cqw, 54px) * var(--qscale, 1))',
             textAlign: 'justify',
             textAlignLast: 'justify',
             lineHeight,
@@ -427,6 +448,7 @@ export const HafsTajweedPageView = ({
             fontWeight: 800,
             overflowWrap: 'break-word',
           }}
+
         >
           {themeGroups.map((group, gi) => {
             const primary = group.themes[0] ?? null;
