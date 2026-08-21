@@ -200,24 +200,43 @@ export const HafsTajweedPageView = ({
     const juzVerses = verses.filter((v) => getJuzForVerse(surahNumber, v.number) === currentJuz);
     const surahEnd = verses.length ? verses[verses.length - 1].number : verse;
     return {
-      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية` },
+      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية`, short: `V${verse}` },
       page: {
         start: pageVerses[0]?.number ?? verse,
         end: pageVerses[pageVerses.length - 1]?.number ?? verse,
         label: `Page ${currentPage} — الصفحة`,
+        short: `P${currentPage}`,
       },
       surah: {
         start: verses[0]?.number ?? 1,
         end: surahEnd,
         label: `Sourate ${surah?.name ?? surahNumber} — السورة`,
+        short: `S${surahNumber}`,
       },
       juz: {
         start: juzVerses[0]?.number ?? verse,
         end: juzVerses[juzVerses.length - 1]?.number ?? verse,
         label: `Juz ${currentJuz} — الجزء`,
+        short: `J${currentJuz}`,
       },
     };
   }, [pageVerses, currentVerse, verses, surahNumber, currentJuz, currentPage, surah]);
+
+  const scopeDetailLabel = useMemo(() => {
+    const scope = playScopes[activeScope];
+    const start = scope.start;
+    const end = scope.end;
+    if (activeScope === 'verse') {
+      return `Verset ${start}`;
+    }
+    if (activeScope === 'page') {
+      return `Page ${currentPage}, V${start}–${end}`;
+    }
+    if (activeScope === 'surah') {
+      return `Sourate ${surahNumber}, V${start}–${end}`;
+    }
+    return `Juz ${currentJuz}, V${start}–${end}`;
+  }, [playScopes, activeScope, currentPage, surahNumber, currentJuz]);
 
   const startScope = useCallback(
     (key: keyof typeof playScopes) => {
