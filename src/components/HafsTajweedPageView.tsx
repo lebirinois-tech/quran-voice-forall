@@ -42,6 +42,9 @@ interface HafsTajweedPageViewProps {
   onNavigateToJuz?: (juz: number) => void;
   playbackSpeed?: number;
   onSpeedChange?: (speed: number) => void;
+  /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). */
+  onPlayRange?: (startVerse: number, endVerse: number, loop: boolean) => void;
+
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
