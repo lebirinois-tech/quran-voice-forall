@@ -276,6 +276,8 @@ export const HafsTajweedPageView = ({
 
       const prevLh = textEl.style.lineHeight;
       const prevFs = textEl.style.fontSize;
+      // Les transitions CSS faussent les mesures : on les gèle le temps du calcul.
+      textEl.classList.add('fit-measuring');
 
       // Tailles en pixels (mesure synchrone fiable, pas d'unités de conteneur).
       const heightAt = (px: number, lh: number) => {
@@ -284,8 +286,6 @@ export const HafsTajweedPageView = ({
         return textEl.scrollHeight;
       };
 
-      // eslint-disable-next-line no-console
-      console.log('[fit]', target, heightAt(14,1.9), heightAt(40,1.9), heightAt(64,1.9), content.length);
       // 1) Plus grande taille de police qui tient dans le cadre.
       let lo = MIN_PX;
       let hi = MAX_PX;
@@ -316,6 +316,7 @@ export const HafsTajweedPageView = ({
 
       textEl.style.fontSize = prevFs;
       textEl.style.lineHeight = prevLh;
+      textEl.classList.remove('fit-measuring');
 
       setFontPx((cur) => (Math.abs(cur - px) < 0.2 ? cur : px));
       setLineHeight((cur) => (Math.abs(cur - lh) < 0.01 ? cur : lh));
@@ -521,7 +522,7 @@ export const HafsTajweedPageView = ({
                       { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
                     }
                     className={cn(
-                      'inline transition-all cursor-pointer rounded-sm',
+                      'inline transition-colors cursor-pointer rounded-sm',
                       isCurrent &&
                         (isAudioPlaying
                           ? 'bg-primary/25 ring-2 ring-primary shadow-md'
