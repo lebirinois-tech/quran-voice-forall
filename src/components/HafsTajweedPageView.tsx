@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack,
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
-import { juzMapping } from '@/data/surahs';
+import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
