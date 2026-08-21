@@ -589,6 +589,21 @@ export const HafsTajweedPageView = ({
           >
             {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
           </Button>
+          {onSpeedChange && (
+            <Button
+              type="button"
+              variant="outline"
+              aria-label={`Vitesse de lecture : ${playbackSpeed}x`}
+              onClick={() => {
+                const steps = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+                const i = steps.indexOf(playbackSpeed);
+                onSpeedChange(steps[(i === -1 ? 2 : i + 1) % steps.length]);
+              }}
+              className="h-9 shrink-0 rounded-full border-primary/40 px-2 text-xs font-bold text-primary"
+            >
+              {playbackSpeed}x
+            </Button>
+          )}
           <Button
             type="button"
             size="icon"
