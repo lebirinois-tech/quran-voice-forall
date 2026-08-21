@@ -260,28 +260,30 @@ export const MushafPageViewer = ({
       )}
     >
       {/* Page Info Header */}
-      <div className="flex items-center justify-between mb-4 px-2">
-        <div className="text-sm text-muted-foreground">
-          {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
-          {mushafType === 'warsh' && '📜 Mushaf Warsh Tajweed (Azraq)'}
-          {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
-          {mushafType === 'hafs-video' && '🎬 Mushaf Hafs vidéo'}
-          {mushafType === 'warsh-video' && '🎬 Mushaf Warsh vidéo'}
-          {mushafType === 'qalun-video' && '🎬 Mushaf Qalun vidéo'}
+      <div className="flex flex-col items-center gap-2 mb-3 px-2">
+        <div className="flex w-full items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            {mushafType === 'hafs' && '📖 Mushaf Hafs Tajweed'}
+            {mushafType === 'warsh' && '📜 Mushaf Warsh Tajweed (Azraq)'}
+            {mushafType === 'qalun' && '📗 Mushaf Qalun Tajweed'}
+            {mushafType === 'hafs-video' && '🎬 Mushaf Hafs vidéo'}
+            {mushafType === 'warsh-video' && '🎬 Mushaf Warsh vidéo'}
+            {mushafType === 'qalun-video' && '🎬 Mushaf Qalun vidéo'}
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            onClick={toggleFullscreen}
+            className="h-8 w-8 rounded-full text-primary"
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
         </div>
-        <span className="text-base font-bold text-foreground">
+        <span className="text-base font-bold text-foreground rounded-full border px-4 py-1 bg-background border-border shadow-sm">
           Page {currentPage} / {maxPage}
         </span>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
-          onClick={toggleFullscreen}
-          className="h-8 w-8 rounded-full text-primary"
-        >
-          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-        </Button>
       </div>
 
       {/* Currently playing verse indicator — only meaningful for standard 604-page mapping (Hafs) */}
