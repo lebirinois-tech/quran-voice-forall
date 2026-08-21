@@ -284,6 +284,8 @@ export const HafsTajweedPageView = ({
         return textEl.scrollHeight;
       };
 
+      // eslint-disable-next-line no-console
+      console.log('[fit]', target, heightAt(14,1.9), heightAt(40,1.9), heightAt(64,1.9), content.length);
       // 1) Plus grande taille de police qui tient dans le cadre.
       let lo = MIN_PX;
       let hi = MAX_PX;
