@@ -273,15 +273,15 @@ export const HafsTajweedPageView = ({
         const ratio = target / h;
         if (Math.abs(h - target) <= 2) break;
         const step = Math.sqrt(ratio);
-        lh = Math.min(2.9, Math.max(1.55, lh * step));
-        sc = Math.min(1.6, Math.max(0.75, sc * step));
+        lh = Math.min(2.9, Math.max(1.35, lh * step));
+        sc = Math.min(1.6, Math.max(0.45, sc * step));
         apply();
       }
-      // Sécurité : ne jamais déborder.
+      // Sécurité : ne jamais déborder du cadre.
       let guard = 0;
-      while (text.scrollHeight > target && guard < 12) {
-        sc = Math.max(0.6, sc * 0.97);
-        lh = Math.max(1.4, lh * 0.98);
+      while (text.scrollHeight > target && guard < 60) {
+        sc = Math.max(0.35, sc * 0.96);
+        lh = Math.max(1.25, lh * 0.985);
         apply();
         guard++;
       }
@@ -301,24 +301,26 @@ export const HafsTajweedPageView = ({
     };
 
     schedule();
-    // Les polices arabes changent le nombre de lignes : re-mesurer après leur
-    // chargement, ainsi qu'après un court délai (rendu tardif des versets).
-    const t1 = window.setTimeout(schedule, 150);
-    const t2 = window.setTimeout(schedule, 600);
+    // Les polices arabes et le chargement tardif des versets changent le
+    // nombre de lignes : re-mesurer plusieurs fois puis à chaque mutation.
+    const timers = [80, 300, 800, 1500, 2500].map((d) => window.setTimeout(schedule, d));
     (document as any).fonts?.ready?.then?.(() => schedule());
 
     const ro = new ResizeObserver(() => {
       schedule();
     });
     ro.observe(frame);
+    const mo = new MutationObserver(() => schedule());
+    mo.observe(text, { childList: true, subtree: true, characterData: true });
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
+      timers.forEach((t) => window.clearTimeout(t));
       ro.disconnect();
+      mo.disconnect();
     };
   }, [currentPage, verses, showBismillah, surahNumber]);
+
 
   return (
     <div
