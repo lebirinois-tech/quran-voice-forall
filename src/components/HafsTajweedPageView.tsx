@@ -263,13 +263,13 @@ export const HafsTajweedPageView = ({
 
       // Première estimation puis 2 itérations de correction (le nombre de
       // lignes peut changer quand l'interligne change).
-      let next = Math.min(2.8, Math.max(1.7, (1.95 * target) / base));
+      let next = Math.min(3.4, Math.max(1.7, (1.95 * target) / base));
       for (let i = 0; i < 3; i++) {
         text.style.lineHeight = String(next);
         const h = text.scrollHeight;
         if (h <= 0) break;
         if (Math.abs(h - target) <= 2) break;
-        next = Math.min(2.8, Math.max(1.7, next * (target / h)));
+        next = Math.min(3.4, Math.max(1.7, next * (target / h)));
       }
       next = Number(next.toFixed(3));
       text.style.lineHeight = String(next);
@@ -334,9 +334,19 @@ export const HafsTajweedPageView = ({
           className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
         >
           <div
-            className="relative flex h-full w-full flex-col rounded-xl border-2 p-0.5 shadow-md sm:p-1"
-            style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
+            className="relative flex h-full w-full flex-col rounded-xl border-[3px] p-1 shadow-lg sm:p-1.5"
+            style={{
+              borderColor: 'hsl(43, 62%, 45%)',
+              transformOrigin: 'top center',
+              background: 'linear-gradient(135deg, hsl(43, 62%, 45% / 0.06) 0%, transparent 40%, transparent 60%, hsl(43, 62%, 45% / 0.06) 100%)',
+            }}
           >
+            {/* Ornements aux quatre coins du cadre */}
+            <span aria-hidden className="pointer-events-none absolute -top-1.5 -left-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+            <span aria-hidden className="pointer-events-none absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+            <span aria-hidden className="pointer-events-none absolute -bottom-1.5 -left-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+            <span aria-hidden className="pointer-events-none absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+
             {/* En-tête façon Mushaf : sourate (droite) et Juz (gauche), cliquables */}
             <div
               dir="rtl"
@@ -371,7 +381,7 @@ export const HafsTajweedPageView = ({
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Choisir une page"
-              className="mx-auto mb-1.5 mt-0.5 w-fit rounded-full border px-4 py-1 text-base font-bold shadow-sm"
+              className="mx-auto mb-1.5 mt-0.5 w-fit rounded-full border-2 px-4 py-1 text-base font-bold shadow-sm"
               style={{
                 backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
@@ -382,11 +392,11 @@ export const HafsTajweedPageView = ({
             </button>
             <div
               ref={frameRef}
-              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border"
+              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: '0.3em',
-                paddingBlock: '0.35em',
+                paddingInline: '0.35em',
+                paddingBlock: '0.4em',
               }}
             >
 
@@ -408,7 +418,7 @@ export const HafsTajweedPageView = ({
           ref={textRef}
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(18px,5.9cqw,42px)] font-extrabold text-foreground [&_span]:font-bold"
+          className="quran-text tajweed-text mx-auto w-full max-w-3xl text-[clamp(22px,7.2cqw,54px)] font-extrabold text-foreground [&_span]:font-bold"
           style={{
             textAlign: 'justify',
             textAlignLast: 'justify',
