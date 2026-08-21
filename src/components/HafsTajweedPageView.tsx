@@ -73,6 +73,8 @@ export const HafsTajweedPageView = ({
   onNavigateToJuz,
   playbackSpeed = 1,
   onSpeedChange,
+  onPlayRange,
+
   audioControls,
   voiceControls,
   settingsControls,
