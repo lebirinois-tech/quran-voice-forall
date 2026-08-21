@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack,
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
-import { juzMapping } from '@/data/surahs';
+import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { getThemesForVerse } from '@/data/quranThemes';
@@ -174,6 +174,12 @@ export const HafsTajweedPageView = ({
     [verses, currentPage]
   );
 
+  const currentJuz = useMemo(
+    () => getJuzForVerse(surahNumber, pageVerses[0]?.number ?? 1),
+    [surahNumber, pageVerses]
+  );
+
+
   // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
   // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
   const themeGroups = useMemo(() => {
@@ -257,13 +263,13 @@ export const HafsTajweedPageView = ({
 
       // Première estimation puis 2 itérations de correction (le nombre de
       // lignes peut changer quand l'interligne change).
-      let next = Math.min(4.2, Math.max(1.5, (1.95 * target) / base));
+      let next = Math.min(2.8, Math.max(1.7, (1.95 * target) / base));
       for (let i = 0; i < 3; i++) {
         text.style.lineHeight = String(next);
         const h = text.scrollHeight;
         if (h <= 0) break;
         if (Math.abs(h - target) <= 2) break;
-        next = Math.min(4.2, Math.max(1.5, next * (target / h)));
+        next = Math.min(2.8, Math.max(1.7, next * (target / h)));
       }
       next = Number(next.toFixed(3));
       text.style.lineHeight = String(next);
@@ -328,12 +334,44 @@ export const HafsTajweedPageView = ({
           className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
         >
           <div
-            className="relative h-full w-full rounded-xl border-2 p-0.5 shadow-md sm:p-1"
+            className="relative flex h-full w-full flex-col rounded-xl border-2 p-0.5 shadow-md sm:p-1"
             style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
           >
-            {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
+            {/* En-tête façon Mushaf : sourate (droite) et Juz (gauche), cliquables */}
             <div
-              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border px-4 py-1 text-base font-bold shadow-sm"
+              dir="rtl"
+              className="mb-1 flex shrink-0 items-center justify-between gap-2 rounded-lg border px-2 py-1"
+              style={{
+                borderColor: 'hsl(43, 55%, 58%)',
+                backgroundColor: 'hsl(43, 62%, 45% / 0.08)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="max-w-[46%] truncate rounded-md px-2 py-0.5 font-amiri text-base font-bold sm:text-lg"
+                style={{ color: 'hsl(43, 62%, 25%)' }}
+                aria-label="Choisir une sourate"
+              >
+                سورة {surah?.nameArabic ?? ''}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="max-w-[46%] truncate rounded-md px-2 py-0.5 font-amiri text-base font-bold sm:text-lg"
+                style={{ color: 'hsl(43, 62%, 25%)' }}
+                aria-label="Choisir un Juz"
+              >
+                الجزء {toArabicDigits(currentJuz)}
+              </button>
+            </div>
+
+            {/* Numéro de page façon Mushaf, posé sur la bordure basse du cadre */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Choisir une page"
+              className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 rounded-full border px-4 py-1 text-base font-bold shadow-sm"
               style={{
                 backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
@@ -341,16 +379,17 @@ export const HafsTajweedPageView = ({
               }}
             >
               {toArabicDigits(currentPage)} · Page {currentPage} / 604
-            </div>
+            </button>
             <div
               ref={frameRef}
-              className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border"
+              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
                 paddingInline: '0.3em',
                 paddingBlock: '0.35em',
               }}
             >
+
               {showBismillah && (
                 <p
                   data-bismillah
