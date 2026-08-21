@@ -263,13 +263,13 @@ export const HafsTajweedPageView = ({
 
       // Première estimation puis 2 itérations de correction (le nombre de
       // lignes peut changer quand l'interligne change).
-      let next = Math.min(2.8, Math.max(1.7, (1.95 * target) / base));
+      let next = Math.min(3.4, Math.max(1.7, (1.95 * target) / base));
       for (let i = 0; i < 3; i++) {
         text.style.lineHeight = String(next);
         const h = text.scrollHeight;
         if (h <= 0) break;
         if (Math.abs(h - target) <= 2) break;
-        next = Math.min(2.8, Math.max(1.7, next * (target / h)));
+        next = Math.min(3.4, Math.max(1.7, next * (target / h)));
       }
       next = Number(next.toFixed(3));
       text.style.lineHeight = String(next);
