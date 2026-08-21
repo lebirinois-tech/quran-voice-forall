@@ -633,6 +633,19 @@ export const HafsTajweedPageView = ({
           >
             {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
           </Button>
+          {onPlayRange && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label="Choix de la lecture : verset, page, sourate, juz"
+              onClick={() => setScopeOpen(true)}
+              className="h-9 w-9 shrink-0 rounded-full text-primary"
+            >
+              <ListMusic className="h-5 w-5" />
+            </Button>
+          )}
+
           {onSpeedChange && (
             <Button
               type="button"
