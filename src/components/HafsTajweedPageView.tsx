@@ -334,9 +334,19 @@ export const HafsTajweedPageView = ({
           className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
         >
           <div
-            className="relative flex h-full w-full flex-col rounded-xl border-2 p-0.5 shadow-md sm:p-1"
-            style={{ borderColor: 'hsl(43, 62%, 45%)', transformOrigin: 'top center' }}
+            className="relative flex h-full w-full flex-col rounded-xl border-[3px] p-1 shadow-lg sm:p-1.5"
+            style={{
+              borderColor: 'hsl(43, 62%, 45%)',
+              transformOrigin: 'top center',
+              background: 'linear-gradient(135deg, hsl(43, 62%, 45% / 0.06) 0%, transparent 40%, transparent 60%, hsl(43, 62%, 45% / 0.06) 100%)',
+            }}
           >
+            {/* Ornements aux quatre coins du cadre */}
+            <span aria-hidden className="pointer-events-none absolute -top-1.5 -left-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+            <span aria-hidden className="pointer-events-none absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+            <span aria-hidden className="pointer-events-none absolute -bottom-1.5 -left-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+            <span aria-hidden className="pointer-events-none absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
+
             {/* En-tête façon Mushaf : sourate (droite) et Juz (gauche), cliquables */}
             <div
               dir="rtl"
@@ -371,7 +381,7 @@ export const HafsTajweedPageView = ({
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Choisir une page"
-              className="mx-auto mb-1.5 mt-0.5 w-fit rounded-full border px-4 py-1 text-base font-bold shadow-sm"
+              className="mx-auto mb-1.5 mt-0.5 w-fit rounded-full border-2 px-4 py-1 text-base font-bold shadow-sm"
               style={{
                 backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
@@ -382,11 +392,11 @@ export const HafsTajweedPageView = ({
             </button>
             <div
               ref={frameRef}
-              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border"
+              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
-                paddingInline: '0.3em',
-                paddingBlock: '0.35em',
+                paddingInline: '0.35em',
+                paddingBlock: '0.4em',
               }}
             >
 
