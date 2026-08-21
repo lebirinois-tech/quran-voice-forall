@@ -554,6 +554,8 @@ const SurahReader = () => {
               onManualPageChange={handleManualMushafPageChange}
               onNavigateToSurah={(s) => navigate(`/surah/${s}`)}
               onNavigateToJuz={handleNavigateToJuz}
+              playbackSpeed={quranAudio.playbackSpeed}
+              onSpeedChange={quranAudio.changeSpeed}
               audioControls={audioPlayerControls}
               voiceControls={voiceCommandControls}
               settingsControls={mushafSettingsControls}
