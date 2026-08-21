@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Verse, surahs } from '@/data/surahs';
@@ -42,6 +42,9 @@ interface HafsTajweedPageViewProps {
   onNavigateToJuz?: (juz: number) => void;
   playbackSpeed?: number;
   onSpeedChange?: (speed: number) => void;
+  /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). */
+  onPlayRange?: (startVerse: number, endVerse: number, loop: boolean) => void;
+
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
@@ -70,6 +73,8 @@ export const HafsTajweedPageView = ({
   onNavigateToJuz,
   playbackSpeed = 1,
   onSpeedChange,
+  onPlayRange,
+
   audioControls,
   voiceControls,
   settingsControls,
@@ -84,6 +89,9 @@ export const HafsTajweedPageView = ({
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
   const { reciter, textDisplayStyle, fontSize } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scopeOpen, setScopeOpen] = useState(false);
+  const [loopScope, setLoopScope] = useState(false);
+
   const [recorderVerse, setRecorderVerse] = useState<number | null>(null);
   // Bouton d'appel du menu : masquable pour libérer toute la page.
   const [showMenuButton, setShowMenuButton] = useState(true);
@@ -182,6 +190,42 @@ export const HafsTajweedPageView = ({
     () => getJuzForVerse(surahNumber, pageVerses[0]?.number ?? 1),
     [surahNumber, pageVerses]
   );
+
+  // Plages de lecture disponibles : verset, page, sourate, juz.
+  const playScopes = useMemo(() => {
+    const fallback = pageVerses[0]?.number ?? 1;
+    const verse = currentVerse ?? fallback;
+    const juzVerses = verses.filter((v) => getJuzForVerse(surahNumber, v.number) === currentJuz);
+    const surahEnd = verses.length ? verses[verses.length - 1].number : verse;
+    return {
+      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية` },
+      page: {
+        start: pageVerses[0]?.number ?? verse,
+        end: pageVerses[pageVerses.length - 1]?.number ?? verse,
+        label: `Page ${currentPage} — الصفحة`,
+      },
+      surah: {
+        start: verses[0]?.number ?? 1,
+        end: surahEnd,
+        label: `Sourate ${surah?.name ?? surahNumber} — السورة`,
+      },
+      juz: {
+        start: juzVerses[0]?.number ?? verse,
+        end: juzVerses[juzVerses.length - 1]?.number ?? verse,
+        label: `Juz ${currentJuz} — الجزء`,
+      },
+    };
+  }, [pageVerses, currentVerse, verses, surahNumber, currentJuz, currentPage, surah]);
+
+  const startScope = useCallback(
+    (key: keyof typeof playScopes) => {
+      const scope = playScopes[key];
+      setScopeOpen(false);
+      onPlayRange?.(scope.start, scope.end, loopScope);
+    },
+    [playScopes, loopScope, onPlayRange]
+  );
+
 
 
   // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
@@ -589,6 +633,19 @@ export const HafsTajweedPageView = ({
           >
             {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
           </Button>
+          {onPlayRange && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label="Choix de la lecture : verset, page, sourate, juz"
+              onClick={() => setScopeOpen(true)}
+              className="h-9 w-9 shrink-0 rounded-full text-primary"
+            >
+              <ListMusic className="h-5 w-5" />
+            </Button>
+          )}
+
           {onSpeedChange && (
             <Button
               type="button"
@@ -863,7 +920,46 @@ export const HafsTajweedPageView = ({
         </SheetContent>
       </Sheet>
 
+      {/* Choix de la portée de lecture : verset, page, sourate, juz */}
+      <Dialog open={scopeOpen} onOpenChange={setScopeOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Choix de la lecture — اختيار القراءة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {(['verse', 'page', 'surah', 'juz'] as const).map((key) => {
+              const scope = playScopes[key];
+              return (
+                <Button
+                  key={key}
+                  variant="outline"
+                  className="h-12 w-full justify-between text-sm"
+                  onClick={() => startScope(key)}
+                >
+                  <span className="flex items-center gap-2">
+                    <Play className="h-4 w-4 text-primary" />
+                    {scope.label}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {scope.start === scope.end ? `v. ${scope.start}` : `v. ${scope.start}–${scope.end}`}
+                  </span>
+                </Button>
+              );
+            })}
+            <Button
+              variant={loopScope ? 'default' : 'ghost'}
+              className="h-11 w-full justify-center gap-2 text-sm"
+              onClick={() => setLoopScope((v) => !v)}
+            >
+              <Repeat className="h-4 w-4" />
+              Répéter en boucle {loopScope ? '(activé)' : '(désactivé)'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Recorder dialog */}
+
       <Dialog open={recorderVerse !== null} onOpenChange={(o) => !o && setRecorderVerse(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>

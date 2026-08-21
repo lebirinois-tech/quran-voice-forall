@@ -556,6 +556,15 @@ const SurahReader = () => {
               onNavigateToJuz={handleNavigateToJuz}
               playbackSpeed={quranAudio.playbackSpeed}
               onSpeedChange={quranAudio.changeSpeed}
+              onPlayRange={(start, end, loop) => {
+                if (start === end) {
+                  quranAudio.setRepeatMode(loop ? 'verse' : 'none', loop ? 0 : 1);
+                } else {
+                  quranAudio.setRepeatMode('range', loop ? 0 : 1, start, end);
+                }
+                quranAudio.playVerse(start);
+              }}
+
               audioControls={audioPlayerControls}
               voiceControls={voiceCommandControls}
               settingsControls={mushafSettingsControls}
