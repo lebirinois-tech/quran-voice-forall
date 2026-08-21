@@ -222,11 +222,13 @@ export const HafsTajweedPageView = ({
   const startScope = useCallback(
     (key: keyof typeof playScopes) => {
       const scope = playScopes[key];
+      setActiveScope(key as 'verse' | 'page' | 'surah' | 'juz');
       setScopeOpen(false);
       onPlayRange?.(scope.start, scope.end, loopScope);
     },
     [playScopes, loopScope, onPlayRange]
   );
+
 
 
 
