@@ -145,17 +145,6 @@ export const useAudioCache = () => {
           saveAudioUrl(reciterId, surahNumber, v, url);
           setProgress(Math.round((v / totalVerses) * 100));
         }
-      } else if (reciterInfo.qiraat === 'warsh') {
-        // Direct URL pattern - fetch each verse to populate SW cache + save URL
-        for (let v = 1; v <= totalVerses; v++) {
-          const url = getWarshDirectUrl(reciterId, surahNumber, v);
-          if (url) {
-            const ok = await putInRuntimeCache(url);
-            ok ? okCount++ : failCount++;
-            saveAudioUrl(reciterId, surahNumber, v, url);
-          }
-          setProgress(Math.round((v / totalVerses) * 100));
-        }
       } else {
         // Hafs - get URLs from API then fetch to cache
         // Use verse-level API to match what playVerse uses
