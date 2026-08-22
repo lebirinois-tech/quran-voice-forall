@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { stripLeadingBasmala, stripLeadingBasmalaHtml, surahHasHeaderBasmala } from '@/lib/basmala';
+import { getSurahText, putSurahText } from '@/lib/offlineTextStore';
 
 interface QuranApiVerse {
   number: number;
