@@ -7,10 +7,7 @@ export type TextDisplayStyle =
   | 'qalun-tajweed'
   | 'pages-hafs'
   | 'pages-warsh'
-  | 'pages-qalun'
-  | 'pages-hafs-video'
-  | 'pages-warsh-video'
-  | 'pages-qalun-video';
+  | 'pages-qalun';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 /**
@@ -20,13 +17,10 @@ export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 const STYLE_TO_RECITER: Record<TextDisplayStyle, ReciterId> = {
   'tajweed': 'husary',
   'pages-hafs': 'husary',
-  'pages-hafs-video': 'husary',
-  'warsh-tajweed': 'ibrahimDosaryWarsh',
-  'pages-warsh': 'ibrahimDosaryWarsh',
-  'pages-warsh-video': 'ibrahimDosaryWarsh',
+  'warsh-tajweed': 'husaryWarshPerVerse',
+  'pages-warsh': 'husaryWarshPerVerse',
   'qalun-tajweed': 'husaryQalunPerVerse',
   'pages-qalun': 'husaryQalunPerVerse',
-  'pages-qalun-video': 'husaryQalunPerVerse',
 };
 
 const STORAGE_KEYS = {
