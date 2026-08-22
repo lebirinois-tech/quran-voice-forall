@@ -171,7 +171,7 @@ const startApp = async () => {
   (() => {
     const FIRST_RUN_KEY = "quran-first-run-initialized-v1";
     const RECITER_MIGRATION_KEY = "quran-reciter-list-v2";
-    const allowedReciters = new Set(["husary", "ibrahimDosaryWarsh", "husaryQalunPerVerse"]);
+    const allowedReciters = new Set(["husary", "husaryWarshPerVerse", "husaryQalunPerVerse"]);
     const savedReciter = localStorage.getItem("quran-reciter");
 
     if (!allowedReciters.has(savedReciter || "")) {
