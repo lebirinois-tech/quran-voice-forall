@@ -3,7 +3,6 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { VerseRecorder } from '@/components/VerseRecorder';
-import { MushafPageViewer } from '@/components/MushafPageViewer';
 import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
