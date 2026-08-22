@@ -13,12 +13,11 @@ export const QIRAAT_LABELS = {
 
 export type QiraatId = keyof typeof QIRAAT_LABELS;
 
+// Trois lectures d'Al-Husary uniquement : Hafs, Warsh et Qalun.
 export const RECITER_IDS = [
   'husary',
-  'ibrahimDosaryWarsh',
   'husaryWarshPerVerse',
   'husaryQalunPerVerse',
-  'ahmadKhedrQalunPerVerse',
 ] as const;
 
 export type ReciterId = (typeof RECITER_IDS)[number];
