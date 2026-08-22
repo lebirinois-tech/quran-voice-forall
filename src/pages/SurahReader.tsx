@@ -572,34 +572,7 @@ const SurahReader = () => {
           )}
 
           {/* Autres modes Mushaf (vidéos uniquement — Warsh/Qalun scans remplacés par rendu texte) */}
-          {isMushafImageMode &&
-            appSettings.textDisplayStyle !== 'pages-hafs' &&
-            appSettings.textDisplayStyle !== 'pages-warsh' &&
-            appSettings.textDisplayStyle !== 'pages-qalun' && (
-            <MushafPageViewer
-              key={`mushaf-${num}-${searchParams.get('page') || 'default'}`}
-              surahNumber={num}
-              totalVerses={verses.length || surah.versesCount}
-              initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
-              onPageChange={setCurrentMushafPage}
-              currentVerse={quranAudio.currentVerse}
-              isAudioPlaying={quranAudio.isPlaying}
-              pageVerseRange={currentPageVerseRange}
-              pageVerseNumbers={
-                currentMushafPage
-                  ? verses.filter(v => v.page === currentMushafPage).map(v => v.number)
-                  : []
-              }
-              onVerseClick={(vn) => quranAudio.playVerse(vn)}
-              mushafType={
-                appSettings.textDisplayStyle === 'pages-warsh-video'
-                  ? 'warsh-video'
-                  : appSettings.textDisplayStyle === 'pages-qalun-video'
-                    ? 'qalun-video'
-                    : 'hafs-video'
-              }
-            />
-          )}
+          {/* Mushafs vidéo retirés : tous les modes « pages-* » utilisent le rendu texte Tajweed. */}
 
           {/* Text-based display modes (Tajweed / Warsh / Qalun). Mushaf page modes must never render VerseCard text. */}
           {!isMushafImageMode && (
