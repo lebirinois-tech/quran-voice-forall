@@ -29,9 +29,12 @@ const normalizeOldMushafSettings = () => {
     "mushaf-hafs": "pages-hafs",
     "mushaf-warsh": "pages-warsh",
     "mushaf-qalun": "pages-qalun",
-    "mushaf-hafs-video": "pages-hafs-video",
-    "mushaf-warsh-video": "pages-warsh-video",
-    "mushaf-qalun-video": "pages-qalun-video",
+    "mushaf-hafs-video": "pages-hafs",
+    "mushaf-warsh-video": "pages-warsh",
+    "mushaf-qalun-video": "pages-qalun",
+    "pages-hafs-video": "pages-hafs",
+    "pages-warsh-video": "pages-warsh",
+    "pages-qalun-video": "pages-qalun",
   };
 
   if (savedDisplayStyle && migrations[savedDisplayStyle]) {
