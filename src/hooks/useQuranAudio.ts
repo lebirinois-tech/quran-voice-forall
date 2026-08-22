@@ -53,7 +53,7 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
-  ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
+
 
   husaryWarshPerVerse: {
     id: 'husary_warsh_per_verse',
