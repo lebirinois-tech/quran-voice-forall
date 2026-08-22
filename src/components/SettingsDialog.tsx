@@ -60,38 +60,20 @@ const TEXT_DISPLAY_STYLES = [
   { 
     id: 'pages-hafs' as TextDisplayStyle, 
     name: 'Mushaf Hafs (pages) / مصحف حفص', 
-    description: 'Pages scan Hafs Tajweed — image uniquement',
+    description: 'Mushaf Hafs Tajweed page par page — hors ligne',
     icon: '📖'
   },
   { 
     id: 'pages-warsh' as TextDisplayStyle, 
     name: 'Mushaf Warsh (pages) / مصحف ورش', 
-    description: 'Pages scan Warsh Tajweed — image uniquement',
+    description: 'Mushaf Warsh Tajweed page par page — hors ligne',
     icon: '📜'
   },
   { 
     id: 'pages-qalun' as TextDisplayStyle, 
     name: 'Mushaf Qalun (pages) / مصحف قالون', 
-    description: 'Pages scan Qalun Tajweed — image uniquement',
+    description: 'Mushaf Qalun Tajweed page par page — hors ligne',
     icon: '📗'
-  },
-  {
-    id: 'pages-hafs-video' as TextDisplayStyle,
-    name: 'Mushaf Hafs vidéo / مصحف حفص فيديو',
-    description: 'Vidéo page par page (604 pages, son inclus) — archive.org',
-    icon: '🎬'
-  },
-  {
-    id: 'pages-warsh-video' as TextDisplayStyle,
-    name: 'Mushaf Warsh vidéo / مصحف ورش فيديو',
-    description: 'Vidéo Warsh page par page (604 pages, son inclus) — archive.org',
-    icon: '🎬'
-  },
-  {
-    id: 'pages-qalun-video' as TextDisplayStyle,
-    name: 'Mushaf Qalun vidéo / مصحف قالون فيديو',
-    description: 'Vidéo Qalun page par page (604 pages, son inclus) — archive.org',
-    icon: '🎬'
   },
 ];
 

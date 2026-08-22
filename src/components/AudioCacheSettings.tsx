@@ -13,8 +13,8 @@ import { ScrollArea } from './ui/scroll-area';
 
 const DOWNLOADABLE_RECITERS: { id: ReciterId; label: string }[] = [
   { id: 'husary', label: '🟢 Al-Husary (Hafs)' },
-  { id: 'ibrahimDosaryWarsh', label: '🟠 Ibrahim Al-Dosary (Warsh)' },
-  { id: 'husaryQalunPerVerse', label: '🟣 Al-Husary (Qalun — verset)' },
+  { id: 'husaryWarshPerVerse', label: '🟠 Al-Husary (Warsh)' },
+  { id: 'husaryQalunPerVerse', label: '🟣 Al-Husary (Qalun)' },
 ];
 
 type DownloadTab = 'audio' | 'text' | 'tafsir';

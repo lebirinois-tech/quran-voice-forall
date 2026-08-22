@@ -29,9 +29,12 @@ const normalizeOldMushafSettings = () => {
     "mushaf-hafs": "pages-hafs",
     "mushaf-warsh": "pages-warsh",
     "mushaf-qalun": "pages-qalun",
-    "mushaf-hafs-video": "pages-hafs-video",
-    "mushaf-warsh-video": "pages-warsh-video",
-    "mushaf-qalun-video": "pages-qalun-video",
+    "mushaf-hafs-video": "pages-hafs",
+    "mushaf-warsh-video": "pages-warsh",
+    "mushaf-qalun-video": "pages-qalun",
+    "pages-hafs-video": "pages-hafs",
+    "pages-warsh-video": "pages-warsh",
+    "pages-qalun-video": "pages-qalun",
   };
 
   if (savedDisplayStyle && migrations[savedDisplayStyle]) {
@@ -168,7 +171,7 @@ const startApp = async () => {
   (() => {
     const FIRST_RUN_KEY = "quran-first-run-initialized-v1";
     const RECITER_MIGRATION_KEY = "quran-reciter-list-v2";
-    const allowedReciters = new Set(["husary", "ibrahimDosaryWarsh", "husaryQalunPerVerse"]);
+    const allowedReciters = new Set(["husary", "husaryWarshPerVerse", "husaryQalunPerVerse"]);
     const savedReciter = localStorage.getItem("quran-reciter");
 
     if (!allowedReciters.has(savedReciter || "")) {

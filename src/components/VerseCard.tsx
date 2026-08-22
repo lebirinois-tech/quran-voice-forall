@@ -264,15 +264,15 @@ export const VerseCard = ({
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      // everyayah.com folder mapping (same source as playback)
-      const EVERYAYAH_FOLDERS: Record<string, string> = {
-        husary: 'Husary_128kbps',
-        ibrahimDosaryWarsh: 'warsh/warsh_ibrahim_aldosary_128kbps',
-      };
-      const folder = EVERYAYAH_FOLDERS[reciter] || EVERYAYAH_FOLDERS.husary;
+      // Même source que la lecture : archive.org pour Warsh/Qalun, everyayah pour Hafs.
       const surahStr = String(surahNumber).padStart(3, '0');
       const verseStr = String(verse.number).padStart(3, '0');
-      const audioUrl = `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
+      const info = RECITERS[reciter];
+      const audioUrl = info?.archiveItem
+        ? `https://archive.org/download/${info.archiveItem}/${
+            info.archiveZipPad === 2 ? String(surahNumber).padStart(2, '0') : surahStr
+          }.zip/${surahStr}${verseStr}.mp3`
+        : `https://everyayah.com/data/Husary_128kbps/${surahStr}${verseStr}.mp3`;
 
       const audioResponse = await fetch(audioUrl);
       if (!audioResponse.ok) throw new Error(`HTTP ${audioResponse.status}`);

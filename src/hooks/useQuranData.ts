@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { stripLeadingBasmala, stripLeadingBasmalaHtml, surahHasHeaderBasmala } from '@/lib/basmala';
+import { getSurahText, putSurahText } from '@/lib/offlineTextStore';
 
 interface QuranApiVerse {
   number: number;
@@ -17,35 +18,12 @@ interface QuranApiResponse {
   };
 }
 
-// Local storage keys for offline cache
-const CACHE_KEY_PREFIX = 'quran-offline-';
-const getCacheKey = (surahNumber: number) => `${CACHE_KEY_PREFIX}${surahNumber}`;
-
-interface CachedSurahData {
-  verses: Verse[];
-  tajweed: Record<number, string>;
-  timestamp: number;
-}
-
+// Cache hors ligne : IndexedDB (localStorage était saturé au-delà de ~20 sourates)
 const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) => {
-  try {
-    const data: CachedSurahData = { verses, tajweed, timestamp: Date.now() };
-    localStorage.setItem(getCacheKey(surahNumber), JSON.stringify(data));
-  } catch (e) {
-    // localStorage might be full, silently fail
-    console.warn('Could not cache surah data:', e);
-  }
+  void putSurahText(surahNumber, { verses, tajweed, timestamp: Date.now() });
 };
 
-const loadSurahFromCache = (surahNumber: number): CachedSurahData | null => {
-  try {
-    const raw = localStorage.getItem(getCacheKey(surahNumber));
-    if (!raw) return null;
-    return JSON.parse(raw) as CachedSurahData;
-  } catch {
-    return null;
-  }
-};
+const loadSurahFromCache = (surahNumber: number) => getSurahText(surahNumber);
 
 // Parse tajweed markers from API into styled HTML
 // Using Quran University / Al Muhafez standard color scheme
@@ -143,9 +121,9 @@ export const useQuranData = (surahNumber: number) => {
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(surahNumber);
+        const cached = await loadSurahFromCache(surahNumber);
         if (cached) {
-          const cleaned = removeDuplicateBasmala(surahNumber, cached.verses, cached.tajweed);
+          const cleaned = removeDuplicateBasmala(surahNumber, cached.verses as Verse[], cached.tajweed);
           setVerses(cleaned.verses);
           setVersesTajweed(cleaned.tajweed);
           setIsOffline(true);

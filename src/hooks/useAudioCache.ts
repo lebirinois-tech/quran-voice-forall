@@ -99,12 +99,6 @@ const putInRuntimeCache = async (url: string): Promise<boolean> => {
   }
 };
 
-const getWarshDirectUrl = (reciterId: ReciterId, surahNumber: number, verseNumber: number): string => {
-  if (reciterId === 'ibrahimDosaryWarsh') {
-    return `https://everyayah.com/data/warsh/warsh_ibrahim_aldosary_128kbps/${formatNum(surahNumber)}${formatNum(verseNumber)}.mp3`;
-  }
-  return '';
-};
 
 export const useAudioCache = () => {
   const [downloadingReciter, setDownloadingReciter] = useState<string | null>(null);
@@ -149,17 +143,6 @@ export const useAudioCache = () => {
           const ok = await putInRuntimeCache(url);
           ok ? okCount++ : failCount++;
           saveAudioUrl(reciterId, surahNumber, v, url);
-          setProgress(Math.round((v / totalVerses) * 100));
-        }
-      } else if (reciterInfo.qiraat === 'warsh') {
-        // Direct URL pattern - fetch each verse to populate SW cache + save URL
-        for (let v = 1; v <= totalVerses; v++) {
-          const url = getWarshDirectUrl(reciterId, surahNumber, v);
-          if (url) {
-            const ok = await putInRuntimeCache(url);
-            ok ? okCount++ : failCount++;
-            saveAudioUrl(reciterId, surahNumber, v, url);
-          }
           setProgress(Math.round((v / totalVerses) * 100));
         }
       } else {

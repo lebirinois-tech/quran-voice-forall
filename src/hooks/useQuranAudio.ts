@@ -13,12 +13,11 @@ export const QIRAAT_LABELS = {
 
 export type QiraatId = keyof typeof QIRAAT_LABELS;
 
+// Trois lectures d'Al-Husary uniquement : Hafs, Warsh et Qalun.
 export const RECITER_IDS = [
   'husary',
-  'ibrahimDosaryWarsh',
   'husaryWarshPerVerse',
   'husaryQalunPerVerse',
-  'ahmadKhedrQalunPerVerse',
 ] as const;
 
 export type ReciterId = (typeof RECITER_IDS)[number];
@@ -54,7 +53,7 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع)
   // ═══════════════════════════════════════════════════════════════════════════
-  ibrahimDosaryWarsh: { id: 'warsh_ibrahim_dosary', name: 'Ibrahim Al-Dosary (Warsh)', nameAr: 'إبراهيم الدوسري (ورش)', qiraat: 'warsh', quranicAudioId: 35 },
+
 
   husaryWarshPerVerse: {
     id: 'husary_warsh_per_verse',
@@ -76,15 +75,6 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     qiraat: 'qalun',
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
-  },
-  ahmadKhedrQalunPerVerse: {
-    id: 'ahmad_khedr_qalun_per_verse',
-    name: 'Ahmad Khedr Al-Trabolsy (Qalun – verset par verset)',
-    nameAr: 'أحمد خضر الطرابلسي (قالون – آية آية)',
-    qiraat: 'qalun',
-    archiveItem:
-      '128kb--quran--ahmad--khedr--altrabolsy---by---qaloon-----6236---ayaat-----__ve',
-    archiveZipPad: 2,
   },
 };
 
