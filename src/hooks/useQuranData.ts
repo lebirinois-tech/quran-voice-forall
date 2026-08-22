@@ -121,9 +121,9 @@ export const useQuranData = (surahNumber: number) => {
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
-        const cached = loadSurahFromCache(surahNumber);
+        const cached = await loadSurahFromCache(surahNumber);
         if (cached) {
-          const cleaned = removeDuplicateBasmala(surahNumber, cached.verses, cached.tajweed);
+          const cleaned = removeDuplicateBasmala(surahNumber, cached.verses as Verse[], cached.tajweed);
           setVerses(cleaned.verses);
           setVersesTajweed(cleaned.tajweed);
           setIsOffline(true);
