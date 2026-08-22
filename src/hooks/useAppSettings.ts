@@ -54,9 +54,6 @@ export const useAppSettings = () => {
       'pages-hafs',
       'pages-warsh',
       'pages-qalun',
-      'pages-hafs-video',
-      'pages-warsh-video',
-      'pages-qalun-video',
     ];
     const MIGRATIONS: Record<string, TextDisplayStyle> = {
       simple: 'tajweed',
@@ -66,9 +63,13 @@ export const useAppSettings = () => {
       'mushaf-hafs': 'pages-hafs',
       'mushaf-warsh': 'pages-warsh',
       'mushaf-qalun': 'pages-qalun',
-      'mushaf-hafs-video': 'pages-hafs-video',
-      'mushaf-warsh-video': 'pages-warsh-video',
-      'mushaf-qalun-video': 'pages-qalun-video',
+      // Mushafs vidéo retirés : bascule sur le rendu texte Tajweed équivalent.
+      'mushaf-hafs-video': 'pages-hafs',
+      'mushaf-warsh-video': 'pages-warsh',
+      'mushaf-qalun-video': 'pages-qalun',
+      'pages-hafs-video': 'pages-hafs',
+      'pages-warsh-video': 'pages-warsh',
+      'pages-qalun-video': 'pages-qalun',
     };
     if (saved && ALLOWED.includes(saved as TextDisplayStyle)) return saved as TextDisplayStyle;
     if (saved && MIGRATIONS[saved]) {
