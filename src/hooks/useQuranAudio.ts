@@ -76,15 +76,6 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
   },
-  ahmadKhedrQalunPerVerse: {
-    id: 'ahmad_khedr_qalun_per_verse',
-    name: 'Ahmad Khedr Al-Trabolsy (Qalun – verset par verset)',
-    nameAr: 'أحمد خضر الطرابلسي (قالون – آية آية)',
-    qiraat: 'qalun',
-    archiveItem:
-      '128kb--quran--ahmad--khedr--altrabolsy---by---qaloon-----6236---ayaat-----__ve',
-    archiveZipPad: 2,
-  },
 };
 
 export const isReciterId = (value: unknown): value is ReciterId =>
