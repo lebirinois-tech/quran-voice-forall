@@ -251,23 +251,29 @@ export const HafsTajweedPageView = ({
 
 
 
-  // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
-  // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
+  // Regroupe les versets consécutifs partageant le MÊME thème dominant unique
+  // (Tafsir Mawdou'i). Un seul thème par bloc => une seule couleur, pas de
+  // dégradé : le coloriage reste lisible et cohérent dans toutes les sourates.
   const themeGroups = useMemo(() => {
-    type Themes = ReturnType<typeof getThemesForVerse>;
-    const groups: { themes: Themes; key: string; verses: typeof pageVerses }[] = [];
+    const groups: {
+      theme: ReturnType<typeof getPrimaryThemeForVerse>['theme'];
+      curated: boolean;
+      key: string;
+      verses: typeof pageVerses;
+    }[] = [];
     for (const v of pageVerses) {
-      const themes = getThemesForVerse(surahNumber, v.number);
-      const key = themes.map((t) => t.id).join('+');
+      const { theme, curated } = getPrimaryThemeForVerse(surahNumber, v.number);
+      const key = `${theme?.id ?? 'none'}:${curated ? 'c' : 'd'}`;
       const last = groups[groups.length - 1];
       if (last && last.key === key) {
         last.verses.push(v);
       } else {
-        groups.push({ themes, key, verses: [v] });
+        groups.push({ theme, curated, key, verses: [v] });
       }
     }
     return groups;
   }, [pageVerses, surahNumber]);
+
 
   // Auto-scroll current verse into view
   const containerRef = useRef<HTMLDivElement | null>(null);
