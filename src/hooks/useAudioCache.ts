@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { RECITERS, ReciterId } from './useQuranAudio';
 import { surahs } from '@/data/surahs';
+import { putOfflineAudio } from '@/lib/offlineAudioStore';
 
 const AUDIO_CACHE_KEY = 'quran-audio-cache-status';
 const AUDIO_URL_CACHE_KEY = 'quran-audio-urls';
@@ -67,34 +68,18 @@ const formatNum = (n: number) => n.toString().padStart(3, '0');
 
 // Cache name must match the one declared in vite.config.ts runtimeCaching
 // so the service worker will serve these entries on later playback.
-const CACHE_NAME_BY_HOST: Record<string, string> = {
-  'cdn.islamic.network': 'quran-audio-cache',
-  'everyayah.com': 'quran-audio-cache',
-  'archive.org': 'quran-audio-cache',
-};
-
-const putInRuntimeCache = async (url: string): Promise<boolean> => {
-  if (typeof caches === 'undefined') return false;
+const downloadAudioFile = async (
+  url: string,
+  reciterId: ReciterId,
+  surahNumber: number,
+  verseNumber: number,
+): Promise<boolean> => {
   try {
-    const host = new URL(url).hostname;
-    const cacheName = CACHE_NAME_BY_HOST[host];
-    if (!cacheName) return false;
-    // Try CORS first so the response is usable; fall back to no-cors (opaque)
-    let res: Response | null = null;
-    try {
-      res = await fetch(url, { mode: 'cors', credentials: 'omit' });
-      if (!res.ok && res.type !== 'opaque') res = null;
-    } catch { /* fall through */ }
-    if (!res) {
-      try {
-        res = await fetch(url, { mode: 'no-cors' });
-      } catch { return false; }
-    }
-    const cache = await caches.open(cacheName);
-    await cache.put(url, res.clone());
-    return true;
+    const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+    if (!response.ok) return false;
+    return putOfflineAudio(reciterId, surahNumber, verseNumber, await response.blob());
   } catch (e) {
-    console.warn('[audio-cache] put failed', url, e);
+    console.warn('[audio-cache] download failed', url, e);
     return false;
   }
 };
@@ -125,10 +110,9 @@ export const useAudioCache = () => {
         // Full-surah reciter: one MP3 per surah, no per-verse files.
         const surahStr = formatNum(surahNumber);
         const url = `${reciterInfo.fullSurahBaseUrl}${surahStr}.mp3`;
-        const ok = await putInRuntimeCache(url);
-        ok ? okCount++ : failCount++;
-        // Save the same surah URL under every verse key so any verse playback resolves to it.
         for (let v = 1; v <= totalVerses; v++) {
+          const ok = await downloadAudioFile(url, reciterId, surahNumber, v);
+          ok ? okCount++ : failCount++;
           saveAudioUrl(reciterId, surahNumber, v, url);
           setProgress(Math.round((v / totalVerses) * 100));
         }
@@ -140,7 +124,7 @@ export const useAudioCache = () => {
           : surahStr;
         for (let v = 1; v <= totalVerses; v++) {
           const url = `https://archive.org/download/${reciterInfo.archiveItem}/${zipName}.zip/${surahStr}${formatNum(v)}.mp3`;
-          const ok = await putInRuntimeCache(url);
+          const ok = await downloadAudioFile(url, reciterId, surahNumber, v);
           ok ? okCount++ : failCount++;
           saveAudioUrl(reciterId, surahNumber, v, url);
           setProgress(Math.round((v / totalVerses) * 100));
@@ -154,7 +138,7 @@ export const useAudioCache = () => {
             const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${v}/${edition}`);
             const data = await res.json();
             if (data.code === 200 && data.data?.audio) {
-              const ok = await putInRuntimeCache(data.data.audio);
+              const ok = await downloadAudioFile(data.data.audio, reciterId, surahNumber, v);
               ok ? okCount++ : failCount++;
               saveAudioUrl(reciterId, surahNumber, v, data.data.audio);
             }
@@ -165,11 +149,12 @@ export const useAudioCache = () => {
         }
       }
       // Only mark as cached if at least some files were stored
-      if (okCount > 0) {
+      if (okCount === totalVerses) {
         markSurahCached(reciterId, surahNumber);
       }
       if (failCount > 0) {
         console.warn(`[audio-cache] sourate ${surahNumber}: ${okCount} ok, ${failCount} échec`);
+        throw new Error(`${failCount} fichier(s) audio non téléchargé(s)`);
       }
     } catch (err) {
       console.error('Audio cache error:', err);

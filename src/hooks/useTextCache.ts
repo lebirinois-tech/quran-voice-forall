@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { surahs } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { putSurahText } from '@/lib/offlineTextStore';
 
 const CACHE_KEY_PREFIX = 'quran-offline-';
 const TEXT_CACHE_STATUS = 'quran-text-cache-status';
@@ -90,9 +91,10 @@ export const useTextCache = () => {
           });
         }
 
-        localStorage.setItem(`${CACHE_KEY_PREFIX}${surahNumber}`, JSON.stringify({
+        const stored = await putSurahText(surahNumber, {
           verses, tajweed, timestamp: Date.now(),
-        }));
+        });
+        if (!stored) throw new Error('Stockage hors ligne indisponible');
 
         // Update status
         const status = getTextCacheStatus();

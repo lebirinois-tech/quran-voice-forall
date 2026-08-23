@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { getCachedAudioUrl } from './useAudioCache';
+import { getOfflineAudioUrl } from '@/lib/offlineAudioStore';
 
 // Interface moved inside hook for better organization
 
@@ -481,7 +481,6 @@ export const useQuranAudio = ({
   // everyayah.com folder names for each reciter
   const EVERYAYAH_FOLDERS: Record<string, string> = {
     husary: 'Husary_128kbps',
-    ibrahimDosaryWarsh: 'warsh/warsh_ibrahim_aldosary_128kbps',
   };
 
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
@@ -548,8 +547,8 @@ export const useQuranAudio = ({
       audioRef.current = newAudio;
       syncPlaybackSpeed(newAudio);
 
-      // Check localStorage for cached audio URL (offline support)
-      const cachedUrl = getCachedAudioUrl(reciter, targetSurah, verseNumber);
+      // IndexedDB works in browsers and native WebViews, unlike Service Worker caches.
+      const cachedUrl = await getOfflineAudioUrl(reciter, targetSurah, verseNumber);
       if (cachedUrl) {
         await playAudioFromUrl(newAudio, cachedUrl);
         setIsPlaying(true);
