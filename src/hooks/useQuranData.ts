@@ -19,9 +19,8 @@ interface QuranApiResponse {
 }
 
 // Cache hors ligne : IndexedDB (localStorage était saturé au-delà de ~20 sourates)
-const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) => {
-  void putSurahText(surahNumber, { verses, tajweed, timestamp: Date.now() });
-};
+const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) =>
+  putSurahText(surahNumber, { verses, tajweed, timestamp: Date.now() });
 
 const loadSurahFromCache = (surahNumber: number) => getSurahText(surahNumber);
 
@@ -109,7 +108,7 @@ export const useQuranData = (surahNumber: number) => {
           }
 
           // Cache for offline use
-          saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
+          await saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
 
           const cleaned = removeDuplicateBasmala(surahNumber, combinedVerses, tajweedMap);
           setVerses(cleaned.verses);

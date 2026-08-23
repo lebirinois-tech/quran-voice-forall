@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { surahs } from '@/data/surahs';
+import { getOfflineTafsir } from '@/lib/offlineTafsir';
 
 const TAFSIR_CACHE_PREFIX = 'quran-tafsir-';
 const TAFSIR_CACHE_STATUS = 'quran-tafsir-cache-status';
@@ -60,24 +61,17 @@ export const useTafsirCache = () => {
     setProgress(0);
 
     try {
-      // Fetch all tafsir for the surah at once
-      const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.muyassar`);
-      const data = await res.json();
-
-      if (data.code === 200 && data.data?.ayahs) {
-        const ayahs = data.data.ayahs;
-        for (let i = 0; i < ayahs.length; i++) {
-          saveTafsirToCache(surahNumber, ayahs[i].numberInSurah, ayahs[i].text);
-          setProgress(Math.round(((i + 1) / ayahs.length) * 100));
-        }
-
-        // Mark surah as fully cached
-        const status = getTafsirCacheStatus();
-        status[surahNumber] = true;
-        localStorage.setItem(TAFSIR_CACHE_STATUS, JSON.stringify(status));
-      }
+      // Les trois Tafsir sont déjà inclus dans l'application et l'APK.
+      // Cette vérification confirme que le fichier embarqué est lisible hors ligne.
+      const sample = await getOfflineTafsir(surahNumber, 1, 'ar');
+      if (!sample) throw new Error('Tafsir intégré introuvable');
+      const status = getTafsirCacheStatus();
+      status[surahNumber] = true;
+      localStorage.setItem(TAFSIR_CACHE_STATUS, JSON.stringify(status));
+      setProgress(100);
     } catch (err) {
       console.error('Tafsir cache error:', err);
+      throw err;
     } finally {
       setIsDownloading(false);
       setDownloadingSurah(null);

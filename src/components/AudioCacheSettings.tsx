@@ -35,31 +35,39 @@ export const AudioCacheSettings = () => {
   const isDownloading = isAudioDownloading || isTafsirDownloading || isTextDownloading;
 
   const handleDownloadAll = async () => {
-    if (activeTab === 'audio') {
-      toast.info(`Téléchargement audio — ${RECITERS[selectedReciter].name}`);
-      await downloadAllSurahs(selectedReciter);
-      toast.success('Audio téléchargé !');
-    } else if (activeTab === 'text') {
-      toast.info('Téléchargement du texte coranique...');
-      await downloadAllText();
-      toast.success('Texte téléchargé !');
-    } else {
-      toast.info('Téléchargement du Tafsir...');
-      await downloadAllTafsir();
-      toast.success('Tafsir téléchargé !');
+    try {
+      if (activeTab === 'audio') {
+        toast.info(`Téléchargement audio — ${RECITERS[selectedReciter].name}`);
+        await downloadAllSurahs(selectedReciter);
+        toast.success('Audio téléchargé !');
+      } else if (activeTab === 'text') {
+        toast.info('Téléchargement du texte coranique...');
+        await downloadAllText();
+        toast.success('Texte téléchargé !');
+      } else {
+        toast.info('Activation du Tafsir hors ligne...');
+        await downloadAllTafsir();
+        toast.success('Tafsir disponible hors ligne !');
+      }
+    } catch {
+      toast.error('Téléchargement interrompu. Vérifiez la connexion et l’espace libre.');
     }
   };
 
   const handleDownloadSurah = async (surahNum: number) => {
-    if (activeTab === 'audio') {
-      await downloadSurahAudio(selectedReciter, surahNum);
-      toast.success(`Audio sourate ${surahNum} en cache`);
-    } else if (activeTab === 'text') {
-      await downloadSurahText(surahNum);
-      toast.success(`Texte sourate ${surahNum} en cache`);
-    } else {
-      await downloadSurahTafsir(surahNum);
-      toast.success(`Tafsir sourate ${surahNum} en cache`);
+    try {
+      if (activeTab === 'audio') {
+        await downloadSurahAudio(selectedReciter, surahNum);
+        toast.success(`Audio sourate ${surahNum} disponible hors ligne`);
+      } else if (activeTab === 'text') {
+        await downloadSurahText(surahNum);
+        toast.success(`Texte sourate ${surahNum} disponible hors ligne`);
+      } else {
+        await downloadSurahTafsir(surahNum);
+        toast.success(`Tafsir sourate ${surahNum} disponible hors ligne`);
+      }
+    } catch {
+      toast.error(`Échec du téléchargement de la sourate ${surahNum}`);
     }
   };
 

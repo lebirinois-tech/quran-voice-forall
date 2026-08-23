@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { surahs } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { putSurahText } from '@/lib/offlineTextStore';
 
 const CACHE_KEY_PREFIX = 'quran-offline-';
 const TEXT_CACHE_STATUS = 'quran-text-cache-status';
@@ -16,18 +17,13 @@ const getTextCacheStatus = (): TextCacheStatus => {
 };
 
 export const isTextSurahCached = (surahNumber: number): boolean => {
-  // Check both the status flag and actual data
   try {
-    return !!localStorage.getItem(`${CACHE_KEY_PREFIX}${surahNumber}`);
+    return getTextCacheStatus()[surahNumber] === true || !!localStorage.getItem(`${CACHE_KEY_PREFIX}${surahNumber}`);
   } catch { return false; }
 };
 
 export const getCachedTextSurahCount = (): number => {
-  let count = 0;
-  for (let i = 1; i <= 114; i++) {
-    if (isTextSurahCached(i)) count++;
-  }
-  return count;
+  return Object.keys(getTextCacheStatus()).length;
 };
 
 // Tajweed parser (same as useQuranData)
@@ -90,9 +86,10 @@ export const useTextCache = () => {
           });
         }
 
-        localStorage.setItem(`${CACHE_KEY_PREFIX}${surahNumber}`, JSON.stringify({
+        const stored = await putSurahText(surahNumber, {
           verses, tajweed, timestamp: Date.now(),
-        }));
+        });
+        if (!stored) throw new Error('Stockage hors ligne indisponible');
 
         // Update status
         const status = getTextCacheStatus();
@@ -102,6 +99,7 @@ export const useTextCache = () => {
       setProgress(100);
     } catch (err) {
       console.error('Text cache error:', err);
+      throw err;
     } finally {
       setIsDownloading(false);
       setDownloadingSurah(null);
