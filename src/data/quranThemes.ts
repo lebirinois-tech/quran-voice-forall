@@ -462,7 +462,35 @@ export const getThemesForVerse = (surahNumber: number, verseNumber: number): Qur
   return QURAN_THEMES.filter((t) => ids.includes(t.id));
 };
 
+/**
+ * Thème DOMINANT unique d'un verset — utilisé pour le coloriage du Mushaf par
+ * pages afin d'éviter les dégradés multi-thèmes illisibles. Toujours défini
+ * (les 114 sourates ont des thèmes par défaut).
+ * `curated` indique si le thème vient d'un mapping verset précis (sinon thème
+ * dominant de la sourate).
+ */
+export const getPrimaryThemeForVerse = (
+  surahNumber: number,
+  verseNumber: number
+): { theme: QuranTheme | null; curated: boolean } => {
+  const surahMap = M[surahNumber];
+  if (surahMap) {
+    for (const t of QURAN_THEMES) {
+      const refs = surahMap[t.id];
+      if (refs?.some((r) => rangeIncludes(r, verseNumber))) {
+        return { theme: t, curated: true };
+      }
+    }
+  }
+  const defaults = SURAH_DEFAULTS[surahNumber];
+  const fallback = defaults?.length
+    ? QURAN_THEMES.find((t) => t.id === defaults[0]) ?? null
+    : null;
+  return { theme: fallback, curated: false };
+};
+
 export const getThemeById = (id: ThemeId) => QURAN_THEMES.find((t) => t.id === id);
+
 
 /** Localized label for a theme in a given language. */
 export const getThemeLabel = (theme: QuranTheme, lang: 'ar' | 'fr' | 'en' = 'fr') =>

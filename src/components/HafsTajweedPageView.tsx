@@ -6,7 +6,7 @@ import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
-import { getThemesForVerse } from '@/data/quranThemes';
+import { getThemesForVerse, getPrimaryThemeForVerse } from '@/data/quranThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { Input } from './ui/input';
@@ -251,23 +251,29 @@ export const HafsTajweedPageView = ({
 
 
 
-  // Group consecutive verses sharing the EXACT same thematic signature (Tafsir Mawdou'i),
-  // i.e. the same full list of themes — identical to what the verse view / thematic panel use.
+  // Regroupe les versets consécutifs partageant le MÊME thème dominant unique
+  // (Tafsir Mawdou'i). Un seul thème par bloc => une seule couleur, pas de
+  // dégradé : le coloriage reste lisible et cohérent dans toutes les sourates.
   const themeGroups = useMemo(() => {
-    type Themes = ReturnType<typeof getThemesForVerse>;
-    const groups: { themes: Themes; key: string; verses: typeof pageVerses }[] = [];
+    const groups: {
+      theme: ReturnType<typeof getPrimaryThemeForVerse>['theme'];
+      curated: boolean;
+      key: string;
+      verses: typeof pageVerses;
+    }[] = [];
     for (const v of pageVerses) {
-      const themes = getThemesForVerse(surahNumber, v.number);
-      const key = themes.map((t) => t.id).join('+');
+      const { theme, curated } = getPrimaryThemeForVerse(surahNumber, v.number);
+      const key = `${theme?.id ?? 'none'}:${curated ? 'c' : 'd'}`;
       const last = groups[groups.length - 1];
       if (last && last.key === key) {
         last.verses.push(v);
       } else {
-        groups.push({ themes, key, verses: [v] });
+        groups.push({ theme, curated, key, verses: [v] });
       }
     }
     return groups;
   }, [pageVerses, surahNumber]);
+
 
   // Auto-scroll current verse into view
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -551,26 +557,43 @@ export const HafsTajweedPageView = ({
 
         >
           {themeGroups.map((group, gi) => {
-            const primary = group.themes[0] ?? null;
-            const secondary = group.themes[1] ?? null;
-            const themeTitle = group.themes.length
-              ? group.themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' | ')
+            const theme = group.theme;
+            const themeTitle = theme
+              ? `${theme.emoji} ${theme.labels.fr} · ${theme.labels.ar}${group.curated ? '' : ' (thème dominant de la sourate)'}`
               : undefined;
             return (
             <span
               key={`g-${gi}`}
               style={{
                 display: 'inline',
-                // Same primary/secondary logic as the verse view (Tafsir Mawdou'i)
-                background: primary
-                  ? secondary
-                    ? `linear-gradient(135deg, hsl(${primary.hsl} / 0.18) 0%, hsl(${secondary.hsl} / 0.18) 100%)`
-                    : `hsl(${primary.hsl} / 0.18)`
+                // Un seul thème dominant => une seule couleur, opacité plus forte
+                // pour les blocs thématiques précis, plus discrète pour le
+                // thème général de la sourate.
+                background: theme
+                  ? `hsl(${theme.hsl} / ${group.curated ? 0.2 : 0.07})`
+                  : undefined,
+                boxShadow: theme && group.curated
+                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / 0.55)`
                   : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
             >
+              {theme && group.curated && (
+                <span
+                  contentEditable={false}
+                  className="mx-[0.15em] inline-flex select-none items-center gap-[0.15em] rounded-full px-[0.35em] py-0 align-middle font-cairo"
+                  style={{
+                    fontSize: '0.4em',
+                    lineHeight: 1.6,
+                    background: `hsl(${theme.hsl} / 0.9)`,
+                    color: 'white',
+                  }}
+                >
+                  {theme.emoji} {theme.labels.ar}
+                </span>
+              )}
+
               {group.verses.map((v) => {
                 const isCurrent = currentVerse === v.number;
                 const providedTajweed = versesTajweed?.[v.number];
