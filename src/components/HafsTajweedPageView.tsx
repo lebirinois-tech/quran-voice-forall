@@ -557,26 +557,43 @@ export const HafsTajweedPageView = ({
 
         >
           {themeGroups.map((group, gi) => {
-            const primary = group.themes[0] ?? null;
-            const secondary = group.themes[1] ?? null;
-            const themeTitle = group.themes.length
-              ? group.themes.map((t) => `${t.emoji} ${t.labels.fr} · ${t.labels.ar}`).join(' | ')
+            const theme = group.theme;
+            const themeTitle = theme
+              ? `${theme.emoji} ${theme.labels.fr} · ${theme.labels.ar}${group.curated ? '' : ' (thème dominant de la sourate)'}`
               : undefined;
             return (
             <span
               key={`g-${gi}`}
               style={{
                 display: 'inline',
-                // Same primary/secondary logic as the verse view (Tafsir Mawdou'i)
-                background: primary
-                  ? secondary
-                    ? `linear-gradient(135deg, hsl(${primary.hsl} / 0.18) 0%, hsl(${secondary.hsl} / 0.18) 100%)`
-                    : `hsl(${primary.hsl} / 0.18)`
+                // Un seul thème dominant => une seule couleur, opacité plus forte
+                // pour les blocs thématiques précis, plus discrète pour le
+                // thème général de la sourate.
+                background: theme
+                  ? `hsl(${theme.hsl} / ${group.curated ? 0.2 : 0.07})`
+                  : undefined,
+                boxShadow: theme && group.curated
+                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / 0.55)`
                   : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
             >
+              {theme && group.curated && (
+                <span
+                  contentEditable={false}
+                  className="mx-[0.15em] inline-flex select-none items-center gap-[0.15em] rounded-full px-[0.35em] py-0 align-middle font-cairo"
+                  style={{
+                    fontSize: '0.4em',
+                    lineHeight: 1.6,
+                    background: `hsl(${theme.hsl} / 0.9)`,
+                    color: 'white',
+                  }}
+                >
+                  {theme.emoji} {theme.labels.ar}
+                </span>
+              )}
+
               {group.verses.map((v) => {
                 const isCurrent = currentVerse === v.number;
                 const providedTajweed = versesTajweed?.[v.number];
