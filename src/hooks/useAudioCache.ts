@@ -3,7 +3,8 @@ import { RECITERS, ReciterId } from './useQuranAudio';
 import { surahs } from '@/data/surahs';
 import { putOfflineAudio } from '@/lib/offlineAudioStore';
 
-const AUDIO_CACHE_KEY = 'quran-audio-cache-status';
+// v2 indique que les fichiers sont réellement présents dans IndexedDB.
+const AUDIO_CACHE_KEY = 'quran-audio-cache-status-v2';
 const AUDIO_URL_CACHE_KEY = 'quran-audio-urls';
 
 interface CacheStatus {
@@ -130,18 +131,13 @@ export const useAudioCache = () => {
           setProgress(Math.round((v / totalVerses) * 100));
         }
       } else {
-        // Hafs - get URLs from API then fetch to cache
-        // Use verse-level API to match what playVerse uses
-        const edition = reciterInfo.id;
+        // Hafs : URL directe, sans dépendre d'un second appel API par verset.
         for (let v = 1; v <= totalVerses; v++) {
           try {
-            const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surahNumber}:${v}/${edition}`);
-            const data = await res.json();
-            if (data.code === 200 && data.data?.audio) {
-              const ok = await downloadAudioFile(data.data.audio, reciterId, surahNumber, v);
-              ok ? okCount++ : failCount++;
-              saveAudioUrl(reciterId, surahNumber, v, data.data.audio);
-            }
+            const url = `https://everyayah.com/data/Husary_128kbps/${formatNum(surahNumber)}${formatNum(v)}.mp3`;
+            const ok = await downloadAudioFile(url, reciterId, surahNumber, v);
+            ok ? okCount++ : failCount++;
+            saveAudioUrl(reciterId, surahNumber, v, url);
           } catch {
             failCount++;
           }

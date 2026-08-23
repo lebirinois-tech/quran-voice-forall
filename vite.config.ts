@@ -82,7 +82,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/(?:everyayah\.com|archive\.org)\//,
             handler: "CacheFirst",
             options: {
-              cacheName: "quran-audio-cache-v6",
+              cacheName: "quran-audio-cache-v7",
               expiration: { maxEntries: 2000, maxAgeSeconds: 365 * 24 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200, 206] },
             },
