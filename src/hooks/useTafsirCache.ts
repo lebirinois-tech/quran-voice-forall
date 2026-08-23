@@ -71,6 +71,7 @@ export const useTafsirCache = () => {
       setProgress(100);
     } catch (err) {
       console.error('Tafsir cache error:', err);
+      throw err;
     } finally {
       setIsDownloading(false);
       setDownloadingSurah(null);
