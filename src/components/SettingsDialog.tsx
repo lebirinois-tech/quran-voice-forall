@@ -95,6 +95,8 @@ export const SettingsDialog = ({
   onTextDisplayStyleChange,
   fontSize,
   onFontSizeChange,
+  verseViewMode,
+  onVerseViewModeChange,
   triggerClassName,
   triggerLabel,
 }: SettingsDialogProps) => {
