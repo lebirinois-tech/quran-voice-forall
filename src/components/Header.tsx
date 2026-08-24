@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from './SettingsDialog';
 import { ReciterId } from '@/hooks/useQuranAudio';
-import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
+import { TextDisplayStyle, FontSize, VerseViewMode } from '@/hooks/useAppSettings';
 import { useTtsLang } from '@/hooks/useTtsLang';
 
 interface HeaderProps {
@@ -22,6 +22,8 @@ interface HeaderProps {
   onTextDisplayStyleChange?: (style: TextDisplayStyle) => void;
   fontSize?: FontSize;
   onFontSizeChange?: (size: FontSize) => void;
+  verseViewMode?: VerseViewMode;
+  onVerseViewModeChange?: (mode: VerseViewMode) => void;
 }
 
 export const Header = ({ 
@@ -39,6 +41,8 @@ export const Header = ({
   onTextDisplayStyleChange,
   fontSize = 'medium',
   onFontSizeChange,
+  verseViewMode = 'scroll',
+  onVerseViewModeChange,
 }: HeaderProps) => {
   const [ttsLang, setTtsLang] = useTtsLang();
   return (
@@ -116,6 +120,8 @@ export const Header = ({
                 onTextDisplayStyleChange={onTextDisplayStyleChange}
                 fontSize={fontSize}
                 onFontSizeChange={onFontSizeChange}
+                verseViewMode={verseViewMode}
+                onVerseViewModeChange={onVerseViewModeChange}
               />
             )}
             {onToggleContinuous && (

@@ -204,6 +204,40 @@ const SurahReader = () => {
 
   const isMushafMode = isMushafImageMode;
 
+  // ---- Affichage « page par page » pour le mode versets (coloriage thématique conservé) ----
+  const isPagedVerseView = !isMushafImageMode && appSettings.verseViewMode === 'page';
+
+  const versePageGroups = useMemo(() => {
+    const pagesMap = new Map<number, typeof verses>();
+    verses.forEach((v) => {
+      const p = v.page ?? getVersePage(num, v.number, verses.length);
+      if (!pagesMap.has(p)) pagesMap.set(p, []);
+      pagesMap.get(p)!.push(v);
+    });
+    return Array.from(pagesMap.entries()).sort(([a], [b]) => a - b);
+  }, [verses, num]);
+
+  const [versePageNum, setVersePageNum] = useState<number | null>(null);
+
+  // Initialise / recadre la page affichée (paramètre ?page= ou 1re page de la sourate)
+  useEffect(() => {
+    if (!isPagedVerseView || versePageGroups.length === 0) return;
+    const available = versePageGroups.map(([p]) => p);
+    if (versePageNum !== null && available.includes(versePageNum)) return;
+    const pageParam = searchParams.get('page');
+    const wanted = pageParam ? parseInt(pageParam) : NaN;
+    setVersePageNum(available.includes(wanted) ? wanted : available[0]);
+  }, [isPagedVerseView, versePageGroups, versePageNum, searchParams]);
+
+  // Suit la lecture audio : bascule automatiquement sur la page du verset en cours
+  useEffect(() => {
+    if (!isPagedVerseView || !quranAudio.isPlaying) return;
+    const group = versePageGroups.find(([, vs]) =>
+      vs.some((v) => v.number === quranAudio.currentVerse)
+    );
+    if (group && group[0] !== versePageNum) setVersePageNum(group[0]);
+  }, [isPagedVerseView, quranAudio.isPlaying, quranAudio.currentVerse, versePageGroups, versePageNum]);
+
   // Compute verse range for the current Mushaf page using real API page data
   const currentPageVerseRange = useMemo(() => {
     if (!isMushafMode || !currentMushafPage || verses.length === 0) return null;
@@ -368,6 +402,8 @@ const SurahReader = () => {
       onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
       fontSize={appSettings.fontSize}
       onFontSizeChange={appSettings.onFontSizeChange}
+      verseViewMode={appSettings.verseViewMode}
+      onVerseViewModeChange={appSettings.onVerseViewModeChange}
       triggerLabel="Ouvrir les paramètres"
       triggerClassName="w-full justify-start gap-2 border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
     />
@@ -394,6 +430,8 @@ const SurahReader = () => {
           onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
           fontSize={appSettings.fontSize}
           onFontSizeChange={appSettings.onFontSizeChange}
+          verseViewMode={appSettings.verseViewMode}
+          onVerseViewModeChange={appSettings.onVerseViewModeChange}
         />
       )}
 
@@ -602,14 +640,10 @@ const SurahReader = () => {
               {!isLoadingVerses && !isLoadingTextSource && !error && (
                 <div className="space-y-6">
                   {(() => {
-                    // Group verses by page
-                    const pagesMap = new Map<number, typeof verses>();
-                    verses.forEach((v) => {
-                      const p = v.page ?? getVersePage(num, v.number, verses.length);
-                      if (!pagesMap.has(p)) pagesMap.set(p, []);
-                      pagesMap.get(p)!.push(v);
-                    });
-                    const pageGroups = Array.from(pagesMap.entries()).sort(([a], [b]) => a - b);
+                    const allGroups = versePageGroups;
+                    const pageGroups = isPagedVerseView
+                      ? allGroups.filter(([p]) => p === versePageNum)
+                      : allGroups;
 
                     return pageGroups.map(([pageNum, pageVerses]) => {
                       const firstVerseOfPage = pageVerses[0].number;
@@ -730,6 +764,44 @@ const SurahReader = () => {
                       );
                     });
                   })()}
+
+                  {/* Pagination — mode « page par page » (versets) */}
+                  {isPagedVerseView && versePageNum !== null && (
+                    <div className="sticky bottom-24 z-20 flex items-center justify-between gap-3 rounded-full border border-border bg-background/90 backdrop-blur px-3 py-2 shadow-sm">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => {
+                          const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                          if (idx > 0) setVersePageNum(versePageGroups[idx - 1][0]);
+                          else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
+                        }}
+                        disabled={versePageNum <= 1}
+                        aria-label="Page précédente"
+                      >
+                        ‹ Précédent
+                      </Button>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        Page <span className="font-semibold text-foreground">{versePageNum}</span>/604
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => {
+                          const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                          if (idx >= 0 && idx < versePageGroups.length - 1)
+                            setVersePageNum(versePageGroups[idx + 1][0]);
+                          else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
+                        }}
+                        disabled={versePageNum >= 604}
+                        aria-label="Page suivante"
+                      >
+                        Suivant ›
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </>

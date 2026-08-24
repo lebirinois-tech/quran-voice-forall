@@ -9,6 +9,8 @@ export type TextDisplayStyle =
   | 'pages-warsh'
   | 'pages-qalun';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
+/** Mode d'affichage des versets : défilement continu ou page par page (une page du Mushaf à la fois). */
+export type VerseViewMode = 'scroll' | 'page';
 
 /**
  * Récitateur par défaut pour chaque qira'a / mode d'affichage.
@@ -28,6 +30,7 @@ const STORAGE_KEYS = {
   BACKGROUND_COLOR: 'quran-background-color',
   TEXT_DISPLAY_STYLE: 'quran-text-display-style',
   FONT_SIZE: 'quran-font-size',
+  VERSE_VIEW_MODE: 'quran-verse-view-mode',
 };
 
 const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
@@ -84,6 +87,11 @@ export const useAppSettings = () => {
     return (saved as FontSize) || 'medium';
   });
 
+  const [verseViewMode, setVerseViewMode] = useState<VerseViewMode>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.VERSE_VIEW_MODE);
+    return saved === 'page' ? 'page' : 'scroll';
+  });
+
   // Apply background color to document
   useEffect(() => {
     document.documentElement.style.setProperty('--background', backgroundColor.replace('hsl(', '').replace(')', ''));
@@ -116,14 +124,21 @@ export const useAppSettings = () => {
     localStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
   }, []);
 
+  const handleVerseViewModeChange = useCallback((mode: VerseViewMode) => {
+    setVerseViewMode(mode);
+    localStorage.setItem(STORAGE_KEYS.VERSE_VIEW_MODE, mode);
+  }, []);
+
   return {
     reciter,
     backgroundColor,
     textDisplayStyle,
     fontSize,
+    verseViewMode,
     onReciterChange: handleReciterChange,
     onBackgroundColorChange: handleBackgroundColorChange,
     onTextDisplayStyleChange: handleTextDisplayStyleChange,
     onFontSizeChange: handleFontSizeChange,
+    onVerseViewModeChange: handleVerseViewModeChange,
   };
 };
