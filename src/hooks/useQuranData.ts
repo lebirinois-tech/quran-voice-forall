@@ -18,6 +18,27 @@ interface QuranApiResponse {
   };
 }
 
+interface BundledSurahData {
+  arabic: QuranApiVerse[];
+  tajweed: QuranApiVerse[];
+  translation: QuranApiVerse[];
+}
+
+let bundledQuranPromise: Promise<Record<string, BundledSurahData>> | null = null;
+
+const loadBundledSurah = async (surahNumber: number): Promise<BundledSurahData | null> => {
+  bundledQuranPromise ??= fetch('/data/quran-hafs-fr.json').then((response) => {
+    if (!response.ok) throw new Error(`Bundled Quran HTTP ${response.status}`);
+    return response.json() as Promise<Record<string, BundledSurahData>>;
+  });
+  try {
+    return (await bundledQuranPromise)[String(surahNumber)] ?? null;
+  } catch {
+    bundledQuranPromise = null;
+    return null;
+  }
+};
+
 // Cache hors ligne : IndexedDB (localStorage était saturé au-delà de ~20 sourates)
 const saveSurahToCache = (surahNumber: number, verses: Verse[], tajweed: Record<number, string>) =>
   putSurahText(surahNumber, { verses, tajweed, timestamp: Date.now() });
@@ -128,7 +149,27 @@ export const useQuranData = (surahNumber: number) => {
           setIsOffline(true);
           setError(null);
         } else {
-          setError('Impossible de charger les versets. Connectez-vous à Internet pour la première lecture.');
+          const bundled = await loadBundledSurah(surahNumber);
+          if (!bundled) {
+            setError('Impossible de charger les versets hors connexion.');
+          } else {
+            const combinedVerses: Verse[] = bundled.arabic.map((ayah, index) => ({
+              number: ayah.numberInSurah,
+              text: ayah.text,
+              translation: bundled.translation[index]?.text || '',
+              page: ayah.page,
+            }));
+            const tajweedMap: Record<number, string> = {};
+            bundled.tajweed.forEach((ayah) => {
+              tajweedMap[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
+            });
+            const cleaned = removeDuplicateBasmala(surahNumber, combinedVerses, tajweedMap);
+            setVerses(cleaned.verses);
+            setVersesTajweed(cleaned.tajweed);
+            setIsOffline(true);
+            setError(null);
+            await saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
+          }
         }
       } finally {
         setIsLoading(false);

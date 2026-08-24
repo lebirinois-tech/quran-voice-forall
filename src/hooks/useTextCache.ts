@@ -10,6 +10,28 @@ interface TextCacheStatus {
   [surahNumber: number]: boolean;
 }
 
+interface BundledAyah {
+  text: string;
+  numberInSurah: number;
+  page: number;
+}
+
+interface BundledSurah {
+  arabic: BundledAyah[];
+  tajweed: BundledAyah[];
+  translation: BundledAyah[];
+}
+
+let bundledQuranPromise: Promise<Record<string, BundledSurah>> | null = null;
+
+const getBundledQuran = () => {
+  bundledQuranPromise ??= fetch('/data/quran-hafs-fr.json').then((response) => {
+    if (!response.ok) throw new Error(`Texte intégré indisponible (${response.status})`);
+    return response.json() as Promise<Record<string, BundledSurah>>;
+  });
+  return bundledQuranPromise;
+};
+
 const getTextCacheStatus = (): TextCacheStatus => {
   try {
     return JSON.parse(localStorage.getItem(TEXT_CACHE_STATUS) || '{}');
@@ -61,30 +83,20 @@ export const useTextCache = () => {
     setProgress(0);
 
     try {
-      const [arabicRes, tajweedRes, translationRes] = await Promise.all([
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
-      ]);
-
-      const [arabicData, tajweedData, translationData] = await Promise.all([
-        arabicRes.json(), tajweedRes.json(), translationRes.json(),
-      ]);
-
-      if (arabicData.code === 200 && translationData.code === 200) {
-        const verses = arabicData.data.ayahs.map((ayah: any, index: number) => ({
+      const bundled = (await getBundledQuran())[String(surahNumber)];
+      if (!bundled) throw new Error(`Sourate ${surahNumber} absente du texte intégré`);
+      {
+        const verses = bundled.arabic.map((ayah, index) => ({
           number: ayah.numberInSurah,
           text: ayah.text,
-          translation: translationData.data.ayahs[index]?.text || '',
+          translation: bundled.translation[index]?.text || '',
           page: ayah.page,
         }));
 
         const tajweed: Record<number, string> = {};
-        if (tajweedData.code === 200) {
-          tajweedData.data.ayahs.forEach((ayah: any) => {
-            tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
-          });
-        }
+        bundled.tajweed.forEach((ayah) => {
+          tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
+        });
 
         const stored = await putSurahText(surahNumber, {
           verses, tajweed, timestamp: Date.now(),

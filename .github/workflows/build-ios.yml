@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-ios:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,10 +25,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+
       - name: Install dependencies
-        run: |
-          rm -f bun.lock bun.lockb
-          bun install --no-save --registry https://registry.npmjs.org
+        run: bun install --frozen-lockfile
 
       - name: Build web app
         run: bun run build
