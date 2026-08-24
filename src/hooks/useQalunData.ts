@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { stripLeadingBasmala, surahHasHeaderBasmala } from '@/lib/basmala';
+import { getDataset, putDataset } from '@/lib/offlineDatasetStore';
+import { QALUN_DATASET_KEY } from '@/lib/autoOfflineRiwayat';
 
 interface QalunVerse {
   id: number;
@@ -26,7 +28,10 @@ let qalunDataCache: QalunVerse[] | null = null;
 const isQalunData = (data: unknown): data is QalunVerse[] =>
   Array.isArray(data) && data.every((item) => typeof item === 'object' && item !== null && 'sura_no' in item && 'aya_no' in item && 'aya_text' in item);
 
-const loadFromStorage = (): QalunVerse[] | null => {
+/** Lecture hors ligne : IndexedDB d'abord (téléchargement auto), puis ancien localStorage. */
+const loadFromStorage = async (): Promise<QalunVerse[] | null> => {
+  const fromDb = await getDataset<QalunVerse[]>(QALUN_DATASET_KEY);
+  if (isQalunData(fromDb)) return fromDb;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -37,12 +42,9 @@ const loadFromStorage = (): QalunVerse[] | null => {
   }
 };
 
-const saveToStorage = (data: QalunVerse[]) => {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.warn('Could not cache Qalun data:', e);
-  }
+const saveToStorage = async (data: QalunVerse[]) => {
+  // ~2,8 Mo : IndexedDB uniquement (le quota localStorage est trop faible).
+  await putDataset(QALUN_DATASET_KEY, data);
 };
 
 const fetchQalunDataset = async (): Promise<QalunVerse[]> => {
@@ -92,12 +94,12 @@ export const useQalunData = (surahNumber: number, enabled: boolean) => {
       setIsLoading(true);
       try {
         if (!qalunDataCache) {
-          qalunDataCache = loadFromStorage();
+          qalunDataCache = await loadFromStorage();
         }
 
         if (!qalunDataCache) {
           qalunDataCache = await fetchQalunDataset();
-          saveToStorage(qalunDataCache);
+          await saveToStorage(qalunDataCache);
         }
 
         if (!cancelled) {
@@ -105,7 +107,7 @@ export const useQalunData = (surahNumber: number, enabled: boolean) => {
         }
       } catch (err) {
         console.error('Error fetching Qalun data:', err);
-        const cached = loadFromStorage();
+        const cached = await loadFromStorage();
         if (!cancelled) {
           setQalunVerses(cached ? getSurahVerses(cached, surahNumber) : {});
         }
