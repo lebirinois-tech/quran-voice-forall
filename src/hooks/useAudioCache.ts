@@ -168,7 +168,6 @@ export const useAudioCache = () => {
       setIsDownloading(false);
       setDownloadingReciter(null);
       setDownloadingSurah(null);
-      setProgress(0);
     }
   }, []);
 

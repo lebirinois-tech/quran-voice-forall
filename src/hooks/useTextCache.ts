@@ -115,7 +115,6 @@ export const useTextCache = () => {
     } finally {
       setIsDownloading(false);
       setDownloadingSurah(null);
-      setProgress(0);
     }
   }, []);
 

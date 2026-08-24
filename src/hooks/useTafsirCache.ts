@@ -79,7 +79,6 @@ export const useTafsirCache = () => {
     } finally {
       setIsDownloading(false);
       setDownloadingSurah(null);
-      setProgress(0);
     }
   }, []);
 
