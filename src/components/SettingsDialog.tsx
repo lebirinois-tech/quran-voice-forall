@@ -188,50 +188,21 @@ export const SettingsDialog = ({
         </DialogHeader>
         
         <div className="space-y-4 py-2">
-          {/* Reciter Selection by Qira'at */}
+          {/* Récitateur — automatique selon la riwaya affichée */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Volume2 className="h-3.5 w-3.5 text-primary" />
               Récitateur / القارئ
             </Label>
-            
-            {/* Group reciters by Qira'at */}
-            {Object.entries(QIRAAT_LABELS).map(([qiraatKey, qiraatLabel]) => {
-              const recitersForQiraat = RECITER_IDS.filter(
-                (key) => RECITERS[key].qiraat === (qiraatKey as QiraatId)
-              );
-              
-              if (recitersForQiraat.length === 0) return null;
-              
-              return (
-                <div key={qiraatKey} className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground px-1 pt-1">
-                    {qiraatLabel}
-                  </p>
-                  <RadioGroup
-                    value={reciter}
-                    onValueChange={(value) => onReciterChange(value as ReciterId)}
-                    className="space-y-1"
-                  >
-                    {recitersForQiraat.map((key) => (
-                      <div
-                        key={key}
-                        className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <RadioGroupItem value={key} id={`reciter-${key}`} className="h-3.5 w-3.5" />
-                        <Label
-                          htmlFor={`reciter-${key}`}
-                          className="flex-1 cursor-pointer text-foreground text-sm"
-                        >
-                          {RECITERS[key].name} / <span dir="rtl">{RECITERS[key].nameAr}</span>
-                        </Label>
-                        {reciter === key && <Check className="h-3.5 w-3.5 text-primary" />}
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              );
-            })}
+            <div className="p-3 rounded-lg bg-muted/50 border border-border">
+              <p className="text-sm text-foreground">
+                {RECITERS[getSafeReciter(reciter)].name} /{' '}
+                <span dir="rtl" className="font-amiri">{RECITERS[getSafeReciter(reciter)].nameAr}</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                L'audio suit automatiquement la riwaya choisie (Hafs, Warsh, Qalun) — الصوت يتبع الرواية المختارة
+              </p>
+            </div>
           </div>
 
           {/* Text Display Style */}
