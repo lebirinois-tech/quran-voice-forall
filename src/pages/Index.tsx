@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { OfflineRiwayatStatus } from "@/components/OfflineRiwayatStatus";
 import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SurahCard } from '@/components/SurahCard';
@@ -232,6 +233,8 @@ const Index = () => {
             </p>
           </div>
         </section>
+
+        <OfflineRiwayatStatus />
 
         {/* Mode de lecture : Versets / Pages */}
         <section className="mb-6 max-w-md mx-auto animate-fade-in">
