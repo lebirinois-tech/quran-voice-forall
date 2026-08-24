@@ -238,7 +238,15 @@ const Index = () => {
           <div className="bg-card border border-border rounded-xl p-2 flex gap-2">
             <button
               type="button"
-              onClick={() => appSettings.onTextDisplayStyleChange('tajweed')}
+              onClick={() =>
+                appSettings.onTextDisplayStyleChange(
+                  appSettings.textDisplayStyle === 'pages-warsh'
+                    ? 'warsh-tajweed'
+                    : appSettings.textDisplayStyle === 'pages-qalun'
+                      ? 'qalun-tajweed'
+                      : 'tajweed'
+                )
+              }
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
                 appSettings.textDisplayStyle.startsWith('pages-')
