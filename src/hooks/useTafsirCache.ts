@@ -63,8 +63,12 @@ export const useTafsirCache = () => {
     try {
       // Les trois Tafsir sont déjà inclus dans l'application et l'APK.
       // Cette vérification confirme que le fichier embarqué est lisible hors ligne.
-      const sample = await getOfflineTafsir(surahNumber, 1, 'ar');
-      if (!sample) throw new Error('Tafsir intégré introuvable');
+      const samples = await Promise.all([
+        getOfflineTafsir(surahNumber, 1, 'ar'),
+        getOfflineTafsir(surahNumber, 1, 'fr'),
+        getOfflineTafsir(surahNumber, 1, 'en'),
+      ]);
+      if (samples.some((sample) => !sample)) throw new Error('Tafsir intégré incomplet');
       const status = getTafsirCacheStatus();
       status[surahNumber] = true;
       localStorage.setItem(TAFSIR_CACHE_STATUS, JSON.stringify(status));

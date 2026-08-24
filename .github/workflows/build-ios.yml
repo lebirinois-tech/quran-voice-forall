@@ -47,6 +47,7 @@ jobs:
         run: |
           bunx cap add ios
           bunx cap sync ios
+          test -f ios/App/App.xcworkspace/contents.xcworkspacedata
 
       - name: Generate iOS app icons
         run: |
@@ -59,8 +60,9 @@ jobs:
         working-directory: ios/App
         run: |
           xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
-            -sdk iphoneos -derivedDataPath build \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES CODE_SIGN_ENTITLEMENTS="" \
             ONLY_ACTIVE_ARCH=NO
 
       - name: Package unsigned IPA
