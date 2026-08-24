@@ -238,6 +238,43 @@ const SurahReader = () => {
     if (group && group[0] !== versePageNum) setVersePageNum(group[0]);
   }, [isPagedVerseView, quranAudio.isPlaying, quranAudio.currentVerse, versePageGroups, versePageNum]);
 
+  /**
+   * Changement de page manuel en mode « page par page » (versets) :
+   * évite les sauts en resynchronisant immédiatement l'audio sur le 1er verset
+   * de la page affichée lorsque la lecture est en cours.
+   */
+  const goToVersePage = useCallback(
+    (targetPage: number) => {
+      const group = versePageGroups.find(([p]) => p === targetPage);
+      if (!group) {
+        // Page hors de la sourate courante : navigation classique
+        handleNavigateToPage(targetPage);
+        return;
+      }
+      setVersePageNum(targetPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (quranAudio.isPlaying) {
+        const first = group[1][0].number;
+        if (quranAudio.currentVerse < first || quranAudio.currentVerse > group[1][group[1].length - 1].number) {
+          if (quranAudio.repeatSettings.mode === 'range') quranAudio.setRepeatMode('none', 1);
+          quranAudio.playVerse(first);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [versePageGroups, quranAudio.isPlaying, quranAudio.currentVerse, quranAudio.playVerse, quranAudio.repeatSettings.mode, quranAudio.setRepeatMode]
+  );
+
+  // Page réellement en cours de lecture audio (pour l'indicateur de position)
+  const playingVersePage = useMemo(() => {
+    if (!isPagedVerseView || !quranAudio.currentVerse) return null;
+    const group = versePageGroups.find(([, vs]) =>
+      vs.some((v) => v.number === quranAudio.currentVerse)
+    );
+    return group ? group[0] : null;
+  }, [isPagedVerseView, quranAudio.currentVerse, versePageGroups]);
+
+
   // Compute verse range for the current Mushaf page using real API page data
   const currentPageVerseRange = useMemo(() => {
     if (!isMushafMode || !currentMushafPage || verses.length === 0) return null;
