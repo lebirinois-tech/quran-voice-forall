@@ -802,43 +802,95 @@ const SurahReader = () => {
                     });
                   })()}
 
-                  {/* Pagination — mode « page par page » (versets) */}
+                  {/* Position courante + pagination — mode « page par page » (versets) */}
                   {isPagedVerseView && versePageNum !== null && (
-                    <div className="sticky bottom-24 z-20 flex items-center justify-between gap-3 rounded-full border border-border bg-background/90 backdrop-blur px-3 py-2 shadow-sm">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full"
-                        onClick={() => {
-                          const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
-                          if (idx > 0) setVersePageNum(versePageGroups[idx - 1][0]);
-                          else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
-                        }}
-                        disabled={versePageNum <= 1}
-                        aria-label="Page précédente"
+                    <div className="sticky bottom-24 z-20 space-y-2">
+                      {/* Indicateur de position clair (riwaya, sourate, page, verset lu) */}
+                      <div
+                        className="rounded-2xl border border-border bg-background/92 backdrop-blur px-3 py-2 shadow-sm text-[11px] sm:text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
+                        aria-live="polite"
                       >
-                        ‹ Précédent
-                      </Button>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        Page <span className="font-semibold text-foreground">{versePageNum}</span>/604
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full"
-                        onClick={() => {
-                          const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
-                          if (idx >= 0 && idx < versePageGroups.length - 1)
-                            setVersePageNum(versePageGroups[idx + 1][0]);
-                          else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
-                        }}
-                        disabled={versePageNum >= 604}
-                        aria-label="Page suivante"
-                      >
-                        Suivant ›
-                      </Button>
+                        <span className="font-semibold text-primary">
+                          {effectiveDisplayStyle === 'warsh-tajweed'
+                            ? 'Warsh / ورش'
+                            : effectiveDisplayStyle === 'qalun-tajweed'
+                              ? 'Qalun / قالون'
+                              : 'Hafs / حفص'}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span className="truncate max-w-[38%]">{surah.name}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>
+                          Page <span className="font-semibold text-foreground">{versePageNum}</span>/604
+                        </span>
+                        {quranAudio.currentVerse > 0 && (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span>
+                              {quranAudio.isPlaying ? '▶ Verset ' : 'Verset '}
+                              <span className="font-semibold text-foreground">{quranAudio.currentVerse}</span>
+                            </span>
+                          </>
+                        )}
+                        {playingVersePage !== null && playingVersePage !== versePageNum && (
+                          <button
+                            type="button"
+                            onClick={() => goToVersePage(playingVersePage)}
+                            className="underline text-primary font-medium"
+                          >
+                            Revenir à la lecture (p. {playingVersePage})
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 rounded-full border border-border bg-background/90 backdrop-blur px-3 py-2 shadow-sm">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => {
+                            const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                            if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
+                            else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
+                          }}
+                          disabled={versePageNum <= 1}
+                          aria-label="Page précédente"
+                        >
+                          ‹ Précédent
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-full h-8 px-3 text-xs"
+                          onClick={() => {
+                            const group = versePageGroups.find(([p]) => p === versePageNum);
+                            if (!group) return;
+                            if (quranAudio.repeatSettings.mode === 'range') quranAudio.setRepeatMode('none', 1);
+                            quranAudio.playVerse(group[1][0].number);
+                          }}
+                          aria-label={`Lire la page ${versePageNum}`}
+                        >
+                          <Play className="h-3.5 w-3.5 mr-1" /> Lire la page
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => {
+                            const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                            if (idx >= 0 && idx < versePageGroups.length - 1)
+                              goToVersePage(versePageGroups[idx + 1][0]);
+                            else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
+                          }}
+                          disabled={versePageNum >= 604}
+                          aria-label="Page suivante"
+                        >
+                          Suivant ›
+                        </Button>
+                      </div>
                     </div>
                   )}
+
                 </div>
               )}
             </>
