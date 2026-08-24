@@ -115,17 +115,45 @@ export const useTextCache = () => {
     } finally {
       setIsDownloading(false);
       setDownloadingSurah(null);
-      setProgress(0);
     }
   }, []);
 
   const downloadAllText = useCallback(async () => {
-    for (let s = 1; s <= 114; s++) {
-      if (isTextSurahCached(s)) continue;
-      setProgress(Math.round((s / 114) * 100));
-      await downloadSurahText(s);
+    setIsDownloading(true);
+    setDownloadingSurah(1);
+    setProgress(0);
+    try {
+      await navigator.storage?.persist?.();
+      const allSurahs = await getBundledQuran();
+      for (let s = 1; s <= 114; s++) {
+        setDownloadingSurah(s);
+        if (!isTextSurahCached(s)) {
+          const bundled = allSurahs[String(s)];
+          if (!bundled) throw new Error(`Sourate ${s} absente du texte intégré`);
+          const verses = bundled.arabic.map((ayah, index) => ({
+            number: ayah.numberInSurah,
+            text: ayah.text,
+            translation: bundled.translation[index]?.text || '',
+            page: ayah.page,
+          }));
+          const tajweed: Record<number, string> = {};
+          bundled.tajweed.forEach((ayah) => {
+            tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
+          });
+          if (!await putSurahText(s, { verses, tajweed, timestamp: Date.now() })) {
+            throw new Error('Stockage hors ligne indisponible');
+          }
+          const status = getTextCacheStatus();
+          status[s] = true;
+          localStorage.setItem(TEXT_CACHE_STATUS, JSON.stringify(status));
+        }
+        setProgress(Math.round((s / 114) * 100));
+      }
+    } finally {
+      setIsDownloading(false);
+      setDownloadingSurah(null);
     }
-  }, [downloadSurahText]);
+  }, []);
 
   return {
     downloadSurahText,
