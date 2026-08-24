@@ -96,12 +96,12 @@ export const useWarshData = (surahNumber: number, enabled: boolean) => {
       setIsLoading(true);
       try {
         if (!warshDataCache) {
-          warshDataCache = loadFromStorage();
+          warshDataCache = await loadFromStorage();
         }
 
         if (!warshDataCache) {
           warshDataCache = await fetchWarshDataset();
-          saveToStorage(warshDataCache);
+          await saveToStorage(warshDataCache);
         }
 
         if (!cancelled) {
@@ -109,7 +109,7 @@ export const useWarshData = (surahNumber: number, enabled: boolean) => {
         }
       } catch (err) {
         console.error('Error fetching Warsh data:', err);
-        const cached = loadFromStorage();
+        const cached = await loadFromStorage();
         if (!cancelled) {
           setWarshVerses(cached ? getSurahVerses(cached, surahNumber) : {});
         }
