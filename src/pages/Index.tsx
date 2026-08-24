@@ -260,7 +260,15 @@ const Index = () => {
             </button>
             <button
               type="button"
-              onClick={() => appSettings.onTextDisplayStyleChange('pages-hafs')}
+              onClick={() =>
+                appSettings.onTextDisplayStyleChange(
+                  appSettings.textDisplayStyle === 'warsh-tajweed'
+                    ? 'pages-warsh'
+                    : appSettings.textDisplayStyle === 'qalun-tajweed'
+                      ? 'pages-qalun'
+                      : 'pages-hafs'
+                )
+              }
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
                 appSettings.textDisplayStyle.startsWith('pages-')
