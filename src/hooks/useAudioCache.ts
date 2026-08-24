@@ -175,11 +175,14 @@ export const useAudioCache = () => {
   const downloadAllSurahs = useCallback(async (reciterId: ReciterId) => {
     setIsDownloading(true);
     await requestPersistentStorage();
-    for (let s = 1; s <= 114; s++) {
-      if (isSurahCached(reciterId, s)) continue;
-      await downloadSurahAudio(reciterId, s);
+    try {
+      for (let s = 1; s <= 114; s++) {
+        if (isSurahCached(reciterId, s)) continue;
+        await downloadSurahAudio(reciterId, s);
+      }
+    } finally {
+      setIsDownloading(false);
     }
-    setIsDownloading(false);
   }, [downloadSurahAudio]);
 
   return {
