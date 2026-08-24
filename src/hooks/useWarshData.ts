@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { stripLeadingBasmala, surahHasHeaderBasmala } from '@/lib/basmala';
+import { getDataset, putDataset } from '@/lib/offlineDatasetStore';
+import { WARSH_DATASET_KEY } from '@/lib/autoOfflineRiwayat';
+
 
 interface WarshVerse {
   id: number;
