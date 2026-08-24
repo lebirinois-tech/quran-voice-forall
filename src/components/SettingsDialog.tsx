@@ -25,6 +25,8 @@ interface SettingsDialogProps {
   onTextDisplayStyleChange: (style: TextDisplayStyle) => void;
   fontSize: FontSize;
   onFontSizeChange: (size: FontSize) => void;
+  verseViewMode?: VerseViewMode;
+  onVerseViewModeChange?: (mode: VerseViewMode) => void;
   triggerClassName?: string;
   triggerLabel?: string;
 }
