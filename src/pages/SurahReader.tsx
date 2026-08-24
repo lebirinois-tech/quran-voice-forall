@@ -402,6 +402,8 @@ const SurahReader = () => {
       onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
       fontSize={appSettings.fontSize}
       onFontSizeChange={appSettings.onFontSizeChange}
+      verseViewMode={appSettings.verseViewMode}
+      onVerseViewModeChange={appSettings.onVerseViewModeChange}
       triggerLabel="Ouvrir les paramètres"
       triggerClassName="w-full justify-start gap-2 border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
     />
@@ -428,6 +430,8 @@ const SurahReader = () => {
           onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
           fontSize={appSettings.fontSize}
           onFontSizeChange={appSettings.onFontSizeChange}
+          verseViewMode={appSettings.verseViewMode}
+          onVerseViewModeChange={appSettings.onVerseViewModeChange}
         />
       )}
 
@@ -760,6 +764,44 @@ const SurahReader = () => {
                       );
                     });
                   })()}
+
+                  {/* Pagination — mode « page par page » (versets) */}
+                  {isPagedVerseView && versePageNum !== null && (
+                    <div className="sticky bottom-24 z-20 flex items-center justify-between gap-3 rounded-full border border-border bg-background/90 backdrop-blur px-3 py-2 shadow-sm">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => {
+                          const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                          if (idx > 0) setVersePageNum(versePageGroups[idx - 1][0]);
+                          else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
+                        }}
+                        disabled={versePageNum <= 1}
+                        aria-label="Page précédente"
+                      >
+                        ‹ Précédent
+                      </Button>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        Page <span className="font-semibold text-foreground">{versePageNum}</span>/604
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => {
+                          const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                          if (idx >= 0 && idx < versePageGroups.length - 1)
+                            setVersePageNum(versePageGroups[idx + 1][0]);
+                          else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
+                        }}
+                        disabled={versePageNum >= 604}
+                        aria-label="Page suivante"
+                      >
+                        Suivant ›
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </>
