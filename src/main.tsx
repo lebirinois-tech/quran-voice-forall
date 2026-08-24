@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
+import { scheduleOfflineRiwayatBootstrap } from "./lib/autoOfflineRiwayat";
 import {
   HAFS_MUSHAF_VERSION,
   HAFS_MUSHAF_VERSION_KEY,
@@ -207,6 +208,9 @@ const startApp = async () => {
   // Pré-charge les datasets Tafsir bundle (AR Al-Muyassar + FR Al-Montada)
   // pour qu'ils soient disponibles immédiatement et hors-ligne.
   preloadOfflineTafsir();
+  // Télécharge automatiquement les trois riwayat (Hafs, Warsh, Qalun) dès
+  // l'installation, pour une lecture complète hors connexion.
+  scheduleOfflineRiwayatBootstrap();
 };
 
 startApp().catch((error) => {
