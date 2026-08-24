@@ -92,11 +92,19 @@ const SurahReader = () => {
     (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
 
   const handleVerseChange = useCallback((verseNum: number) => {
-    const verseElement = document.getElementById(`verse-${verseNum}`);
-    if (verseElement) {
-      verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    // En mode « page par page », le verset peut n'être monté qu'après le
+    // changement de page : on réessaie brièvement pour éviter les sauts.
+    const tryScroll = (attempt = 0) => {
+      const verseElement = document.getElementById(`verse-${verseNum}`);
+      if (verseElement) {
+        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (attempt < 8) {
+        setTimeout(() => tryScroll(attempt + 1), 150);
+      }
+    };
+    tryScroll();
   }, []);
+
 
   const quranAudio = useQuranAudio({
     surahNumber: num,
