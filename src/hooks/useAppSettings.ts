@@ -87,6 +87,11 @@ export const useAppSettings = () => {
     return (saved as FontSize) || 'medium';
   });
 
+  const [verseViewMode, setVerseViewMode] = useState<VerseViewMode>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.VERSE_VIEW_MODE);
+    return saved === 'page' ? 'page' : 'scroll';
+  });
+
   // Apply background color to document
   useEffect(() => {
     document.documentElement.style.setProperty('--background', backgroundColor.replace('hsl(', '').replace(')', ''));
