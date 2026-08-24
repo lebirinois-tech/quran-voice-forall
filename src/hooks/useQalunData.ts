@@ -15,6 +15,7 @@ interface QalunVerse {
 }
 
 const QALUN_DATA_URLS = [
+  '/data/qalun-data.json',
   'https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/qaloon/data/QaloonData_v10.json',
   'https://raw.githubusercontent.com/thetruetruth/quran-data-kfgqpc/main/qaloon/data/QaloonData_v10.json',
 ];

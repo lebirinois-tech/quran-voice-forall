@@ -35,9 +35,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install dependencies
-        run: |
-          rm -f bun.lock bun.lockb
-          bun install --no-save --registry https://registry.npmjs.org
+        run: bun install --frozen-lockfile
 
       - name: Configure APK download URL
         run: |

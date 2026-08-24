@@ -15,6 +15,7 @@ interface WarshVerse {
 }
 
 const WARSH_DATA_URLS = [
+  '/data/warsh-data.json',
   'https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/warsh/data/warshData_v10.json',
   'https://raw.githubusercontent.com/thetruetruth/quran-data-kfgqpc/main/warsh/data/warshData_v10.json',
 ];
