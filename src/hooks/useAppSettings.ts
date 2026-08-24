@@ -9,6 +9,8 @@ export type TextDisplayStyle =
   | 'pages-warsh'
   | 'pages-qalun';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
+/** Mode d'affichage des versets : défilement continu ou page par page (une page du Mushaf à la fois). */
+export type VerseViewMode = 'scroll' | 'page';
 
 /**
  * Récitateur par défaut pour chaque qira'a / mode d'affichage.
