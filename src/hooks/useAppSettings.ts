@@ -124,14 +124,21 @@ export const useAppSettings = () => {
     localStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
   }, []);
 
+  const handleVerseViewModeChange = useCallback((mode: VerseViewMode) => {
+    setVerseViewMode(mode);
+    localStorage.setItem(STORAGE_KEYS.VERSE_VIEW_MODE, mode);
+  }, []);
+
   return {
     reciter,
     backgroundColor,
     textDisplayStyle,
     fontSize,
+    verseViewMode,
     onReciterChange: handleReciterChange,
     onBackgroundColorChange: handleBackgroundColorChange,
     onTextDisplayStyleChange: handleTextDisplayStyleChange,
     onFontSizeChange: handleFontSizeChange,
+    onVerseViewModeChange: handleVerseViewModeChange,
   };
 };
