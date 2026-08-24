@@ -30,6 +30,7 @@ const STORAGE_KEYS = {
   BACKGROUND_COLOR: 'quran-background-color',
   TEXT_DISPLAY_STYLE: 'quran-text-display-style',
   FONT_SIZE: 'quran-font-size',
+  VERSE_VIEW_MODE: 'quran-verse-view-mode',
 };
 
 const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
