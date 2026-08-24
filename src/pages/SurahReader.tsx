@@ -204,6 +204,40 @@ const SurahReader = () => {
 
   const isMushafMode = isMushafImageMode;
 
+  // ---- Affichage « page par page » pour le mode versets (coloriage thématique conservé) ----
+  const isPagedVerseView = !isMushafImageMode && appSettings.verseViewMode === 'page';
+
+  const versePageGroups = useMemo(() => {
+    const pagesMap = new Map<number, typeof verses>();
+    verses.forEach((v) => {
+      const p = v.page ?? getVersePage(num, v.number, verses.length);
+      if (!pagesMap.has(p)) pagesMap.set(p, []);
+      pagesMap.get(p)!.push(v);
+    });
+    return Array.from(pagesMap.entries()).sort(([a], [b]) => a - b);
+  }, [verses, num]);
+
+  const [versePageNum, setVersePageNum] = useState<number | null>(null);
+
+  // Initialise / recadre la page affichée (paramètre ?page= ou 1re page de la sourate)
+  useEffect(() => {
+    if (!isPagedVerseView || versePageGroups.length === 0) return;
+    const available = versePageGroups.map(([p]) => p);
+    if (versePageNum !== null && available.includes(versePageNum)) return;
+    const pageParam = searchParams.get('page');
+    const wanted = pageParam ? parseInt(pageParam) : NaN;
+    setVersePageNum(available.includes(wanted) ? wanted : available[0]);
+  }, [isPagedVerseView, versePageGroups, versePageNum, searchParams]);
+
+  // Suit la lecture audio : bascule automatiquement sur la page du verset en cours
+  useEffect(() => {
+    if (!isPagedVerseView || !quranAudio.isPlaying) return;
+    const group = versePageGroups.find(([, vs]) =>
+      vs.some((v) => v.number === quranAudio.currentVerse)
+    );
+    if (group && group[0] !== versePageNum) setVersePageNum(group[0]);
+  }, [isPagedVerseView, quranAudio.isPlaying, quranAudio.currentVerse, versePageGroups, versePageNum]);
+
   // Compute verse range for the current Mushaf page using real API page data
   const currentPageVerseRange = useMemo(() => {
     if (!isMushafMode || !currentMushafPage || verses.length === 0) return null;
@@ -602,14 +636,10 @@ const SurahReader = () => {
               {!isLoadingVerses && !isLoadingTextSource && !error && (
                 <div className="space-y-6">
                   {(() => {
-                    // Group verses by page
-                    const pagesMap = new Map<number, typeof verses>();
-                    verses.forEach((v) => {
-                      const p = v.page ?? getVersePage(num, v.number, verses.length);
-                      if (!pagesMap.has(p)) pagesMap.set(p, []);
-                      pagesMap.get(p)!.push(v);
-                    });
-                    const pageGroups = Array.from(pagesMap.entries()).sort(([a], [b]) => a - b);
+                    const allGroups = versePageGroups;
+                    const pageGroups = isPagedVerseView
+                      ? allGroups.filter(([p]) => p === versePageNum)
+                      : allGroups;
 
                     return pageGroups.map(([pageNum, pageVerses]) => {
                       const firstVerseOfPage = pageVerses[0].number;
