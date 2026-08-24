@@ -269,6 +269,40 @@ export const SettingsDialog = ({
           </RadioGroup>
           </div>
 
+          {/* Verse view mode — only relevant for verse-based (non "pages-") styles */}
+          {onVerseViewModeChange && !textDisplayStyle.startsWith('pages-') && (
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+                <Type className="h-3.5 w-3.5 text-primary" />
+                Affichage des versets / عرض الآيات
+              </Label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {([
+                  { id: 'scroll' as VerseViewMode, name: 'Défilement / تمرير', desc: 'Toutes les pages à la suite' },
+                  { id: 'page' as VerseViewMode, name: 'Page par page / صفحة بصفحة', desc: 'Une page du Mushaf à la fois' },
+                ]).map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => onVerseViewModeChange(m.id)}
+                    className={`p-2 rounded-lg border-2 transition-all text-left ${
+                      verseViewMode === m.id
+                        ? 'border-primary ring-2 ring-primary/30 bg-primary/10'
+                        : 'border-border hover:border-primary/50 bg-muted/50'
+                    }`}
+                    aria-label={m.name}
+                  >
+                    <span className="block text-xs font-medium text-foreground">{m.name}</span>
+                    <span className="block text-[10px] text-muted-foreground">{m.desc}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Le coloriage thématique des versets est conservé dans les deux modes.
+              </p>
+            </div>
+          )}
+
+
           {/* Font Size */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
