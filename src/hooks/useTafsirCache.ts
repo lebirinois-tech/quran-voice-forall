@@ -84,11 +84,28 @@ export const useTafsirCache = () => {
   }, []);
 
   const downloadAllTafsir = useCallback(async () => {
-    for (let s = 1; s <= 114; s++) {
-      if (isTafsirSurahCached(s)) continue;
-      await downloadSurahTafsir(s);
+    setIsDownloading(true);
+    setDownloadingSurah(1);
+    setProgress(0);
+    try {
+      const samples = await Promise.all([
+        getOfflineTafsir(1, 1, 'ar'),
+        getOfflineTafsir(1, 1, 'fr'),
+        getOfflineTafsir(1, 1, 'en'),
+      ]);
+      if (samples.some((sample) => !sample)) throw new Error('Tafsir intégré incomplet');
+      const status = getTafsirCacheStatus();
+      for (let s = 1; s <= 114; s++) {
+        setDownloadingSurah(s);
+        status[s] = true;
+        setProgress(Math.round((s / 114) * 100));
+      }
+      localStorage.setItem(TAFSIR_CACHE_STATUS, JSON.stringify(status));
+    } finally {
+      setIsDownloading(false);
+      setDownloadingSurah(null);
     }
-  }, [downloadSurahTafsir]);
+  }, []);
 
   return {
     downloadSurahTafsir,

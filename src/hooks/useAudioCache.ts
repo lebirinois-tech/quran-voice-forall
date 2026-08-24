@@ -92,6 +92,14 @@ export const useAudioCache = () => {
   const [progress, setProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const requestPersistentStorage = async () => {
+    try {
+      await navigator.storage?.persist?.();
+    } catch {
+      // Some WebViews do not expose persistent storage; IndexedDB still works.
+    }
+  };
+
   const downloadSurahAudio = useCallback(async (reciterId: ReciterId, surahNumber: number) => {
     const surah = surahs.find(s => s.number === surahNumber);
     if (!surah) return;
@@ -100,6 +108,7 @@ export const useAudioCache = () => {
     setDownloadingReciter(reciterId);
     setDownloadingSurah(surahNumber);
     setProgress(0);
+    await requestPersistentStorage();
 
     const totalVerses = surah.versesCount;
     const reciterInfo = RECITERS[reciterId];
@@ -164,10 +173,13 @@ export const useAudioCache = () => {
   }, []);
 
   const downloadAllSurahs = useCallback(async (reciterId: ReciterId) => {
+    setIsDownloading(true);
+    await requestPersistentStorage();
     for (let s = 1; s <= 114; s++) {
       if (isSurahCached(reciterId, s)) continue;
       await downloadSurahAudio(reciterId, s);
     }
+    setIsDownloading(false);
   }, [downloadSurahAudio]);
 
   return {

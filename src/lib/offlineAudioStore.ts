@@ -33,10 +33,16 @@ export const putOfflineAudio = async (
   if (!db) return false;
   return new Promise((resolve) => {
     const transaction = db.transaction(STORE, 'readwrite');
-    transaction.objectStore(STORE).put(blob, keyFor(reciter, surah, verse));
+    const request = transaction.objectStore(STORE).put(blob, keyFor(reciter, surah, verse));
+    let requestSucceeded = false;
+    request.onsuccess = () => { requestSucceeded = true; };
     transaction.oncomplete = () => resolve(true);
     transaction.onerror = () => resolve(false);
     transaction.onabort = () => resolve(false);
+    request.onerror = () => {
+      requestSucceeded = false;
+    };
+    transaction.oncomplete = () => resolve(requestSucceeded);
   });
 };
 
