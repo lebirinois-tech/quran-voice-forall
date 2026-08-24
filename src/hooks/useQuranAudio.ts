@@ -233,9 +233,17 @@ export const useQuranAudio = ({
   const [isPausingForRepeat, setIsPausingForRepeat] = useState(false);
   const [pauseRemainingSec, setPauseRemainingSec] = useState(0);
 
-  // Sync reciter with external prop
+  // Sync reciter with external prop (et relance la lecture en cours avec la bonne riwaya)
   useEffect(() => {
-    setReciter(externalReciter);
+    setReciter((prev) => {
+      if (prev === externalReciter) return prev;
+      if (isPlaying) {
+        // relance le verset courant avec le nouveau récitateur
+        setTimeout(() => playVerseRef.current(currentVerseRef.current), 0);
+      }
+      return externalReciter;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalReciter]);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
