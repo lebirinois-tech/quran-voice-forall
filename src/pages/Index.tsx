@@ -238,7 +238,15 @@ const Index = () => {
           <div className="bg-card border border-border rounded-xl p-2 flex gap-2">
             <button
               type="button"
-              onClick={() => appSettings.onTextDisplayStyleChange('tajweed')}
+              onClick={() =>
+                appSettings.onTextDisplayStyleChange(
+                  appSettings.textDisplayStyle === 'pages-warsh'
+                    ? 'warsh-tajweed'
+                    : appSettings.textDisplayStyle === 'pages-qalun'
+                      ? 'qalun-tajweed'
+                      : 'tajweed'
+                )
+              }
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
                 appSettings.textDisplayStyle.startsWith('pages-')
@@ -252,7 +260,15 @@ const Index = () => {
             </button>
             <button
               type="button"
-              onClick={() => appSettings.onTextDisplayStyleChange('pages-hafs')}
+              onClick={() =>
+                appSettings.onTextDisplayStyleChange(
+                  appSettings.textDisplayStyle === 'warsh-tajweed'
+                    ? 'pages-warsh'
+                    : appSettings.textDisplayStyle === 'qalun-tajweed'
+                      ? 'pages-qalun'
+                      : 'pages-hafs'
+                )
+              }
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all',
                 appSettings.textDisplayStyle.startsWith('pages-')
@@ -265,10 +281,42 @@ const Index = () => {
               <span>Pages <span className="opacity-70 text-xs">/ صفحات</span></span>
             </button>
           </div>
+
+          {/* Riwaya : Hafs / Warsh / Qalun (Tajweed) — s'applique au mode choisi */}
+          <div className="bg-card border border-border rounded-xl p-2 grid grid-cols-3 gap-2 mt-2">
+            {([
+              { key: 'hafs', label: 'Hafs', ar: 'حفص', verse: 'tajweed', page: 'pages-hafs' },
+              { key: 'warsh', label: 'Warsh', ar: 'ورش', verse: 'warsh-tajweed', page: 'pages-warsh' },
+              { key: 'qalun', label: 'Qalun', ar: 'قالون', verse: 'qalun-tajweed', page: 'pages-qalun' },
+            ] as const).map((r) => {
+              const isPages = appSettings.textDisplayStyle.startsWith('pages-');
+              const target = isPages ? r.page : r.verse;
+              const active = appSettings.textDisplayStyle === target;
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => appSettings.onTextDisplayStyleChange(target)}
+                  aria-pressed={active}
+                  className={cn(
+                    'py-2.5 px-2 rounded-lg text-sm font-medium transition-all border',
+                    active
+                      ? 'bg-primary text-primary-foreground shadow border-primary'
+                      : 'text-muted-foreground hover:bg-muted border-border'
+                  )}
+                >
+                  <span className="block">{r.label}</span>
+                  <span className="block text-xs opacity-70 font-amiri" dir="rtl">{r.ar} — تجويد</span>
+                </button>
+              );
+            })}
+          </div>
+
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Choisissez le mode d'affichage par défaut
+            Choisissez le mode d'affichage et la riwaya (Tajweed coloré dans les trois lectures)
           </p>
         </section>
+
 
         {/* Voice Command Section */}
         <section className="mb-8 flex flex-col items-center gap-4 animate-scale-in">
