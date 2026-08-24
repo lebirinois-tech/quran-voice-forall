@@ -29,7 +29,10 @@ let warshDataCache: WarshVerse[] | null = null;
 const isWarshData = (data: unknown): data is WarshVerse[] =>
   Array.isArray(data) && data.every((item) => typeof item === 'object' && item !== null && 'sura_no' in item && 'aya_no' in item && 'aya_text' in item);
 
-const loadFromStorage = (): WarshVerse[] | null => {
+/** Lecture hors ligne : IndexedDB d'abord (téléchargement auto), puis ancien localStorage. */
+const loadFromStorage = async (): Promise<WarshVerse[] | null> => {
+  const fromDb = await getDataset<WarshVerse[]>(WARSH_DATASET_KEY);
+  if (isWarshData(fromDb)) return fromDb;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -40,13 +43,11 @@ const loadFromStorage = (): WarshVerse[] | null => {
   }
 };
 
-const saveToStorage = (data: WarshVerse[]) => {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.warn('Could not cache Warsh data:', e);
-  }
+const saveToStorage = async (data: WarshVerse[]) => {
+  // ~2,8 Mo : IndexedDB uniquement (le quota localStorage est trop faible).
+  await putDataset(WARSH_DATASET_KEY, data);
 };
+
 
 const fetchWarshDataset = async (): Promise<WarshVerse[]> => {
   let lastError: unknown;
