@@ -11,7 +11,7 @@ import {
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { RECITERS, RECITER_IDS, QIRAAT_LABELS, ReciterId, QiraatId, getSafeReciter } from '@/hooks/useQuranAudio';
-import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
+import { TextDisplayStyle, FontSize, VerseViewMode } from '@/hooks/useAppSettings';
 import { AudioCacheSettings } from './AudioCacheSettings';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
