@@ -10,7 +10,7 @@ import {
 } from './ui/dialog';
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { RECITERS, RECITER_IDS, QIRAAT_LABELS, ReciterId, QiraatId, getSafeReciter } from '@/hooks/useQuranAudio';
+import { RECITERS, ReciterId, getSafeReciter } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize, VerseViewMode } from '@/hooks/useAppSettings';
 import { AudioCacheSettings } from './AudioCacheSettings';
 import { toast } from 'sonner';
