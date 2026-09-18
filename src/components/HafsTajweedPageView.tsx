@@ -537,7 +537,8 @@ export const HafsTajweedPageView = ({
       window.clearInterval(poll);
       ro?.disconnect();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fontScale, lineSpacing]);
 
 
 
