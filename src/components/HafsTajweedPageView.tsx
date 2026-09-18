@@ -780,19 +780,17 @@ export const HafsTajweedPageView = ({
               )}
 
               {group.verses.map((v) => {
-                const isCurrent = currentVerse === v.number;
-                // Warsh / Qalun : le texte de la qirâa est fourni en texte brut.
-                // On lui applique alors les couleurs Tajweed automatiques pour
-                // obtenir le même rendu coloré que Hafs, sans perdre la variante.
-                // Le verset en cours est en plus découpé en mots pour suivre la
-                // récitation, sans toucher aux couleurs des règles.
+                // Seule la sourate ouverte est interactive (lecture, menu,
+                // surbrillance) ; les versets des sourates voisines présents
+                // sur la même page sont affichés pour compléter la page.
+                const isCurrent = isMainSurah && currentVerse === v.number;
                 const wordSync = isCurrent && currentWords;
-                const html = wordSync ? currentWords.html : buildVerseHtml(v);
+                const html = wordSync ? currentWords.html : v.html;
                 return (
                   <span
                     key={v.number}
-                    data-verse={v.number}
-                    onClick={() => setMenuVerse(v.number)}
+                    data-verse={isMainSurah ? v.number : undefined}
+                    onClick={isMainSurah ? () => setMenuVerse(v.number) : undefined}
                     title={themeTitle}
                     style={
                       { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
