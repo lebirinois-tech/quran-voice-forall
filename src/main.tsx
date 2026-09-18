@@ -4,12 +4,12 @@ import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 import { scheduleOfflineRiwayatBootstrap } from "./lib/autoOfflineRiwayat";
 import {
-  HAFS_MUSHAF_VERSION,
-  HAFS_MUSHAF_VERSION_KEY,
-  HAFS_CACHE_URL_MARKER,
+  MUSHAF_PAGES_VERSION,
+  MUSHAF_PAGES_VERSION_KEY,
+  MUSHAF_CACHE_URL_MARKERS,
 } from "./lib/hafsMushafVersion";
 
-const APP_SHELL_VERSION = "2026-09-18-hafs-tajweed-pages-v9";
+const APP_SHELL_VERSION = "2026-09-18-mushaf-pages-trois-riwayat-v10";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
 const APP_SHELL_RELOAD_KEY = "quran-app-shell-reload-version";
 
