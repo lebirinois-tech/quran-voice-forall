@@ -825,16 +825,23 @@ export const HafsTajweedPageView = ({
             return (
             <span
               key={`g-${gi}`}
+              data-theme={theme?.id}
+              data-curated={group.curated ? '1' : '0'}
               style={{
                 display: 'inline',
-                // Style « مصحف التفصيل الموضوعي » (محفظ الوحيين) : chaque passage
-                // thématique est un bloc pastel arrondi d'une seule couleur.
+                // Chaque thème = UNE couleur claire distincte, appliquée à
+                // l'ensemble de ses versets. Seuls les passages réellement
+                // attribués à un thème (verset par verset) sont coloriés, pour
+                // que chaque thématique ressorte clairement ; les versets hors
+                // thème précis restent sur le fond de la page.
                 background: theme
-                  ? `hsl(${theme.bgHsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
+                  ? `hsl(${theme.bgHsl} / ${group.curated ? themeOpacity : themeOpacity * 0.2})`
                   : undefined,
                 // Bandeau continu (comme le mushaf thématique de référence) :
                 // ni arrondi ni marge interne, pour que toutes les lignes
                 // gardent exactement la même hauteur et la même largeur.
+                // Une fine lisière de la couleur forte du thème borne le bloc
+                // pour bien distinguer deux thèmes voisins de teintes proches.
                 borderRadius: undefined,
                 padding: undefined,
                 boxShadow: undefined,
