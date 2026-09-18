@@ -1551,12 +1551,12 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Tafsir — {surah?.name} · Verset {tafsirVerse}
+              Tafsir — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {tafsirVerse}
             </DialogTitle>
           </DialogHeader>
           {tafsirVerse !== null && (
             <TafsirPanel
-              surahNumber={surahNumber}
+              surahNumber={menuSurah}
               verseNumber={tafsirVerse}
               isOpen={true}
               onToggle={() => setTafsirVerse(null)}
