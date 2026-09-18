@@ -24,11 +24,18 @@ export const AudioCacheSettings = () => {
   const { downloadSurahTafsir, downloadAllTafsir, isDownloading: isTafsirDownloading, downloadingSurah: tafsirDownloadingSurah, progress: tafsirProgress } = useTafsirCache();
   const { downloadSurahText, downloadAllText, isDownloading: isTextDownloading, downloadingSurah: textDownloadingSurah, progress: textProgress } = useTextCache();
 
-  const [selectedReciter, setSelectedReciter] = useState<ReciterId>('husary');
+  const [selectedReciter, setSelectedReciter] = useState<ReciterId | 'all'>('husary');
   const [showSurahList, setShowSurahList] = useState(false);
   const [activeTab, setActiveTab] = useState<DownloadTab>('audio');
 
-  const audioCachedCount = getCachedSurahCount(selectedReciter);
+  const allRiwayat = selectedReciter === 'all';
+  const targetReciters: ReciterId[] = allRiwayat
+    ? DOWNLOADABLE_RECITERS.map((r) => r.id)
+    : [selectedReciter as ReciterId];
+
+  const audioCachedCount = allRiwayat
+    ? Math.min(...targetReciters.map((r) => getCachedSurahCount(r)))
+    : getCachedSurahCount(selectedReciter as ReciterId);
   const textCachedCount = getCachedTextSurahCount();
   const tafsirCachedCount = getCachedTafsirSurahCount();
 
@@ -37,9 +44,11 @@ export const AudioCacheSettings = () => {
   const handleDownloadAll = async () => {
     try {
       if (activeTab === 'audio') {
-        toast.info(`Téléchargement audio — ${RECITERS[selectedReciter].name}`);
-        await downloadAllSurahs(selectedReciter);
-        toast.success('Audio téléchargé !');
+        for (const reciterId of targetReciters) {
+          toast.info(`Téléchargement audio — ${RECITERS[reciterId].name}`);
+          await downloadAllSurahs(reciterId);
+        }
+        toast.success(allRiwayat ? 'Les trois lectures sont hors connexion !' : 'Audio téléchargé !');
       } else if (activeTab === 'text') {
         toast.info('Téléchargement du texte coranique...');
         await downloadAllText();
@@ -57,7 +66,9 @@ export const AudioCacheSettings = () => {
   const handleDownloadSurah = async (surahNum: number) => {
     try {
       if (activeTab === 'audio') {
-        await downloadSurahAudio(selectedReciter, surahNum);
+        for (const reciterId of targetReciters) {
+          await downloadSurahAudio(reciterId, surahNum);
+        }
         toast.success(`Audio sourate ${surahNum} disponible hors ligne`);
       } else if (activeTab === 'text') {
         await downloadSurahText(surahNum);
@@ -72,7 +83,7 @@ export const AudioCacheSettings = () => {
   };
 
   const isSurahDone = (surahNum: number) => {
-    if (activeTab === 'audio') return isSurahCached(selectedReciter, surahNum);
+    if (activeTab === 'audio') return targetReciters.every((r) => isSurahCached(r, surahNum));
     if (activeTab === 'text') return isTextSurahCached(surahNum);
     return isTafsirSurahCached(surahNum);
   };
@@ -131,10 +142,35 @@ export const AudioCacheSettings = () => {
         </div>
       )}
 
+      {activeTab === 'audio' && (
+        <button
+          onClick={() => { setSelectedReciter('all'); setShowSurahList(false); }}
+          className={`w-full p-2 rounded-lg border-2 text-xs font-semibold transition-all ${
+            allRiwayat
+              ? 'border-primary ring-2 ring-primary/30 bg-primary/10 text-foreground'
+              : 'border-border hover:border-primary/50 bg-muted/50 text-foreground'
+          }`}
+        >
+          ⭐ Les trois lectures / الروايات الثلاث
+        </button>
+      )}
+
       {/* Status */}
       <p className="text-xs text-muted-foreground">
         {currentCachedCount}/114 sourates en cache
+        {activeTab === 'audio' && allRiwayat && ' (dans les trois lectures)'}
       </p>
+
+      {activeTab === 'audio' && (
+        <div className="grid grid-cols-3 gap-1.5 text-[11px] text-muted-foreground">
+          {DOWNLOADABLE_RECITERS.map((r) => (
+            <span key={r.id} className="rounded-md bg-muted/50 px-1.5 py-1 text-center">
+              {r.label.slice(2)} : {getCachedSurahCount(r.id)}/114
+            </span>
+          ))}
+        </div>
+      )}
+
 
       {/* Progress bar during download */}
       {isDownloading && (
