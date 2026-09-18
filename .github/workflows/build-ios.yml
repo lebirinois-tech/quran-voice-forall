@@ -24,8 +24,12 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Select Xcode 16
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+      - name: Select latest available Xcode
+        run: |
+          XCODE_APP=$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)
+          echo "Using $XCODE_APP"
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
