@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, typ
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
@@ -667,7 +668,7 @@ export const HafsTajweedPageView = ({
                 color: 'hsl(43, 62%, 25%)',
               }}
             >
-              {toArabicDigits(currentPage)} · Page {currentPage} / 604
+              <MushafPageBadge page={currentPage} />
             </button>
             <div
               ref={frameRef}

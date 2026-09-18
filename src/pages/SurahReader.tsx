@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { VerseRecorder } from '@/components/VerseRecorder';
 import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
+import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { useFullMushafPage } from '@/hooks/useFullMushafPage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
@@ -766,7 +767,7 @@ const SurahReader = () => {
                               </span>
                               <span aria-hidden="true">›</span>
                               <span className="whitespace-nowrap">
-                                Page <span className="font-semibold text-foreground">{pageNum}</span>/604
+                                <MushafPageBadge page={pageNum} className="font-semibold text-foreground" />
                               </span>
                               <span aria-hidden="true">·</span>
                               <span className="whitespace-nowrap">
@@ -775,10 +776,6 @@ const SurahReader = () => {
                                   {firstVerseOfPage}
                                   {firstVerseOfPage !== lastVerseOfPage ? `–${lastVerseOfPage}` : ''}
                                 </span>
-                              </span>
-                              <span className="hidden sm:inline" aria-hidden="true">·</span>
-                              <span className="hidden sm:inline whitespace-nowrap font-amiri" dir="rtl">
-                                صفحة {pageNum}
                               </span>
                             </nav>
                             <Button
@@ -869,7 +866,7 @@ const SurahReader = () => {
                         <span className="truncate max-w-[38%]">{surah.name}</span>
                         <span aria-hidden="true">·</span>
                         <span>
-                          Page <span className="font-semibold text-foreground">{versePageNum}</span>/604
+                          <MushafPageBadge page={versePageNum} className="font-semibold text-foreground" />
                         </span>
                         {quranAudio.currentVerse > 0 && (
                           <>
