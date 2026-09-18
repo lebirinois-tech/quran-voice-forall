@@ -88,7 +88,7 @@ const refreshStaleAppShellCaches = async () => {
 // stale page images on devices that already have the latest app shell.
 const refreshStaleHafsMushafCaches = async () => {
   try {
-    if (localStorage.getItem(HAFS_MUSHAF_VERSION_KEY) === HAFS_MUSHAF_VERSION) return;
+    if (localStorage.getItem(MUSHAF_PAGES_VERSION_KEY) === MUSHAF_PAGES_VERSION) return;
 
     if ("caches" in window) {
       const cacheNames = await caches.keys();
