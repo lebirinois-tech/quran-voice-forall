@@ -1219,65 +1219,68 @@ export const HafsTajweedPageView = ({
                   </Select>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Page (1-604) — الصفحة</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={604}
-                      inputMode="numeric"
-                      value={pageInput}
-                      onChange={(e) => setPageInput(e.target.value)}
-                      placeholder={String(currentPage)}
-                      className="h-11"
-                    />
-                    <Button
-                      className="h-11"
-                      onClick={() => {
-                        const p = parseInt(pageInput, 10);
-                        if (p >= 1 && p <= 604) {
-                          setPageInput('');
-                          setMenuOpen(false);
-                          goToPage(p);
-                        }
-                      }}
-                    >
-                      Aller
-                    </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Page — الصفحة</label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        max={604}
+                        inputMode="numeric"
+                        value={pageInput}
+                        onChange={(e) => setPageInput(e.target.value)}
+                        placeholder={String(currentPage)}
+                        className="h-11"
+                      />
+                      <Button
+                        className="h-11"
+                        onClick={() => {
+                          const p = parseInt(pageInput, 10);
+                          if (p >= 1 && p <= 604) {
+                            setPageInput('');
+                            setMenuOpen(false);
+                            goToPage(p);
+                          }
+                        }}
+                      >
+                        Aller
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">
+                      Verset — الآية
+                    </label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        max={verses.length || 1}
+                        inputMode="numeric"
+                        value={verseInput}
+                        onChange={(e) => setVerseInput(e.target.value)}
+                        placeholder="1"
+                        className="h-11"
+                      />
+                      <Button
+                        className="h-11"
+                        onClick={() => {
+                          const n = parseInt(verseInput, 10);
+                          if (Number.isFinite(n)) {
+                            setVerseInput('');
+                            setMenuOpen(false);
+                            goToVerse(n);
+                          }
+                        }}
+                      >
+                        Aller
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">
-                    Verset (1-{verses.length || 1}) — الآية
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={verses.length || 1}
-                      inputMode="numeric"
-                      value={verseInput}
-                      onChange={(e) => setVerseInput(e.target.value)}
-                      placeholder="1"
-                      className="h-11"
-                    />
-                    <Button
-                      className="h-11"
-                      onClick={() => {
-                        const n = parseInt(verseInput, 10);
-                        if (Number.isFinite(n)) {
-                          setVerseInput('');
-                          setMenuOpen(false);
-                          goToVerse(n);
-                        }
-                      }}
-                    >
-                      Aller
-                    </Button>
-                  </div>
-                </div>
 
                 <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Juz (1-30) — الجزء</label>
