@@ -763,6 +763,39 @@ export const HafsTajweedPageView = ({
                 Go
               </button>
             </form>
+
+            {/* Saisie directe d'un numéro de verset de la sourate courante */}
+            <form
+              dir="ltr"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const target = parseInt(verseInput, 10);
+                if (Number.isFinite(target)) {
+                  goToVerse(target);
+                  setVerseInput('');
+                }
+              }}
+              className="mx-auto mb-1.5 flex w-fit max-w-[90%] items-center gap-1.5 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
+            >
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={verses.length || 1}
+                placeholder="Verset"
+                aria-label="Aller au verset"
+                value={verseInput}
+                onChange={(e) => setVerseInput(e.target.value)}
+                className="h-6 w-16 rounded-md border border-border bg-background px-2 text-center text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
+                className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                Go
+              </button>
+            </form>
             <div
               ref={frameRef}
               className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
