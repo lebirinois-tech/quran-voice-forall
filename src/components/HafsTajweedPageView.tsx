@@ -676,16 +676,13 @@ export const HafsTajweedPageView = ({
 
               {group.verses.map((v) => {
                 const isCurrent = currentVerse === v.number;
-                const providedTajweed = versesTajweed?.[v.number];
                 // Warsh / Qalun : le texte de la qirâa est fourni en texte brut.
                 // On lui applique alors les couleurs Tajweed automatiques pour
                 // obtenir le même rendu coloré que Hafs, sans perdre la variante.
-                const source =
-                  preferProvidedTajweed && providedTajweed ? providedTajweed : v.text;
-                const alreadyColoured = /<span[\s>]/i.test(source);
-                const html = alreadyColoured
-                  ? sanitizeTajweedHtml(source)
-                  : sanitizeTajweedHtml(applyAutoTajweed(source));
+                // Le verset en cours est en plus découpé en mots pour suivre la
+                // récitation, sans toucher aux couleurs des règles.
+                const wordSync = isCurrent && currentWords;
+                const html = wordSync ? currentWords.html : buildVerseHtml(v);
                 return (
                   <span
                     key={v.number}
@@ -699,7 +696,10 @@ export const HafsTajweedPageView = ({
                       'inline transition-colors cursor-pointer rounded-sm',
                       isCurrent &&
                         (isAudioPlaying
-                          ? 'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40 animate-pulse'
+                          ? cn(
+                              'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40',
+                              !wordSync && 'animate-pulse'
+                            )
                           : 'bg-primary/20 ring-2 ring-primary/60')
                     )}
                   >
