@@ -15,13 +15,25 @@
 // Output is HTML with <span style="color: #xxxxxx;"> wrappers, safe for the
 // DOMPurify sanitizer used in the Tajweed pipeline.
 
+// Palette identique à celle du mode Hafs (FROZEN) pour un rendu cohérent
+// entre Hafs, Warsh et Qalun.
 const COLORS = {
   madd: '#DD0000',
   ghunnah: '#2AAD2A',
   qalqalah: '#2E6ECB',
   iqlab: '#D4740C',
   ikhfa: '#DD0000',
+  idghamGhunnah: '#B266D9',
+  silent: '#AAAAAA',
 } as const;
+
+// Lettres solaires (lam shamsiyyah, non prononcé → gris comme en Hafs)
+const SUN_LETTERS = new Set([
+  'ت','ث','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ل','ن',
+]);
+const ALEF_WASLA = '\u0671';
+const ALEF = '\u0627';
+const LAM = '\u0644';
 
 const QALQALAH_LETTERS = new Set(['ق', 'ط', 'ب', 'ج', 'د']);
 const TANWEEN_MARKS = new Set(['\u064B', '\u064C', '\u064D']);
