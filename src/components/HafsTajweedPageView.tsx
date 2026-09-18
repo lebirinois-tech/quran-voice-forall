@@ -31,6 +31,8 @@ interface HafsTajweedPageViewProps {
    * already ships coloured HTML.
    */
   preferProvidedTajweed?: boolean;
+  /** Contenu complet de la page (toutes les sourates), façon Mushaf imprimé. */
+  fullPageGroups?: FullPageGroup[] | null;
   initialPage?: number;
   onPageChange?: (page: number) => void;
   currentVerse?: number;
@@ -64,6 +66,7 @@ export const HafsTajweedPageView = ({
   verses,
   versesTajweed,
   preferProvidedTajweed = false,
+  fullPageGroups = null,
   initialPage,
   onPageChange,
   currentVerse,
