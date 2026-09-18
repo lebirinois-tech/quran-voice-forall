@@ -473,7 +473,8 @@ export const HafsTajweedPageView = ({
       // page « tremble » en permanence.
       const sig = `${content.length}|${Math.round(textEl.clientWidth)}`;
       const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
-      if (measuredRef.current && sig === sigRef.current && !targetChanged) return;
+      const overflowing = frameEl.scrollHeight - frameEl.clientHeight > 2;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
       sigRef.current = sig;
       lastTargetRef.current = target;
 
