@@ -1367,14 +1367,25 @@ export const HafsTajweedPageView = ({
                 </Button>
               );
             })}
-            <Button
-              variant={loopScope ? 'default' : 'ghost'}
-              className="h-11 w-full justify-center gap-2 text-sm"
-              onClick={() => setLoopScope((v) => !v)}
-            >
-              <Repeat className="h-4 w-4" />
-              Répéter en boucle {loopScope ? '(activé)' : '(désactivé)'}
-            </Button>
+            <div className="space-y-1.5 pt-1">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Repeat className="h-3.5 w-3.5" />
+                Nombre de répétitions — عدد التكرار
+              </p>
+              <div className="grid grid-cols-6 gap-1">
+                {[1, 2, 3, 5, 10, 0].map((n) => (
+                  <Button
+                    key={n}
+                    variant={repeatCount === n ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-9 px-0 text-xs"
+                    onClick={() => setRepeatCount(n)}
+                  >
+                    {n === 0 ? '∞' : n}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
