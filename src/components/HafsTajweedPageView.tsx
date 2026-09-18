@@ -1343,7 +1343,7 @@ export const HafsTajweedPageView = ({
 
       {/* Choix de la portée de lecture : verset, page, sourate, juz */}
       <Dialog open={scopeOpen} onOpenChange={setScopeOpen}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>Choix de la lecture — اختيار القراءة</DialogTitle>
           </DialogHeader>
@@ -1393,7 +1393,7 @@ export const HafsTajweedPageView = ({
       {/* Recorder dialog */}
 
       <Dialog open={recorderVerse !== null} onOpenChange={(o) => !o && setRecorderVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               Enregistrement — {surah?.name} · Verset {recorderVerse}
@@ -1417,7 +1417,7 @@ export const HafsTajweedPageView = ({
 
       {/* Verse action menu */}
       <Dialog open={menuVerse !== null} onOpenChange={(o) => !o && setMenuVerse(null)}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>
               Verset {menuVerse} — {surah?.name}
@@ -1507,7 +1507,7 @@ export const HafsTajweedPageView = ({
 
       {/* Full verse-mode content (translation, TTS, share, download, bookmark) */}
       <Dialog open={detailVerse !== null} onOpenChange={(o) => !o && setDetailVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               {surah?.name} · Verset {detailVerse}
@@ -1538,7 +1538,7 @@ export const HafsTajweedPageView = ({
 
       {/* Tafsir Al-Muyassar dialog */}
       <Dialog open={tafsirVerse !== null} onOpenChange={(o) => !o && setTafsirVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               Tafsir — {surah?.name} · Verset {tafsirVerse}
@@ -1557,7 +1557,7 @@ export const HafsTajweedPageView = ({
 
       {/* Thematic tafsir dialog */}
       <Dialog open={themeVerse !== null} onOpenChange={(o) => !o && setThemeVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               Tafsir thématique — {surah?.name} · Verset {themeVerse}
