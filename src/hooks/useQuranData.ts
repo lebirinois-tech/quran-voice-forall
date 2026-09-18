@@ -48,7 +48,7 @@ const loadSurahFromCache = (surahNumber: number) => getSurahText(surahNumber);
 // Parse tajweed markers from API into styled HTML
 // Using Quran University / Al Muhafez standard color scheme
 // Colors extracted from official GTAF Quran app documentation
-const parseTajweedText = (text: string): string => {
+export const parseTajweedText = (text: string): string => {
   // ═══════════════════════════════════════════════════════════════════════════
   // FROZEN TAJWEED COLOR SCHEME - DO NOT MODIFY
   // User confirmed on 2026-01-28: Qalqalah=Blue, Madd=Red, Ghunnah=Green
