@@ -767,7 +767,7 @@ const SurahReader = () => {
                               </span>
                               <span aria-hidden="true">›</span>
                               <span className="whitespace-nowrap">
-                                Page <span className="font-semibold text-foreground">{pageNum}</span>/604
+                                <MushafPageBadge page={pageNum} className="font-semibold text-foreground" />
                               </span>
                               <span aria-hidden="true">·</span>
                               <span className="whitespace-nowrap">
@@ -870,7 +870,7 @@ const SurahReader = () => {
                         <span className="truncate max-w-[38%]">{surah.name}</span>
                         <span aria-hidden="true">·</span>
                         <span>
-                          Page <span className="font-semibold text-foreground">{versePageNum}</span>/604
+                          <MushafPageBadge page={versePageNum} className="font-semibold text-foreground" />
                         </span>
                         {quranAudio.currentVerse > 0 && (
                           <>
