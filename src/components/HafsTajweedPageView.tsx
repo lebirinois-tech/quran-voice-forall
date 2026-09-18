@@ -458,7 +458,10 @@ export const HafsTajweedPageView = ({
       const content = (textEl.textContent || '').trim();
       if (content.length < 5) return;
 
-      const available = frameEl.clientHeight - 8;
+      const frameStyle = window.getComputedStyle(frameEl);
+      const framePad =
+        parseFloat(frameStyle.paddingTop || '0') + parseFloat(frameStyle.paddingBottom || '0');
+      const available = frameEl.clientHeight - framePad - 8;
       if (available <= 0) return;
       const bismillah = frameEl.querySelector('[data-bismillah]') as HTMLElement | null;
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
