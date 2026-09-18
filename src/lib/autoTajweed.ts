@@ -133,16 +133,38 @@ export const applyAutoTajweed = (text: string): string => {
       continue;
     }
 
-    // Meem-sakin (مْ) followed by ب (Ikhfa Shafawi) or م (Idgham Shafawi) → Ghunnah
+    // Meem-sakin (مْ) : ikhfa shafawi devant ب (rouge), idgham shafawi devant م (violet)
     if (ch === SUKUN && prev === MEEM) {
       const nextLetterIdx = findNextLetter(chars, i + 1);
       if (nextLetterIdx !== -1) {
         const nextLetter = chars[nextLetterIdx];
-        if (nextLetter === BAA || nextLetter === MEEM) {
-          paint(i - 1, COLORS.ghunnah);
-          paint(i, COLORS.ghunnah);
-          paint(nextLetterIdx, COLORS.ghunnah);
+        const color =
+          nextLetter === BAA
+            ? COLORS.ikhfa
+            : nextLetter === MEEM
+              ? COLORS.idghamGhunnah
+              : null;
+        if (color) {
+          paint(i - 1, color);
+          paint(i, color);
+          paint(nextLetterIdx, color);
         }
+      }
+      continue;
+    }
+
+    // Hamzat wasl (ٱ) : non prononcée en liaison → gris, comme en Hafs
+    if (ch === ALEF_WASLA) {
+      paint(i, COLORS.silent);
+      continue;
+    }
+
+    // Lam shamsiyyah : ال + lettre solaire → le lam n'est pas prononcé (gris)
+    if (ch === LAM && (prev === ALEF || prev === ALEF_WASLA)) {
+      const nextLetterIdx = findNextLetter(chars, i + 1);
+      if (nextLetterIdx !== -1 && SUN_LETTERS.has(chars[nextLetterIdx])) {
+        paint(i, COLORS.silent);
+        if (chars[i + 1] === SUKUN) paint(i + 1, COLORS.silent);
       }
       continue;
     }
