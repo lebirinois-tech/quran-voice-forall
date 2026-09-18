@@ -99,6 +99,25 @@ export const HafsTajweedPageView = ({
   const [showMenuButton, setShowMenuButton] = useState(true);
   const [pageInput, setPageInput] = useState('');
 
+  // Réglages de lisibilité, persistés : échelle de la police (%) et
+  // opacité des fonds thématiques (0 à 0.4).
+  const [fontScalePct, setFontScalePct] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('mushaf-font-scale'));
+    return Number.isFinite(raw) && raw >= 60 && raw <= 160 ? raw : 100;
+  });
+  const [themeOpacityPct, setThemeOpacityPct] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
+    return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 20;
+  });
+  const fontScale = fontScalePct / 100;
+  const themeOpacity = themeOpacityPct / 100;
+  useEffect(() => {
+    localStorage.setItem('mushaf-font-scale', String(fontScalePct));
+  }, [fontScalePct]);
+  useEffect(() => {
+    localStorage.setItem('mushaf-theme-opacity', String(themeOpacityPct));
+  }, [themeOpacityPct]);
+
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
     const pages = verses.map((v) => v.page ?? 1);
@@ -329,7 +348,7 @@ export const HafsTajweedPageView = ({
 
   useLayoutEffect(() => {
     sigRef.current = '';
-  }, [currentPage, surahNumber]);
+  }, [currentPage, surahNumber, fontScalePct]);
 
   useLayoutEffect(() => {
     const measure = (force = false) => {
@@ -375,7 +394,7 @@ export const HafsTajweedPageView = ({
           else hi = mid;
         }
       }
-      const px = Math.floor(lo * 10) / 10;
+      const px = Math.max(MIN_PX, Math.min(MAX_PX, Math.floor(lo * fontScale * 10) / 10));
 
       // 2) Étirer l'interligne pour combler le vide restant, sans déborder.
       let lhLo = MIN_LH;
@@ -570,10 +589,10 @@ export const HafsTajweedPageView = ({
                 // pour les blocs thématiques précis, plus discrète pour le
                 // thème général de la sourate.
                 background: theme
-                  ? `hsl(${theme.hsl} / ${group.curated ? 0.2 : 0.07})`
+                  ? `hsl(${theme.hsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
                   : undefined,
-                boxShadow: theme && group.curated
-                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / 0.55)`
+                boxShadow: theme && group.curated && themeOpacity > 0.02
+                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / ${Math.min(0.85, themeOpacity * 2.75)})`
                   : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
@@ -959,6 +978,49 @@ export const HafsTajweedPageView = ({
             </section>
 
             <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                Lisibilité — الوضوح
+              </h4>
+              <div className="space-y-3 rounded-2xl border border-border bg-card p-3">
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Taille de la police — حجم الخط</span>
+                    <span className="font-bold text-foreground">{fontScalePct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={60}
+                    max={160}
+                    step={5}
+                    value={fontScalePct}
+                    onChange={(e) => setFontScalePct(Number(e.target.value))}
+                    className="w-full accent-primary"
+                    aria-label="Taille de la police"
+                  />
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Fond des thèmes — خلفية المواضيع</span>
+                    <span className="font-bold text-foreground">{themeOpacityPct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={40}
+                    step={1}
+                    value={themeOpacityPct}
+                    onChange={(e) => setThemeOpacityPct(Number(e.target.value))}
+                    className="w-full accent-primary"
+                    aria-label="Opacité du fond thématique"
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Les couleurs du Tajweed (règles de lecture) restent inchangées.
+                </p>
+              </div>
+            </section>
+
+            <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Paramètres</h4>
               {settingsControls && <div className="mb-2">{settingsControls}</div>}
               <Button
@@ -1070,7 +1132,7 @@ export const HafsTajweedPageView = ({
                         key={t.id}
                         className="text-xs px-2 py-1 rounded-full border"
                         style={{
-                          backgroundColor: `hsl(${t.hsl} / 0.18)`,
+                          backgroundColor: `hsl(${t.hsl} / ${themeOpacity})`,
                           borderColor: `hsl(${t.hsl} / 0.55)`,
                         }}
                       >
