@@ -211,10 +211,14 @@ const SurahReader = () => {
 
   const handleNavigateToJuz = (juzNum: number) => {
     const juz = juzMapping[juzNum];
-    if (juz) {
-      navigate(`/surah/${juz.surah}`);
-      toast.success(`Navigation vers Juz ${juzNum} - ${juz.name}`);
+    if (!juz) return;
+    const page = JUZ_START_PAGES[juzNum] ?? 1;
+    if (quranAudio.isPlaying) {
+      setManualAudioPageRequest(page);
     }
+    navigate(`/surah/${juz.surah}?page=${page}&verse=${juz.verse}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.success(`Juz ${juzNum} — ${juz.name} (page ${page})`);
   };
 
   const isMushafMode = isMushafImageMode;
