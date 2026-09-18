@@ -289,18 +289,21 @@ export const HafsTajweedPageView = ({
 
 
 
-  // Regroupe les versets consécutifs partageant le MÊME thème dominant unique
-  // (Tafsir Mawdou'i). Un seul thème par bloc => une seule couleur, pas de
-  // dégradé : le coloriage reste lisible et cohérent dans toutes les sourates.
-  const themeGroups = useMemo(() => {
+  // Regroupe les versets consécutifs (d'une même sourate) partageant le MÊME
+  // thème dominant unique (Tafsir Mawdou'i). Un seul thème par bloc => une
+  // seule couleur, pas de dégradé : lisible et cohérent dans toutes les sourates.
+  const groupByTheme = (
+    sNo: number,
+    list: { number: number; html: string }[]
+  ) => {
     const groups: {
       theme: ReturnType<typeof getPrimaryThemeForVerse>['theme'];
       curated: boolean;
       key: string;
-      verses: typeof pageVerses;
+      verses: { number: number; html: string }[];
     }[] = [];
-    for (const v of pageVerses) {
-      const { theme, curated } = getPrimaryThemeForVerse(surahNumber, v.number);
+    for (const v of list) {
+      const { theme, curated } = getPrimaryThemeForVerse(sNo, v.number);
       const key = `${theme?.id ?? 'none'}:${curated ? 'c' : 'd'}`;
       const last = groups[groups.length - 1];
       if (last && last.key === key) {
@@ -310,7 +313,7 @@ export const HafsTajweedPageView = ({
       }
     }
     return groups;
-  }, [pageVerses, surahNumber]);
+  };
 
 
   // Auto-scroll current verse into view
