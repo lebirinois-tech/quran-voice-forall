@@ -559,8 +559,9 @@ export const HafsTajweedPageView = ({
       textEl.style.lineHeight = prevLh;
       textEl.classList.remove('fit-measuring');
 
-      setFontPx((cur) => (Math.abs(cur - px) < 0.2 ? cur : px));
-      setLineHeight((cur) => (Math.abs(cur - lh) < 0.01 ? cur : lh));
+      measuredRef.current = true;
+      setFontPx((cur) => (Math.abs(cur - px) < 0.4 ? cur : px));
+      setLineHeight((cur) => (Math.abs(cur - lh) < 0.02 ? cur : lh));
     };
 
     let raf = 0;
@@ -571,21 +572,35 @@ export const HafsTajweedPageView = ({
 
     schedule(true);
     // Le contenu (versets, tajweed) et les polices arrivent de façon asynchrone :
-    // on surveille en continu la signature du contenu, sans recalcul inutile.
-    const poll = window.setInterval(() => schedule(false), 250);
-    (document as any).fonts?.ready?.then?.(() => schedule(true));
+    // on surveille quelques secondes, puis on fige la mise en page pour qu'elle
+    // ne bouge plus pendant la lecture.
+    let ticks = 0;
+    const poll = window.setInterval(() => {
+      ticks += 1;
+      schedule(false);
+      if (ticks >= 16) window.clearInterval(poll);
+    }, 250);
+    (document as any).fonts?.ready?.then?.(() => schedule(false));
 
     const frameEl = frameRef.current;
-    const ro = frameEl ? new ResizeObserver(() => schedule(true)) : null;
+    let roTimer = 0;
+    const ro = frameEl
+      ? new ResizeObserver(() => {
+          window.clearTimeout(roTimer);
+          // Débounce : rotation ou vrai changement de taille seulement.
+          roTimer = window.setTimeout(() => schedule(false), 200);
+        })
+      : null;
     if (frameEl && ro) ro.observe(frameEl);
 
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(poll);
+      window.clearTimeout(roTimer);
       ro?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontScale, lineSpacing]);
+  }, [fontScale, lineSpacing, currentPage, surahNumber]);
 
 
 
