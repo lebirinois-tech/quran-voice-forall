@@ -50,8 +50,8 @@ interface HafsTajweedPageViewProps {
   onNavigateToJuz?: (juz: number) => void;
   playbackSpeed?: number;
   onSpeedChange?: (speed: number) => void;
-  /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). */
-  onPlayRange?: (startVerse: number, endVerse: number, loop: boolean) => void;
+  /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). repeatCount: 0 = infini. */
+  onPlayRange?: (startVerse: number, endVerse: number, loop: boolean, repeatCount?: number) => void;
 
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
@@ -100,7 +100,7 @@ export const HafsTajweedPageView = ({
   const { reciter, textDisplayStyle, fontSize } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
-  const [loopScope, setLoopScope] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(1); // 0 = boucle infinie
   const [activeScope, setActiveScope] = useState<'verse' | 'page' | 'surah' | 'juz'>('verse');
 
 
@@ -282,9 +282,9 @@ export const HafsTajweedPageView = ({
       const scope = playScopes[key];
       setActiveScope(key as 'verse' | 'page' | 'surah' | 'juz');
       setScopeOpen(false);
-      onPlayRange?.(scope.start, scope.end, loopScope);
+      onPlayRange?.(scope.start, scope.end, repeatCount === 0, repeatCount);
     },
-    [playScopes, loopScope, onPlayRange]
+    [playScopes, repeatCount, onPlayRange]
   );
 
 
