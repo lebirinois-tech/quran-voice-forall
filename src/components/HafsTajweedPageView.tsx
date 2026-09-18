@@ -1425,11 +1425,12 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Verset {menuVerse} — {surah?.name}
+              Verset {menuVerse} — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name}
             </DialogTitle>
           </DialogHeader>
           {menuVerse !== null && (() => {
-            const themes = getThemesForVerse(surahNumber, menuVerse);
+            const themes = getThemesForVerse(menuSurah, menuVerse);
+            const isMenuMainSurah = menuSurah === surahNumber;
             return (
               <div className="flex flex-col gap-2">
                 {themes.length > 0 && (
