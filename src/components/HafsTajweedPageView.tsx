@@ -239,9 +239,8 @@ export const HafsTajweedPageView = ({
       if (!target) return;
       const p = target.page ?? currentPage;
       if (p !== currentPage) goToPage(p);
-      onVerseClick?.(n);
     },
-    [verses, currentPage, goToPage, onVerseClick]
+    [verses, currentPage, goToPage]
   );
 
   const pageVerses = useMemo(
