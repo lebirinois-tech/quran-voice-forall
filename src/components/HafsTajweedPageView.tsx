@@ -308,6 +308,50 @@ export const HafsTajweedPageView = ({
     }
   }, [currentVerse, currentPage]);
 
+  // ——— Synchronisation Tajweed / récitation ———
+  // Le texte coloré du verset en cours est découpé en mots (les couleurs des
+  // règles restent intactes) et le mot récité est surligné en suivant la
+  // progression de l'audio, pondérée par la longueur de chaque mot.
+  const buildVerseHtml = useCallback(
+    (v: Verse) => {
+      const provided = versesTajweed?.[v.number];
+      const source = preferProvidedTajweed && provided ? provided : v.text;
+      const alreadyColoured = /<span[\s>]/i.test(source);
+      return alreadyColoured
+        ? sanitizeTajweedHtml(source)
+        : sanitizeTajweedHtml(applyAutoTajweed(source));
+    },
+    [preferProvidedTajweed, versesTajweed]
+  );
+
+  const currentWords = useMemo(() => {
+    if (!currentVerse) return null;
+    const v = pageVerses.find((x) => x.number === currentVerse);
+    if (!v) return null;
+    return splitHtmlIntoWords(buildVerseHtml(v));
+  }, [currentVerse, pageVerses, buildVerseHtml]);
+
+  const activeWordIndex = useMemo(
+    () => (currentWords ? wordIndexForProgress(currentWords.weights, verseProgress) : -1),
+    [currentWords, verseProgress]
+  );
+
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root || !currentVerse) return;
+    const nodes = root.querySelectorAll<HTMLElement>(
+      `[data-verse="${currentVerse}"] [data-w]`
+    );
+    nodes.forEach((n) => {
+      const i = Number(n.dataset.w);
+      const active = !!isAudioPlaying && i === activeWordIndex;
+      const done = !!isAudioPlaying && i < activeWordIndex;
+      n.classList.toggle('tw-word-active', active);
+      n.classList.toggle('tw-word-done', done);
+    });
+  }, [activeWordIndex, currentVerse, currentWords, isAudioPlaying, currentPage]);
+
+
   // Swipe right (left-to-right) advances to the next page, swipe left goes back.
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
