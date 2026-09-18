@@ -100,9 +100,9 @@ const refreshStaleHafsMushafCaches = async () => {
             requests
               .filter((request) => {
                 const url = request.url;
-                if (!url.includes(HAFS_CACHE_URL_MARKER)) return false;
+                if (!MUSHAF_CACHE_URL_MARKERS.some((marker) => url.includes(marker))) return false;
                 // Keep entries already keyed on the current version.
-                return !url.includes(`v=${HAFS_MUSHAF_VERSION}`);
+                return !url.includes(`v=${MUSHAF_PAGES_VERSION}`);
               })
               .map((request) => cache.delete(request))
           );
@@ -110,7 +110,7 @@ const refreshStaleHafsMushafCaches = async () => {
       );
     }
 
-    localStorage.setItem(HAFS_MUSHAF_VERSION_KEY, HAFS_MUSHAF_VERSION);
+    localStorage.setItem(MUSHAF_PAGES_VERSION_KEY, MUSHAF_PAGES_VERSION);
   } catch (error) {
     console.warn("Hafs Mushaf cache refresh skipped:", error);
   }
