@@ -66,6 +66,7 @@ export const HafsTajweedPageView = ({
   onPageChange,
   currentVerse,
   isAudioPlaying,
+  verseProgress = 0,
   onVerseClick,
   onPlayPause,
   onNextVerse,
