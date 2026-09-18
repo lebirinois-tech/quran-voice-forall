@@ -589,10 +589,10 @@ export const HafsTajweedPageView = ({
                 // pour les blocs thématiques précis, plus discrète pour le
                 // thème général de la sourate.
                 background: theme
-                  ? `hsl(${theme.hsl} / ${group.curated ? 0.2 : 0.07})`
+                  ? `hsl(${theme.hsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
                   : undefined,
-                boxShadow: theme && group.curated
-                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / 0.55)`
+                boxShadow: theme && group.curated && themeOpacity > 0.02
+                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / ${Math.min(0.85, themeOpacity * 2.75)})`
                   : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
