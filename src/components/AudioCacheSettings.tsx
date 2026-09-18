@@ -24,11 +24,18 @@ export const AudioCacheSettings = () => {
   const { downloadSurahTafsir, downloadAllTafsir, isDownloading: isTafsirDownloading, downloadingSurah: tafsirDownloadingSurah, progress: tafsirProgress } = useTafsirCache();
   const { downloadSurahText, downloadAllText, isDownloading: isTextDownloading, downloadingSurah: textDownloadingSurah, progress: textProgress } = useTextCache();
 
-  const [selectedReciter, setSelectedReciter] = useState<ReciterId>('husary');
+  const [selectedReciter, setSelectedReciter] = useState<ReciterId | 'all'>('husary');
   const [showSurahList, setShowSurahList] = useState(false);
   const [activeTab, setActiveTab] = useState<DownloadTab>('audio');
 
-  const audioCachedCount = getCachedSurahCount(selectedReciter);
+  const allRiwayat = selectedReciter === 'all';
+  const targetReciters: ReciterId[] = allRiwayat
+    ? DOWNLOADABLE_RECITERS.map((r) => r.id)
+    : [selectedReciter as ReciterId];
+
+  const audioCachedCount = allRiwayat
+    ? Math.min(...targetReciters.map((r) => getCachedSurahCount(r)))
+    : getCachedSurahCount(selectedReciter as ReciterId);
   const textCachedCount = getCachedTextSurahCount();
   const tafsirCachedCount = getCachedTafsirSurahCount();
 
@@ -37,9 +44,11 @@ export const AudioCacheSettings = () => {
   const handleDownloadAll = async () => {
     try {
       if (activeTab === 'audio') {
-        toast.info(`Téléchargement audio — ${RECITERS[selectedReciter].name}`);
-        await downloadAllSurahs(selectedReciter);
-        toast.success('Audio téléchargé !');
+        for (const reciterId of targetReciters) {
+          toast.info(`Téléchargement audio — ${RECITERS[reciterId].name}`);
+          await downloadAllSurahs(reciterId);
+        }
+        toast.success(allRiwayat ? 'Les trois lectures sont hors connexion !' : 'Audio téléchargé !');
       } else if (activeTab === 'text') {
         toast.info('Téléchargement du texte coranique...');
         await downloadAllText();
@@ -57,7 +66,9 @@ export const AudioCacheSettings = () => {
   const handleDownloadSurah = async (surahNum: number) => {
     try {
       if (activeTab === 'audio') {
-        await downloadSurahAudio(selectedReciter, surahNum);
+        for (const reciterId of targetReciters) {
+          await downloadSurahAudio(reciterId, surahNum);
+        }
         toast.success(`Audio sourate ${surahNum} disponible hors ligne`);
       } else if (activeTab === 'text') {
         await downloadSurahText(surahNum);
@@ -72,7 +83,7 @@ export const AudioCacheSettings = () => {
   };
 
   const isSurahDone = (surahNum: number) => {
-    if (activeTab === 'audio') return isSurahCached(selectedReciter, surahNum);
+    if (activeTab === 'audio') return targetReciters.every((r) => isSurahCached(r, surahNum));
     if (activeTab === 'text') return isTextSurahCached(surahNum);
     return isTafsirSurahCached(surahNum);
   };
