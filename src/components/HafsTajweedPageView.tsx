@@ -110,6 +110,7 @@ export const HafsTajweedPageView = ({
   // Bouton d'appel du menu : masquable pour libérer toute la page.
   const [showMenuButton, setShowMenuButton] = useState(true);
   const [pageInput, setPageInput] = useState('');
+  const [verseInput, setVerseInput] = useState('');
 
   // Réglages de lisibilité, persistés : échelle de la police (%) et
   // opacité des fonds thématiques (0 à 0.4).
@@ -229,6 +230,19 @@ export const HafsTajweedPageView = ({
   const goNext = useCallback(() => {
     goToPage(currentPage + 1);
   }, [currentPage, goToPage]);
+
+  // Navigation directe vers un numéro de verset de la sourate courante :
+  // on ouvre la page du Mushaf qui contient ce verset.
+  const goToVerse = useCallback(
+    (n: number) => {
+      const target = verses.find((v) => v.number === n);
+      if (!target) return;
+      const p = target.page ?? currentPage;
+      if (p !== currentPage) goToPage(p);
+      onVerseClick?.(n);
+    },
+    [verses, currentPage, goToPage, onVerseClick]
+  );
 
   const pageVerses = useMemo(
     () => verses.filter((v) => (v.page ?? 1) === currentPage),
