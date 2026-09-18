@@ -419,7 +419,9 @@ export const HafsTajweedPageView = ({
     else goPrev();
   };
 
-  const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
+  // Avec la page complète, la Basmala est affichée dans l'en-tête de sourate.
+  const showBismillah =
+    !fullPageGroups?.length && currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
   // ---- Remplissage vertical de la page --------------------------------
   // Recherche binaire déterministe : on cherche la plus grande échelle de
