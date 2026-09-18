@@ -290,3 +290,17 @@
 
 /* Gel des transitions pendant la mesure d'ajustement de page */
 .fit-measuring, .fit-measuring * { transition: none !important; animation: none !important; }
+
+/* Suivi de la récitation mot à mot : le surlignage n'affecte que le fond,
+   les couleurs des règles de Tajweed restent intactes. */
+[data-w] {
+  border-radius: 0.15em;
+  transition: background-color 120ms linear, box-shadow 120ms linear;
+}
+[data-w].tw-word-active {
+  background-color: hsl(var(--primary) / 0.35);
+  box-shadow: inset 0 -0.12em 0 0 hsl(var(--primary) / 0.85);
+}
+[data-w].tw-word-done {
+  background-color: hsl(var(--primary) / 0.12);
+}
