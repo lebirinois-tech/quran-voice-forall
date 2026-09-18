@@ -113,14 +113,22 @@ export const HafsTajweedPageView = ({
     const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
     return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 20;
   });
+  const [lineSpacingPct, setLineSpacingPct] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('mushaf-line-spacing'));
+    return Number.isFinite(raw) && raw >= 80 && raw <= 150 ? raw : 100;
+  });
   const fontScale = fontScalePct / 100;
   const themeOpacity = themeOpacityPct / 100;
+  const lineSpacing = lineSpacingPct / 100;
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
   }, [fontScalePct]);
   useEffect(() => {
     localStorage.setItem('mushaf-theme-opacity', String(themeOpacityPct));
   }, [themeOpacityPct]);
+  useEffect(() => {
+    localStorage.setItem('mushaf-line-spacing', String(lineSpacingPct));
+  }, [lineSpacingPct]);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
@@ -387,16 +395,18 @@ export const HafsTajweedPageView = ({
   const [lineHeight, setLineHeight] = useState(1.95);
   const [fontPx, setFontPx] = useState(0); // 0 = pas encore mesuré
 
-  const MIN_LH = 1.4;
-  const MAX_LH = 2.6;
+  // L'interlignage choisi par l'utilisateur déplace les bornes : plus il est
+  // large, plus la police se réduit pour que la page reste pleine et lisible.
+  const MIN_LH = 1.4 * lineSpacing;
+  const MAX_LH = 2.6 * lineSpacing;
   const MIN_PX = 14;
   const MAX_PX = 64;
-  const BASE_LH = 1.9;
+  const BASE_LH = 1.9 * lineSpacing;
   const sigRef = useRef('');
 
   useLayoutEffect(() => {
     sigRef.current = '';
-  }, [currentPage, surahNumber, fontScalePct]);
+  }, [currentPage, surahNumber, fontScalePct, lineSpacingPct]);
 
   useLayoutEffect(() => {
     const measure = (force = false) => {
@@ -527,7 +537,8 @@ export const HafsTajweedPageView = ({
       window.clearInterval(poll);
       ro?.disconnect();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fontScale, lineSpacing]);
 
 
 
@@ -1085,6 +1096,36 @@ export const HafsTajweedPageView = ({
                     className="w-full accent-primary"
                     aria-label="Taille de la police"
                   />
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Interlignage — تباعد الأسطر</span>
+                    <span className="font-bold text-foreground">{lineSpacingPct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={80}
+                    max={150}
+                    step={5}
+                    value={lineSpacingPct}
+                    onChange={(e) => setLineSpacingPct(Number(e.target.value))}
+                    className="w-full accent-primary"
+                    aria-label="Interlignage"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px]"
+                    onClick={() => {
+                      setFontScalePct(100);
+                      setLineSpacingPct(100);
+                      setThemeOpacityPct(20);
+                    }}
+                  >
+                    Réinitialiser — إعادة الضبط
+                  </Button>
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
