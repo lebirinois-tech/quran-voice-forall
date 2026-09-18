@@ -6,6 +6,7 @@ import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
+import { splitHtmlIntoWords, wordIndexForProgress } from '@/lib/tajweedWordSync';
 import { getThemesForVerse, getPrimaryThemeForVerse } from '@/data/quranThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
