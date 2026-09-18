@@ -679,11 +679,14 @@ const SurahReader = () => {
               onNavigateToJuz={handleNavigateToJuz}
               playbackSpeed={quranAudio.playbackSpeed}
               onSpeedChange={quranAudio.changeSpeed}
-              onPlayRange={(start, end, loop) => {
+              onPlayRange={(start, end, loop, repeatCount = 1) => {
                 if (start === end) {
-                  quranAudio.setRepeatMode(loop ? 'verse' : 'none', loop ? 0 : 1);
+                  quranAudio.setRepeatMode(
+                    loop || repeatCount > 1 ? 'verse' : 'none',
+                    loop ? 0 : repeatCount
+                  );
                 } else {
-                  quranAudio.setRepeatMode('range', loop ? 0 : 1, start, end);
+                  quranAudio.setRepeatMode('range', loop ? 0 : repeatCount, start, end);
                 }
                 quranAudio.playVerse(start);
               }}

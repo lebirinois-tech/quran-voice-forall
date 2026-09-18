@@ -50,8 +50,8 @@ interface HafsTajweedPageViewProps {
   onNavigateToJuz?: (juz: number) => void;
   playbackSpeed?: number;
   onSpeedChange?: (speed: number) => void;
-  /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). */
-  onPlayRange?: (startVerse: number, endVerse: number, loop: boolean) => void;
+  /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). repeatCount: 0 = infini. */
+  onPlayRange?: (startVerse: number, endVerse: number, loop: boolean, repeatCount?: number) => void;
 
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
@@ -100,7 +100,7 @@ export const HafsTajweedPageView = ({
   const { reciter, textDisplayStyle, fontSize } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
-  const [loopScope, setLoopScope] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(1); // 0 = boucle infinie
   const [activeScope, setActiveScope] = useState<'verse' | 'page' | 'surah' | 'juz'>('verse');
 
 
@@ -282,9 +282,9 @@ export const HafsTajweedPageView = ({
       const scope = playScopes[key];
       setActiveScope(key as 'verse' | 'page' | 'surah' | 'juz');
       setScopeOpen(false);
-      onPlayRange?.(scope.start, scope.end, loopScope);
+      onPlayRange?.(scope.start, scope.end, repeatCount === 0, repeatCount);
     },
-    [playScopes, loopScope, onPlayRange]
+    [playScopes, repeatCount, onPlayRange]
   );
 
 
@@ -1343,7 +1343,7 @@ export const HafsTajweedPageView = ({
 
       {/* Choix de la portée de lecture : verset, page, sourate, juz */}
       <Dialog open={scopeOpen} onOpenChange={setScopeOpen}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>Choix de la lecture — اختيار القراءة</DialogTitle>
           </DialogHeader>
@@ -1367,14 +1367,25 @@ export const HafsTajweedPageView = ({
                 </Button>
               );
             })}
-            <Button
-              variant={loopScope ? 'default' : 'ghost'}
-              className="h-11 w-full justify-center gap-2 text-sm"
-              onClick={() => setLoopScope((v) => !v)}
-            >
-              <Repeat className="h-4 w-4" />
-              Répéter en boucle {loopScope ? '(activé)' : '(désactivé)'}
-            </Button>
+            <div className="space-y-1.5 pt-1">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Repeat className="h-3.5 w-3.5" />
+                Nombre de répétitions — عدد التكرار
+              </p>
+              <div className="grid grid-cols-6 gap-1">
+                {[1, 2, 3, 5, 10, 0].map((n) => (
+                  <Button
+                    key={n}
+                    variant={repeatCount === n ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-9 px-0 text-xs"
+                    onClick={() => setRepeatCount(n)}
+                  >
+                    {n === 0 ? '∞' : n}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -1382,7 +1393,7 @@ export const HafsTajweedPageView = ({
       {/* Recorder dialog */}
 
       <Dialog open={recorderVerse !== null} onOpenChange={(o) => !o && setRecorderVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               Enregistrement — {surah?.name} · Verset {recorderVerse}
@@ -1406,7 +1417,7 @@ export const HafsTajweedPageView = ({
 
       {/* Verse action menu */}
       <Dialog open={menuVerse !== null} onOpenChange={(o) => !o && setMenuVerse(null)}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>
               Verset {menuVerse} — {surah?.name}
@@ -1496,7 +1507,7 @@ export const HafsTajweedPageView = ({
 
       {/* Full verse-mode content (translation, TTS, share, download, bookmark) */}
       <Dialog open={detailVerse !== null} onOpenChange={(o) => !o && setDetailVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               {surah?.name} · Verset {detailVerse}
@@ -1527,7 +1538,7 @@ export const HafsTajweedPageView = ({
 
       {/* Tafsir Al-Muyassar dialog */}
       <Dialog open={tafsirVerse !== null} onOpenChange={(o) => !o && setTafsirVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               Tafsir — {surah?.name} · Verset {tafsirVerse}
@@ -1546,7 +1557,7 @@ export const HafsTajweedPageView = ({
 
       {/* Thematic tafsir dialog */}
       <Dialog open={themeVerse !== null} onOpenChange={(o) => !o && setThemeVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
               Tafsir thématique — {surah?.name} · Verset {themeVerse}
