@@ -201,18 +201,20 @@ type VerseRef = number | string;
 const M: Record<number, Partial<Record<ThemeId, VerseRef[]>>> = {
   1: { tawhid: [1, 2, 3, 4], prayer: [5, 6, 7] },
   2: {
-    tawhid: [255, 163, 22],
+    // Premières pages d'Al-Baqara : blocs continus afin que chaque passage
+    // thématique soit visible sur toute l'étendue de ses versets.
+    tawhid: ['21-22', 163, 255],
     prayer: [3, 43, 45, 110, 238],
     charity: [3, 43, 110, 177, 261, 267, 274],
     patience: [45, 153, 155, 156, 177, 250],
     family: [83, 180, 215, '221-232', 233],
     repentance: [37, 54, 160, 222],
-    hereafter: [25, 81, 82, 281],
+    hereafter: ['23-29', 81, 82, 281],
     mercy: [218, 268],
     knowledge: [31, 32, 269],
     stories: ['30-39', '49-71', '102-103', '124-129', '258-260'],
     prophets: [136, 253, '258-260'],
-    'jihad-nafs': [197, 219],
+    'jihad-nafs': ['6-20', 197, 219],
   },
   3: {
     tawhid: [2, 18, 26, 27],
