@@ -1216,6 +1216,37 @@ export const HafsTajweedPageView = ({
                 </div>
 
                 <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">
+                    Verset (1-{verses.length || 1}) — الآية
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={verses.length || 1}
+                      inputMode="numeric"
+                      value={verseInput}
+                      onChange={(e) => setVerseInput(e.target.value)}
+                      placeholder="1"
+                      className="h-11"
+                    />
+                    <Button
+                      className="h-11"
+                      onClick={() => {
+                        const n = parseInt(verseInput, 10);
+                        if (Number.isFinite(n)) {
+                          setVerseInput('');
+                          setMenuOpen(false);
+                          goToVerse(n);
+                        }
+                      }}
+                    >
+                      Aller
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Juz (1-30) — الجزء</label>
                   <Select
                     value={String(currentJuz)}
