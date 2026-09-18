@@ -394,7 +394,20 @@ export const HafsTajweedPageView = ({
           else hi = mid;
         }
       }
-      const px = Math.max(MIN_PX, Math.min(MAX_PX, Math.floor(lo * fontScale * 10) / 10));
+      // Échelle utilisateur : on ne l'applique que si la page tient encore
+      // (interligne minimal). Sinon on cherche la plus grande taille possible
+      // entre la taille de base et la taille souhaitée : jamais de débordement.
+      let px = Math.max(MIN_PX, Math.min(MAX_PX, Math.floor(lo * fontScale * 10) / 10));
+      if (px > lo && heightAt(px, MIN_LH) > target) {
+        let sLo = lo;
+        let sHi = px;
+        for (let i = 0; i < 10; i++) {
+          const mid = (sLo + sHi) / 2;
+          if (heightAt(mid, MIN_LH) <= target) sLo = mid;
+          else sHi = mid;
+        }
+        px = Math.max(MIN_PX, Math.floor(sLo * 10) / 10);
+      }
 
       // 2) Étirer l'interligne pour combler le vide restant, sans déborder.
       let lhLo = MIN_LH;
