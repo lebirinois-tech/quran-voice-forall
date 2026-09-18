@@ -830,7 +830,7 @@ export const HafsTajweedPageView = ({
                 // Style « مصحف التفصيل الموضوعي » (محفظ الوحيين) : chaque passage
                 // thématique est un bloc pastel arrondi d'une seule couleur.
                 background: theme
-                  ? `hsl(${theme.hsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
+                  ? `hsl(${theme.bgHsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
                   : undefined,
                 // Bandeau continu (comme le mushaf thématique de référence) :
                 // ni arrondi ni marge interne, pour que toutes les lignes
@@ -1437,7 +1437,7 @@ export const HafsTajweedPageView = ({
                         key={t.id}
                         className="text-xs px-2 py-1 rounded-full border"
                         style={{
-                          backgroundColor: `hsl(${t.hsl} / ${themeOpacity})`,
+                        backgroundColor: `hsl(${t.bgHsl} / ${themeOpacity})`,
                           borderColor: `hsl(${t.hsl} / 0.55)`,
                         }}
                       >
