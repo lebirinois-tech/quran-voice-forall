@@ -94,6 +94,8 @@ export const HafsTajweedPageView = ({
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef);
 
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
+  // Sourate du verset touché (une page peut contenir plusieurs sourates).
+  const [menuSurah, setMenuSurah] = useState<number>(surahNumber);
   const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
@@ -853,7 +855,10 @@ export const HafsTajweedPageView = ({
                   <span
                     key={v.number}
                     data-verse={isMainSurah ? v.number : undefined}
-                    onClick={isMainSurah ? () => setMenuVerse(v.number) : undefined}
+                    onClick={() => {
+                      setMenuSurah(section.surahNumber);
+                      setMenuVerse(v.number);
+                    }}
                     title={themeTitle}
                     style={
                       { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
@@ -1420,11 +1425,12 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Verset {menuVerse} — {surah?.name}
+              Verset {menuVerse} — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name}
             </DialogTitle>
           </DialogHeader>
           {menuVerse !== null && (() => {
-            const themes = getThemesForVerse(surahNumber, menuVerse);
+            const themes = getThemesForVerse(menuSurah, menuVerse);
+            const isMenuMainSurah = menuSurah === surahNumber;
             return (
               <div className="flex flex-col gap-2">
                 {themes.length > 0 && (
@@ -1443,30 +1449,47 @@ export const HafsTajweedPageView = ({
                     ))}
                   </div>
                 )}
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    const v = menuVerse;
-                    setMenuVerse(null);
-                    if (v) onVerseClick?.(v);
-                  }}
-                  className="justify-start gap-2"
-                >
-                  <Play className="h-4 w-4" />
-                  Écouter ce verset
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const v = menuVerse;
-                    setMenuVerse(null);
-                    setDetailVerse(v);
-                  }}
-                  className="justify-start gap-2"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Détails du verset (traduction, partage…)
-                </Button>
+                {isMenuMainSurah && (
+                  <>
+                    <Button
+                      variant="default"
+                      onClick={() => {
+                        const v = menuVerse;
+                        setMenuVerse(null);
+                        if (v) onVerseClick?.(v);
+                      }}
+                      className="justify-start gap-2"
+                    >
+                      <Play className="h-4 w-4" />
+                      Écouter ce verset
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const v = menuVerse;
+                        setMenuVerse(null);
+                        setDetailVerse(v);
+                      }}
+                      className="justify-start gap-2"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Détails du verset (traduction, partage…)
+                    </Button>
+                  </>
+                )}
+                {!isMenuMainSurah && (
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      setMenuVerse(null);
+                      onNavigateToSurah?.(menuSurah);
+                    }}
+                    className="justify-start gap-2"
+                  >
+                    <Play className="h-4 w-4" />
+                    Ouvrir cette sourate pour l'écouter
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -1541,12 +1564,12 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Tafsir — {surah?.name} · Verset {tafsirVerse}
+              Tafsir — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {tafsirVerse}
             </DialogTitle>
           </DialogHeader>
           {tafsirVerse !== null && (
             <TafsirPanel
-              surahNumber={surahNumber}
+              surahNumber={menuSurah}
               verseNumber={tafsirVerse}
               isOpen={true}
               onToggle={() => setTafsirVerse(null)}
@@ -1560,12 +1583,12 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Tafsir thématique — {surah?.name} · Verset {themeVerse}
+              Tafsir thématique — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {themeVerse}
             </DialogTitle>
           </DialogHeader>
           {themeVerse !== null && (
             <ThematicTafsirPanel
-              surahNumber={surahNumber}
+              surahNumber={menuSurah}
               verseNumber={themeVerse}
               isOpen={true}
               onToggle={() => setThemeVerse(null)}
