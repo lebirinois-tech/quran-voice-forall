@@ -855,7 +855,10 @@ export const HafsTajweedPageView = ({
                   <span
                     key={v.number}
                     data-verse={isMainSurah ? v.number : undefined}
-                    onClick={isMainSurah ? () => setMenuVerse(v.number) : undefined}
+                    onClick={() => {
+                      setMenuSurah(section.surahNumber);
+                      setMenuVerse(v.number);
+                    }}
                     title={themeTitle}
                     style={
                       { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
