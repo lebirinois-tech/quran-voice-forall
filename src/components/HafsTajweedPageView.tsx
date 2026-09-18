@@ -99,6 +99,25 @@ export const HafsTajweedPageView = ({
   const [showMenuButton, setShowMenuButton] = useState(true);
   const [pageInput, setPageInput] = useState('');
 
+  // Réglages de lisibilité, persistés : échelle de la police (%) et
+  // opacité des fonds thématiques (0 à 0.4).
+  const [fontScalePct, setFontScalePct] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('mushaf-font-scale'));
+    return Number.isFinite(raw) && raw >= 60 && raw <= 160 ? raw : 100;
+  });
+  const [themeOpacityPct, setThemeOpacityPct] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
+    return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 20;
+  });
+  const fontScale = fontScalePct / 100;
+  const themeOpacity = themeOpacityPct / 100;
+  useEffect(() => {
+    localStorage.setItem('mushaf-font-scale', String(fontScalePct));
+  }, [fontScalePct]);
+  useEffect(() => {
+    localStorage.setItem('mushaf-theme-opacity', String(themeOpacityPct));
+  }, [themeOpacityPct]);
+
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
     const pages = verses.map((v) => v.page ?? 1);
