@@ -113,14 +113,22 @@ export const HafsTajweedPageView = ({
     const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
     return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 20;
   });
+  const [lineSpacingPct, setLineSpacingPct] = useState<number>(() => {
+    const raw = Number(localStorage.getItem('mushaf-line-spacing'));
+    return Number.isFinite(raw) && raw >= 80 && raw <= 150 ? raw : 100;
+  });
   const fontScale = fontScalePct / 100;
   const themeOpacity = themeOpacityPct / 100;
+  const lineSpacing = lineSpacingPct / 100;
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
   }, [fontScalePct]);
   useEffect(() => {
     localStorage.setItem('mushaf-theme-opacity', String(themeOpacityPct));
   }, [themeOpacityPct]);
+  useEffect(() => {
+    localStorage.setItem('mushaf-line-spacing', String(lineSpacingPct));
+  }, [lineSpacingPct]);
 
   const { startPage, endPage } = useMemo(() => {
     if (verses.length === 0) return { startPage: 1, endPage: 1 };
