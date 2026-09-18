@@ -25,8 +25,10 @@ export type ThemeId =
 
 export interface QuranTheme {
   id: ThemeId;
-  /** HSL color (light) — use as text color and 12% alpha bg */
+  /** HSL color — used for text, badges and strong accents */
   hsl: string;
+  /** HSL color — light pastel background for Mushaf pages */
+  bgHsl: string;
   emoji: string;
   labels: { ar: string; fr: string; en: string };
   descriptions: { ar: string; fr: string; en: string };
