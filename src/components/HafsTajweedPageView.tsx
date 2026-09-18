@@ -111,7 +111,7 @@ export const HafsTajweedPageView = ({
   });
   const [themeOpacityPct, setThemeOpacityPct] = useState<number>(() => {
     const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
-    return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 20;
+    return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 32;
   });
   const [lineSpacingPct, setLineSpacingPct] = useState<number>(() => {
     const raw = Number(localStorage.getItem('mushaf-line-spacing'));
