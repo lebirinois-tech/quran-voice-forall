@@ -887,9 +887,7 @@ export const HafsTajweedPageView = ({
                 // l'ensemble de ses versets. Les thèmes dominants de sourate
                 // gardent la même intensité afin que toutes les pages soient
                 // entièrement thématisées, y compris hors du relevé détaillé.
-                background: theme
-                  ? `hsl(${theme.bgHsl} / ${themeOpacity})`
-                  : undefined,
+                background: undefined,
                 // Bandeau continu (comme le mushaf thématique de référence) :
                 // ni arrondi ni marge interne, pour que toutes les lignes
                 // gardent exactement la même hauteur et la même largeur.
@@ -920,9 +918,18 @@ export const HafsTajweedPageView = ({
                       setMenuVerse(v.number);
                     }}
                     title={themeTitle}
-                    style={
-                      { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
-                    }
+                    style={{
+                      // Le fond est porté par chaque verset, et non uniquement
+                      // par le groupe : toute l'âyah reste ainsi colorée, même
+                      // lorsqu'elle revient à la ligne. La couleur forte du
+                      // thème est diluée pour rester claire sans masquer le Tajweed.
+                      backgroundColor: theme
+                        ? `hsl(${theme.hsl} / ${Math.max(0.08, themeOpacity * 0.62)})`
+                        : undefined,
+                      boxDecorationBreak: 'clone',
+                      WebkitBoxDecorationBreak: 'clone',
+                      paddingInline: theme ? '0.06em' : undefined,
+                    }}
                     className={cn(
                       'inline transition-colors cursor-pointer rounded-sm',
                       isCurrent &&
