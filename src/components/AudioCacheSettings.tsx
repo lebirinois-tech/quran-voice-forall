@@ -142,10 +142,35 @@ export const AudioCacheSettings = () => {
         </div>
       )}
 
+      {activeTab === 'audio' && (
+        <button
+          onClick={() => { setSelectedReciter('all'); setShowSurahList(false); }}
+          className={`w-full p-2 rounded-lg border-2 text-xs font-semibold transition-all ${
+            allRiwayat
+              ? 'border-primary ring-2 ring-primary/30 bg-primary/10 text-foreground'
+              : 'border-border hover:border-primary/50 bg-muted/50 text-foreground'
+          }`}
+        >
+          ⭐ Les trois lectures / الروايات الثلاث
+        </button>
+      )}
+
       {/* Status */}
       <p className="text-xs text-muted-foreground">
         {currentCachedCount}/114 sourates en cache
+        {activeTab === 'audio' && allRiwayat && ' (dans les trois lectures)'}
       </p>
+
+      {activeTab === 'audio' && (
+        <div className="grid grid-cols-3 gap-1.5 text-[11px] text-muted-foreground">
+          {DOWNLOADABLE_RECITERS.map((r) => (
+            <span key={r.id} className="rounded-md bg-muted/50 px-1.5 py-1 text-center">
+              {r.label.slice(2)} : {getCachedSurahCount(r.id)}/114
+            </span>
+          ))}
+        </div>
+      )}
+
 
       {/* Progress bar during download */}
       {isDownloading && (
