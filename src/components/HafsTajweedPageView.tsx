@@ -731,71 +731,73 @@ export const HafsTajweedPageView = ({
               <MushafPageBadge page={currentPage} />
             </button>
 
-            {/* Saisie directe d'un numéro de page */}
-            <form
-              dir="ltr"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const target = parseInt(pageInput, 10);
-                if (Number.isFinite(target) && target >= 1 && target <= 604) {
-                  goToPage(target);
-                  setPageInput('');
-                }
-              }}
-              className="mx-auto mb-1.5 flex w-fit max-w-[90%] items-center gap-1.5 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
-            >
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={604}
-                placeholder="Page"
-                aria-label="Aller à la page"
-                value={pageInput}
-                onChange={(e) => setPageInput(e.target.value)}
-                className="h-6 w-16 rounded-md border border-border bg-background px-2 text-center text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
-                className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            {/* Saisie directe : page et verset côte à côte */}
+            <div className="mx-auto mb-1.5 flex w-full max-w-[95%] flex-wrap items-center justify-center gap-2 px-1">
+              <form
+                dir="ltr"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const target = parseInt(pageInput, 10);
+                  if (Number.isFinite(target) && target >= 1 && target <= 604) {
+                    goToPage(target);
+                    setPageInput('');
+                  }
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
               >
-                Go
-              </button>
-            </form>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={604}
+                  placeholder="P"
+                  aria-label="Aller à la page"
+                  value={pageInput}
+                  onChange={(e) => setPageInput(e.target.value)}
+                  className="h-6 w-12 rounded-md border border-border bg-background px-1 text-center text-sm text-foreground focus:border-primary focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
+                  className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+                >
+                  Go
+                </button>
+              </form>
 
-            {/* Saisie directe d'un numéro de verset de la sourate courante */}
-            <form
-              dir="ltr"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const target = parseInt(verseInput, 10);
-                if (Number.isFinite(target)) {
-                  goToVerse(target);
-                  setVerseInput('');
-                }
-              }}
-              className="mx-auto mb-1.5 flex w-fit max-w-[90%] items-center gap-1.5 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
-            >
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={verses.length || 1}
-                placeholder="Verset"
-                aria-label="Aller au verset"
-                value={verseInput}
-                onChange={(e) => setVerseInput(e.target.value)}
-                className="h-6 w-16 rounded-md border border-border bg-background px-2 text-center text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
-                className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+              <form
+                dir="ltr"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const target = parseInt(verseInput, 10);
+                  if (Number.isFinite(target)) {
+                    goToVerse(target);
+                    setVerseInput('');
+                  }
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
               >
-                Go
-              </button>
-            </form>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={verses.length || 1}
+                  placeholder="V"
+                  aria-label="Aller au verset"
+                  value={verseInput}
+                  onChange={(e) => setVerseInput(e.target.value)}
+                  className="h-6 w-12 rounded-md border border-border bg-background px-1 text-center text-sm text-foreground focus:border-primary focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
+                  className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+                >
+                  Go
+                </button>
+              </form>
+            </div>
+
             <div
               ref={frameRef}
               className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
@@ -1217,65 +1219,68 @@ export const HafsTajweedPageView = ({
                   </Select>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Page (1-604) — الصفحة</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={604}
-                      inputMode="numeric"
-                      value={pageInput}
-                      onChange={(e) => setPageInput(e.target.value)}
-                      placeholder={String(currentPage)}
-                      className="h-11"
-                    />
-                    <Button
-                      className="h-11"
-                      onClick={() => {
-                        const p = parseInt(pageInput, 10);
-                        if (p >= 1 && p <= 604) {
-                          setPageInput('');
-                          setMenuOpen(false);
-                          goToPage(p);
-                        }
-                      }}
-                    >
-                      Aller
-                    </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Page — الصفحة</label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        max={604}
+                        inputMode="numeric"
+                        value={pageInput}
+                        onChange={(e) => setPageInput(e.target.value)}
+                        placeholder={String(currentPage)}
+                        className="h-11"
+                      />
+                      <Button
+                        className="h-11"
+                        onClick={() => {
+                          const p = parseInt(pageInput, 10);
+                          if (p >= 1 && p <= 604) {
+                            setPageInput('');
+                            setMenuOpen(false);
+                            goToPage(p);
+                          }
+                        }}
+                      >
+                        Aller
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">
+                      Verset — الآية
+                    </label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        max={verses.length || 1}
+                        inputMode="numeric"
+                        value={verseInput}
+                        onChange={(e) => setVerseInput(e.target.value)}
+                        placeholder="1"
+                        className="h-11"
+                      />
+                      <Button
+                        className="h-11"
+                        onClick={() => {
+                          const n = parseInt(verseInput, 10);
+                          if (Number.isFinite(n)) {
+                            setVerseInput('');
+                            setMenuOpen(false);
+                            goToVerse(n);
+                          }
+                        }}
+                      >
+                        Aller
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">
-                    Verset (1-{verses.length || 1}) — الآية
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={verses.length || 1}
-                      inputMode="numeric"
-                      value={verseInput}
-                      onChange={(e) => setVerseInput(e.target.value)}
-                      placeholder="1"
-                      className="h-11"
-                    />
-                    <Button
-                      className="h-11"
-                      onClick={() => {
-                        const n = parseInt(verseInput, 10);
-                        if (Number.isFinite(n)) {
-                          setVerseInput('');
-                          setMenuOpen(false);
-                          goToVerse(n);
-                        }
-                      }}
-                    >
-                      Aller
-                    </Button>
-                  </div>
-                </div>
 
                 <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Juz (1-30) — الجزء</label>
