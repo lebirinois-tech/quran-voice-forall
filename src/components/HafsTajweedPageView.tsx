@@ -1099,6 +1099,36 @@ export const HafsTajweedPageView = ({
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Interlignage — تباعد الأسطر</span>
+                    <span className="font-bold text-foreground">{lineSpacingPct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={80}
+                    max={150}
+                    step={5}
+                    value={lineSpacingPct}
+                    onChange={(e) => setLineSpacingPct(Number(e.target.value))}
+                    className="w-full accent-primary"
+                    aria-label="Interlignage"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px]"
+                    onClick={() => {
+                      setFontScalePct(100);
+                      setLineSpacingPct(100);
+                      setThemeOpacityPct(20);
+                    }}
+                  >
+                    Réinitialiser — إعادة الضبط
+                  </Button>
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
                     <span>Fond des thèmes — خلفية المواضيع</span>
                     <span className="font-bold text-foreground">{themeOpacityPct}%</span>
                   </div>
