@@ -33,6 +33,8 @@ interface HafsTajweedPageViewProps {
   onPageChange?: (page: number) => void;
   currentVerse?: number;
   isAudioPlaying?: boolean;
+  /** Progression (0-100) de l'audio du verset en cours, pour le suivi des mots. */
+  verseProgress?: number;
   onVerseClick?: (verseNumber: number) => void;
   onPlayPause?: () => void;
   onNextVerse?: () => void;
