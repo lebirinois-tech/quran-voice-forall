@@ -667,7 +667,7 @@ export const HafsTajweedPageView = ({
                 color: 'hsl(43, 62%, 25%)',
               }}
             >
-              {toArabicDigits(currentPage)} · Page {currentPage} / 604
+              <MushafPageBadge page={currentPage} />
             </button>
             <div
               ref={frameRef}
