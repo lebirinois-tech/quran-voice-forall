@@ -709,7 +709,38 @@ export const HafsTajweedPageView = ({
           }}
 
         >
-          {themeGroups.map((group, gi) => {
+          {pageSections.map((section) => {
+            const sectionSurah = surahs.find((s) => s.number === section.surahNumber);
+            const isMainSurah = section.surahNumber === surahNumber;
+            return (
+            <span key={`sec-${section.surahNumber}`} style={{ display: 'inline' }}>
+            {section.startsHere && (
+              <span
+                dir="rtl"
+                style={{ display: 'block', width: '100%', textAlign: 'center' }}
+              >
+                <span
+                  className="my-[0.2em] inline-block w-[92%] rounded-lg border-2 px-2 py-[0.1em] font-amiri font-extrabold"
+                  style={{
+                    borderColor: 'hsl(43, 62%, 45%)',
+                    backgroundColor: 'hsl(43, 62%, 45% / 0.12)',
+                    color: 'hsl(43, 62%, 25%)',
+                    fontSize: '0.85em',
+                  }}
+                >
+                  سورة {sectionSurah?.nameArabic ?? section.surahNumber}
+                </span>
+                {surahHasHeaderBasmala(section.surahNumber) && (
+                  <span
+                    className="block font-amiri font-extrabold text-foreground"
+                    style={{ fontSize: '1.0em', margin: '0.1em 0 0.15em' }}
+                  >
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                  </span>
+                )}
+              </span>
+            )}
+            {section.groups.map((group, gi) => {
             const theme = group.theme;
             const themeTitle = theme
               ? `${theme.emoji} ${theme.labels.fr} · ${theme.labels.ar}${group.curated ? '' : ' (thème dominant de la sourate)'}`
