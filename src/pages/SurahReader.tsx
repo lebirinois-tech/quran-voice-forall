@@ -660,6 +660,7 @@ const SurahReader = () => {
               onPageChange={setCurrentMushafPage}
               currentVerse={quranAudio.currentVerse}
               isAudioPlaying={quranAudio.isPlaying}
+              verseProgress={quranAudio.progress}
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               onPlayPause={() => (quranAudio.isPlaying ? quranAudio.pause() : handlePlayRequest())}
               onNextVerse={quranAudio.nextVerse}
