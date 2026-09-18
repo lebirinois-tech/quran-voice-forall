@@ -978,6 +978,49 @@ export const HafsTajweedPageView = ({
             </section>
 
             <section>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                Lisibilité — الوضوح
+              </h4>
+              <div className="space-y-3 rounded-2xl border border-border bg-card p-3">
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Taille de la police — حجم الخط</span>
+                    <span className="font-bold text-foreground">{fontScalePct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={60}
+                    max={160}
+                    step={5}
+                    value={fontScalePct}
+                    onChange={(e) => setFontScalePct(Number(e.target.value))}
+                    className="w-full accent-primary"
+                    aria-label="Taille de la police"
+                  />
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Fond des thèmes — خلفية المواضيع</span>
+                    <span className="font-bold text-foreground">{themeOpacityPct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={40}
+                    step={1}
+                    value={themeOpacityPct}
+                    onChange={(e) => setThemeOpacityPct(Number(e.target.value))}
+                    className="w-full accent-primary"
+                    aria-label="Opacité du fond thématique"
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Les couleurs du Tajweed (règles de lecture) restent inchangées.
+                </p>
+              </div>
+            </section>
+
+            <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Paramètres</h4>
               {settingsControls && <div className="mb-2">{settingsControls}</div>}
               <Button
@@ -1089,7 +1132,7 @@ export const HafsTajweedPageView = ({
                         key={t.id}
                         className="text-xs px-2 py-1 rounded-full border"
                         style={{
-                          backgroundColor: `hsl(${t.hsl} / 0.18)`,
+                          backgroundColor: `hsl(${t.hsl} / ${themeOpacity})`,
                           borderColor: `hsl(${t.hsl} / 0.55)`,
                         }}
                       >
