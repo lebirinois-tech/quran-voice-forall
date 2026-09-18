@@ -905,7 +905,7 @@ export const HafsTajweedPageView = ({
                   dir="rtl"
                   data-theme-title={theme.id}
                   title={themeTitle}
-                  className="mx-[0.12em] inline-flex items-center justify-center rounded-md px-[0.34em] py-[0.04em] align-middle font-cairo text-[0.42em] font-bold leading-none"
+                  className="mx-[0.12em] inline-flex items-center justify-center rounded-md px-[0.34em] py-[0.04em] align-middle font-cairo text-[0.42em] font-bold leading-[1.35]"
                   style={{
                     backgroundColor: `hsl(${theme.hsl})`,
                     color: 'hsl(var(--primary-foreground))',
