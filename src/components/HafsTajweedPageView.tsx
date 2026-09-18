@@ -441,9 +441,13 @@ export const HafsTajweedPageView = ({
   const MAX_PX = 64;
   const BASE_LH = 1.9 * lineSpacing;
   const sigRef = useRef('');
+  const lastTargetRef = useRef(0);
+  const measuredRef = useRef(false);
 
   useLayoutEffect(() => {
     sigRef.current = '';
+    lastTargetRef.current = 0;
+    measuredRef.current = false;
   }, [currentPage, surahNumber, fontScalePct, lineSpacingPct]);
 
   useLayoutEffect(() => {
@@ -461,10 +465,15 @@ export const HafsTajweedPageView = ({
       const target = available - extra;
       if (target <= 0) return;
 
-      // Ne recalculer que si le contenu ou les dimensions ont changé.
-      const sig = `${content.length}|${textEl.clientWidth}|${target}`;
-      if (!force && sig === sigRef.current) return;
+      // Ne recalculer que si le contenu ou la largeur changent réellement.
+      // La hauteur du cadre varie de quelques pixels sur mobile (barre
+      // d'adresse qui se masque) : on ignore ces micro-variations, sinon la
+      // page « tremble » en permanence.
+      const sig = `${content.length}|${Math.round(textEl.clientWidth)}`;
+      const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged) return;
       sigRef.current = sig;
+      lastTargetRef.current = target;
 
       const prevLh = textEl.style.lineHeight;
       const prevFs = textEl.style.fontSize;
@@ -550,8 +559,9 @@ export const HafsTajweedPageView = ({
       textEl.style.lineHeight = prevLh;
       textEl.classList.remove('fit-measuring');
 
-      setFontPx((cur) => (Math.abs(cur - px) < 0.2 ? cur : px));
-      setLineHeight((cur) => (Math.abs(cur - lh) < 0.01 ? cur : lh));
+      measuredRef.current = true;
+      setFontPx((cur) => (Math.abs(cur - px) < 0.4 ? cur : px));
+      setLineHeight((cur) => (Math.abs(cur - lh) < 0.02 ? cur : lh));
     };
 
     let raf = 0;
@@ -562,21 +572,35 @@ export const HafsTajweedPageView = ({
 
     schedule(true);
     // Le contenu (versets, tajweed) et les polices arrivent de façon asynchrone :
-    // on surveille en continu la signature du contenu, sans recalcul inutile.
-    const poll = window.setInterval(() => schedule(false), 250);
-    (document as any).fonts?.ready?.then?.(() => schedule(true));
+    // on surveille quelques secondes, puis on fige la mise en page pour qu'elle
+    // ne bouge plus pendant la lecture.
+    let ticks = 0;
+    const poll = window.setInterval(() => {
+      ticks += 1;
+      schedule(false);
+      if (ticks >= 16) window.clearInterval(poll);
+    }, 250);
+    (document as any).fonts?.ready?.then?.(() => schedule(false));
 
     const frameEl = frameRef.current;
-    const ro = frameEl ? new ResizeObserver(() => schedule(true)) : null;
+    let roTimer = 0;
+    const ro = frameEl
+      ? new ResizeObserver(() => {
+          window.clearTimeout(roTimer);
+          // Débounce : rotation ou vrai changement de taille seulement.
+          roTimer = window.setTimeout(() => schedule(false), 200);
+        })
+      : null;
     if (frameEl && ro) ro.observe(frameEl);
 
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(poll);
+      window.clearTimeout(roTimer);
       ro?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontScale, lineSpacing]);
+  }, [fontScale, lineSpacing, currentPage, surahNumber]);
 
 
 
