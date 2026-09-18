@@ -1,8 +1,25 @@
 import { useEffect, useState } from 'react';
 
 const CACHE_PREFIX = 'quran-en-sahih-';
+const OFFLINE_URL = '/data/quran-en-sahih.json';
 const memoryCache: Record<number, Record<number, string>> = {};
 const inflight: Record<number, Promise<Record<number, string>> | undefined> = {};
+let offlineDatasetPromise: Promise<Record<string, Record<string, string>>> | null = null;
+
+const loadOfflineSurah = async (surah: number): Promise<Record<number, string> | null> => {
+  offlineDatasetPromise ??= fetch(OFFLINE_URL, { cache: 'force-cache' }).then((response) => {
+    if (!response.ok) throw new Error(`Offline English HTTP ${response.status}`);
+    return response.json() as Promise<Record<string, Record<string, string>>>;
+  });
+  try {
+    const source = (await offlineDatasetPromise)[String(surah)];
+    if (!source) return null;
+    return Object.fromEntries(Object.entries(source).map(([verse, text]) => [Number(verse), text]));
+  } catch {
+    offlineDatasetPromise = null;
+    return null;
+  }
+};
 
 const loadFromStorage = (surah: number): Record<number, string> | null => {
   try {
@@ -32,7 +49,9 @@ const fetchSurahEnglish = (surah: number): Promise<Record<number, string>> => {
 
   if (inflight[surah]) return inflight[surah]!;
 
-  const promise = fetch(`https://api.alquran.cloud/v1/surah/${surah}/en.sahih`)
+  const promise = loadOfflineSurah(surah).then((offline) => {
+    if (offline) return offline;
+    return fetch(`https://api.alquran.cloud/v1/surah/${surah}/en.sahih`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
@@ -45,6 +64,12 @@ const fetchSurahEnglish = (surah: number): Promise<Record<number, string>> => {
       for (const ayah of data.data.ayahs) {
         map[ayah.numberInSurah] = ayah.text;
       }
+      memoryCache[surah] = map;
+      saveToStorage(surah, map);
+      return map;
+    });
+  })
+    .then((map) => {
       memoryCache[surah] = map;
       saveToStorage(surah, map);
       return map;
