@@ -1477,6 +1477,19 @@ export const HafsTajweedPageView = ({
                     </Button>
                   </>
                 )}
+                {!isMenuMainSurah && (
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      setMenuVerse(null);
+                      onNavigateToSurah?.(menuSurah);
+                    }}
+                    className="justify-start gap-2"
+                  >
+                    <Play className="h-4 w-4" />
+                    Ouvrir cette sourate pour l'écouter
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => {
