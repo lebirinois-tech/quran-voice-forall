@@ -348,7 +348,7 @@ export const HafsTajweedPageView = ({
 
   useLayoutEffect(() => {
     sigRef.current = '';
-  }, [currentPage, surahNumber]);
+  }, [currentPage, surahNumber, fontScalePct]);
 
   useLayoutEffect(() => {
     const measure = (force = false) => {
