@@ -830,12 +830,11 @@ export const HafsTajweedPageView = ({
               style={{
                 display: 'inline',
                 // Chaque thème = UNE couleur claire distincte, appliquée à
-                // l'ensemble de ses versets. Seuls les passages réellement
-                // attribués à un thème (verset par verset) sont coloriés, pour
-                // que chaque thématique ressorte clairement ; les versets hors
-                // thème précis restent sur le fond de la page.
+                // l'ensemble de ses versets. Les thèmes dominants de sourate
+                // gardent la même intensité afin que toutes les pages soient
+                // entièrement thématisées, y compris hors du relevé détaillé.
                 background: theme
-                  ? `hsl(${theme.bgHsl} / ${group.curated ? themeOpacity : themeOpacity * 0.2})`
+                  ? `hsl(${theme.bgHsl} / ${themeOpacity})`
                   : undefined,
                 // Bandeau continu (comme le mushaf thématique de référence) :
                 // ni arrondi ni marge interne, pour que toutes les lignes
