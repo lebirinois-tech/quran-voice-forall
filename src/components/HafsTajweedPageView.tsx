@@ -759,8 +759,8 @@ export const HafsTajweedPageView = ({
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             textAlign: 'justify',
-            textAlignLast: 'center',
-            wordSpacing: '-0.14em',
+            textAlignLast: 'justify',
+            wordSpacing: '-0.05em',
             
             lineHeight,
             flexShrink: 0,
@@ -815,29 +815,17 @@ export const HafsTajweedPageView = ({
                 background: theme
                   ? `hsl(${theme.hsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
                   : undefined,
-                borderRadius: theme ? '0.3em' : undefined,
-                padding: theme ? '0.02em 0.12em' : undefined,
-                boxShadow: theme && group.curated && themeOpacity > 0.02
-                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / ${Math.min(0.85, themeOpacity * 2.75)})`
-                  : undefined,
+                // Bandeau continu (comme le mushaf thématique de référence) :
+                // ni arrondi ni marge interne, pour que toutes les lignes
+                // gardent exactement la même hauteur et la même largeur.
+                borderRadius: undefined,
+                padding: undefined,
+                boxShadow: undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
             >
-              {theme && group.curated && (
-                <span
-                  contentEditable={false}
-                  className="mx-[0.15em] inline-flex select-none items-center gap-[0.15em] rounded-full px-[0.35em] py-0 align-middle font-cairo"
-                  style={{
-                    fontSize: '0.4em',
-                    lineHeight: 1.6,
-                    background: `hsl(${theme.hsl} / 0.9)`,
-                    color: 'white',
-                  }}
-                >
-                  {theme.emoji} {theme.labels.ar}
-                </span>
-              )}
+
 
               {group.verses.map((v) => {
                 // Seule la sourate ouverte est interactive (lecture, menu,
