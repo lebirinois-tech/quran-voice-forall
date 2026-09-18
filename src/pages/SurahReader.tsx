@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { VerseRecorder } from '@/components/VerseRecorder';
 import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
+import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { useFullMushafPage } from '@/hooks/useFullMushafPage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
