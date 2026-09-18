@@ -73,12 +73,14 @@ const loadHafsIndex = (): Promise<Map<number, FullPageGroup[]>> => {
         surah.arabic.forEach((ayah, i) => {
           const page = ayah.page;
           if (!page) return;
-          let html = sanitizeTajweedHtml(
-            parseTajweedText(surah.tajweed[i]?.text ?? ayah.text)
-          );
+          // Même coloration Tajweed que le mode verset (palette simplifiée,
+          // identique Hafs / Warsh / Qalun) plutôt que l'ancien schéma API
+          // aux multiples teintes de rouge.
+          let text = ayah.text;
           if (ayah.numberInSurah === 1 && surahHasHeaderBasmala(surahNumber)) {
-            html = stripLeadingBasmalaHtml(html);
+            text = stripLeadingBasmala(text);
           }
+          const html = sanitizeTajweedHtml(applyAutoTajweed(text));
           pushVerse(map, page, surahNumber, { number: ayah.numberInSurah, html });
         });
       }
