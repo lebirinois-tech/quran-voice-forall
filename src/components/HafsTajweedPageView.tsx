@@ -110,7 +110,9 @@ export const HafsTajweedPageView = ({
     return Number.isFinite(raw) && raw >= 60 && raw <= 160 ? raw : 100;
   });
   const [themeOpacityPct, setThemeOpacityPct] = useState<number>(() => {
-    const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
+    const stored = localStorage.getItem('mushaf-theme-opacity');
+    if (stored === null) return 32;
+    const raw = Number(stored);
     return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 32;
   });
   const [lineSpacingPct, setLineSpacingPct] = useState<number>(() => {
