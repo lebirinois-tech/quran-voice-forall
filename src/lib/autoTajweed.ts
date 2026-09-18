@@ -121,7 +121,8 @@ export const applyAutoTajweed = (text: string): string => {
         const nextLetter = chars[nextLetterIdx];
         let color: string | null = null;
         if (nextLetter === BAA) color = COLORS.iqlab;
-        else if (IDGHAM_GHUNNAH_LETTERS.has(nextLetter)) color = COLORS.ghunnah;
+        else if (IDGHAM_GHUNNAH_LETTERS.has(nextLetter)) color = COLORS.idghamGhunnah;
+        else if (nextLetter === 'ر' || nextLetter === 'ل') color = COLORS.silent;
         else if (IKHFA_LETTERS.has(nextLetter)) color = COLORS.ikhfa;
         if (color) {
           paint(triggerLetterIdx, color);
