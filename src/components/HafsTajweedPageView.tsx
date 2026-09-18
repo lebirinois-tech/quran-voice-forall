@@ -110,8 +110,10 @@ export const HafsTajweedPageView = ({
     return Number.isFinite(raw) && raw >= 60 && raw <= 160 ? raw : 100;
   });
   const [themeOpacityPct, setThemeOpacityPct] = useState<number>(() => {
-    const raw = Number(localStorage.getItem('mushaf-theme-opacity'));
-    return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 20;
+    const stored = localStorage.getItem('mushaf-theme-opacity');
+    if (stored === null) return 32;
+    const raw = Number(stored);
+    return Number.isFinite(raw) && raw >= 0 && raw <= 40 ? raw : 32;
   });
   const [lineSpacingPct, setLineSpacingPct] = useState<number>(() => {
     const raw = Number(localStorage.getItem('mushaf-line-spacing'));
@@ -684,12 +686,13 @@ export const HafsTajweedPageView = ({
               key={`g-${gi}`}
               style={{
                 display: 'inline',
-                // Un seul thème dominant => une seule couleur, opacité plus forte
-                // pour les blocs thématiques précis, plus discrète pour le
-                // thème général de la sourate.
+                // Style « مصحف التفصيل الموضوعي » (محفظ الوحيين) : chaque passage
+                // thématique est un bloc pastel arrondi d'une seule couleur.
                 background: theme
                   ? `hsl(${theme.hsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
                   : undefined,
+                borderRadius: theme ? '0.3em' : undefined,
+                padding: theme ? '0.02em 0.12em' : undefined,
                 boxShadow: theme && group.curated && themeOpacity > 0.02
                   ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / ${Math.min(0.85, themeOpacity * 2.75)})`
                   : undefined,
