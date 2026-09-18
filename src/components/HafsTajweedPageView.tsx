@@ -816,9 +816,12 @@ export const HafsTajweedPageView = ({
             </span>
             );
           })}
-          {pageVerses.length === 0 && (
+            </span>
+            );
+          })}
+          {pageSections.every((s) => s.groups.every((g) => g.verses.length === 0)) && (
             <p className="text-center text-muted-foreground text-base">
-              Aucun verset sur cette page pour cette sourate.
+              Aucun verset sur cette page.
             </p>
           )}
               </div>
