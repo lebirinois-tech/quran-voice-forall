@@ -153,6 +153,7 @@ export const HafsTajweedPageView = ({
   );
 
   const prevSurahRef = useRef(surahNumber);
+  const prevInitialPageRef = useRef(initialPage);
   const manualNavRef = useRef(
     !!(initialPage && initialPage >= startPage && initialPage <= endPage)
   );
@@ -161,6 +162,7 @@ export const HafsTajweedPageView = ({
   useEffect(() => {
     if (prevSurahRef.current !== surahNumber) {
       prevSurahRef.current = surahNumber;
+      prevInitialPageRef.current = initialPage;
       manualNavRef.current = !!(initialPage && initialPage >= startPage && initialPage <= endPage);
       setCurrentPage(
         initialPage && initialPage >= startPage && initialPage <= endPage
@@ -171,8 +173,12 @@ export const HafsTajweedPageView = ({
       initialPage &&
       initialPage >= startPage &&
       initialPage <= endPage &&
-      !manualNavRef.current
+      initialPage !== prevInitialPageRef.current
     ) {
+      // A Juz can start in the same sourate as the currently displayed Juz
+      // (for example Juz 1, 2 and 3 in Al-Baqara). In that case the component
+      // stays mounted, so explicitly follow the changed page query parameter.
+      prevInitialPageRef.current = initialPage;
       setCurrentPage(initialPage);
       manualNavRef.current = true;
     }
