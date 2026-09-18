@@ -1,15 +1,28 @@
-// Single source of truth for the Hafs Mushaf image cache version.
-// Bump HAFS_MUSHAF_VERSION on every release that changes the Hafs page
-// rendering pipeline (URLs, image sources, or affected code). Everything
+// Single source of truth for the Mushaf pages cache version (Hafs, Warsh, Qalun).
+// Bump MUSHAF_PAGES_VERSION on every release that changes the pages rendering
+// pipeline (URLs, image sources, datasets, or affected code). Everything
 // downstream keys off this constant so a single bump forces:
-//   1. New image URLs (via ?v= cache-buster) → browsers refetch pages.
+//   1. New image/data URLs (via ?v= cache-buster) → browsers refetch pages.
 //   2. Purge of any Cache Storage entries that pinned the previous version.
 //   3. Purge of the app-shell caches that may embed old HTML/JS references.
-export const HAFS_MUSHAF_VERSION = "2026-09-18-hafs-tajweed-pages-v9";
+export const MUSHAF_PAGES_VERSION = "2026-09-18-mushaf-pages-trois-riwayat-v10";
+
+// Backward-compatible alias (older imports).
+export const HAFS_MUSHAF_VERSION = MUSHAF_PAGES_VERSION;
 
 // Storage key that records the last version applied on this device.
-export const HAFS_MUSHAF_VERSION_KEY = "quran-hafs-mushaf-version";
+export const MUSHAF_PAGES_VERSION_KEY = "quran-mushaf-pages-version";
+export const HAFS_MUSHAF_VERSION_KEY = MUSHAF_PAGES_VERSION_KEY;
 
-// Substring used to identify any Cache Storage entry keyed on a previous
-// Hafs page URL (all Hafs image URLs carry `?v=<HAFS_MUSHAF_VERSION>`).
-export const HAFS_CACHE_URL_MARKER = "hafs-tajweed";
+// Substrings used to identify any Cache Storage entry keyed on a previous
+// Mushaf page URL for ANY of the three riwayat (Hafs, Warsh, Qalun).
+export const MUSHAF_CACHE_URL_MARKERS = [
+  "hafs-tajweed",
+  "warsh",
+  "qalun",
+  "quran-mushaf-pages",
+  "mushaf-pages",
+];
+
+// Backward-compatible alias.
+export const HAFS_CACHE_URL_MARKER = MUSHAF_CACHE_URL_MARKERS[0];

@@ -34,7 +34,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android SDK 36
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -114,7 +114,9 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p artifacts
-          cp "$(find android/app/build/outputs/apk -name '*debug*.apk' | head -n 1)" artifacts/quran-acces-pour-tous.apk
+          APK_PATH=$(find android/app/build/outputs/apk -name '*debug*.apk' | head -n 1)
+          if [ -z "$APK_PATH" ]; then echo "APK introuvable"; exit 1; fi
+          cp "$APK_PATH" artifacts/quran-acces-pour-tous.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

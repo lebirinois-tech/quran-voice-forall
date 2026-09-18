@@ -4,12 +4,12 @@ import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 import { scheduleOfflineRiwayatBootstrap } from "./lib/autoOfflineRiwayat";
 import {
-  HAFS_MUSHAF_VERSION,
-  HAFS_MUSHAF_VERSION_KEY,
-  HAFS_CACHE_URL_MARKER,
+  MUSHAF_PAGES_VERSION,
+  MUSHAF_PAGES_VERSION_KEY,
+  MUSHAF_CACHE_URL_MARKERS,
 } from "./lib/hafsMushafVersion";
 
-const APP_SHELL_VERSION = "2026-09-18-hafs-tajweed-pages-v9";
+const APP_SHELL_VERSION = "2026-09-18-mushaf-pages-trois-riwayat-v10";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
 const APP_SHELL_RELOAD_KEY = "quran-app-shell-reload-version";
 
@@ -88,7 +88,7 @@ const refreshStaleAppShellCaches = async () => {
 // stale page images on devices that already have the latest app shell.
 const refreshStaleHafsMushafCaches = async () => {
   try {
-    if (localStorage.getItem(HAFS_MUSHAF_VERSION_KEY) === HAFS_MUSHAF_VERSION) return;
+    if (localStorage.getItem(MUSHAF_PAGES_VERSION_KEY) === MUSHAF_PAGES_VERSION) return;
 
     if ("caches" in window) {
       const cacheNames = await caches.keys();
@@ -100,9 +100,9 @@ const refreshStaleHafsMushafCaches = async () => {
             requests
               .filter((request) => {
                 const url = request.url;
-                if (!url.includes(HAFS_CACHE_URL_MARKER)) return false;
+                if (!MUSHAF_CACHE_URL_MARKERS.some((marker) => url.includes(marker))) return false;
                 // Keep entries already keyed on the current version.
-                return !url.includes(`v=${HAFS_MUSHAF_VERSION}`);
+                return !url.includes(`v=${MUSHAF_PAGES_VERSION}`);
               })
               .map((request) => cache.delete(request))
           );
@@ -110,7 +110,7 @@ const refreshStaleHafsMushafCaches = async () => {
       );
     }
 
-    localStorage.setItem(HAFS_MUSHAF_VERSION_KEY, HAFS_MUSHAF_VERSION);
+    localStorage.setItem(MUSHAF_PAGES_VERSION_KEY, MUSHAF_PAGES_VERSION);
   } catch (error) {
     console.warn("Hafs Mushaf cache refresh skipped:", error);
   }
