@@ -661,7 +661,7 @@ export const HafsTajweedPageView = ({
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Choisir une page"
-              className="mx-auto mb-1.5 mt-0.5 w-fit rounded-full border-2 px-4 py-1 text-base font-bold shadow-sm"
+              className="mx-auto mb-1 mt-0.5 w-fit rounded-full border-2 px-4 py-1 text-base font-bold shadow-sm"
               style={{
                 backgroundColor: 'hsl(195, 80%, 96%)',
                 borderColor: 'hsl(43, 62%, 45%)',
@@ -670,6 +670,39 @@ export const HafsTajweedPageView = ({
             >
               <MushafPageBadge page={currentPage} />
             </button>
+
+            {/* Saisie directe d'un numéro de page */}
+            <form
+              dir="ltr"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const target = parseInt(pageInput, 10);
+                if (Number.isFinite(target) && target >= 1 && target <= 604) {
+                  goToPage(target);
+                  setPageInput('');
+                }
+              }}
+              className="mx-auto mb-1.5 flex w-fit max-w-[90%] items-center gap-1.5 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
+            >
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={604}
+                placeholder="Page"
+                aria-label="Aller à la page"
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                className="h-6 w-16 rounded-md border border-border bg-background px-2 text-center text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
+                className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                Go
+              </button>
+            </form>
             <div
               ref={frameRef}
               className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
