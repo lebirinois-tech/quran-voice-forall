@@ -465,10 +465,15 @@ export const HafsTajweedPageView = ({
       const target = available - extra;
       if (target <= 0) return;
 
-      // Ne recalculer que si le contenu ou les dimensions ont changé.
-      const sig = `${content.length}|${textEl.clientWidth}|${target}`;
-      if (!force && sig === sigRef.current) return;
+      // Ne recalculer que si le contenu ou la largeur changent réellement.
+      // La hauteur du cadre varie de quelques pixels sur mobile (barre
+      // d'adresse qui se masque) : on ignore ces micro-variations, sinon la
+      // page « tremble » en permanence.
+      const sig = `${content.length}|${Math.round(textEl.clientWidth)}`;
+      const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged) return;
       sigRef.current = sig;
+      lastTargetRef.current = target;
 
       const prevLh = textEl.style.lineHeight;
       const prevFs = textEl.style.fontSize;
