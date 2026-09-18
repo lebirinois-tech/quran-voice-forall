@@ -441,9 +441,13 @@ export const HafsTajweedPageView = ({
   const MAX_PX = 64;
   const BASE_LH = 1.9 * lineSpacing;
   const sigRef = useRef('');
+  const lastTargetRef = useRef(0);
+  const measuredRef = useRef(false);
 
   useLayoutEffect(() => {
     sigRef.current = '';
+    lastTargetRef.current = 0;
+    measuredRef.current = false;
   }, [currentPage, surahNumber, fontScalePct, lineSpacingPct]);
 
   useLayoutEffect(() => {
