@@ -990,6 +990,37 @@ export const HafsTajweedPageView = ({
               Go
             </button>
           </form>
+          <form
+            dir="ltr"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const target = parseInt(verseInput, 10);
+              if (Number.isFinite(target)) {
+                goToVerse(target);
+                setVerseInput('');
+              }
+            }}
+            className="flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5"
+          >
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={verses.length || 1}
+              placeholder="آية"
+              aria-label="Aller au verset (barre)"
+              value={verseInput}
+              onChange={(e) => setVerseInput(e.target.value)}
+              className="h-8 w-14 rounded-full border border-primary/40 bg-background px-1 text-center text-sm font-semibold text-foreground focus:border-primary focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
+              className="h-8 rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
+            >
+              Go
+            </button>
+          </form>
           <Button
             type="button"
             size="icon"
