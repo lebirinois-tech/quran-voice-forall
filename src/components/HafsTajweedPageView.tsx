@@ -94,6 +94,8 @@ export const HafsTajweedPageView = ({
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef);
 
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
+  // Sourate du verset touché (une page peut contenir plusieurs sourates).
+  const [menuSurah, setMenuSurah] = useState<number>(surahNumber);
   const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
