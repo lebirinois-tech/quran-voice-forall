@@ -476,8 +476,17 @@ export const HafsTajweedPageView = ({
       // page « tremble » en permanence.
       const sig = `${content.length}|${Math.round(textEl.clientWidth)}`;
       const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
-      const overflowing = frameEl.scrollHeight - frameEl.clientHeight > 2;
+      const overflow = frameEl.scrollHeight - frameEl.clientHeight;
+      const overflowing = overflow > 2;
       if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged && overflowing) {
+        // Sécurité : la page déborde encore de quelques pixels après application
+        // (justification complète). On resserre l'interligne juste ce qu'il faut.
+        const h = textEl.scrollHeight || 1;
+        const factor = Math.max(0.8, (h - overflow - 4) / h);
+        setLineHeight((cur) => Number(Math.max(MIN_LH * 0.85, cur * factor).toFixed(3)));
+        return;
+      }
       sigRef.current = sig;
       lastTargetRef.current = target;
 
