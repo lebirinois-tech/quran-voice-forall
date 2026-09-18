@@ -110,6 +110,7 @@ export const HafsTajweedPageView = ({
   // Bouton d'appel du menu : masquable pour libérer toute la page.
   const [showMenuButton, setShowMenuButton] = useState(true);
   const [pageInput, setPageInput] = useState('');
+  const [verseInput, setVerseInput] = useState('');
 
   // Réglages de lisibilité, persistés : échelle de la police (%) et
   // opacité des fonds thématiques (0 à 0.4).
@@ -229,6 +230,18 @@ export const HafsTajweedPageView = ({
   const goNext = useCallback(() => {
     goToPage(currentPage + 1);
   }, [currentPage, goToPage]);
+
+  // Navigation directe vers un numéro de verset de la sourate courante :
+  // on ouvre la page du Mushaf qui contient ce verset.
+  const goToVerse = useCallback(
+    (n: number) => {
+      const target = verses.find((v) => v.number === n);
+      if (!target) return;
+      const p = target.page ?? currentPage;
+      if (p !== currentPage) goToPage(p);
+    },
+    [verses, currentPage, goToPage]
+  );
 
   const pageVerses = useMemo(
     () => verses.filter((v) => (v.page ?? 1) === currentPage),
@@ -750,6 +763,39 @@ export const HafsTajweedPageView = ({
                 Go
               </button>
             </form>
+
+            {/* Saisie directe d'un numéro de verset de la sourate courante */}
+            <form
+              dir="ltr"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const target = parseInt(verseInput, 10);
+                if (Number.isFinite(target)) {
+                  goToVerse(target);
+                  setVerseInput('');
+                }
+              }}
+              className="mx-auto mb-1.5 flex w-fit max-w-[90%] items-center gap-1.5 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
+            >
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={verses.length || 1}
+                placeholder="Verset"
+                aria-label="Aller au verset"
+                value={verseInput}
+                onChange={(e) => setVerseInput(e.target.value)}
+                className="h-6 w-16 rounded-md border border-border bg-background px-2 text-center text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
+                className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                Go
+              </button>
+            </form>
             <div
               ref={frameRef}
               className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
@@ -939,6 +985,37 @@ export const HafsTajweedPageView = ({
             <button
               type="submit"
               disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
+              className="h-8 rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
+            >
+              Go
+            </button>
+          </form>
+          <form
+            dir="ltr"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const target = parseInt(verseInput, 10);
+              if (Number.isFinite(target)) {
+                goToVerse(target);
+                setVerseInput('');
+              }
+            }}
+            className="flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5"
+          >
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={verses.length || 1}
+              placeholder="آية"
+              aria-label="Aller au verset (barre)"
+              value={verseInput}
+              onChange={(e) => setVerseInput(e.target.value)}
+              className="h-8 w-14 rounded-full border border-primary/40 bg-background px-1 text-center text-sm font-semibold text-foreground focus:border-primary focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
               className="h-8 rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
             >
               Go
@@ -1161,6 +1238,37 @@ export const HafsTajweedPageView = ({
                           setPageInput('');
                           setMenuOpen(false);
                           goToPage(p);
+                        }
+                      }}
+                    >
+                      Aller
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">
+                    Verset (1-{verses.length || 1}) — الآية
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={verses.length || 1}
+                      inputMode="numeric"
+                      value={verseInput}
+                      onChange={(e) => setVerseInput(e.target.value)}
+                      placeholder="1"
+                      className="h-11"
+                    />
+                    <Button
+                      className="h-11"
+                      onClick={() => {
+                        const n = parseInt(verseInput, 10);
+                        if (Number.isFinite(n)) {
+                          setVerseInput('');
+                          setMenuOpen(false);
+                          goToVerse(n);
                         }
                       }}
                     >
