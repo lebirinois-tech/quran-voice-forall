@@ -867,10 +867,7 @@ export const HafsTajweedPageView = ({
                       'inline transition-colors cursor-pointer rounded-sm',
                       isCurrent &&
                         (isAudioPlaying
-                          ? cn(
-                              'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40',
-                              !wordSync && 'animate-pulse'
-                            )
+                          ? 'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40'
                           : 'bg-primary/20 ring-2 ring-primary/60')
                     )}
                   >
