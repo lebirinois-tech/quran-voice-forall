@@ -462,7 +462,9 @@ export const HafsTajweedPageView = ({
       if (available <= 0) return;
       const bismillah = frameEl.querySelector('[data-bismillah]') as HTMLElement | null;
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
-      const target = available - extra;
+      // Petite marge de sécurité : la justification complète des lignes peut
+      // faire varier la hauteur d'un ou deux pixels après application.
+      const target = available - extra - 10;
       if (target <= 0) return;
 
       // Ne recalculer que si le contenu ou la largeur changent réellement.
