@@ -469,7 +469,34 @@ export const HafsTajweedPageView = ({
           else lhHi = mid;
         }
       }
-      const lh = Number(lhLo.toFixed(3));
+      let lh = lhLo;
+
+      // 3) Remplissage automatique : si même à la plus grande taille et au
+      // plus grand interligne la page n'est pas pleine (pages courtes comme
+      // les fins de sourates), on étire l'interligne au-delà du maximum
+      // standard pour combler exactement l'espace disponible.
+      if (heightAt(px, lh) < target - 2) {
+        const hBase = heightAt(px, lh);
+        if (hBase > 0) {
+          // L'interligne agit de façon quasi proportionnelle sur la hauteur :
+          // estimation directe puis vérification, sans jamais déborder.
+          const estimate = lh * (target / hBase);
+          const exactHi = Math.min(estimate, 6);
+          if (heightAt(px, exactHi) <= target) {
+            lh = exactHi;
+          } else {
+            let eLo = lh;
+            let eHi = exactHi;
+            for (let i = 0; i < 12; i++) {
+              const mid = (eLo + eHi) / 2;
+              if (heightAt(px, mid) <= target) eLo = mid;
+              else eHi = mid;
+            }
+            lh = eLo;
+          }
+        }
+      }
+      lh = Number(lh.toFixed(3));
 
       textEl.style.fontSize = prevFs;
       textEl.style.lineHeight = prevLh;
