@@ -9,7 +9,7 @@ import {
   HAFS_CACHE_URL_MARKER,
 } from "./lib/hafsMushafVersion";
 
-const APP_SHELL_VERSION = "2026-08-24-offline-downloads-v8";
+const APP_SHELL_VERSION = "2026-09-18-hafs-tajweed-pages-v9";
 const APP_SHELL_VERSION_KEY = "quran-app-shell-version";
 const APP_SHELL_RELOAD_KEY = "quran-app-shell-reload-version";
 
