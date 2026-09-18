@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
 import { VerseRecorder } from '@/components/VerseRecorder';
 import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
+import { useFullMushafPage } from '@/hooks/useFullMushafPage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { SettingsDialog } from '@/components/SettingsDialog';
@@ -87,6 +88,11 @@ const SurahReader = () => {
 
   const effectiveDisplayStyle = appSettings.textDisplayStyle;
   const isMushafImageMode = appSettings.textDisplayStyle.startsWith('pages-');
+  // Contenu complet de la page affichée (toutes les sourates), comme un Mushaf imprimé.
+  const { groups: fullPageGroups } = useFullMushafPage(
+    isMushafImageMode ? currentMushafPage : null,
+    appSettings.textDisplayStyle
+  );
   const isLoadingTextSource =
     (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
     (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
@@ -656,6 +662,7 @@ const SurahReader = () => {
                 appSettings.textDisplayStyle === 'pages-warsh' ||
                 appSettings.textDisplayStyle === 'pages-qalun'
               }
+              fullPageGroups={fullPageGroups}
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}
               currentVerse={quranAudio.currentVerse}

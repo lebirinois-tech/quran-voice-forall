@@ -8,6 +8,8 @@ import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { splitHtmlIntoWords, wordIndexForProgress } from '@/lib/tajweedWordSync';
 import { getThemesForVerse, getPrimaryThemeForVerse } from '@/data/quranThemes';
+import { surahHasHeaderBasmala } from '@/lib/basmala';
+import type { FullPageGroup } from '@/hooks/useFullMushafPage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { Input } from './ui/input';
@@ -29,6 +31,8 @@ interface HafsTajweedPageViewProps {
    * already ships coloured HTML.
    */
   preferProvidedTajweed?: boolean;
+  /** Contenu complet de la page (toutes les sourates), façon Mushaf imprimé. */
+  fullPageGroups?: FullPageGroup[] | null;
   initialPage?: number;
   onPageChange?: (page: number) => void;
   currentVerse?: number;
@@ -62,6 +66,7 @@ export const HafsTajweedPageView = ({
   verses,
   versesTajweed,
   preferProvidedTajweed = false,
+  fullPageGroups = null,
   initialPage,
   onPageChange,
   currentVerse,
@@ -284,18 +289,21 @@ export const HafsTajweedPageView = ({
 
 
 
-  // Regroupe les versets consécutifs partageant le MÊME thème dominant unique
-  // (Tafsir Mawdou'i). Un seul thème par bloc => une seule couleur, pas de
-  // dégradé : le coloriage reste lisible et cohérent dans toutes les sourates.
-  const themeGroups = useMemo(() => {
+  // Regroupe les versets consécutifs (d'une même sourate) partageant le MÊME
+  // thème dominant unique (Tafsir Mawdou'i). Un seul thème par bloc => une
+  // seule couleur, pas de dégradé : lisible et cohérent dans toutes les sourates.
+  const groupByTheme = (
+    sNo: number,
+    list: { number: number; html: string }[]
+  ) => {
     const groups: {
       theme: ReturnType<typeof getPrimaryThemeForVerse>['theme'];
       curated: boolean;
       key: string;
-      verses: typeof pageVerses;
+      verses: { number: number; html: string }[];
     }[] = [];
-    for (const v of pageVerses) {
-      const { theme, curated } = getPrimaryThemeForVerse(surahNumber, v.number);
+    for (const v of list) {
+      const { theme, curated } = getPrimaryThemeForVerse(sNo, v.number);
       const key = `${theme?.id ?? 'none'}:${curated ? 'c' : 'd'}`;
       const last = groups[groups.length - 1];
       if (last && last.key === key) {
@@ -305,7 +313,7 @@ export const HafsTajweedPageView = ({
       }
     }
     return groups;
-  }, [pageVerses, surahNumber]);
+  };
 
 
   // Auto-scroll current verse into view
@@ -338,12 +346,37 @@ export const HafsTajweedPageView = ({
     [preferProvidedTajweed, versesTajweed]
   );
 
+  // Page complète façon Mushaf imprimé : toutes les sourates présentes sur la
+  // page (fin de la sourate précédente, début de la suivante), chacune avec
+  // ses blocs thématiques. Repli sur la sourate courante si l'index n'est pas prêt.
+  const pageSections = useMemo(() => {
+    if (fullPageGroups && fullPageGroups.length > 0) {
+      return fullPageGroups.map((g) => ({
+        surahNumber: g.surahNumber,
+        startsHere: g.startsHere,
+        groups: groupByTheme(g.surahNumber, g.verses),
+      }));
+    }
+    return [
+      {
+        surahNumber,
+        startsHere: false,
+        groups: groupByTheme(
+          surahNumber,
+          pageVerses.map((v) => ({ number: v.number, html: buildVerseHtml(v) }))
+        ),
+      },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullPageGroups, pageVerses, surahNumber, buildVerseHtml]);
+
   const currentWords = useMemo(() => {
     if (!currentVerse) return null;
-    const v = pageVerses.find((x) => x.number === currentVerse);
+    const section = pageSections.find((s) => s.surahNumber === surahNumber);
+    const v = section?.groups.flatMap((g) => g.verses).find((x) => x.number === currentVerse);
     if (!v) return null;
-    return splitHtmlIntoWords(buildVerseHtml(v));
-  }, [currentVerse, pageVerses, buildVerseHtml]);
+    return splitHtmlIntoWords(v.html);
+  }, [currentVerse, pageSections, surahNumber]);
 
   const activeWordIndex = useMemo(
     () => (currentWords ? wordIndexForProgress(currentWords.weights, verseProgress) : -1),
@@ -386,7 +419,9 @@ export const HafsTajweedPageView = ({
     else goPrev();
   };
 
-  const showBismillah = currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
+  // Avec la page complète, la Basmala est affichée dans l'en-tête de sourate.
+  const showBismillah =
+    !fullPageGroups?.length && currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
   // ---- Remplissage vertical de la page --------------------------------
   // Recherche binaire déterministe : on cherche la plus grande échelle de
@@ -676,7 +711,38 @@ export const HafsTajweedPageView = ({
           }}
 
         >
-          {themeGroups.map((group, gi) => {
+          {pageSections.map((section) => {
+            const sectionSurah = surahs.find((s) => s.number === section.surahNumber);
+            const isMainSurah = section.surahNumber === surahNumber;
+            return (
+            <span key={`sec-${section.surahNumber}`} style={{ display: 'inline' }}>
+            {section.startsHere && (
+              <span
+                dir="rtl"
+                style={{ display: 'block', width: '100%', textAlign: 'center' }}
+              >
+                <span
+                  className="my-[0.2em] inline-block w-[92%] rounded-lg border-2 px-2 py-[0.1em] font-amiri font-extrabold"
+                  style={{
+                    borderColor: 'hsl(43, 62%, 45%)',
+                    backgroundColor: 'hsl(43, 62%, 45% / 0.12)',
+                    color: 'hsl(43, 62%, 25%)',
+                    fontSize: '0.85em',
+                  }}
+                >
+                  سورة {sectionSurah?.nameArabic ?? section.surahNumber}
+                </span>
+                {surahHasHeaderBasmala(section.surahNumber) && (
+                  <span
+                    className="block font-amiri font-extrabold text-foreground"
+                    style={{ fontSize: '1.0em', margin: '0.1em 0 0.15em' }}
+                  >
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                  </span>
+                )}
+              </span>
+            )}
+            {section.groups.map((group, gi) => {
             const theme = group.theme;
             const themeTitle = theme
               ? `${theme.emoji} ${theme.labels.fr} · ${theme.labels.ar}${group.curated ? '' : ' (thème dominant de la sourate)'}`
@@ -716,19 +782,17 @@ export const HafsTajweedPageView = ({
               )}
 
               {group.verses.map((v) => {
-                const isCurrent = currentVerse === v.number;
-                // Warsh / Qalun : le texte de la qirâa est fourni en texte brut.
-                // On lui applique alors les couleurs Tajweed automatiques pour
-                // obtenir le même rendu coloré que Hafs, sans perdre la variante.
-                // Le verset en cours est en plus découpé en mots pour suivre la
-                // récitation, sans toucher aux couleurs des règles.
+                // Seule la sourate ouverte est interactive (lecture, menu,
+                // surbrillance) ; les versets des sourates voisines présents
+                // sur la même page sont affichés pour compléter la page.
+                const isCurrent = isMainSurah && currentVerse === v.number;
                 const wordSync = isCurrent && currentWords;
-                const html = wordSync ? currentWords.html : buildVerseHtml(v);
+                const html = wordSync ? currentWords.html : v.html;
                 return (
                   <span
                     key={v.number}
-                    data-verse={v.number}
-                    onClick={() => setMenuVerse(v.number)}
+                    data-verse={isMainSurah ? v.number : undefined}
+                    onClick={isMainSurah ? () => setMenuVerse(v.number) : undefined}
                     title={themeTitle}
                     style={
                       { boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }
@@ -754,9 +818,12 @@ export const HafsTajweedPageView = ({
             </span>
             );
           })}
-          {pageVerses.length === 0 && (
+            </span>
+            );
+          })}
+          {pageSections.every((s) => s.groups.every((g) => g.verses.length === 0)) && (
             <p className="text-center text-muted-foreground text-base">
-              Aucun verset sur cette page pour cette sourate.
+              Aucun verset sur cette page.
             </p>
           )}
               </div>
