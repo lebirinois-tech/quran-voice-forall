@@ -458,11 +458,16 @@ export const HafsTajweedPageView = ({
       const content = (textEl.textContent || '').trim();
       if (content.length < 5) return;
 
-      const available = frameEl.clientHeight - 8;
+      const frameStyle = window.getComputedStyle(frameEl);
+      const framePad =
+        parseFloat(frameStyle.paddingTop || '0') + parseFloat(frameStyle.paddingBottom || '0');
+      const available = frameEl.clientHeight - framePad - 8;
       if (available <= 0) return;
       const bismillah = frameEl.querySelector('[data-bismillah]') as HTMLElement | null;
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
-      const target = available - extra;
+      // Petite marge de sécurité : la justification complète des lignes peut
+      // faire varier la hauteur d'un ou deux pixels après application.
+      const target = available - extra - 10;
       if (target <= 0) return;
 
       // Ne recalculer que si le contenu ou la largeur changent réellement.
@@ -471,7 +476,17 @@ export const HafsTajweedPageView = ({
       // page « tremble » en permanence.
       const sig = `${content.length}|${Math.round(textEl.clientWidth)}`;
       const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
-      if (measuredRef.current && sig === sigRef.current && !targetChanged) return;
+      const overflow = frameEl.scrollHeight - frameEl.clientHeight;
+      const overflowing = overflow > 2;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged && overflowing) {
+        // Sécurité : la page déborde encore de quelques pixels après application
+        // (justification complète). On resserre l'interligne juste ce qu'il faut.
+        const h = textEl.scrollHeight || 1;
+        const factor = Math.max(0.8, (h - overflow - 4) / h);
+        setLineHeight((cur) => Number(Math.max(MIN_LH * 0.85, cur * factor).toFixed(3)));
+        return;
+      }
       sigRef.current = sig;
       lastTargetRef.current = target;
 
@@ -759,8 +774,8 @@ export const HafsTajweedPageView = ({
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             textAlign: 'justify',
-            textAlignLast: 'center',
-            wordSpacing: '-0.14em',
+            textAlignLast: 'justify',
+            wordSpacing: '-0.05em',
             
             lineHeight,
             flexShrink: 0,
@@ -815,29 +830,17 @@ export const HafsTajweedPageView = ({
                 background: theme
                   ? `hsl(${theme.hsl} / ${group.curated ? themeOpacity : themeOpacity * 0.35})`
                   : undefined,
-                borderRadius: theme ? '0.3em' : undefined,
-                padding: theme ? '0.02em 0.12em' : undefined,
-                boxShadow: theme && group.curated && themeOpacity > 0.02
-                  ? `inset 0 -0.12em 0 0 hsl(${theme.hsl} / ${Math.min(0.85, themeOpacity * 2.75)})`
-                  : undefined,
+                // Bandeau continu (comme le mushaf thématique de référence) :
+                // ni arrondi ni marge interne, pour que toutes les lignes
+                // gardent exactement la même hauteur et la même largeur.
+                borderRadius: undefined,
+                padding: undefined,
+                boxShadow: undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
             >
-              {theme && group.curated && (
-                <span
-                  contentEditable={false}
-                  className="mx-[0.15em] inline-flex select-none items-center gap-[0.15em] rounded-full px-[0.35em] py-0 align-middle font-cairo"
-                  style={{
-                    fontSize: '0.4em',
-                    lineHeight: 1.6,
-                    background: `hsl(${theme.hsl} / 0.9)`,
-                    color: 'white',
-                  }}
-                >
-                  {theme.emoji} {theme.labels.ar}
-                </span>
-              )}
+
 
               {group.verses.map((v) => {
                 // Seule la sourate ouverte est interactive (lecture, menu,
