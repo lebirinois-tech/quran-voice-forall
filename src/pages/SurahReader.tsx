@@ -662,6 +662,7 @@ const SurahReader = () => {
                 appSettings.textDisplayStyle === 'pages-warsh' ||
                 appSettings.textDisplayStyle === 'pages-qalun'
               }
+              fullPageGroups={fullPageGroups}
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}
               currentVerse={quranAudio.currentVerse}
