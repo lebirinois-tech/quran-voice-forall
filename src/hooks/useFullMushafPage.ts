@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
-import { stripLeadingBasmala, stripLeadingBasmalaHtml, surahHasHeaderBasmala } from '@/lib/basmala';
-import { parseTajweedText } from '@/hooks/useQuranData';
+import { stripLeadingBasmala, surahHasHeaderBasmala } from '@/lib/basmala';
 import { getDataset } from '@/lib/offlineDatasetStore';
 import { WARSH_DATASET_KEY, QALUN_DATASET_KEY } from '@/lib/autoOfflineRiwayat';
 
