@@ -899,6 +899,37 @@ export const HafsTajweedPageView = ({
           className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-center gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
+          <form
+            dir="ltr"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const target = parseInt(pageInput, 10);
+              if (Number.isFinite(target) && target >= 1 && target <= 604) {
+                goToPage(target);
+                setPageInput('');
+              }
+            }}
+            className="flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5"
+          >
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={604}
+              placeholder={String(currentPage)}
+              aria-label="Aller à la page (barre)"
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              className="h-8 w-14 rounded-full border border-primary/40 bg-background px-1 text-center text-sm font-semibold text-foreground focus:border-primary focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
+              className="h-8 rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
+            >
+              Go
+            </button>
+          </form>
           <Button
             type="button"
             size="icon"
