@@ -394,7 +394,7 @@ export const HafsTajweedPageView = ({
           else hi = mid;
         }
       }
-      const px = Math.floor(lo * 10) / 10;
+      const px = Math.max(MIN_PX, Math.min(MAX_PX, Math.floor(lo * fontScale * 10) / 10));
 
       // 2) Étirer l'interligne pour combler le vide restant, sans déborder.
       let lhLo = MIN_LH;
