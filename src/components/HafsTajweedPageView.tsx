@@ -1160,10 +1160,10 @@ export const HafsTajweedPageView = ({
                 <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Juz (1-30) — الجزء</label>
                   <Select
-                    value=""
+                    value={String(currentJuz)}
                     onValueChange={(v) => {
-                      setMenuOpen(false);
                       onNavigateToJuz?.(Number(v));
+                      setMenuOpen(false);
                     }}
                   >
                     <SelectTrigger className="h-11">

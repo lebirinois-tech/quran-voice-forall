@@ -200,7 +200,7 @@ const SurahReader = () => {
     toast.success(`Navigation vers sourate ${surahNum}`);
   };
 
-  const handleNavigateToPage = (pageNum: number) => {
+  const navigateToMushafPage = (pageNum: number, successMessage: string) => {
     const targetSurah = getSurahForPage(pageNum);
 
     // Navigation by page should first change the visible Mushaf page. If audio
@@ -210,7 +210,12 @@ const SurahReader = () => {
       setManualAudioPageRequest(pageNum);
     }
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
-    toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.success(successMessage);
+  };
+
+  const handleNavigateToPage = (pageNum: number) => {
+    navigateToMushafPage(pageNum, `Navigation vers page ${pageNum}`);
   };
 
   const handleManualMushafPageChange = useCallback((pageNum: number) => {
@@ -221,14 +226,12 @@ const SurahReader = () => {
 
   const handleNavigateToJuz = (juzNum: number) => {
     const juz = juzMapping[juzNum];
-    if (!juz) return;
-    const page = JUZ_START_PAGES[juzNum] ?? 1;
-    if (quranAudio.isPlaying) {
-      setManualAudioPageRequest(page);
-    }
-    navigate(`/surah/${juz.surah}?page=${page}&verse=${juz.verse}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast.success(`Juz ${juzNum} — ${juz.name} (page ${page})`);
+    const page = JUZ_START_PAGES[juzNum];
+    if (!juz || !page) return;
+
+    // La page est la référence unique en vue Mushaf. Ajouter aussi un verset
+    // faisait entrer les deux destinations en concurrence lors du changement.
+    navigateToMushafPage(page, `Juz ${juzNum} — ${juz.name} (page ${page})`);
   };
 
   const isMushafMode = isMushafImageMode;
