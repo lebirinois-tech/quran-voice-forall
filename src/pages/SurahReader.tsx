@@ -777,10 +777,6 @@ const SurahReader = () => {
                                   {firstVerseOfPage !== lastVerseOfPage ? `–${lastVerseOfPage}` : ''}
                                 </span>
                               </span>
-                              <span className="hidden sm:inline" aria-hidden="true">·</span>
-                              <span className="hidden sm:inline whitespace-nowrap font-amiri" dir="rtl">
-                                صفحة {pageNum}
-                              </span>
                             </nav>
                             <Button
                               size="sm"
