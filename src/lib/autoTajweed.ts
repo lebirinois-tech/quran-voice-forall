@@ -15,13 +15,25 @@
 // Output is HTML with <span style="color: #xxxxxx;"> wrappers, safe for the
 // DOMPurify sanitizer used in the Tajweed pipeline.
 
+// Palette identique à celle du mode Hafs (FROZEN) pour un rendu cohérent
+// entre Hafs, Warsh et Qalun.
 const COLORS = {
   madd: '#DD0000',
   ghunnah: '#2AAD2A',
   qalqalah: '#2E6ECB',
   iqlab: '#D4740C',
   ikhfa: '#DD0000',
+  idghamGhunnah: '#B266D9',
+  silent: '#AAAAAA',
 } as const;
+
+// Lettres solaires (lam shamsiyyah, non prononcé → gris comme en Hafs)
+const SUN_LETTERS = new Set([
+  'ت','ث','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ل','ن',
+]);
+const ALEF_WASLA = '\u0671';
+const ALEF = '\u0627';
+const LAM = '\u0644';
 
 const QALQALAH_LETTERS = new Set(['ق', 'ط', 'ب', 'ج', 'د']);
 const TANWEEN_MARKS = new Set(['\u064B', '\u064C', '\u064D']);
@@ -109,7 +121,8 @@ export const applyAutoTajweed = (text: string): string => {
         const nextLetter = chars[nextLetterIdx];
         let color: string | null = null;
         if (nextLetter === BAA) color = COLORS.iqlab;
-        else if (IDGHAM_GHUNNAH_LETTERS.has(nextLetter)) color = COLORS.ghunnah;
+        else if (IDGHAM_GHUNNAH_LETTERS.has(nextLetter)) color = COLORS.idghamGhunnah;
+        else if (nextLetter === 'ر' || nextLetter === 'ل') color = COLORS.silent;
         else if (IKHFA_LETTERS.has(nextLetter)) color = COLORS.ikhfa;
         if (color) {
           paint(triggerLetterIdx, color);
@@ -120,16 +133,38 @@ export const applyAutoTajweed = (text: string): string => {
       continue;
     }
 
-    // Meem-sakin (مْ) followed by ب (Ikhfa Shafawi) or م (Idgham Shafawi) → Ghunnah
+    // Meem-sakin (مْ) : ikhfa shafawi devant ب (rouge), idgham shafawi devant م (violet)
     if (ch === SUKUN && prev === MEEM) {
       const nextLetterIdx = findNextLetter(chars, i + 1);
       if (nextLetterIdx !== -1) {
         const nextLetter = chars[nextLetterIdx];
-        if (nextLetter === BAA || nextLetter === MEEM) {
-          paint(i - 1, COLORS.ghunnah);
-          paint(i, COLORS.ghunnah);
-          paint(nextLetterIdx, COLORS.ghunnah);
+        const color =
+          nextLetter === BAA
+            ? COLORS.ikhfa
+            : nextLetter === MEEM
+              ? COLORS.idghamGhunnah
+              : null;
+        if (color) {
+          paint(i - 1, color);
+          paint(i, color);
+          paint(nextLetterIdx, color);
         }
+      }
+      continue;
+    }
+
+    // Hamzat wasl (ٱ) : non prononcée en liaison → gris, comme en Hafs
+    if (ch === ALEF_WASLA) {
+      paint(i, COLORS.silent);
+      continue;
+    }
+
+    // Lam shamsiyyah : ال + lettre solaire → le lam n'est pas prononcé (gris)
+    if (ch === LAM && (prev === ALEF || prev === ALEF_WASLA)) {
+      const nextLetterIdx = findNextLetter(chars, i + 1);
+      if (nextLetterIdx !== -1 && SUN_LETTERS.has(chars[nextLetterIdx])) {
+        paint(i, COLORS.silent);
+        if (chars[i + 1] === SUKUN) paint(i + 1, COLORS.silent);
       }
       continue;
     }
