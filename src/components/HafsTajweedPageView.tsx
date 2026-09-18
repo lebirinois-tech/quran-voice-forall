@@ -346,12 +346,37 @@ export const HafsTajweedPageView = ({
     [preferProvidedTajweed, versesTajweed]
   );
 
+  // Page complète façon Mushaf imprimé : toutes les sourates présentes sur la
+  // page (fin de la sourate précédente, début de la suivante), chacune avec
+  // ses blocs thématiques. Repli sur la sourate courante si l'index n'est pas prêt.
+  const pageSections = useMemo(() => {
+    if (fullPageGroups && fullPageGroups.length > 0) {
+      return fullPageGroups.map((g) => ({
+        surahNumber: g.surahNumber,
+        startsHere: g.startsHere,
+        groups: groupByTheme(g.surahNumber, g.verses),
+      }));
+    }
+    return [
+      {
+        surahNumber,
+        startsHere: false,
+        groups: groupByTheme(
+          surahNumber,
+          pageVerses.map((v) => ({ number: v.number, html: buildVerseHtml(v) }))
+        ),
+      },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullPageGroups, pageVerses, surahNumber, buildVerseHtml]);
+
   const currentWords = useMemo(() => {
     if (!currentVerse) return null;
-    const v = pageVerses.find((x) => x.number === currentVerse);
+    const section = pageSections.find((s) => s.surahNumber === surahNumber);
+    const v = section?.groups.flatMap((g) => g.verses).find((x) => x.number === currentVerse);
     if (!v) return null;
-    return splitHtmlIntoWords(buildVerseHtml(v));
-  }, [currentVerse, pageVerses, buildVerseHtml]);
+    return splitHtmlIntoWords(v.html);
+  }, [currentVerse, pageSections, surahNumber]);
 
   const activeWordIndex = useMemo(
     () => (currentWords ? wordIndexForProgress(currentWords.weights, verseProgress) : -1),
