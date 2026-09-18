@@ -81,19 +81,9 @@ jobs:
           fs.writeFileSync(p, src);
           console.log(src);
           NODE
-          # APK universel (toutes les architectures CPU), pas de split par ABI
-          node - <<'NODE'
-          const fs = require('fs');
-          const p = 'android/app/build.gradle';
-          let src = fs.readFileSync(p, 'utf8');
-          if (!src.includes('universalApk')) {
-            src = src.replace(
-              /android\s*\{/,
-              `android {\n    splits { abi { enable false; universalApk true } }\n    packaging { jniLibs { useLegacyPackaging = true } }`
-            );
-            fs.writeFileSync(p, src);
-          }
-          NODE
+          # APK universel : on garde la configuration Capacitor par défaut
+          # (pas de patch de android/app/build.gradle, source d'échecs répétés).
+
 
       - name: Generate Android app icons
         run: |
@@ -118,7 +108,8 @@ jobs:
 
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew --no-daemon assembleDebug
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+
 
       - name: Rename APK
         run: |

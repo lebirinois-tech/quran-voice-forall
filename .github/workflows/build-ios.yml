@@ -42,11 +42,19 @@ jobs:
           fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2) + '\n');
           NODE
 
+      - name: Setup CocoaPods
+        run: |
+          gem install cocoapods --no-document || sudo gem install cocoapods --no-document
+          pod --version
+
       - name: Add iOS platform
         run: |
           bunx cap add ios
           bunx cap sync ios
+          cd ios/App && pod install --repo-update
+          cd - >/dev/null
           test -f ios/App/App.xcworkspace/contents.xcworkspacedata
+
 
       - name: Generate iOS app icons
         run: |
