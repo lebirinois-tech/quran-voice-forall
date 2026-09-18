@@ -1449,30 +1449,34 @@ export const HafsTajweedPageView = ({
                     ))}
                   </div>
                 )}
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    const v = menuVerse;
-                    setMenuVerse(null);
-                    if (v) onVerseClick?.(v);
-                  }}
-                  className="justify-start gap-2"
-                >
-                  <Play className="h-4 w-4" />
-                  Écouter ce verset
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const v = menuVerse;
-                    setMenuVerse(null);
-                    setDetailVerse(v);
-                  }}
-                  className="justify-start gap-2"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Détails du verset (traduction, partage…)
-                </Button>
+                {isMenuMainSurah && (
+                  <>
+                    <Button
+                      variant="default"
+                      onClick={() => {
+                        const v = menuVerse;
+                        setMenuVerse(null);
+                        if (v) onVerseClick?.(v);
+                      }}
+                      className="justify-start gap-2"
+                    >
+                      <Play className="h-4 w-4" />
+                      Écouter ce verset
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const v = menuVerse;
+                        setMenuVerse(null);
+                        setDetailVerse(v);
+                      }}
+                      className="justify-start gap-2"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Détails du verset (traduction, partage…)
+                    </Button>
+                  </>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => {
