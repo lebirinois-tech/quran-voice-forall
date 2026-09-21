@@ -881,16 +881,12 @@ export const HafsTajweedPageView = ({
               data-curated={group.curated ? '1' : '0'}
               style={{
                 display: 'inline',
-                // Chaque thème = UNE couleur claire distincte, appliquée à
-                // l'ensemble de ses versets. Les thèmes dominants de sourate
-                // gardent la même intensité afin que toutes les pages soient
-                // entièrement thématisées, y compris hors du relevé détaillé.
-                background: undefined,
-                // Bandeau continu (comme le mushaf thématique de référence) :
-                // ni arrondi ni marge interne, pour que toutes les lignes
-                // gardent exactement la même hauteur et la même largeur.
-                // Une fine lisière de la couleur forte du thème borne le bloc
-                // pour bien distinguer deux thèmes voisins de teintes proches.
+                // Aplat pastel continu inspiré du Mushaf thématique Al Muhafez.
+                // Le fond porte aussi les espaces entre les versets afin de ne
+                // laisser aucune coupure blanche au milieu d'un même passage.
+                backgroundColor: theme
+                  ? `hsl(${theme.bgHsl} / ${Math.max(0.32, themeOpacity)})`
+                  : undefined,
                 borderRadius: undefined,
                 padding: undefined,
                 boxShadow: undefined,
@@ -935,14 +931,14 @@ export const HafsTajweedPageView = ({
                       // lorsqu'elle revient à la ligne. La couleur forte du
                       // thème est diluée pour rester claire sans masquer le Tajweed.
                       backgroundColor: theme
-                        ? `hsl(${theme.hsl} / ${Math.max(0.08, themeOpacity * 0.62)})`
+                        ? `hsl(${theme.bgHsl} / ${Math.max(0.32, themeOpacity)})`
                         : undefined,
                       boxDecorationBreak: 'clone',
                       WebkitBoxDecorationBreak: 'clone',
-                      paddingInline: theme ? '0.06em' : undefined,
+                      paddingInline: undefined,
                     }}
                     className={cn(
-                      'inline transition-colors cursor-pointer rounded-sm',
+                      'inline cursor-pointer transition-colors',
                       isCurrent &&
                         (isAudioPlaying
                           ? 'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40'

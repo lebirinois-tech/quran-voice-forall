@@ -7,6 +7,7 @@
 - (aucun)
 
 ## Fait récemment
+- Fonds du Tafsir thématique rapprochés du modèle Al Muhafez : aplats pastel continus, sans coupure blanche, sur Hafs, Warsh et Qaloun.
 - Traduction et Tafsir trilingues au toucher d’un verset dans les trois Mushafs pages, contenus hors connexion inclus.
 - Coloriage thématique harmonisé sur les trois Mushafs selon le principe visuel de محفظ الوحيين : fonds clairs continus et titre arabe au début de chaque thème.
 - Purge du cache étendue aux trois Mushafs (Hafs, Warsh, Qalun) — version unique `MUSHAF_PAGES_VERSION` v10.
