@@ -15,9 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
-import { VerseCard } from './VerseCard';
+import { MushafVerseStudy } from './MushafVerseStudy';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
@@ -96,7 +95,6 @@ export const HafsTajweedPageView = ({
   const [menuVerse, setMenuVerse] = useState<number | null>(null);
   // Sourate du verset touché (une page peut contenir plusieurs sourates).
   const [menuSurah, setMenuSurah] = useState<number>(surahNumber);
-  const [tafsirVerse, setTafsirVerse] = useState<number | null>(null);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
   const { reciter, textDisplayStyle, fontSize } = useAppSettings();
@@ -1605,18 +1603,6 @@ export const HafsTajweedPageView = ({
                       <Play className="h-4 w-4" />
                       Écouter ce verset
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        const v = menuVerse;
-                        setMenuVerse(null);
-                        setDetailVerse(v);
-                      }}
-                      className="justify-start gap-2"
-                    >
-                      <BookOpen className="h-4 w-4" />
-                      Détails du verset (traduction, partage…)
-                    </Button>
                   </>
                 )}
                 {!isMenuMainSurah && (
@@ -1637,12 +1623,12 @@ export const HafsTajweedPageView = ({
                   onClick={() => {
                     const v = menuVerse;
                     setMenuVerse(null);
-                    setTafsirVerse(v);
+                    setDetailVerse(v);
                   }}
                   className="justify-start gap-2"
                 >
                   <BookOpen className="h-4 w-4" />
-                  Tafsir (Al-Muyassar)
+                  Traduction et Tafsir · الترجمة والتفسير
                 </Button>
                 <Button
                   variant="outline"
@@ -1670,53 +1656,31 @@ export const HafsTajweedPageView = ({
         </DialogContent>
       </Dialog>
 
-      {/* Full verse-mode content (translation, TTS, share, download, bookmark) */}
+      {/* Traduction et Tafsir trilingues, y compris pour une sourate voisine. */}
       <Dialog open={detailVerse !== null} onOpenChange={(o) => !o && setDetailVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120]">
+        <DialogContent className="w-[calc(100%-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120] p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>
-              {surah?.name} · Verset {detailVerse}
+              {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {detailVerse}
             </DialogTitle>
           </DialogHeader>
           {detailVerse !== null && (() => {
-            const v = verses.find((x) => x.number === detailVerse);
-            if (!v) return null;
+            const pageVerse = fullPageGroups
+              ?.find((group) => group.surahNumber === menuSurah)
+              ?.verses.find((verse) => verse.number === detailVerse);
+            const mainVerse = menuSurah === surahNumber
+              ? verses.find((verse) => verse.number === detailVerse)
+              : undefined;
+            const arabicHtml = pageVerse?.html ?? versesTajweed[detailVerse] ?? mainVerse?.text;
+            if (!arabicHtml) return null;
             return (
-              <VerseCard
-                verse={v}
-                surahNumber={surahNumber}
-                reciter={reciter}
-                textDisplayStyle={textDisplayStyle}
-                fontSize={fontSize}
-                tajweedHtml={versesTajweed[v.number]}
-                pageNumber={v.page}
-                isPlaying={isAudioPlaying && currentVerse === v.number}
-                onPlay={() => {
-                  setDetailVerse(null);
-                  onVerseClick?.(v.number);
-                }}
+              <MushafVerseStudy
+                surahNumber={menuSurah}
+                verseNumber={detailVerse}
+                arabicHtml={arabicHtml}
               />
             );
           })()}
-        </DialogContent>
-      </Dialog>
-
-      {/* Tafsir Al-Muyassar dialog */}
-      <Dialog open={tafsirVerse !== null} onOpenChange={(o) => !o && setTafsirVerse(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
-          <DialogHeader>
-            <DialogTitle>
-              Tafsir — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {tafsirVerse}
-            </DialogTitle>
-          </DialogHeader>
-          {tafsirVerse !== null && (
-            <TafsirPanel
-              surahNumber={menuSurah}
-              verseNumber={tafsirVerse}
-              isOpen={true}
-              onToggle={() => setTafsirVerse(null)}
-            />
-          )}
         </DialogContent>
       </Dialog>
 

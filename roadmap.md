@@ -1,7 +1,8 @@
 # Feuille de route
 
 ## En cours
-- (aucun)
+- Intégrer la traduction et le Tafsir trilingues au toucher d’un verset dans les trois Mushafs pages.
+- Harmoniser le coloriage thématique des trois Mushafs pages avec le principe visuel de محفظ الوحيين.
 
 ## À faire
 - (aucun)
