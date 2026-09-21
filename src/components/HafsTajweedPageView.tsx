@@ -97,7 +97,7 @@ export const HafsTajweedPageView = ({
   const [menuSurah, setMenuSurah] = useState<number>(surahNumber);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
-  const { reciter, textDisplayStyle, fontSize } = useAppSettings();
+  const { reciter } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
   const [repeatCount, setRepeatCount] = useState(1); // 0 = boucle infinie
@@ -1658,7 +1658,7 @@ export const HafsTajweedPageView = ({
 
       {/* Traduction et Tafsir trilingues, y compris pour une sourate voisine. */}
       <Dialog open={detailVerse !== null} onOpenChange={(o) => !o && setDetailVerse(null)}>
-        <DialogContent className="w-[calc(100%-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120] p-4 sm:p-6">
+        <DialogContent className="w-full max-w-[calc(100vw-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120] p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>
               {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {detailVerse}
