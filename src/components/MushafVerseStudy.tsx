@@ -32,7 +32,7 @@ export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: Musha
   const [translations, setTranslations] = useState<Partial<Record<Lang, string>>>({});
   const [tafsirs, setTafsirs] = useState<Partial<Record<Lang, string>>>({});
   const [loading, setLoading] = useState(true);
-  const theme = useMemo(() => getPrimaryThemeForVerse(surahNumber, verseNumber), [surahNumber, verseNumber]);
+  const { theme } = useMemo(() => getPrimaryThemeForVerse(surahNumber, verseNumber), [surahNumber, verseNumber]);
   const safeArabicHtml = useMemo(() => sanitizeTajweedHtml(arabicHtml), [arabicHtml]);
 
   useEffect(() => {
