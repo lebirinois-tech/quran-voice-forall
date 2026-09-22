@@ -455,10 +455,8 @@ export const HafsTajweedPageView = ({
   // L'interlignage choisi par l'utilisateur déplace les bornes : plus il est
   // large, plus la police se réduit pour que la page reste pleine et lisible.
   const MIN_LH = 1.4 * lineSpacing;
-  const MAX_LH = 2.6 * lineSpacing;
   const MIN_PX = 14;
   const MAX_PX = 64;
-  const BASE_LH = 1.9 * lineSpacing;
   const sigRef = useRef('');
   const lastTargetRef = useRef(0);
   const measuredRef = useRef(false);
@@ -521,72 +519,41 @@ export const HafsTajweedPageView = ({
         return textEl.scrollHeight;
       };
 
-      // 1) Plus grande taille de police qui tient dans le cadre.
+      // Format Mushaf de Médine : quinze lignes visuelles régulières. La
+      // hauteur d'une ligne est calculée à partir du cadre, puis la police est
+      // ajustée pour conserver tout le texte sans jamais créer une 16e ligne.
+      const MEDINA_LINE_COUNT = 15;
+      const rowHeightPx = target / MEDINA_LINE_COUNT;
+      const medinaLineHeight = (px: number) =>
+        Math.max(MIN_LH * 0.85, Math.min(6, rowHeightPx / px));
+
+      // 1) Plus grande taille de police qui tient dans les quinze lignes.
       let lo = MIN_PX;
       let hi = MAX_PX;
-      if (heightAt(MAX_PX, BASE_LH) <= target) {
+      if (heightAt(MAX_PX, medinaLineHeight(MAX_PX)) <= target) {
         lo = MAX_PX;
       } else {
         for (let i = 0; i < 12; i++) {
           const mid = (lo + hi) / 2;
-          if (heightAt(mid, BASE_LH) <= target) lo = mid;
+          if (heightAt(mid, medinaLineHeight(mid)) <= target) lo = mid;
           else hi = mid;
         }
       }
-      // Échelle utilisateur : on ne l'applique que si la page tient encore
-      // (interligne minimal). Sinon on cherche la plus grande taille possible
-      // entre la taille de base et la taille souhaitée : jamais de débordement.
+      // Le réglage utilisateur peut réduire la police, mais ne peut pas créer
+      // une ligne supplémentaire ni faire sortir le texte du cadre.
       let px = Math.max(MIN_PX, Math.min(MAX_PX, Math.floor(lo * fontScale * 10) / 10));
-      if (px > lo && heightAt(px, MIN_LH) > target) {
+      if (px > lo && heightAt(px, medinaLineHeight(px)) > target) {
         let sLo = lo;
         let sHi = px;
         for (let i = 0; i < 10; i++) {
           const mid = (sLo + sHi) / 2;
-          if (heightAt(mid, MIN_LH) <= target) sLo = mid;
+          if (heightAt(mid, medinaLineHeight(mid)) <= target) sLo = mid;
           else sHi = mid;
         }
         px = Math.max(MIN_PX, Math.floor(sLo * 10) / 10);
       }
-
-      // 2) Étirer l'interligne pour combler le vide restant, sans déborder.
-      let lhLo = MIN_LH;
-      let lhHi = MAX_LH;
-      if (heightAt(px, MAX_LH) <= target) {
-        lhLo = MAX_LH;
-      } else {
-        for (let i = 0; i < 12; i++) {
-          const mid = (lhLo + lhHi) / 2;
-          if (heightAt(px, mid) <= target) lhLo = mid;
-          else lhHi = mid;
-        }
-      }
-      let lh = lhLo;
-
-      // 3) Remplissage automatique : si même à la plus grande taille et au
-      // plus grand interligne la page n'est pas pleine (pages courtes comme
-      // les fins de sourates), on étire l'interligne au-delà du maximum
-      // standard pour combler exactement l'espace disponible.
-      if (heightAt(px, lh) < target - 2) {
-        const hBase = heightAt(px, lh);
-        if (hBase > 0) {
-          // L'interligne agit de façon quasi proportionnelle sur la hauteur :
-          // estimation directe puis vérification, sans jamais déborder.
-          const estimate = lh * (target / hBase);
-          const exactHi = Math.min(estimate, 6);
-          if (heightAt(px, exactHi) <= target) {
-            lh = exactHi;
-          } else {
-            let eLo = lh;
-            let eHi = exactHi;
-            for (let i = 0; i < 12; i++) {
-              const mid = (eLo + eHi) / 2;
-              if (heightAt(px, mid) <= target) eLo = mid;
-              else eHi = mid;
-            }
-            lh = eLo;
-          }
-        }
-      }
+      let lh = medinaLineHeight(px) * lineSpacing;
+      if (heightAt(px, lh) > target) lh = medinaLineHeight(px);
       lh = Number(lh.toFixed(3));
 
       textEl.style.fontSize = prevFs;
