@@ -455,10 +455,8 @@ export const HafsTajweedPageView = ({
   // L'interlignage choisi par l'utilisateur déplace les bornes : plus il est
   // large, plus la police se réduit pour que la page reste pleine et lisible.
   const MIN_LH = 1.4 * lineSpacing;
-  const MAX_LH = 2.6 * lineSpacing;
   const MIN_PX = 14;
   const MAX_PX = 64;
-  const BASE_LH = 1.9 * lineSpacing;
   const sigRef = useRef('');
   const lastTargetRef = useRef(0);
   const measuredRef = useRef(false);

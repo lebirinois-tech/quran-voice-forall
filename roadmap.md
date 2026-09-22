@@ -1,12 +1,13 @@
 # Feuille de route
 
 ## En cours
-- Adapter les pages Hafs, Warsh et Qaloun au format Mushaf de Médine de 15 lignes par page.
+- (aucun)
 
 ## À faire
 - (aucun)
 
 ## Fait récemment
+- Pages Hafs, Warsh et Qaloun harmonisées sur le rythme visuel du Mushaf de Médine à 15 lignes, avec ajustement automatique sans débordement.
 - Fonds du Tafsir thématique rapprochés du modèle Al Muhafez : aplats pastel continus, sans coupure blanche, sur Hafs, Warsh et Qaloun.
 - Traduction et Tafsir trilingues au toucher d’un verset dans les trois Mushafs pages, contenus hors connexion inclus.
 - Coloriage thématique harmonisé sur les trois Mushafs selon le principe visuel de محفظ الوحيين : fonds clairs continus et titre arabe au début de chaque thème.
