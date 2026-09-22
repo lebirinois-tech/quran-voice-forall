@@ -1,7 +1,7 @@
 # Feuille de route
 
 ## En cours
-- (aucun)
+- Adapter les pages Hafs, Warsh et Qaloun au format Mushaf de Médine de 15 lignes par page.
 
 ## À faire
 - (aucun)
