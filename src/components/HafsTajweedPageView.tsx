@@ -496,14 +496,6 @@ export const HafsTajweedPageView = ({
       const overflow = frameEl.scrollHeight - frameEl.clientHeight;
       const overflowing = overflow > 2;
       if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
-      if (measuredRef.current && sig === sigRef.current && !targetChanged && overflowing) {
-        // Sécurité : la page déborde encore de quelques pixels après application
-        // (justification complète). On resserre l'interligne juste ce qu'il faut.
-        const h = textEl.scrollHeight || 1;
-        const factor = Math.max(0.8, (h - overflow - 4) / h);
-        setLineHeight((cur) => Number(Math.max(MIN_LH * 0.85, cur * factor).toFixed(3)));
-        return;
-      }
       sigRef.current = sig;
       lastTargetRef.current = target;
 
@@ -576,20 +568,9 @@ export const HafsTajweedPageView = ({
         }
       }
 
-      // Répartir régulièrement les lignes dans le cadre sans en créer une 16e.
-      let lhLow = Math.max(1.08, 1.12 * lineSpacing);
-      let lhHigh = 5;
-      for (let i = 0; i < 10; i++) {
-        const mid = (lhLow + lhHigh) / 2;
-        const measured = measureAt(px, mid);
-        if (measured.height <= target && measured.lineCount === MEDINA_LINE_COUNT) lhLow = mid;
-        else lhHigh = mid;
-      }
-      let lh = Number(lhLow.toFixed(3));
-      const finalMeasure = measureAt(px, lh);
-      if (finalMeasure.lineCount !== MEDINA_LINE_COUNT || finalMeasure.height > target) {
-        lh = MEASURE_LH;
-      }
+      // Garder ensuite cet interligne compact : le modifier après le comptage
+      // change les rectangles de glyphes et peut recréer une seizième ligne.
+      const lh = Number(MEASURE_LH.toFixed(3));
       px = Math.floor(px * 10) / 10;
 
       textEl.style.fontSize = prevFs;
