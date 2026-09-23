@@ -443,10 +443,10 @@ export const HafsTajweedPageView = ({
   const showBismillah =
     !fullPageGroups?.length && currentPage === startPage && surahNumber !== 1 && surahNumber !== 9;
 
-  // ---- Remplissage vertical de la page --------------------------------
-  // Recherche binaire déterministe : on cherche la plus grande échelle de
-  // police qui tient dans le cadre, puis on étire l'interligne pour combler
-  // l'espace restant. Aucun débordement possible, rendu régulier.
+  // ---- Mise en page Médine à quinze lignes -----------------------------
+  // Le navigateur ne coupe pas l'arabe aux mêmes endroits sur tous les
+  // téléphones. On compte donc les lignes réellement peintes, puis on ajuste
+  // la police jusqu'à obtenir quinze lignes de versets (sept pour la Fatiha).
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [lineHeight, setLineHeight] = useState(1.95);
@@ -496,14 +496,6 @@ export const HafsTajweedPageView = ({
       const overflow = frameEl.scrollHeight - frameEl.clientHeight;
       const overflowing = overflow > 2;
       if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
-      if (measuredRef.current && sig === sigRef.current && !targetChanged && overflowing) {
-        // Sécurité : la page déborde encore de quelques pixels après application
-        // (justification complète). On resserre l'interligne juste ce qu'il faut.
-        const h = textEl.scrollHeight || 1;
-        const factor = Math.max(0.8, (h - overflow - 4) / h);
-        setLineHeight((cur) => Number(Math.max(MIN_LH * 0.85, cur * factor).toFixed(3)));
-        return;
-      }
       sigRef.current = sig;
       lastTargetRef.current = target;
 
@@ -512,49 +504,74 @@ export const HafsTajweedPageView = ({
       // Les transitions CSS faussent les mesures : on les gèle le temps du calcul.
       textEl.classList.add('fit-measuring');
 
-      // Tailles en pixels (mesure synchrone fiable, pas d'unités de conteneur).
-      const heightAt = (px: number, lh: number) => {
+      // Mesure synchrone en pixels, indépendante de la taille de l'écran.
+      const measureAt = (px: number, lh: number) => {
         textEl.style.fontSize = `${px}px`;
         textEl.style.lineHeight = String(lh);
-        return textEl.scrollHeight;
+        const tops: number[] = [];
+        // Un rectangle est produit pour chaque ligne traversée par un verset,
+        // y compris son médaillon de fin. Cela correspond aux lignes que voit
+        // réellement la lectrice, sans compter séparément les lettres Tajweed.
+        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          Array.from(range.getClientRects()).forEach((rect) => {
+            if (rect.width > 1 && rect.height > 1) tops.push(rect.top);
+          });
+        });
+        tops.sort((a, b) => a - b);
+        const uniqueTops: number[] = [];
+        tops.forEach((top) => {
+          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= 3)) uniqueTops.push(top);
+        });
+        const lineCount = uniqueTops.length;
+        return { height: textEl.scrollHeight, lineCount };
       };
 
-      // Format Mushaf de Médine : quinze lignes visuelles régulières. La
-      // hauteur d'une ligne est calculée à partir du cadre, puis la police est
-      // ajustée pour conserver tout le texte sans jamais créer une 16e ligne.
-      const MEDINA_LINE_COUNT = 15;
-      const rowHeightPx = target / MEDINA_LINE_COUNT;
-      const medinaLineHeight = (px: number) =>
-        Math.max(MIN_LH * 0.85, Math.min(6, rowHeightPx / px));
+      const MEDINA_LINE_COUNT = currentPage === 1 ? 7 : 15;
+      // Le Mushaf imprimé utilise un corps large dans une ligne compacte. Sur
+      // mobile, ce rapport est indispensable pour garder quinze lignes malgré
+      // l'en-tête et les commandes de navigation.
+      const MEASURE_LH = Math.max(1.12, 1.18 * lineSpacing);
+      const desiredPx = Math.min(MAX_PX, Math.max(MIN_PX, 32 * fontScale));
 
-      // 1) Plus grande taille de police qui tient dans les quinze lignes.
-      let lo = MIN_PX;
-      let hi = MAX_PX;
-      if (heightAt(MAX_PX, medinaLineHeight(MAX_PX)) <= target) {
-        lo = MAX_PX;
-      } else {
-        for (let i = 0; i < 12; i++) {
-          const mid = (lo + hi) / 2;
-          if (heightAt(mid, medinaLineHeight(mid)) <= target) lo = mid;
-          else hi = mid;
+      // Le nombre de lignes croît avec la taille. Cette recherche trouve le
+      // seuil réel, puis absorbe les différences entre Android et iPhone.
+      let low = 10;
+      let high = 64;
+      let px = low;
+      let bestDistance = Number.POSITIVE_INFINITY;
+      // Recherche bornée par la hauteur de quinze lignes : aucune taille
+      // examinée ne peut déjà dépasser verticalement le cadre.
+      for (let candidate = low; candidate <= high; candidate += 0.2) {
+        const measured = measureAt(candidate, MEASURE_LH);
+        if (measured.lineCount !== MEDINA_LINE_COUNT || measured.height > target) continue;
+        const distance = Math.abs(candidate - desiredPx);
+        if (distance < bestDistance) {
+          px = candidate;
+          bestDistance = distance;
         }
       }
-      // Le réglage utilisateur peut réduire la police, mais ne peut pas créer
-      // une ligne supplémentaire ni faire sortir le texte du cadre.
-      let px = Math.max(MIN_PX, Math.min(MAX_PX, Math.floor(lo * fontScale * 10) / 10));
-      if (px > lo && heightAt(px, medinaLineHeight(px)) > target) {
-        let sLo = lo;
-        let sHi = px;
-        for (let i = 0; i < 10; i++) {
-          const mid = (sLo + sHi) / 2;
-          if (heightAt(mid, medinaLineHeight(mid)) <= target) sLo = mid;
-          else sHi = mid;
+
+      // Repli défensif : si les glyphes du téléphone rendent le seuil très
+      // étroit, retenir la taille qui se rapproche le plus de quinze lignes.
+      if (!Number.isFinite(bestDistance)) {
+        let bestScore = Number.POSITIVE_INFINITY;
+        for (let candidate = low; candidate <= high; candidate += 0.2) {
+          const measured = measureAt(candidate, MEASURE_LH);
+          if (measured.height > target) continue;
+          const score = Math.abs(measured.lineCount - MEDINA_LINE_COUNT) * 100 + Math.abs(candidate - desiredPx);
+          if (score < bestScore) {
+            px = candidate;
+            bestScore = score;
+          }
         }
-        px = Math.max(MIN_PX, Math.floor(sLo * 10) / 10);
       }
-      let lh = medinaLineHeight(px) * lineSpacing;
-      if (heightAt(px, lh) > target) lh = medinaLineHeight(px);
-      lh = Number(lh.toFixed(3));
+
+      // Garder ensuite cet interligne compact : le modifier après le comptage
+      // change les rectangles de glyphes et peut recréer une seizième ligne.
+      const lh = Number(MEASURE_LH.toFixed(3));
+      px = Math.floor(px * 10) / 10;
 
       textEl.style.fontSize = prevFs;
       textEl.style.lineHeight = prevLh;
@@ -886,6 +903,7 @@ export const HafsTajweedPageView = ({
                 return (
                   <span
                     key={v.number}
+                    data-mushaf-verse-row
                     data-verse={isMainSurah ? v.number : undefined}
                     onClick={() => {
                       setMenuSurah(section.surahNumber);
@@ -912,7 +930,7 @@ export const HafsTajweedPageView = ({
                           : 'bg-primary/20 ring-2 ring-primary/60')
                     )}
                   >
-                    <span dangerouslySetInnerHTML={{ __html: html }} />
+                    <span data-mushaf-verse-content dangerouslySetInnerHTML={{ __html: html }} />
                     <span className="mx-[0.02em] inline-flex items-center justify-center align-middle text-primary font-bold">
                       ۝{toArabicDigits(v.number)}
                     </span>{' '}
