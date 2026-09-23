@@ -546,7 +546,7 @@ export const HafsTajweedPageView = ({
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
       // seuil réel, puis absorbe les différences entre Android et iPhone.
       let low = 10;
-      let high = Math.min(64, target / (MEDINA_LINE_COUNT * MEASURE_LH));
+      let high = 64;
       let px = low;
       let bestDistance = Number.POSITIVE_INFINITY;
       // Recherche bornée par la hauteur de quinze lignes : aucune taille
