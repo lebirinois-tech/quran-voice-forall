@@ -537,7 +537,10 @@ export const HafsTajweedPageView = ({
       };
 
       const MEDINA_LINE_COUNT = currentPage === 1 ? 7 : 15;
-      const MEASURE_LH = Math.max(1.35, 1.45 * lineSpacing);
+      // Le Mushaf imprimé utilise un corps large dans une ligne compacte. Sur
+      // mobile, ce rapport est indispensable pour garder quinze lignes malgré
+      // l'en-tête et les commandes de navigation.
+      const MEASURE_LH = Math.max(1.12, 1.18 * lineSpacing);
       const desiredPx = Math.min(MAX_PX, Math.max(MIN_PX, 32 * fontScale));
 
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
@@ -574,7 +577,7 @@ export const HafsTajweedPageView = ({
       }
 
       // Répartir régulièrement les lignes dans le cadre sans en créer une 16e.
-      let lhLow = Math.max(1.2, MIN_LH * 0.8);
+      let lhLow = Math.max(1.08, 1.12 * lineSpacing);
       let lhHigh = 5;
       for (let i = 0; i < 10; i++) {
         const mid = (lhLow + lhHigh) / 2;
