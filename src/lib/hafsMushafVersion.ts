@@ -5,7 +5,7 @@
 //   1. New image/data URLs (via ?v= cache-buster) → browsers refetch pages.
 //   2. Purge of any Cache Storage entries that pinned the previous version.
 //   3. Purge of the app-shell caches that may embed old HTML/JS references.
-export const MUSHAF_PAGES_VERSION = "2026-09-23-mushaf-medine-15-lignes-v14";
+export const MUSHAF_PAGES_VERSION = "2026-09-25-mushaf-medine-plein-cadre-v15";
 
 // Backward-compatible alias (older imports).
 export const HAFS_MUSHAF_VERSION = MUSHAF_PAGES_VERSION;

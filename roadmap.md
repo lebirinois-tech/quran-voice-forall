@@ -1,7 +1,7 @@
 # Feuille de route
 
 ## En cours
-- Vérifier les 15 lignes réelles du Mushaf de Médine sur Hafs, Warsh et Qaloun après remplacement du calcul de hauteur par un comptage visuel.
+- Vérifier que les 15 lignes occupent régulièrement tout le cadre sur Hafs, Warsh et Qaloun, sans débordement.
 
 ## À faire
 - (aucun)

@@ -568,10 +568,27 @@ export const HafsTajweedPageView = ({
         }
       }
 
-      // Garder ensuite cet interligne compact : le modifier après le comptage
-      // change les rectangles de glyphes et peut recréer une seizième ligne.
-      const lh = Number(MEASURE_LH.toFixed(3));
       px = Math.floor(px * 10) / 10;
+
+      // Une page de Médine occupe toute la hauteur utile. Le premier passage
+      // ci-dessus fixe les coupures horizontales à 15 lignes ; ce second
+      // passage augmente uniquement leur hauteur jusqu'à remplir le cadre.
+      // C'est indispensable sur les écrans mobiles très hauts, où conserver
+      // l'interligne de mesure regroupait tout le texte au milieu de la page.
+      let lh = MEASURE_LH;
+      let lhLow = MEASURE_LH;
+      let lhHigh = Math.max(MEASURE_LH, Math.min(6, target / Math.max(1, MEDINA_LINE_COUNT * px)));
+      for (let i = 0; i < 18; i += 1) {
+        const candidate = (lhLow + lhHigh) / 2;
+        const measured = measureAt(px, candidate);
+        if (measured.height <= target && measured.lineCount <= MEDINA_LINE_COUNT) {
+          lh = candidate;
+          lhLow = candidate;
+        } else {
+          lhHigh = candidate;
+        }
+      }
+      lh = Number(lh.toFixed(3));
 
       textEl.style.fontSize = prevFs;
       textEl.style.lineHeight = prevLh;
