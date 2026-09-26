@@ -3,6 +3,7 @@
 ## En cours
 - Vérifier que les 15 lignes occupent régulièrement tout le cadre sur Hafs, Warsh et Qaloun, sans débordement.
 - Rétablir l’accès à la mise à jour publiée et déclencher la publication immédiatement.
+- Expliquer et débloquer l’autorisation « Publish » affichée sur mobile.
 
 ## À faire
 - (aucun)
