@@ -484,7 +484,9 @@ export const HafsTajweedPageView = ({
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
       // Petite marge de sécurité : la justification complète des lignes peut
       // faire varier la hauteur d'un ou deux pixels après application.
-      const target = available - extra - 10;
+      // Réserver la hauteur des bordures et des diacritiques qui dépassent
+      // légèrement la boîte typographique sur Android.
+      const target = available - extra - 22;
       if (target <= 0) return;
 
       // Ne recalculer que si le contenu ou la largeur changent réellement.
@@ -521,8 +523,14 @@ export const HafsTajweedPageView = ({
         });
         tops.sort((a, b) => a - b);
         const uniqueTops: number[] = [];
+        // Les signes diacritiques et les spans Tajweed d'une même ligne ont
+        // souvent des rectangles décalés de plusieurs pixels. Une tolérance
+        // fixe de 3 px les comptait comme des lignes supplémentaires, puis
+        // réduisait à tort tout le texte en un petit bloc. La tolérance suit
+        // désormais la hauteur réelle d'une ligne typographique.
+        const sameLineTolerance = Math.max(4, px * lh * 0.45);
         tops.forEach((top) => {
-          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= 3)) uniqueTops.push(top);
+          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
         });
         const lineCount = uniqueTops.length;
         return { height: textEl.scrollHeight, lineCount };
@@ -577,7 +585,9 @@ export const HafsTajweedPageView = ({
       // l'interligne de mesure regroupait tout le texte au milieu de la page.
       let lh = MEASURE_LH;
       let lhLow = MEASURE_LH;
-      let lhHigh = Math.max(MEASURE_LH, Math.min(6, target / Math.max(1, MEDINA_LINE_COUNT * px)));
+      // Une valeur démesurée peut créer une page artificiellement espacée sur
+      // certains moteurs Android. Le plafond garde un rythme de Mushaf lisible.
+      let lhHigh = Math.max(MEASURE_LH, Math.min(2.5, target / Math.max(1, MEDINA_LINE_COUNT * px)));
       for (let i = 0; i < 18; i += 1) {
         const candidate = (lhLow + lhHigh) / 2;
         const measured = measureAt(px, candidate);
@@ -799,7 +809,8 @@ export const HafsTajweedPageView = ({
 
             <div
               ref={frameRef}
-              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
+              data-mushaf-page-frame
+              className="flex min-h-0 w-full flex-1 flex-col items-center justify-start overflow-hidden rounded-lg border-2"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
                 paddingInline: '0.35em',
@@ -823,6 +834,7 @@ export const HafsTajweedPageView = ({
 
               <div
           ref={textRef}
+          data-mushaf-page-text
           dir="rtl"
           lang="ar"
           className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
