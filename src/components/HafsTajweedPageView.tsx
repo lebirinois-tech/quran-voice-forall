@@ -809,6 +809,7 @@ export const HafsTajweedPageView = ({
 
             <div
               ref={frameRef}
+              data-mushaf-page-frame
               className="flex min-h-0 w-full flex-1 flex-col items-center justify-start overflow-hidden rounded-lg border-2"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
@@ -833,6 +834,7 @@ export const HafsTajweedPageView = ({
 
               <div
           ref={textRef}
+          data-mushaf-page-text
           dir="rtl"
           lang="ar"
           className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
