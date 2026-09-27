@@ -484,7 +484,9 @@ export const HafsTajweedPageView = ({
       const extra = bismillah ? bismillah.offsetHeight + 8 : 0;
       // Petite marge de sécurité : la justification complète des lignes peut
       // faire varier la hauteur d'un ou deux pixels après application.
-      const target = available - extra - 10;
+      // Réserver la hauteur des bordures et des diacritiques qui dépassent
+      // légèrement la boîte typographique sur Android.
+      const target = available - extra - 22;
       if (target <= 0) return;
 
       // Ne recalculer que si le contenu ou la largeur changent réellement.
