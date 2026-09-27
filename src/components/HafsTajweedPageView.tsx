@@ -521,8 +521,14 @@ export const HafsTajweedPageView = ({
         });
         tops.sort((a, b) => a - b);
         const uniqueTops: number[] = [];
+        // Les signes diacritiques et les spans Tajweed d'une même ligne ont
+        // souvent des rectangles décalés de plusieurs pixels. Une tolérance
+        // fixe de 3 px les comptait comme des lignes supplémentaires, puis
+        // réduisait à tort tout le texte en un petit bloc. La tolérance suit
+        // désormais la hauteur réelle d'une ligne typographique.
+        const sameLineTolerance = Math.max(4, px * lh * 0.45);
         tops.forEach((top) => {
-          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= 3)) uniqueTops.push(top);
+          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
         });
         const lineCount = uniqueTops.length;
         return { height: textEl.scrollHeight, lineCount };
