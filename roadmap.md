@@ -2,13 +2,13 @@
 
 ## En cours
 - Vérifier que les 15 lignes occupent régulièrement tout le cadre sur Hafs, Warsh et Qaloun, sans débordement.
-- Rétablir l’accès à la mise à jour publiée et déclencher la publication immédiatement.
-- Expliquer et débloquer l’autorisation « Publish » affichée sur mobile.
+- Publier la correction de mise en page après validation mobile.
 
 ## À faire
 - (aucun)
 
 ## Fait récemment
+- Suppression du centrage vertical qui tassait les versets au milieu du cadre ; contenu ancré en haut et interligne borné.
 - Pages Hafs, Warsh et Qaloun harmonisées sur le rythme visuel du Mushaf de Médine à 15 lignes, avec ajustement automatique sans débordement.
 - Fonds du Tafsir thématique rapprochés du modèle Al Muhafez : aplats pastel continus, sans coupure blanche, sur Hafs, Warsh et Qaloun.
 - Traduction et Tafsir trilingues au toucher d’un verset dans les trois Mushafs pages, contenus hors connexion inclus.

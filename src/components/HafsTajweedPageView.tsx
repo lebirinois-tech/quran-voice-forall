@@ -577,7 +577,9 @@ export const HafsTajweedPageView = ({
       // l'interligne de mesure regroupait tout le texte au milieu de la page.
       let lh = MEASURE_LH;
       let lhLow = MEASURE_LH;
-      let lhHigh = Math.max(MEASURE_LH, Math.min(6, target / Math.max(1, MEDINA_LINE_COUNT * px)));
+      // Une valeur démesurée peut créer une page artificiellement espacée sur
+      // certains moteurs Android. Le plafond garde un rythme de Mushaf lisible.
+      let lhHigh = Math.max(MEASURE_LH, Math.min(2.5, target / Math.max(1, MEDINA_LINE_COUNT * px)));
       for (let i = 0; i < 18; i += 1) {
         const candidate = (lhLow + lhHigh) / 2;
         const measured = measureAt(px, candidate);
@@ -799,7 +801,7 @@ export const HafsTajweedPageView = ({
 
             <div
               ref={frameRef}
-              className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border-2"
+              className="flex min-h-0 w-full flex-1 flex-col items-center justify-start overflow-hidden rounded-lg border-2"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
                 paddingInline: '0.35em',
