@@ -641,6 +641,11 @@ export const HafsTajweedPageView = ({
         })
       : null;
     if (frameEl && ro) ro.observe(frameEl);
+    // Sur un téléphone lent, les textes Warsh/Qaloun peuvent arriver après la
+    // fin de la surveillance initiale : observer aussi le bloc de texte pour
+    // recalculer les 15 lignes dès que son contenu change.
+    const textElObs = textRef.current;
+    if (textElObs && ro) ro.observe(textElObs);
 
     return () => {
       cancelAnimationFrame(raf);
