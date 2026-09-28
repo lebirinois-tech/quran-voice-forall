@@ -3,6 +3,7 @@
 ## En cours
 - Vérifier que les 15 lignes occupent régulièrement tout le cadre sur Hafs, Warsh et Qaloun, sans débordement.
 - Publier la correction de mise en page après validation mobile.
+- Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
 ## À faire
 - (aucun)
