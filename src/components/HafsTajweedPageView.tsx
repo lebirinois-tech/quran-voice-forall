@@ -541,12 +541,16 @@ export const HafsTajweedPageView = ({
       // mobile, ce rapport est indispensable pour garder quinze lignes malgré
       // l'en-tête et les commandes de navigation.
       const MEASURE_LH = Math.max(1.12, 1.18 * lineSpacing);
-      const desiredPx = Math.min(MAX_PX, Math.max(MIN_PX, 32 * fontScale));
+      // Sur téléphone, une seconde mesure pouvait choisir un corps de 35 px
+      // après le chargement de la police et couper le bas de la page. Ce
+      // plafond dépend de la largeur réelle, pas du modèle de téléphone.
+      const responsiveMaxPx = textEl.clientWidth < 500 ? 22 : MAX_PX;
+      const desiredPx = Math.min(responsiveMaxPx, Math.max(MIN_PX, 32 * fontScale));
 
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
       // seuil réel, puis absorbe les différences entre Android et iPhone.
       let low = 10;
-      let high = 64;
+      let high = responsiveMaxPx;
       let px = low;
       let bestDistance = Number.POSITIVE_INFINITY;
       // Recherche bornée par la hauteur de quinze lignes : aucune taille
