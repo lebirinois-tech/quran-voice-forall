@@ -1,14 +1,15 @@
 # Feuille de route
 
 ## En cours
-- Vérifier que les 15 lignes occupent régulièrement tout le cadre sur Hafs, Warsh et Qaloun, sans débordement.
-- Publier la correction de mise en page après validation mobile.
+- Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
 ## À faire
 - (aucun)
 
 ## Fait récemment
+- Validation sur téléphone réel : Hafs, Warsh et Qaloun s’affichent maintenant en 15 lignes.
+- Publication de la correction de mise en page après validation mobile.
 - Suppression du centrage vertical qui tassait les versets au milieu du cadre ; contenu ancré en haut et interligne borné.
 - Pages Hafs, Warsh et Qaloun harmonisées sur le rythme visuel du Mushaf de Médine à 15 lignes, avec ajustement automatique sans débordement.
 - Fonds du Tafsir thématique rapprochés du modèle Al Muhafez : aplats pastel continus, sans coupure blanche, sur Hafs, Warsh et Qaloun.
