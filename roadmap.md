@@ -5,7 +5,7 @@
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
 ## À faire
-- Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages.
+- Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
 - Validation sur téléphone réel : Hafs, Warsh et Qaloun s’affichent maintenant en 15 lignes.
