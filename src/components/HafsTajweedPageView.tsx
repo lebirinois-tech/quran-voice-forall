@@ -128,6 +128,10 @@ export const HafsTajweedPageView = ({
   });
   const fontScale = fontScalePct / 100;
   const themeOpacity = themeOpacityPct / 100;
+  // Le modèle محفظ الوحيين utilise des aplats pastel réellement visibles.
+  // Le curseur conserve sa plage historique (0–40), mais pilote ici une
+  // opacité de papier pastel suffisante pour distinguer chaque passage.
+  const thematicPaperOpacity = Math.min(1, 0.48 + themeOpacity * 1.3);
   const lineSpacing = lineSpacingPct / 100;
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
@@ -324,7 +328,7 @@ export const HafsTajweedPageView = ({
     }[] = [];
     for (const v of list) {
       const { theme, curated } = getPrimaryThemeForVerse(sNo, v.number);
-      const key = `${theme?.id ?? 'none'}:${curated ? 'c' : 'd'}`;
+      const key = theme?.id ?? 'none';
       const last = groups[groups.length - 1];
       if (last && last.key === key) {
         last.verses.push(v);
@@ -903,11 +907,11 @@ export const HafsTajweedPageView = ({
               data-curated={group.curated ? '1' : '0'}
               style={{
                 display: 'inline',
-                // Aplat pastel continu inspiré du Mushaf thématique Al Muhafez.
-                // Le fond porte aussi les espaces entre les versets afin de ne
-                // laisser aucune coupure blanche au milieu d'un même passage.
+                // Aplat pastel continu du مصحف التجويد الموضوعي : le fond
+                // couvre aussi les espaces entre les versets et les retours à
+                // la ligne, sans séparation blanche dans un même passage.
                 backgroundColor: theme
-                  ? `hsl(${theme.bgHsl} / ${Math.max(0.32, themeOpacity)})`
+                  ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
                   : undefined,
                 borderRadius: undefined,
                 padding: undefined,
@@ -921,11 +925,11 @@ export const HafsTajweedPageView = ({
                   dir="rtl"
                   data-theme-title={theme.id}
                   title={themeTitle}
-                  className="mx-[0.12em] inline-flex items-center justify-center rounded-md px-[0.34em] py-[0.04em] align-middle font-cairo text-[0.42em] font-bold leading-[1.35]"
+                  className="mb-[0.12em] mt-[0.08em] flex w-full items-center justify-center rounded-sm border px-[0.5em] py-[0.05em] text-center font-amiri text-[0.48em] font-bold leading-[1.25]"
                   style={{
-                    backgroundColor: `hsl(${theme.hsl})`,
-                    color: 'hsl(var(--primary-foreground))',
-                    boxShadow: `inset 0 0 0 1px hsl(${theme.hsl} / 0.35)`,
+                    backgroundColor: `hsl(${theme.hsl} / 0.24)`,
+                    borderColor: `hsl(${theme.hsl} / 0.42)`,
+                    color: `hsl(${theme.hsl})`,
                   }}
                 >
                   {theme.labels.ar}
@@ -954,7 +958,7 @@ export const HafsTajweedPageView = ({
                       // lorsqu'elle revient à la ligne. La couleur forte du
                       // thème est diluée pour rester claire sans masquer le Tajweed.
                       backgroundColor: theme
-                        ? `hsl(${theme.bgHsl} / ${Math.max(0.32, themeOpacity)})`
+                        ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
                         : undefined,
                       boxDecorationBreak: 'clone',
                       WebkitBoxDecorationBreak: 'clone',
