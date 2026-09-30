@@ -72,15 +72,15 @@ jobs:
           bunx cap add android
           bunx cap sync android
 
-      - name: Widen Android compatibility (minSdk 23 = Android 6+)
+      - name: Set Android compatibility (minSdk 24 = Android 7+)
         run: |
           node - <<'NODE'
           const fs = require('fs');
           const p = 'android/variables.gradle';
           let src = fs.readFileSync(p, 'utf8');
-          src = src.replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 23');
+          src = src.replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 24');
           if (!/minSdkVersion/.test(src)) {
-            src = src.replace('ext {', 'ext {\n    minSdkVersion = 23');
+            src = src.replace('ext {', 'ext {\n    minSdkVersion = 24');
           }
           fs.writeFileSync(p, src);
           console.log(src);
