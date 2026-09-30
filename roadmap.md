@@ -3,6 +3,7 @@
 ## En cours
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
+- Reproduire le coloriage thématique de محفظ الوحيين dans les Mushafs Tajweed Pages Hafs, Warsh et Qaloun.
 
 ## À faire
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
