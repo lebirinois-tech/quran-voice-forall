@@ -8,7 +8,7 @@ import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { splitHtmlIntoWords, wordIndexForProgress } from '@/lib/tajweedWordSync';
-import { getThemesForVerse, getPrimaryThemeForVerse } from '@/data/quranThemes';
+import { getThemesForVerse, getPrimaryThemeForVerse, getThemeById } from '@/data/quranThemes';
 import { surahHasHeaderBasmala } from '@/lib/basmala';
 import type { FullPageGroup } from '@/hooks/useFullMushafPage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
@@ -21,6 +21,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
 import { useHafsMedinaWordLines } from '@/hooks/useHafsMedinaWordLines';
+import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -159,6 +160,7 @@ export const HafsTajweedPageView = ({
       : startPage
   );
   const officialMedinaLines = useHafsMedinaWordLines(currentPage, riwaya === 'hafs');
+  const hafsVerseThemes = useHafsVerseThemes(riwaya === 'hafs');
   const usesOfficialMedinaLines = riwaya === 'hafs' && officialMedinaLines !== null;
   const [officialFontPx, setOfficialFontPx] = useState(24);
 
@@ -870,7 +872,10 @@ export const HafsTajweedPageView = ({
                     </span>
                   ) : (
                     words.map((word, wordPosition) => {
-                      const theme = getPrimaryThemeForVerse(word.surah, word.verse).theme;
+                      const indexedThemeId = hafsVerseThemes?.[`${word.surah}:${word.verse}`];
+                      const theme = indexedThemeId
+                        ? getThemeById(indexedThemeId)
+                        : getPrimaryThemeForVerse(word.surah, word.verse).theme;
                       const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
                       const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
                       const html = word.kind === 'word'
