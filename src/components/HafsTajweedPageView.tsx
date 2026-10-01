@@ -685,7 +685,14 @@ export const HafsTajweedPageView = ({
         let used = 0;
         Array.from(row.children).forEach((child) => {
           const element = child as HTMLElement;
-          used += Math.max(element.getBoundingClientRect().width, element.scrollWidth);
+          if (element.hasAttribute('data-theme-run')) {
+            // Les aplats s'étirent (justification) : mesurer les mots eux-mêmes.
+            Array.from(element.children).forEach((word) => {
+              used += (word as HTMLElement).getBoundingClientRect().width;
+            });
+          } else {
+            used += Math.max(element.getBoundingClientRect().width, element.scrollWidth);
+          }
         });
         if (used > 0) ratio = Math.min(ratio, available / used);
       });
@@ -909,7 +916,8 @@ export const HafsTajweedPageView = ({
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
                   className={cn(
-                    'flex min-w-0 items-center justify-center whitespace-nowrap text-center'
+                    'flex w-full min-w-0 items-center whitespace-nowrap',
+                    isHeaderGap ? 'justify-center text-center' : 'justify-between'
                   )}
                 >
                   {isHeaderGap ? (
@@ -925,7 +933,8 @@ export const HafsTajweedPageView = ({
                       <span
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
-                        className="inline-flex shrink-0 items-center rounded-[0.12em]"
+                        data-theme-run=""
+                        className="flex flex-auto items-center justify-between rounded-[0.12em]"
                         style={{
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
