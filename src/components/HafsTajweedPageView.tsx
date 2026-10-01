@@ -518,11 +518,24 @@ export const HafsTajweedPageView = ({
         textEl.style.fontSize = `${px}px`;
         textEl.style.lineHeight = String(lh);
         const height = textEl.scrollHeight;
-        // Les rectangles DOM des lettres Tajweed et de leurs diacritiques se
-        // chevauchent différemment selon la riwaya. Ils ne constituent donc pas
-        // un compteur fiable. La hauteur typographique donne directement le
-        // nombre de lignes réellement peintes, quelle que soit la police.
-        const lineCount = Math.max(1, Math.round(height / (px * lh)));
+        const tops: number[] = [];
+        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          Array.from(range.getClientRects()).forEach((rect) => {
+            if (rect.width > 1 && rect.height > 1) tops.push(rect.top);
+          });
+        });
+        tops.sort((a, b) => a - b);
+        const uniqueTops: number[] = [];
+        // À ce stade les trois fontes Médine sont effectivement appliquées.
+        // Le seuil d'une demi-ligne réunit les diacritiques d'une même rangée
+        // sans fusionner deux rangées successives.
+        const sameLineTolerance = Math.max(4, px * lh * 0.45);
+        tops.forEach((top) => {
+          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
+        });
+        const lineCount = uniqueTops.length;
         return { height, lineCount };
       };
 
