@@ -102,6 +102,7 @@ export const HafsTajweedPageView = ({
   const [menuSurah, setMenuSurah] = useState<number>(surahNumber);
   const [themeVerse, setThemeVerse] = useState<number | null>(null);
   const [detailVerse, setDetailVerse] = useState<number | null>(null);
+  const [detailMode, setDetailMode] = useState<'verse' | 'page'>('verse');
   const { reciter } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
@@ -1698,7 +1699,52 @@ export const HafsTajweedPageView = ({
               {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {detailVerse}
             </DialogTitle>
           </DialogHeader>
-          {detailVerse !== null && (() => {
+          {detailVerse !== null && (
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant={detailMode === 'verse' ? 'default' : 'outline'} onClick={() => setDetailMode('verse')}>
+                Ce verset · الآية
+              </Button>
+              <Button size="sm" variant={detailMode === 'page' ? 'default' : 'outline'} onClick={() => setDetailMode('page')}>
+                <BookOpen className="h-4 w-4 mr-1" /> Page {currentPage} · الصفحة
+              </Button>
+              {onPlayRange && (
+                <Button size="sm" variant="secondary" onClick={() => { setDetailVerse(null); startScope('page'); }}>
+                  <Volume2 className="h-4 w-4 mr-1" /> Écouter la page
+                </Button>
+              )}
+            </div>
+          )}
+          {detailVerse !== null && detailMode === 'page' && (() => {
+            const groups = fullPageGroups?.length
+              ? fullPageGroups.map((g) => ({ surahNumber: g.surahNumber, verses: g.verses.map((v) => ({ number: v.number, html: v.html })) }))
+              : [{ surahNumber, verses: pageVerses.map((v) => ({ number: v.number, html: versesTajweed[v.number] ?? v.text })) }];
+            return (
+              <div className="space-y-3">
+                {groups.map((g) => (
+                  <div key={g.surahNumber} className="space-y-2">
+                    <p className="text-sm font-semibold text-primary">{surahs.find((s) => s.number === g.surahNumber)?.name}</p>
+                    {g.verses.map((v) => (
+                      <button
+                        key={`${g.surahNumber}-${v.number}`}
+                        type="button"
+                        onClick={() => { setMenuSurah(g.surahNumber); setDetailVerse(v.number); setDetailMode('verse'); }}
+                        className={cn(
+                          'w-full rounded-md border p-2 text-right font-amiri text-xl leading-loose hover:bg-accent',
+                          g.surahNumber === menuSurah && v.number === detailVerse && 'border-primary bg-primary/5'
+                        )}
+                        dir="rtl"
+                      >
+                        <span dangerouslySetInnerHTML={{ __html: sanitizeTajweedHtml(v.html) }} />
+                        <span className="mx-1 text-sm text-muted-foreground">﴿{v.number}﴾</span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">Touchez un verset pour voir sa traduction et son tafsir.</p>
+              </div>
+            );
+          })()}
+          {detailVerse !== null && detailMode === 'verse' && (() => {
             const pageVerse = fullPageGroups
               ?.find((group) => group.surahNumber === menuSurah)
               ?.verses.find((verse) => verse.number === detailVerse);
