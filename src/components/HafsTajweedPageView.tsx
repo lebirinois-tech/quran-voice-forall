@@ -711,10 +711,10 @@ export const HafsTajweedPageView = ({
             <span aria-hidden className="pointer-events-none absolute -bottom-1.5 -left-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
             <span aria-hidden className="pointer-events-none absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full border-2 bg-background" style={{ borderColor: 'hsl(43, 62%, 45%)' }} />
 
-            {/* En-tête façon Mushaf : sourate (droite) et Juz (gauche), cliquables */}
+            {/* En-tête unique : sourate, page cliquable au centre et Juz. */}
             <div
               dir="rtl"
-              className="mb-1 flex shrink-0 items-center justify-between gap-2 rounded-lg border px-2 py-1"
+              className="mb-1 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-1 rounded-lg border px-2 py-1"
               style={{
                 borderColor: 'hsl(43, 55%, 58%)',
                 backgroundColor: 'hsl(43, 62%, 45% / 0.08)',
@@ -723,7 +723,7 @@ export const HafsTajweedPageView = ({
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="max-w-[46%] truncate rounded-md px-2 py-0.5 font-amiri text-base font-bold sm:text-lg"
+                className="min-w-0 truncate rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
                 style={{ color: 'hsl(43, 62%, 25%)' }}
                 aria-label="Choisir une sourate"
               >
@@ -732,28 +732,26 @@ export const HafsTajweedPageView = ({
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="max-w-[46%] truncate rounded-md px-2 py-0.5 font-amiri text-base font-bold sm:text-lg"
+                aria-label="Choisir une page"
+                className="whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-xs font-bold shadow-sm sm:text-sm"
+                style={{
+                  backgroundColor: 'hsl(195, 80%, 96%)',
+                  borderColor: 'hsl(43, 62%, 45%)',
+                  color: 'hsl(43, 62%, 25%)',
+                }}
+              >
+                <MushafPageBadge page={currentPage} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="min-w-0 truncate rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
                 style={{ color: 'hsl(43, 62%, 25%)' }}
                 aria-label="Choisir un Juz"
               >
                 الجزء {toArabicDigits(currentJuz)}
               </button>
             </div>
-
-            {/* Numéro de page façon Mushaf, centré en haut du cadre */}
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              aria-label="Choisir une page"
-              className="mx-auto mb-1 mt-0.5 w-fit rounded-full border-2 px-4 py-1 text-base font-bold shadow-sm"
-              style={{
-                backgroundColor: 'hsl(195, 80%, 96%)',
-                borderColor: 'hsl(43, 62%, 45%)',
-                color: 'hsl(43, 62%, 25%)',
-              }}
-            >
-              <MushafPageBadge page={currentPage} />
-            </button>
 
             <div
               ref={frameRef}
