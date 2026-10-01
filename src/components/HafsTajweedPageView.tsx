@@ -674,25 +674,55 @@ export const HafsTajweedPageView = ({
     const desired = Math.min(30, Math.max(17, 24 * fontScale));
     let raf = 0;
     let timer = 0;
+    let roTimer = 0;
+    // Largeur réelle du contenu d'une ligne = somme des mots (indépendant du
+    // sens RTL et de justify-between, qui masquait le dépassement à gauche).
+    const worstRatio = () => {
+      let ratio = 1;
+      root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
+        const available = row.clientWidth;
+        if (available <= 0) return;
+        let used = 0;
+        Array.from(row.children).forEach((child) => {
+          used += (child as HTMLElement).getBoundingClientRect().width;
+        });
+        if (used > 0) ratio = Math.min(ratio, available / used);
+      });
+      return ratio;
+    };
     const fitOfficialLines = () => {
-      root.style.fontSize = `${desired}px`;
-      const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-medina-line]'));
-      const ratios = rows
-        .filter((row) => row.scrollWidth > 0)
-        .map((row) => row.clientWidth / row.scrollWidth);
-      const ratio = ratios.length ? Math.min(1, ...ratios) : 1;
-      setOfficialFontPx(Math.max(11, Math.floor(desired * ratio * 0.96 * 10) / 10));
+      let size = desired;
+      root.style.fontSize = `${size}px`;
+      size = Math.max(10, Math.floor(desired * Math.min(1, worstRatio()) * 0.97 * 10) / 10);
+      root.style.fontSize = `${size}px`;
+      // Filet de sécurité : réduire tant qu'une ligne dépasse encore.
+      for (let i = 0; i < 12 && size > 10 && worstRatio() < 0.995; i += 1) {
+        size = Math.max(10, Math.floor(size * 0.97 * 10) / 10);
+        root.style.fontSize = `${size}px`;
+      }
+      setOfficialFontPx(size);
     };
     raf = requestAnimationFrame(fitOfficialLines);
     const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
     fontSet?.load?.('24px hafs-medina').then(() => {
       timer = window.setTimeout(fitOfficialLines, 50);
     });
+    fontSet?.ready?.then?.(() => requestAnimationFrame(fitOfficialLines));
+    const frameEl = frameRef.current;
+    const ro = frameEl
+      ? new ResizeObserver(() => {
+          window.clearTimeout(roTimer);
+          roTimer = window.setTimeout(fitOfficialLines, 120);
+        })
+      : null;
+    if (frameEl && ro) ro.observe(frameEl);
     return () => {
       cancelAnimationFrame(raf);
       window.clearTimeout(timer);
+      window.clearTimeout(roTimer);
+      ro?.disconnect();
     };
-  }, [usesOfficialMedinaLines, currentPage, fontScale, themeOpacityPct]);
+  }, [usesOfficialMedinaLines, officialMedinaLines, currentPage, fontScale, themeOpacityPct]);
 
 
 
