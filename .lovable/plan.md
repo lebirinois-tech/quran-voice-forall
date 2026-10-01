@@ -1,10 +1,13 @@
 # Mushaf Médine thématique indépendant
 
 ## Objectif
-Reproduire, sans copier les fichiers de محفظ الوحيين, la présentation demandée sur les trois lectures : page Médine de 15 lignes, Tajweed intact et couleurs thématiques continues par passages de versets.
+Corriger d’abord la structure des trois lectures pour obtenir 15 lignes fixes, régulières et réparties comme une vraie page du Mushaf de Médine. Le Tajweed et le coloriage thématique seront ensuite posés sur ces lignes sans en modifier la géométrie.
 
 ## Mise en œuvre
-- Conserver strictement le cadre, les 15 lignes, la taille automatique et la synchronisation audio actuellement validés.
+- Remplacer le comptage visuel approximatif actuel par 15 emplacements de lignes stables et de hauteur identique.
+- Utiliser les repères de lignes officiels disponibles pour Warsh et Qaloun ; établir les coupures Médine correspondantes pour Hafs au lieu de laisser le téléphone couper automatiquement le texte.
+- Répartir les 15 lignes du haut jusqu’au bas du cadre, avec une taille de texte uniforme et sans agrandissement variable après chargement.
+- Conserver strictement le cadre, le Tajweed et la synchronisation audio actuellement validés.
 - Remplacer le coloriage approximatif appliqué à toute une sourate par des blocs de versets documentés : seuls les passages réellement classés recevront une couleur thématique.
 - Utiliser une palette pastel indépendante et lisible, distincte des couleurs des règles de Tajweed.
 - Appliquer exactement les mêmes limites thématiques aux vues Hafs, Warsh et Qaloun.
@@ -12,8 +15,8 @@ Reproduire, sans copier les fichiers de محفظ الوحيين, la présentatio
 - Forcer l’actualisation du cache des trois Mushafs après la correction.
 
 ## Vérification
-- Contrôler plusieurs pages du début, du milieu et de la fin dans les trois lectures sur écran mobile.
-- Vérifier 15 lignes, absence de débordement, versets entiers, Tajweed visible et changements de couleurs uniquement aux limites des thèmes.
+- Contrôler automatiquement les 604 pages de chaque lecture sur écran mobile.
+- Vérifier exactement 15 lignes régulières par page (sauf la Fatiha selon sa composition), absence de débordement, versets entiers, Tajweed visible et changements de couleurs uniquement aux limites des thèmes.
 - Ne publier et ne reconstruire l’APK qu’après cette validation.
 
 ## Limite assumée
