@@ -884,7 +884,7 @@ export const HafsTajweedPageView = ({
                       const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
                       const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
                       const html = word.kind === 'word'
-                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text))
+                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text.replace(/\u06DF/g, '\u0652')))
                         : word.text;
                       return (
                         <span

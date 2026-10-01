@@ -79,7 +79,7 @@ const loadHafsIndex = (): Promise<Map<number, FullPageGroup[]>> => {
           if (ayah.numberInSurah === 1 && surahHasHeaderBasmala(surahNumber)) {
             text = stripLeadingBasmala(text);
           }
-          const html = sanitizeTajweedHtml(applyAutoTajweed(text));
+          const html = sanitizeTajweedHtml(applyAutoTajweed(text.replace(/\u06DF/g, '\u0652')));
           pushVerse(map, page, surahNumber, { number: ayah.numberInSurah, html });
         });
       }
