@@ -548,7 +548,9 @@ export const HafsTajweedPageView = ({
       // Sur téléphone, une seconde mesure pouvait choisir un corps de 35 px
       // après le chargement de la police et couper le bas de la page. Ce
       // plafond dépend de la largeur réelle, pas du modèle de téléphone.
-      const responsiveMaxPx = textEl.clientWidth < 500 ? 22 : MAX_PX;
+      // Les champs de navigation et le titre intérieur ont été retirés : la
+      // page dispose de plus de hauteur et peut employer un corps plus lisible.
+      const responsiveMaxPx = textEl.clientWidth < 500 ? 24 : MAX_PX;
       const desiredPx = Math.min(responsiveMaxPx, Math.max(MIN_PX, 32 * fontScale));
 
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
@@ -753,73 +755,6 @@ export const HafsTajweedPageView = ({
               <MushafPageBadge page={currentPage} />
             </button>
 
-            {/* Saisie directe : page et verset côte à côte */}
-            <div className="mx-auto mb-1.5 flex w-full max-w-[95%] flex-wrap items-center justify-center gap-2 px-1">
-              <form
-                dir="ltr"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const target = parseInt(pageInput, 10);
-                  if (Number.isFinite(target) && target >= 1 && target <= 604) {
-                    goToPage(target);
-                    setPageInput('');
-                  }
-                }}
-                className="flex shrink-0 items-center gap-1 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
-              >
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={604}
-                  placeholder="P"
-                  aria-label="Aller à la page"
-                  value={pageInput}
-                  onChange={(e) => setPageInput(e.target.value)}
-                  className="h-6 w-12 rounded-md border border-border bg-background px-1 text-center text-sm text-foreground focus:border-primary focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
-                  className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
-                >
-                  Go
-                </button>
-              </form>
-
-              <form
-                dir="ltr"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const target = parseInt(verseInput, 10);
-                  if (Number.isFinite(target)) {
-                    goToVerse(target);
-                    setVerseInput('');
-                  }
-                }}
-                className="flex shrink-0 items-center gap-1 rounded-full border border-primary/30 bg-background/90 px-2 py-1 shadow-sm backdrop-blur"
-              >
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={verses.length || 1}
-                  placeholder="V"
-                  aria-label="Aller au verset"
-                  value={verseInput}
-                  onChange={(e) => setVerseInput(e.target.value)}
-                  className="h-6 w-12 rounded-md border border-border bg-background px-1 text-center text-sm text-foreground focus:border-primary focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
-                  className="h-6 rounded-md bg-primary px-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
-                >
-                  Go
-                </button>
-              </form>
-            </div>
-
             <div
               ref={frameRef}
               data-mushaf-page-frame
@@ -856,8 +791,8 @@ export const HafsTajweedPageView = ({
             // L'alignement à droite conserve l'espacement naturel du texte
             // coranique. La justification forcée étirait chaque ligne et
             // créait des vides artificiels entre les mots, surtout en bas.
-            textAlign: 'right',
-            textAlignLast: 'right',
+            textAlign: 'center',
+            textAlignLast: 'center',
             wordSpacing: 'normal',
             
             lineHeight,
@@ -872,30 +807,17 @@ export const HafsTajweedPageView = ({
             const isMainSurah = section.surahNumber === surahNumber;
             return (
             <span key={`sec-${section.surahNumber}`} style={{ display: 'inline' }}>
-            {section.startsHere && (
+            {section.startsHere && surahHasHeaderBasmala(section.surahNumber) && (
               <span
                 dir="rtl"
                 style={{ display: 'block', width: '100%', textAlign: 'center' }}
               >
                 <span
-                  className="my-[0.2em] inline-block w-[92%] rounded-lg border-2 px-2 py-[0.1em] font-amiri font-extrabold"
-                  style={{
-                    borderColor: 'hsl(43, 62%, 45%)',
-                    backgroundColor: 'hsl(43, 62%, 45% / 0.12)',
-                    color: 'hsl(43, 62%, 25%)',
-                    fontSize: '0.85em',
-                  }}
+                  className="block font-amiri font-extrabold text-foreground"
+                  style={{ fontSize: '1.0em', margin: '0.1em 0 0.15em' }}
                 >
-                  سورة {sectionSurah?.nameArabic ?? section.surahNumber}
+                  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                 </span>
-                {surahHasHeaderBasmala(section.surahNumber) && (
-                  <span
-                    className="block font-amiri font-extrabold text-foreground"
-                    style={{ fontSize: '1.0em', margin: '0.1em 0 0.15em' }}
-                  >
-                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-                  </span>
-                )}
               </span>
             )}
             {section.groups.map((group, gi) => {
@@ -1005,68 +927,6 @@ export const HafsTajweedPageView = ({
           className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-center gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
-          <form
-            dir="ltr"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const target = parseInt(pageInput, 10);
-              if (Number.isFinite(target) && target >= 1 && target <= 604) {
-                goToPage(target);
-                setPageInput('');
-              }
-            }}
-            className="flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5"
-          >
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={604}
-              placeholder={String(currentPage)}
-              aria-label="Aller à la page (barre)"
-              value={pageInput}
-              onChange={(e) => setPageInput(e.target.value)}
-              className="h-8 w-14 rounded-full border border-primary/40 bg-background px-1 text-center text-sm font-semibold text-foreground focus:border-primary focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={!pageInput || !Number.isFinite(parseInt(pageInput, 10))}
-              className="h-8 rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
-            >
-              Go
-            </button>
-          </form>
-          <form
-            dir="ltr"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const target = parseInt(verseInput, 10);
-              if (Number.isFinite(target)) {
-                goToVerse(target);
-                setVerseInput('');
-              }
-            }}
-            className="flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5"
-          >
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={verses.length || 1}
-              placeholder="آية"
-              aria-label="Aller au verset (barre)"
-              value={verseInput}
-              onChange={(e) => setVerseInput(e.target.value)}
-              className="h-8 w-14 rounded-full border border-primary/40 bg-background px-1 text-center text-sm font-semibold text-foreground focus:border-primary focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={!verseInput || !Number.isFinite(parseInt(verseInput, 10))}
-              className="h-8 rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
-            >
-              Go
-            </button>
-          </form>
           <Button
             type="button"
             size="icon"

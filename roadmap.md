@@ -1,7 +1,6 @@
 # Feuille de route
 
 ## En cours
-- Épurer la vue Mushaf : indicateur de page centré et cliquable, champs Go et titre intérieur retirés, texte coranique agrandi et recentré.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
@@ -9,6 +8,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Vue Mushaf épurée : numéro de page centré et cliquable, champs « Go » et titre intérieur retirés, texte coranique agrandi et recentré.
 - Suppression de la justification forcée et des grands vides entre les mots dans les titres et les versets, sur les trois Mushafs pages.
 - Coloriage thématique des trois Mushafs rapproché de محفظ الوحيين : blocs pastel continus, bandeau arabe assorti au début de chaque thème, Tajweed préservé.
 - Validation sur téléphone réel : Hafs, Warsh et Qaloun s’affichent maintenant en 15 lignes.
