@@ -1,6 +1,7 @@
 # Feuille de route
 
 ## En cours
+- Remplacer la recomposition actuelle par les trois Mushafs Tajweed Médine 15 lignes issus de sources réutilisables, puis superposer uniquement les fonds thématiques sans déplacer le texte.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
