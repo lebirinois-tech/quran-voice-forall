@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { applyAutoTajweed, concealBrokenMobileQuranZeros } from '@/lib/autoTajweed';
+import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { stripLeadingBasmala, surahHasHeaderBasmala } from '@/lib/basmala';
 import { getDataset } from '@/lib/offlineDatasetStore';
 import { WARSH_DATASET_KEY, QALUN_DATASET_KEY } from '@/lib/autoOfflineRiwayat';
@@ -79,7 +79,7 @@ const loadHafsIndex = (): Promise<Map<number, FullPageGroup[]>> => {
           if (ayah.numberInSurah === 1 && surahHasHeaderBasmala(surahNumber)) {
             text = stripLeadingBasmala(text);
           }
-          const html = concealBrokenMobileQuranZeros(sanitizeTajweedHtml(applyAutoTajweed(text)));
+          const html = sanitizeTajweedHtml(applyAutoTajweed(text));
           pushVerse(map, page, surahNumber, { number: ayah.numberInSurah, html });
         });
       }
@@ -138,7 +138,7 @@ const loadRiwayaIndex = (
       if (v.aya_no === 1 && surahHasHeaderBasmala(v.sura_no)) {
         text = stripLeadingBasmala(text);
       }
-      const html = concealBrokenMobileQuranZeros(sanitizeTajweedHtml(applyAutoTajweed(text)));
+      const html = sanitizeTajweedHtml(applyAutoTajweed(text));
       pushVerse(map, page, v.sura_no, { number: v.aya_no, html });
     }
     return map;

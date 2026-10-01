@@ -10,8 +10,6 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
-- Texte intégral rétabli et lignes de mots regroupées ; les petits zéros défectueux restent dans le texte mais deviennent transparents sur Android, sans supprimer de caractères.
-- Suppression à l’affichage des petits zéros coraniques que certaines polices mobiles transformaient en gros cercles noirs dispersés dans les versets, sur les trois Mushafs.
 - Coloriage par paragraphes de sens (558 rukû‘ traditionnels) sur Hafs, Warsh et Qaloun : couleur unique par paragraphe, paragraphes voisins toujours de couleurs différentes.
 - Remplacement des points noirs de fin de verset par des médaillons Médine lisibles sur Hafs, Warsh et Qaloun, sans modifier les lignes ni les fonds thématiques.
 - Coloriage thématique complet unifié sur Hafs, Warsh et Qaloun avec le même index verset et la palette propre à l’application.
