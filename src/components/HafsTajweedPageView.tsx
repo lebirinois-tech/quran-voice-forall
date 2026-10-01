@@ -136,7 +136,7 @@ export const HafsTajweedPageView = ({
   const themeOpacity = themeOpacityPct / 100;
   // Voile thématique plus soutenu : aplats nets et identifiables, tout en
   // laissant les couleurs du Tajweed rester lisibles.
-  const thematicPaperOpacity = Math.min(0.55, 0.22 + themeOpacity * 1.0);
+  const thematicPaperOpacity = Math.min(0.6, 0.3 + themeOpacity * 1.0);
   const lineSpacing = lineSpacingPct / 100;
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
@@ -909,7 +909,7 @@ export const HafsTajweedPageView = ({
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
                   className={cn(
-                    'flex min-w-0 items-center justify-center gap-[0.2em] whitespace-nowrap text-center'
+                    'flex min-w-0 items-center justify-center whitespace-nowrap text-center'
                   )}
                 >
                   {isHeaderGap ? (
@@ -925,7 +925,7 @@ export const HafsTajweedPageView = ({
                       <span
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
-                        className="inline-flex shrink-0 items-center gap-[0.2em] rounded-[0.12em] px-[0.08em]"
+                        className="inline-flex shrink-0 items-center rounded-[0.12em]"
                         style={{
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
@@ -948,7 +948,7 @@ export const HafsTajweedPageView = ({
                                 setMenuVerse(word.verse);
                               }}
                               className={cn(
-                                'cursor-pointer',
+                                'cursor-pointer px-[0.1em]',
                                 isCurrent && 'bg-primary/20',
                                 wordActive && 'tw-word-active'
                               )}
