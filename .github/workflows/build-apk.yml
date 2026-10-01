@@ -30,11 +30,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: ''
-
       - name: Install Android SDK 36
         run: |
           yes | sdkmanager --licenses > /dev/null || true
