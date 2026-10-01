@@ -45,6 +45,12 @@ const BAA = 'ب';
 const MADDAH = '\u0653';
 const SUPERSCRIPT_ALEF = '\u0670';
 
+// Certaines polices mobiles rendent ces deux zéros orthographiques comme un
+// gros cercle pointillé isolé au milieu du verset. Ils ne sont pas prononcés :
+// on les retire uniquement du rendu Mushaf, sans modifier les données sources.
+export const stripBrokenMobileQuranZeros = (text: string): string =>
+  text.replace(/[\u06DF\u06E0]/g, '');
+
 // Letters triggering Ikhfa after noon-sakin / tanween (15 letters)
 const IKHFA_LETTERS = new Set([
   'ت','ث','ج','د','ذ','ز','س','ش','ص','ض','ط','ظ','ف','ق','ك',
