@@ -832,17 +832,15 @@ export const HafsTajweedPageView = ({
               data-theme={theme?.id}
               data-curated={group.curated ? '1' : '0'}
               style={{
-                // Flux coranique continu : un thème ne force plus une nouvelle
-                // ligne. Le navigateur peut ainsi composer les quinze lignes
-                // comme un Mushaf imprimé, sans trou avant ou après un titre.
-                display: 'inline',
+                // Chaque thème forme un véritable aplat continu, comme sur la
+                // page imprimée de référence. Le titre reste inline dans la
+                // première ligne afin de ne créer aucun vide supplémentaire.
+                display: 'block',
                 backgroundColor: theme
                   ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
                   : undefined,
-                borderRadius: theme ? '0.12em' : undefined,
-                paddingInline: theme ? '0.04em' : undefined,
-                boxDecorationBreak: 'clone',
-                WebkitBoxDecorationBreak: 'clone',
+                borderRadius: 0,
+                paddingInline: theme ? '0.08em' : undefined,
               }}
             >
               {theme && (
