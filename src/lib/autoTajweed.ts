@@ -170,6 +170,15 @@ export const applyAutoTajweed = (text: string): string => {
     }
   }
 
+  // Ne jamais séparer un signe coranique (harakat, petit zéro ۟, madd…) de sa
+  // lettre porteuse : sur les navigateurs mobiles, un signe isolé dans un
+  // autre <span> est dessiné seul, sous forme de cercle noir élargissant la
+  // ligne. Chaque signe prend donc la couleur de sa lettre.
+  for (let k = 1; k < chars.length; k++) {
+    const isMark = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/.test(chars[k]);
+    if (isMark && !/\s/.test(chars[k - 1])) colors[k] = colors[k - 1];
+  }
+
   // Build HTML by grouping consecutive characters sharing the same color
   let html = '';
   let i = 0;
