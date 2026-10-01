@@ -680,6 +680,13 @@ const SurahReader = () => {
                 appSettings.textDisplayStyle === 'pages-warsh' ||
                 appSettings.textDisplayStyle === 'pages-qalun'
               }
+              riwaya={
+                appSettings.textDisplayStyle === 'pages-warsh'
+                  ? 'warsh'
+                  : appSettings.textDisplayStyle === 'pages-qalun'
+                    ? 'qalun'
+                    : 'hafs'
+              }
               fullPageGroups={fullPageGroups}
               initialPage={searchParams.get('page') ? parseInt(searchParams.get('page')!) : undefined}
               onPageChange={setCurrentMushafPage}

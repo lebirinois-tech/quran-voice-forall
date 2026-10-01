@@ -481,12 +481,8 @@ export const getThemesForVerse = (surahNumber: number, verseNumber: number): Qur
       }
     }
   }
-  // Fallback: if no verse-specific theme matched, use the surah's dominant themes
-  // so every verse of every surah still gets visual theming.
-  if (ids.length === 0) {
-    const defaults = SURAH_DEFAULTS[surahNumber];
-    if (defaults) ids.push(...defaults);
-  }
+  // Aucun fond approximatif : un verset non classé reste neutre jusqu'à ce
+  // qu'une plage thématique documentée lui soit attribuée.
   return QURAN_THEMES.filter((t) => ids.includes(t.id));
 };
 
@@ -510,11 +506,7 @@ export const getPrimaryThemeForVerse = (
       }
     }
   }
-  const defaults = SURAH_DEFAULTS[surahNumber];
-  const fallback = defaults?.length
-    ? QURAN_THEMES.find((t) => t.id === defaults[0]) ?? null
-    : null;
-  return { theme: fallback, curated: false };
+  return { theme: null, curated: false };
 };
 
 export const getThemeById = (id: ThemeId) => QURAN_THEMES.find((t) => t.id === id);

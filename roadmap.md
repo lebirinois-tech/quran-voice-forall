@@ -1,7 +1,6 @@
 # Feuille de route
 
 ## En cours
-- Rendre les 15 lignes parfaitement régulières et conformes à la présentation du Mushaf de Médine sur Hafs, Warsh et Qaloun.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
@@ -9,6 +8,8 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Répartition des pages stabilisée sur 15 hauteurs identiques avec les polices Médine embarquées propres à Hafs, Warsh et Qaloun ; les fonds thématiques ne provoquent plus de coupure de ligne.
+- Suppression des couleurs thématiques approximatives appliquées par défaut à une sourate entière : seuls les passages documentés sont colorés.
 - Titres thématiques retirés des trois Mushafs pour ne conserver que les aplats de couleur lorsque l’intitulé n’est pas fiable.
 - Présentation du texte des trois Mushafs alignée sur la référence محفظ الوحيين : lignes équilibrées sur toute la largeur et aplats pastel continus sans ligne vide.
 - Vue Mushaf épurée : numéro de page centré et cliquable, champs « Go » et titre intérieur retirés, texte coranique agrandi et recentré.
