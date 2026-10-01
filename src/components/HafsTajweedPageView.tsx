@@ -907,7 +907,12 @@ export const HafsTajweedPageView = ({
                           }}
                         >
                           {word.kind === 'end' ? (
-                            <span className="text-primary font-bold">۝{word.text}</span>
+                            <span
+                              aria-label={`Fin du verset ${word.text}`}
+                              className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
+                            >
+                              {word.text}
+                            </span>
                           ) : (
                             <span dangerouslySetInnerHTML={{ __html: html }} />
                           )}
@@ -990,8 +995,11 @@ export const HafsTajweedPageView = ({
                     )}
                   >
                     <span data-mushaf-verse-content dangerouslySetInnerHTML={{ __html: html }} />
-                    <span className="mx-[0.02em] inline-flex items-center justify-center align-middle text-primary font-bold">
-                      ۝{toArabicDigits(v.number)}
+                    <span
+                      aria-label={`Fin du verset ${v.number}`}
+                      className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
+                    >
+                      {toArabicDigits(v.number)}
                     </span>{' '}
                   </span>
                 );
