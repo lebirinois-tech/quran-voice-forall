@@ -907,8 +907,7 @@ export const HafsTajweedPageView = ({
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
                   className={cn(
-                    'flex min-w-0 items-center whitespace-nowrap text-center',
-                    words.length > 4 ? 'justify-between' : 'justify-center gap-[0.2em]'
+                    'flex min-w-0 items-center justify-center gap-[0.2em] whitespace-nowrap text-center'
                   )}
                 >
                   {isHeaderGap ? (
@@ -924,10 +923,8 @@ export const HafsTajweedPageView = ({
                       <span
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
-                        className="inline-flex min-w-0 items-center justify-between rounded-[0.12em] px-[0.08em]"
+                        className="inline-flex min-w-0 items-center gap-[0.2em] rounded-[0.12em] px-[0.08em]"
                         style={{
-                          flexGrow: Math.max(1, run.words.length),
-                          flexBasis: 0,
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
                             : undefined,
