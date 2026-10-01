@@ -3,7 +3,6 @@ name: Build Android APK
 on:
   workflow_dispatch:
 
-
 permissions:
   contents: write
 
@@ -11,130 +10,66 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-java@v4
         with:
-          bun-version: latest
-
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: ''
-
-      - name: Install Android SDK 36
+      - name: Install Android tools
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "platforms;android-35" "build-tools;35.0.0"
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Install dependencies
-        run: bun install --no-frozen-lockfile
-
-      - name: Configure APK download URL
+      - name: Build application
         run: |
+          bun install --no-frozen-lockfile
           echo "VITE_GITHUB_REPOSITORY=${{ github.repository }}" >> .env.production
-          echo "VITE_APK_DOWNLOAD_URL=https://github.com/${{ github.repository }}/releases/latest/download/quran-acces-pour-tous.apk" >> .env.production
-
-      - name: Build web app
-        run: bun run build
-
-      - name: Prepare native APK config
-        run: |
+          echo "VITE_APK_DOWNLOAD_URL=https://github.com/${{ github.repository }}/releases/latest/download/qaran-acces-pour-tous.apk" >> .env.production
+          bun run build
           node - <<'NODE'
           const fs = require('fs');
-          const config = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+          const p = 'capacitor.config.json';
+          const config = JSON.parse(fs.readFileSync(p, 'utf8'));
           delete config.server;
-
-          const appId = config.appId || '';
-          const validAppId = /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(appId);
-          if (!validAppId) {
-            throw new Error(`Invalid Android appId: ${appId}`);
-          }
-
-          fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2) + '\n');
+          fs.writeFileSync(p, JSON.stringify(config, null, 2) + '\n');
           NODE
-
-      - name: Add Android platform
-        run: |
           bunx cap add android
           bunx cap sync android
-
-      - name: Set Android compatibility (minSdk 24 = Android 7+)
-        run: |
           node - <<'NODE'
           const fs = require('fs');
           const p = 'android/variables.gradle';
           let src = fs.readFileSync(p, 'utf8');
           src = src.replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 24');
-          if (!/minSdkVersion/.test(src)) {
-            src = src.replace('ext {', 'ext {\n    minSdkVersion = 24');
-          }
           fs.writeFileSync(p, src);
-          console.log(src);
           NODE
-          # APK universel : on garde la configuration Capacitor par défaut
-          # (pas de patch de android/app/build.gradle, source d'échecs répétés).
+          chmod +x android/gradlew
+          cd android
+          ./gradlew --no-daemon assembleDebug
 
-
-      - name: Generate Android app icons
-        run: |
-          mkdir -p assets
-          cp public/pwa-512x512.png assets/icon-only.png
-          cp public/pwa-512x512.png assets/icon-foreground.png
-          cp public/pwa-512x512.png assets/icon.png
-          # Solid background derived from the app's emerald theme
-          node - <<'NODE'
-          const fs = require('fs');
-          // 1x1 emerald PNG used as adaptive icon background
-          const bg = Buffer.from(
-            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAEElEQVR42mNk+M9QzwAEAAYUAQHQ4eIDAAAAAElFTkSuQmCC',
-            'base64'
-          );
-          fs.writeFileSync('assets/icon-background.png', bg);
-          NODE
-          bunx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#1b7f5a' --iconBackgroundColorDark '#0f3d2b' --splashBackgroundColor '#1b7f5a' --splashBackgroundColorDark '#0f3d2b' || echo 'Icon generation skipped'
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
-
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew --no-daemon --stacktrace assembleDebug
-
-
-      - name: Rename APK
+      - name: Prepare APK
         run: |
           mkdir -p artifacts
           APK_PATH=$(find android/app/build/outputs/apk -name '*debug*.apk' | head -n 1)
-          if [ -z "$APK_PATH" ]; then echo "APK introuvable"; exit 1; fi
+          test -n "$APK_PATH"
           cp "$APK_PATH" artifacts/quran-acces-pour-tous.apk
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: quran-acces-pour-tous-apk
           path: artifacts/quran-acces-pour-tous.apk
 
-      - name: Create / Update "latest" Release
+      - name: Publish downloadable APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Dernière version APK"
-          body: "APK Android généré automatiquement depuis le dernier commit."
-          files: artifacts/quran-acces-pour-tous.apk
+          name: Dernière version APK
+          body: APK Android 7+ avec Hafs, Warsh et Qaloun en 15 lignes.
+          files: artifacts/qaran-acces-pour-tous.apk
           prerelease: false
           make_latest: true
         env:
