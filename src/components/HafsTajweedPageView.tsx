@@ -853,9 +853,12 @@ export const HafsTajweedPageView = ({
           className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
-            textAlign: 'justify',
-            textAlignLast: 'justify',
-            wordSpacing: '-0.05em',
+            // L'alignement à droite conserve l'espacement naturel du texte
+            // coranique. La justification forcée étirait chaque ligne et
+            // créait des vides artificiels entre les mots, surtout en bas.
+            textAlign: 'right',
+            textAlignLast: 'right',
+            wordSpacing: 'normal',
             
             lineHeight,
             flexShrink: 0,
