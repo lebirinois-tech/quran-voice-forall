@@ -1,7 +1,6 @@
 # Feuille de route
 
 ## En cours
-- Vérifier sur mobile le coloriage thématique complet de Hafs, Warsh et Qaloun sans modification des 15 lignes.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
