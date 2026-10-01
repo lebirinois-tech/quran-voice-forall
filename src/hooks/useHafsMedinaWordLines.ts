@@ -54,6 +54,23 @@ export const useHafsMedinaWordLines = (page: number, enabled: boolean) => {
             return { surah, verse, kind, text, wordIndex: nextIndex };
           });
         }
+        // L'API attribue parfois le médaillon de fin au numéro de la ligne
+        // suivante. Dans le Mushaf imprimé il reste après le dernier mot du
+        // verset : le replacer sur cette ligne reproduit la page à l'identique.
+        for (let line = 2; line <= 15; line += 1) {
+          const endings = unpacked[line].filter((word) => word.kind === 'end');
+          for (const ending of endings) {
+            for (let previous = line - 1; previous >= 1; previous -= 1) {
+              if (unpacked[previous].some((word) =>
+                word.kind === 'word' && word.surah === ending.surah && word.verse === ending.verse
+              )) {
+                unpacked[line] = unpacked[line].filter((word) => word !== ending);
+                unpacked[previous].push(ending);
+                break;
+              }
+            }
+          }
+        }
         setLines(unpacked);
       })
       .catch(() => {
