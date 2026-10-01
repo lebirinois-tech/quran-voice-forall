@@ -8,6 +8,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Présentation du texte des trois Mushafs alignée sur la référence محفظ الوحيين : flux continu, lignes équilibrées sur toute la largeur, titres thématiques compacts sans ligne vide.
 - Vue Mushaf épurée : numéro de page centré et cliquable, champs « Go » et titre intérieur retirés, texte coranique agrandi et recentré.
 - Suppression de la justification forcée et des grands vides entre les mots dans les titres et les versets, sur les trois Mushafs pages.
 - Coloriage thématique des trois Mushafs rapproché de محفظ الوحيين : blocs pastel continus, bandeau arabe assorti au début de chaque thème, Tajweed préservé.

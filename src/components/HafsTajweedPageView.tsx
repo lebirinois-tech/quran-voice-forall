@@ -550,7 +550,7 @@ export const HafsTajweedPageView = ({
       // plafond dépend de la largeur réelle, pas du modèle de téléphone.
       // Les champs de navigation et le titre intérieur ont été retirés : la
       // page dispose de plus de hauteur et peut employer un corps plus lisible.
-      const responsiveMaxPx = textEl.clientWidth < 500 ? 24 : MAX_PX;
+      const responsiveMaxPx = textEl.clientWidth < 500 ? 26 : MAX_PX;
       const desiredPx = Math.min(responsiveMaxPx, Math.max(MIN_PX, 32 * fontScale));
 
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
@@ -789,7 +789,10 @@ export const HafsTajweedPageView = ({
             // L'alignement à droite conserve l'espacement naturel du texte
             // coranique. La justification forcée étirait chaque ligne et
             // créait des vides artificiels entre les mots, surtout en bas.
-            textAlign: 'center',
+            // Présentation proche du Mushaf imprimé de référence : les lignes
+            // ordinaires occupent toute la largeur, tandis que la dernière
+            // ligne d'un passage reste centrée sans grands blancs artificiels.
+            textAlign: 'justify',
             textAlignLast: 'center',
             wordSpacing: 'normal',
             
@@ -829,18 +832,15 @@ export const HafsTajweedPageView = ({
               data-theme={theme?.id}
               data-curated={group.curated ? '1' : '0'}
               style={{
-                display: 'block',
-                // Aplat pastel continu du مصحف التجويد الموضوعي : le fond
-                // couvre aussi les espaces entre les versets et les retours à
-                // la ligne, sans séparation blanche dans un même passage.
+                // Flux coranique continu : un thème ne force plus une nouvelle
+                // ligne. Le navigateur peut ainsi composer les quinze lignes
+                // comme un Mushaf imprimé, sans trou avant ou après un titre.
+                display: 'inline',
                 backgroundColor: theme
                   ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
                   : undefined,
-                borderColor: theme ? `hsl(${theme.hsl} / 0.32)` : undefined,
-                borderRadius: theme ? '0.35em' : undefined,
-                borderStyle: theme ? 'solid' : undefined,
-                borderWidth: theme ? '1px' : undefined,
-                padding: theme ? '0.08em 0.12em 0.12em' : undefined,
+                borderRadius: theme ? '0.12em' : undefined,
+                paddingInline: theme ? '0.04em' : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
@@ -850,7 +850,7 @@ export const HafsTajweedPageView = ({
                   dir="rtl"
                   data-theme-title={theme.id}
                   title={themeTitle}
-                  className="mb-[0.12em] mt-[0.08em] flex w-full items-center justify-center rounded-sm border px-[0.5em] py-[0.05em] text-center font-amiri text-[0.48em] font-bold leading-[1.25]"
+                  className="mx-[0.12em] inline-flex items-center justify-center rounded-sm border px-[0.35em] py-[0.03em] align-middle font-amiri text-[0.46em] font-bold leading-[1.2]"
                   style={{
                     backgroundColor: `hsl(${theme.hsl} / 0.24)`,
                     borderColor: `hsl(${theme.hsl} / 0.42)`,
