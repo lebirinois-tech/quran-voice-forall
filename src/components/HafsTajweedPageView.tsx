@@ -934,7 +934,7 @@ export const HafsTajweedPageView = ({
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
                         data-theme-run=""
-                        className="flex flex-auto items-center justify-between rounded-[0.12em]"
+                        className="flex flex-auto items-center justify-between self-stretch"
                         style={{
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
