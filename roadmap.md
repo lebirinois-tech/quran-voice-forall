@@ -1,6 +1,7 @@
 # Feuille de route
 
 ## En cours
+- Rendre les 15 lignes parfaitement régulières et conformes à la présentation du Mushaf de Médine sur Hafs, Warsh et Qaloun.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
