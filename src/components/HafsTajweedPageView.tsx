@@ -882,7 +882,7 @@ export const HafsTajweedPageView = ({
             // ne modifie PAS les métriques du texte (contrairement à
             // font-weight synthétique), donc les coupures de lignes
             // officielles de Médine restent intactes, aucun mot ne bouge.
-            WebkitTextStroke: '0.016em currentColor',
+            WebkitTextStroke: '0.022em currentColor',
             fontWeight: 400,
             overflowWrap: 'break-word',
           }}
