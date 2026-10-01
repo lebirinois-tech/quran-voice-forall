@@ -906,16 +906,18 @@ export const HafsTajweedPageView = ({
               data-theme={theme?.id}
               data-curated={group.curated ? '1' : '0'}
               style={{
-                display: 'inline',
+                display: 'block',
                 // Aplat pastel continu du مصحف التجويد الموضوعي : le fond
                 // couvre aussi les espaces entre les versets et les retours à
                 // la ligne, sans séparation blanche dans un même passage.
                 backgroundColor: theme
                   ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
                   : undefined,
-                borderRadius: undefined,
-                padding: undefined,
-                boxShadow: undefined,
+                borderColor: theme ? `hsl(${theme.hsl} / 0.32)` : undefined,
+                borderRadius: theme ? '0.35em' : undefined,
+                borderStyle: theme ? 'solid' : undefined,
+                borderWidth: theme ? '1px' : undefined,
+                padding: theme ? '0.08em 0.12em 0.12em' : undefined,
                 boxDecorationBreak: 'clone',
                 WebkitBoxDecorationBreak: 'clone',
               }}
@@ -957,9 +959,7 @@ export const HafsTajweedPageView = ({
                       // par le groupe : toute l'âyah reste ainsi colorée, même
                       // lorsqu'elle revient à la ligne. La couleur forte du
                       // thème est diluée pour rester claire sans masquer le Tajweed.
-                      backgroundColor: theme
-                        ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
-                        : undefined,
+                      backgroundColor: 'transparent',
                       boxDecorationBreak: 'clone',
                       WebkitBoxDecorationBreak: 'clone',
                       paddingInline: undefined,
