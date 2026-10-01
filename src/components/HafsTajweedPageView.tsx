@@ -1729,7 +1729,7 @@ export const HafsTajweedPageView = ({
                         type="button"
                         onClick={() => { setMenuSurah(g.surahNumber); setDetailVerse(v.number); setDetailMode('verse'); }}
                         className={cn(
-                          'w-full rounded-md border p-2 text-right font-quran text-xl leading-loose hover:bg-accent',
+                          'w-full rounded-md border p-2 text-right font-amiri text-xl leading-loose hover:bg-accent',
                           g.surahNumber === menuSurah && v.number === detailVerse && 'border-primary bg-primary/5'
                         )}
                         dir="rtl"
