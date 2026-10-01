@@ -10,6 +10,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Fonds thématiques Hafs regroupés en aplats pastel légers et continus par passage, au lieu d'un rectangle séparé derrière chaque mot ; Tajweed et coupures Médine inchangés.
 - Coloriage par paragraphes de sens (558 rukû‘ traditionnels) sur Hafs, Warsh et Qaloun : couleur unique par paragraphe, paragraphes voisins toujours de couleurs différentes.
 - Remplacement des points noirs de fin de verset par des médaillons Médine lisibles sur Hafs, Warsh et Qaloun, sans modifier les lignes ni les fonds thématiques.
 - Coloriage thématique complet unifié sur Hafs, Warsh et Qaloun avec le même index verset et la palette propre à l’application.

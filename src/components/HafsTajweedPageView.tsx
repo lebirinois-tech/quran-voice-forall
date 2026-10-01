@@ -20,7 +20,7 @@ import { MushafVerseStudy } from './MushafVerseStudy';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
-import { useHafsMedinaWordLines } from '@/hooks/useHafsMedinaWordLines';
+import { useHafsMedinaWordLines, type MedinaLineWord } from '@/hooks/useHafsMedinaWordLines';
 import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
 
 interface HafsTajweedPageViewProps {
@@ -133,10 +133,9 @@ export const HafsTajweedPageView = ({
   });
   const fontScale = fontScalePct / 100;
   const themeOpacity = themeOpacityPct / 100;
-  // Le modèle محفظ الوحيين utilise des aplats pastel réellement visibles.
-  // Le curseur conserve sa plage historique (0–40), mais pilote ici une
-  // opacité de papier pastel suffisante pour distinguer chaque passage.
-  const thematicPaperOpacity = Math.min(1, 0.48 + themeOpacity * 1.3);
+  // Voile pastel léger : le thème reste identifiable sans concurrencer les
+  // couleurs du Tajweed pendant une lecture prolongée.
+  const thematicPaperOpacity = Math.min(0.36, 0.12 + themeOpacity * 0.6);
   const lineSpacing = lineSpacingPct / 100;
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
@@ -684,7 +683,8 @@ export const HafsTajweedPageView = ({
         if (available <= 0) return;
         let used = 0;
         Array.from(row.children).forEach((child) => {
-          used += (child as HTMLElement).getBoundingClientRect().width;
+          const element = child as HTMLElement;
+          used += Math.max(element.getBoundingClientRect().width, element.scrollWidth);
         });
         if (used > 0) ratio = Math.min(ratio, available / used);
       });
@@ -887,14 +887,28 @@ export const HafsTajweedPageView = ({
               const previousLine = lineNumber > 1 ? officialMedinaLines[lineNumber - 1] ?? [] : [];
               const isFirstHeaderGap = isHeaderGap && previousLine.length > 0;
               const headerSurah = nextSurah ? surahs.find((item) => item.number === nextSurah) : undefined;
+              const themedRuns = words.reduce<Array<{
+                key: string;
+                theme: ReturnType<typeof getPrimaryThemeForVerse>['theme'];
+                words: MedinaLineWord[];
+              }>>((runs, word) => {
+                const indexedThemeId = verseThemes?.[`${word.surah}:${word.verse}`];
+                const theme = indexedThemeId
+                  ? getThemeById(indexedThemeId) ?? null
+                  : getPrimaryThemeForVerse(word.surah, word.verse).theme;
+                const key = theme?.id ?? 'none';
+                const last = runs[runs.length - 1];
+                if (last?.key === key) last.words.push(word);
+                else runs.push({ key, theme, words: [word] });
+                return runs;
+              }, []);
 
               return (
                 <div
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
                   className={cn(
-                    'flex min-w-0 items-center whitespace-nowrap text-center',
-                    words.length > 4 ? 'justify-between' : 'justify-center gap-[0.2em]'
+                    'flex min-w-0 items-center justify-center gap-[0.2em] whitespace-nowrap text-center'
                   )}
                 >
                   {isHeaderGap ? (
@@ -906,49 +920,53 @@ export const HafsTajweedPageView = ({
                           : ''}
                     </span>
                   ) : (
-                    words.map((word, wordPosition) => {
-                      const indexedThemeId = verseThemes?.[`${word.surah}:${word.verse}`];
-                      const theme = indexedThemeId
-                        ? getThemeById(indexedThemeId)
-                        : getPrimaryThemeForVerse(word.surah, word.verse).theme;
-                      const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
-                      const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
-                      const html = word.kind === 'word'
-                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text.replace(/\u06DF/g, '\u0652')))
-                        : word.text;
-                      return (
-                        <span
-                          key={`${word.surah}-${word.verse}-${word.kind}-${wordPosition}`}
-                          data-verse={word.surah === surahNumber ? word.verse : undefined}
-                          data-w={word.kind === 'word' ? word.wordIndex : undefined}
-                          onClick={() => {
-                            setMenuSurah(word.surah);
-                            setMenuVerse(word.verse);
-                          }}
-                          className={cn(
-                            'cursor-pointer',
-                            isCurrent && 'bg-primary/20',
-                            wordActive && 'tw-word-active'
-                          )}
-                          style={{
-                            backgroundColor: theme && !isCurrent
-                              ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
-                              : undefined,
-                          }}
-                        >
-                          {word.kind === 'end' ? (
+                    themedRuns.map((run, runPosition) => (
+                      <span
+                        key={`${lineNumber}-${run.key}-${runPosition}`}
+                        data-theme={run.theme?.id}
+                        className="inline-flex shrink-0 items-center gap-[0.2em] rounded-[0.12em] px-[0.08em]"
+                        style={{
+                          backgroundColor: run.theme
+                            ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
+                            : undefined,
+                        }}
+                      >
+                        {run.words.map((word, wordPosition) => {
+                          const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
+                          const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
+                          const html = word.kind === 'word'
+                            ? sanitizeTajweedHtml(applyAutoTajweed(word.text.replace(/\u06DF/g, '\u0652')))
+                            : word.text;
+                          return (
                             <span
-                              aria-label={`Fin du verset ${word.text}`}
-                              className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
+                              key={`${word.surah}-${word.verse}-${word.kind}-${wordPosition}`}
+                              data-verse={word.surah === surahNumber ? word.verse : undefined}
+                              data-w={word.kind === 'word' ? word.wordIndex : undefined}
+                              onClick={() => {
+                                setMenuSurah(word.surah);
+                                setMenuVerse(word.verse);
+                              }}
+                              className={cn(
+                                'cursor-pointer',
+                                isCurrent && 'bg-primary/20',
+                                wordActive && 'tw-word-active'
+                              )}
                             >
-                              {word.text}
+                              {word.kind === 'end' ? (
+                                <span
+                                  aria-label={`Fin du verset ${word.text}`}
+                                  className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
+                                >
+                                  {word.text}
+                                </span>
+                              ) : (
+                                <span dangerouslySetInnerHTML={{ __html: html }} />
+                              )}
                             </span>
-                          ) : (
-                            <span dangerouslySetInnerHTML={{ __html: html }} />
-                          )}
-                        </span>
-                      );
-                    })
+                          );
+                        })}
+                      </span>
+                    ))
                   )}
                 </div>
               );
