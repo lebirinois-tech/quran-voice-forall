@@ -853,10 +853,10 @@ export const HafsTajweedPageView = ({
           className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
-            textAlign: 'justify',
-            // Ne jamais étirer la dernière ligne d'un thème : chaque bloc est
-            // un élément distinct et `justify` y créait de grands vides entre
-            // les mots, particulièrement dans le dernier verset de la page.
+            // L'alignement à droite conserve l'espacement naturel du texte
+            // coranique. La justification forcée étirait chaque ligne et
+            // créait des vides artificiels entre les mots, surtout en bas.
+            textAlign: 'right',
             textAlignLast: 'right',
             wordSpacing: 'normal',
             
