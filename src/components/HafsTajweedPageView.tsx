@@ -671,7 +671,12 @@ export const HafsTajweedPageView = ({
     if (!usesOfficialMedinaLines) return;
     const root = textRef.current;
     if (!root) return;
-    const desired = Math.min(30, Math.max(17, 24 * fontScale));
+    // Taille de départ proportionnelle à la largeur réelle du cadre : la page
+    // s'adapte automatiquement à tout écran (petit téléphone, tablette, grand
+    // écran), puis le filet de sécurité ci-dessous réduit si une ligne dépasse.
+    // Relue à chaque ajustement pour suivre les rotations et redimensionnements.
+    const currentDesired = () =>
+      Math.min(64, Math.max(11, (frameRef.current?.clientWidth ?? 360) * 0.068 * fontScale));
     let raf = 0;
     let timer = 0;
     let roTimer = 0;
@@ -699,6 +704,7 @@ export const HafsTajweedPageView = ({
       return ratio;
     };
     const fitOfficialLines = () => {
+      const desired = currentDesired();
       let size = desired;
       root.style.fontSize = `${size}px`;
       size = Math.max(10, Math.floor(desired * Math.min(1, worstRatio()) * 0.97 * 10) / 10);
