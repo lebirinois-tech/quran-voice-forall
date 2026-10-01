@@ -376,7 +376,9 @@ export const HafsTajweedPageView = ({
   const buildVerseHtml = useCallback(
     (v: Verse) => {
       const provided = versesTajweed?.[v.number];
-      const source = preferProvidedTajweed && provided ? provided : v.text;
+      const source = stripBrokenMobileQuranZeros(
+        preferProvidedTajweed && provided ? provided : v.text
+      );
       const alreadyColoured = /<span[\s>]/i.test(source);
       return alreadyColoured
         ? sanitizeTajweedHtml(source)
