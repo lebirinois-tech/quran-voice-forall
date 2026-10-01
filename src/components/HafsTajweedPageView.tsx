@@ -854,8 +854,11 @@ export const HafsTajweedPageView = ({
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             textAlign: 'justify',
-            textAlignLast: 'justify',
-            wordSpacing: '-0.05em',
+            // Ne jamais étirer la dernière ligne d'un thème : chaque bloc est
+            // un élément distinct et `justify` y créait de grands vides entre
+            // les mots, particulièrement dans le dernier verset de la page.
+            textAlignLast: 'right',
+            wordSpacing: 'normal',
             
             lineHeight,
             flexShrink: 0,

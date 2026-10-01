@@ -5,7 +5,7 @@
 //   1. New image/data URLs (via ?v= cache-buster) → browsers refetch pages.
 //   2. Purge of any Cache Storage entries that pinned the previous version.
 //   3. Purge of the app-shell caches that may embed old HTML/JS references.
-export const MUSHAF_PAGES_VERSION = "2026-09-30-mushaf-tajweed-mawdoui-v18";
+export const MUSHAF_PAGES_VERSION = "2026-10-01-mushaf-tajweed-spacing-v19";
 
 // Backward-compatible alias (older imports).
 export const HAFS_MUSHAF_VERSION = MUSHAF_PAGES_VERSION;
