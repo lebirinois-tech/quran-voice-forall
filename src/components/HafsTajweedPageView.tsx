@@ -664,17 +664,15 @@ export const HafsTajweedPageView = ({
     if (!usesOfficialMedinaLines) return;
     const root = textRef.current;
     if (!root) return;
+    const desired = Math.min(30, Math.max(17, 24 * fontScale));
+    root.style.fontSize = `${desired}px`;
     let raf = requestAnimationFrame(() => {
-      const desired = Math.min(30, Math.max(17, 24 * fontScale));
-      setOfficialFontPx(desired);
-      raf = requestAnimationFrame(() => {
-        const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-medina-line]'));
-        const ratios = rows
-          .filter((row) => row.scrollWidth > 0)
-          .map((row) => row.clientWidth / row.scrollWidth);
-        const ratio = ratios.length ? Math.min(1, ...ratios) : 1;
-        setOfficialFontPx(Math.max(14, Math.floor(desired * ratio * 10) / 10));
-      });
+      const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-medina-line]'));
+      const ratios = rows
+        .filter((row) => row.scrollWidth > 0)
+        .map((row) => row.clientWidth / row.scrollWidth);
+      const ratio = ratios.length ? Math.min(1, ...ratios) : 1;
+      setOfficialFontPx(Math.max(14, Math.floor(desired * ratio * 0.98 * 10) / 10));
     });
     return () => cancelAnimationFrame(raf);
   }, [usesOfficialMedinaLines, currentPage, fontScale, themeOpacityPct]);
@@ -847,7 +845,10 @@ export const HafsTajweedPageView = ({
                 <div
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
-                  className="flex min-w-0 items-center justify-center whitespace-nowrap text-center"
+                  className={cn(
+                    'flex min-w-0 items-center whitespace-nowrap text-center',
+                    words.length > 4 ? 'justify-between' : 'justify-center gap-[0.2em]'
+                  )}
                 >
                   {isHeaderGap ? (
                     <span className="font-amiri font-bold text-foreground">
@@ -875,7 +876,7 @@ export const HafsTajweedPageView = ({
                             setMenuVerse(word.verse);
                           }}
                           className={cn(
-                            'cursor-pointer px-[0.08em]',
+                            'cursor-pointer',
                             isCurrent && 'bg-primary/20',
                             wordActive && 'tw-word-active'
                           )}
