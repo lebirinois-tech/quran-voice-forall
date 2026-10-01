@@ -665,16 +665,26 @@ export const HafsTajweedPageView = ({
     const root = textRef.current;
     if (!root) return;
     const desired = Math.min(30, Math.max(17, 24 * fontScale));
-    root.style.fontSize = `${desired}px`;
-    let raf = requestAnimationFrame(() => {
+    let raf = 0;
+    let timer = 0;
+    const fitOfficialLines = () => {
+      root.style.fontSize = `${desired}px`;
       const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-medina-line]'));
       const ratios = rows
         .filter((row) => row.scrollWidth > 0)
         .map((row) => row.clientWidth / row.scrollWidth);
       const ratio = ratios.length ? Math.min(1, ...ratios) : 1;
       setOfficialFontPx(Math.max(14, Math.floor(desired * ratio * 0.98 * 10) / 10));
+    };
+    raf = requestAnimationFrame(fitOfficialLines);
+    const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
+    fontSet?.load?.('24px hafs-medina').then(() => {
+      timer = window.setTimeout(fitOfficialLines, 50);
     });
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(timer);
+    };
   }, [usesOfficialMedinaLines, currentPage, fontScale, themeOpacityPct]);
 
 
