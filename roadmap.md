@@ -2,6 +2,7 @@
 
 ## En cours
 - Vérifier le PDF Warsh Tajweed fourni sur Scribd, isoler ses 604 pages coraniques officielles et confirmer son droit d’intégration hors ligne.
+- Vérifier le PDF Qaloun Tajweed indiqué sur Scribd, isoler ses 604 pages coraniques officielles et lui appliquer le même traitement que Warsh.
 - Remplacer la recomposition actuelle par les trois Mushafs Tajweed Médine 15 lignes issus de sources réutilisables, puis superposer uniquement les fonds thématiques sans déplacer le texte.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
