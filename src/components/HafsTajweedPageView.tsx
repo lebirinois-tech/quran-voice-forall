@@ -875,9 +875,14 @@ export const HafsTajweedPageView = ({
             textAlign: 'justify',
             textAlignLast: 'center',
             wordSpacing: 'normal',
-            
+
             lineHeight: usesOfficialMedinaLines ? 1 : lineHeight,
             flexShrink: 0,
+            // Épaisseur visuelle semi-gras via un fin contour : le contour
+            // ne modifie PAS les métriques du texte (contrairement à
+            // font-weight synthétique), donc les coupures de lignes
+            // officielles de Médine restent intactes, aucun mot ne bouge.
+            WebkitTextStroke: '0.016em currentColor',
             fontWeight: 400,
             overflowWrap: 'break-word',
           }}
