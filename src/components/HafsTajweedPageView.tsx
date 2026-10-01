@@ -6,7 +6,7 @@ import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { applyAutoTajweed, stripBrokenMobileQuranZeros } from '@/lib/autoTajweed';
+import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { splitHtmlIntoWords, wordIndexForProgress } from '@/lib/tajweedWordSync';
 import { getThemesForVerse, getPrimaryThemeForVerse, getThemeById } from '@/data/quranThemes';
 import { surahHasHeaderBasmala } from '@/lib/basmala';
@@ -376,9 +376,7 @@ export const HafsTajweedPageView = ({
   const buildVerseHtml = useCallback(
     (v: Verse) => {
       const provided = versesTajweed?.[v.number];
-      const source = stripBrokenMobileQuranZeros(
-        preferProvidedTajweed && provided ? provided : v.text
-      );
+      const source = preferProvidedTajweed && provided ? provided : v.text;
       const alreadyColoured = /<span[\s>]/i.test(source);
       return alreadyColoured
         ? sanitizeTajweedHtml(source)
@@ -865,8 +863,7 @@ export const HafsTajweedPageView = ({
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
                   className={cn(
-                    'flex min-w-0 items-center whitespace-nowrap text-center',
-                    words.length > 4 ? 'justify-between' : 'justify-center gap-[0.2em]'
+                    'flex min-w-0 items-center justify-center whitespace-nowrap text-center'
                   )}
                 >
                   {isHeaderGap ? (
@@ -886,7 +883,7 @@ export const HafsTajweedPageView = ({
                       const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
                       const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
                       const html = word.kind === 'word'
-                        ? sanitizeTajweedHtml(applyAutoTajweed(stripBrokenMobileQuranZeros(word.text)))
+                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text))
                         : word.text;
                       return (
                         <span
@@ -898,7 +895,7 @@ export const HafsTajweedPageView = ({
                             setMenuVerse(word.verse);
                           }}
                           className={cn(
-                            'cursor-pointer',
+                            'cursor-pointer px-[0.07em]',
                             isCurrent && 'bg-primary/20',
                             wordActive && 'tw-word-active'
                           )}
