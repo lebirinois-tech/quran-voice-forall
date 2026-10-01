@@ -6,7 +6,7 @@ import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { applyAutoTajweed } from '@/lib/autoTajweed';
+import { applyAutoTajweed, stripBrokenMobileQuranZeros } from '@/lib/autoTajweed';
 import { splitHtmlIntoWords, wordIndexForProgress } from '@/lib/tajweedWordSync';
 import { getThemesForVerse, getPrimaryThemeForVerse, getThemeById } from '@/data/quranThemes';
 import { surahHasHeaderBasmala } from '@/lib/basmala';
@@ -884,7 +884,7 @@ export const HafsTajweedPageView = ({
                       const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
                       const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
                       const html = word.kind === 'word'
-                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text))
+                        ? sanitizeTajweedHtml(applyAutoTajweed(stripBrokenMobileQuranZeros(word.text)))
                         : word.text;
                       return (
                         <span
