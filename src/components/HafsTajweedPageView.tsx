@@ -20,6 +20,7 @@ import { MushafVerseStudy } from './MushafVerseStudy';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
+import { useHafsMedinaWordLines } from '@/hooks/useHafsMedinaWordLines';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -157,6 +158,9 @@ export const HafsTajweedPageView = ({
       ? initialPage
       : startPage
   );
+  const officialMedinaLines = useHafsMedinaWordLines(currentPage, riwaya === 'hafs');
+  const usesOfficialMedinaLines = riwaya === 'hafs' && officialMedinaLines !== null;
+  const [officialFontPx, setOfficialFontPx] = useState(24);
 
   const prevSurahRef = useRef(surahNumber);
   const appliedInitialPageRef = useRef<number | null>(null);
@@ -476,6 +480,7 @@ export const HafsTajweedPageView = ({
 
   useLayoutEffect(() => {
     const measure = (force = false) => {
+      if (usesOfficialMedinaLines) return;
       const frameEl = frameRef.current;
       const textEl = textRef.current;
       if (!frameEl || !textEl) return;
@@ -650,7 +655,29 @@ export const HafsTajweedPageView = ({
       ro?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontScale, lineSpacing, currentPage, surahNumber, riwaya]);
+  }, [fontScale, lineSpacing, currentPage, surahNumber, riwaya, usesOfficialMedinaLines]);
+
+  // Les coupures officielles restent immuables. Seul le corps global est
+  // réduit, si nécessaire, pour que la ligne Médine la plus large tienne dans
+  // le cadre sans masquer un seul mot.
+  useLayoutEffect(() => {
+    if (!usesOfficialMedinaLines) return;
+    const root = textRef.current;
+    if (!root) return;
+    let raf = requestAnimationFrame(() => {
+      const desired = Math.min(30, Math.max(17, 24 * fontScale));
+      setOfficialFontPx(desired);
+      raf = requestAnimationFrame(() => {
+        const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-medina-line]'));
+        const ratios = rows
+          .filter((row) => row.scrollWidth > 0)
+          .map((row) => row.clientWidth / row.scrollWidth);
+        const ratio = ratios.length ? Math.min(1, ...ratios) : 1;
+        setOfficialFontPx(Math.max(14, Math.floor(desired * ratio * 10) / 10));
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [usesOfficialMedinaLines, currentPage, fontScale, themeOpacityPct]);
 
 
 
