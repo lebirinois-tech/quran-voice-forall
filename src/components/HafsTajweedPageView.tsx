@@ -133,9 +133,9 @@ export const HafsTajweedPageView = ({
   });
   const fontScale = fontScalePct / 100;
   const themeOpacity = themeOpacityPct / 100;
-  // Voile pastel léger : le thème reste identifiable sans concurrencer les
-  // couleurs du Tajweed pendant une lecture prolongée.
-  const thematicPaperOpacity = Math.min(0.36, 0.12 + themeOpacity * 0.6);
+  // Voile thématique plus soutenu : aplats nets et identifiables, tout en
+  // laissant les couleurs du Tajweed rester lisibles.
+  const thematicPaperOpacity = Math.min(0.55, 0.22 + themeOpacity * 1.0);
   const lineSpacing = lineSpacingPct / 100;
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
