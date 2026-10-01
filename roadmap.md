@@ -1,6 +1,7 @@
 # Feuille de route
 
 ## En cours
+- Épurer la vue Mushaf : indicateur de page centré et cliquable, champs Go et titre intérieur retirés, texte coranique agrandi et recentré.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 
