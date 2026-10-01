@@ -704,6 +704,7 @@ export const HafsTajweedPageView = ({
       return ratio;
     };
     const fitOfficialLines = () => {
+      const desired = currentDesired();
       let size = desired;
       root.style.fontSize = `${size}px`;
       size = Math.max(10, Math.floor(desired * Math.min(1, worstRatio()) * 0.97 * 10) / 10);
