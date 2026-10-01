@@ -1,6 +1,7 @@
 # Feuille de route
 
 ## En cours
+- Reproduire exactement les 604 pages du Mushaf Médine avec leurs coupures officielles mot par mot, puis superposer Tajweed et coloriage thématique sans modifier la géométrie.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
