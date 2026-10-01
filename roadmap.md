@@ -6,6 +6,7 @@
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
 
 ## À faire
+- Découpage thématique des paragraphes à l'identique de محفظ الوحيين, avec des couleurs distinctes par thématique (découpage précis au niveau du sens).
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
