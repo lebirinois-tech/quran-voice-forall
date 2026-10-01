@@ -1,14 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* KFGQPC Warsh Uthmanic Script - King Fahd Complex Official Warsh Font */
+/* Polices Unicode du Complexe du Roi Fahd, embarquées pour le mode hors ligne. */
 @font-face {
-  font-family: 'warsh10';
-  src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/warsh/font/warsh.10.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/warsh/font/warsh.10.ttf') format('truetype');
+  font-family: 'hafs-medina';
+  src: url('/fonts/hafs-medina.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'warsh-medina';
+  src: url('/fonts/warsh-medina.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'qalun-medina';
+  src: url('/fonts/qalun-medina.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -144,8 +155,16 @@
     font-family: 'Amiri', serif;
   }
 
-  .font-warsh {
-    font-family: 'warsh10', 'Amiri', serif;
+  .font-warsh, .quran-text.font-mushaf-warsh {
+    font-family: 'warsh-medina', 'Amiri', serif;
+  }
+
+  .quran-text.font-mushaf-hafs {
+    font-family: 'hafs-medina', 'Amiri', serif;
+  }
+
+  .quran-text.font-mushaf-qalun {
+    font-family: 'qalun-medina', 'Amiri', serif;
   }
 
   .font-cairo {

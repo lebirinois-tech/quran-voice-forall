@@ -31,6 +31,8 @@ interface HafsTajweedPageViewProps {
    * already ships coloured HTML.
    */
   preferProvidedTajweed?: boolean;
+  /** Police officielle correspondant à la riwaya affichée. */
+  riwaya?: 'hafs' | 'warsh' | 'qalun';
   /** Contenu complet de la page (toutes les sourates), façon Mushaf imprimé. */
   fullPageGroups?: FullPageGroup[] | null;
   initialPage?: number;
@@ -66,6 +68,7 @@ export const HafsTajweedPageView = ({
   verses,
   versesTajweed,
   preferProvidedTajweed = false,
+  riwaya = 'hafs',
   fullPageGroups = null,
   initialPage,
   onPageChange,
@@ -514,10 +517,8 @@ export const HafsTajweedPageView = ({
       const measureAt = (px: number, lh: number) => {
         textEl.style.fontSize = `${px}px`;
         textEl.style.lineHeight = String(lh);
+        const height = textEl.scrollHeight;
         const tops: number[] = [];
-        // Un rectangle est produit pour chaque ligne traversée par un verset,
-        // y compris son médaillon de fin. Cela correspond aux lignes que voit
-        // réellement la lectrice, sans compter séparément les lettres Tajweed.
         textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
           const range = document.createRange();
           range.selectNodeContents(node);
@@ -527,17 +528,15 @@ export const HafsTajweedPageView = ({
         });
         tops.sort((a, b) => a - b);
         const uniqueTops: number[] = [];
-        // Les signes diacritiques et les spans Tajweed d'une même ligne ont
-        // souvent des rectangles décalés de plusieurs pixels. Une tolérance
-        // fixe de 3 px les comptait comme des lignes supplémentaires, puis
-        // réduisait à tort tout le texte en un petit bloc. La tolérance suit
-        // désormais la hauteur réelle d'une ligne typographique.
+        // À ce stade les trois fontes Médine sont effectivement appliquées.
+        // Le seuil d'une demi-ligne réunit les diacritiques d'une même rangée
+        // sans fusionner deux rangées successives.
         const sameLineTolerance = Math.max(4, px * lh * 0.45);
         tops.forEach((top) => {
           if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
         });
         const lineCount = uniqueTops.length;
-        return { height: textEl.scrollHeight, lineCount };
+        return { height, lineCount };
       };
 
       const MEDINA_LINE_COUNT = currentPage === 1 ? 7 : 15;
@@ -588,27 +587,10 @@ export const HafsTajweedPageView = ({
 
       px = Math.floor(px * 10) / 10;
 
-      // Une page de Médine occupe toute la hauteur utile. Le premier passage
-      // ci-dessus fixe les coupures horizontales à 15 lignes ; ce second
-      // passage augmente uniquement leur hauteur jusqu'à remplir le cadre.
-      // C'est indispensable sur les écrans mobiles très hauts, où conserver
-      // l'interligne de mesure regroupait tout le texte au milieu de la page.
-      let lh = MEASURE_LH;
-      let lhLow = MEASURE_LH;
-      // Une valeur démesurée peut créer une page artificiellement espacée sur
-      // certains moteurs Android. Le plafond garde un rythme de Mushaf lisible.
-      let lhHigh = Math.max(MEASURE_LH, Math.min(2.5, target / Math.max(1, MEDINA_LINE_COUNT * px)));
-      for (let i = 0; i < 18; i += 1) {
-        const candidate = (lhLow + lhHigh) / 2;
-        const measured = measureAt(px, candidate);
-        if (measured.height <= target && measured.lineCount <= MEDINA_LINE_COUNT) {
-          lh = candidate;
-          lhLow = candidate;
-        } else {
-          lhHigh = candidate;
-        }
-      }
-      lh = Number(lh.toFixed(3));
+      // Chaque ligne reçoit exactement la même part de la hauteur disponible.
+      // Contrairement à l'ancien second ajustement, aucune ligne ne peut être
+      // tassée au milieu ni changer d'espacement après le chargement Android.
+      const lh = Number(Math.max(MEASURE_LH, target / Math.max(1, MEDINA_LINE_COUNT * px)).toFixed(3));
 
       textEl.style.fontSize = prevFs;
       textEl.style.lineHeight = prevLh;
@@ -783,7 +765,12 @@ export const HafsTajweedPageView = ({
           data-mushaf-page-text
           dir="rtl"
           lang="ar"
-          className="quran-text tajweed-text mx-auto w-full max-w-3xl font-extrabold text-foreground [&_span]:font-bold"
+          className={cn(
+            'quran-text tajweed-text mx-auto w-full max-w-3xl text-foreground',
+            riwaya === 'hafs' && 'font-mushaf-hafs',
+            riwaya === 'warsh' && 'font-mushaf-warsh',
+            riwaya === 'qalun' && 'font-mushaf-qalun'
+          )}
           style={{
             fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
             // L'alignement à droite conserve l'espacement naturel du texte
@@ -798,7 +785,7 @@ export const HafsTajweedPageView = ({
             
             lineHeight,
             flexShrink: 0,
-            fontWeight: 800,
+            fontWeight: 400,
             overflowWrap: 'break-word',
           }}
 
@@ -829,14 +816,15 @@ export const HafsTajweedPageView = ({
               data-theme={theme?.id}
               data-curated={group.curated ? '1' : '0'}
               style={{
-                // Chaque thème forme un véritable aplat continu, comme sur la
-                // page imprimée de référence, sans titre potentiellement imprécis.
-                display: 'block',
+                // Le thème suit le flux imprimé sans créer une nouvelle ligne :
+                // un changement de couleur ne modifie jamais les 15 coupures.
+                display: 'inline',
                 backgroundColor: theme
                   ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
                   : undefined,
                 borderRadius: 0,
-                paddingInline: theme ? '0.08em' : undefined,
+                boxDecorationBreak: 'clone',
+                WebkitBoxDecorationBreak: 'clone',
               }}
             >
               {group.verses.map((v) => {
