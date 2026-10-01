@@ -681,7 +681,7 @@ export const HafsTajweedPageView = ({
         .filter((row) => row.scrollWidth > 0)
         .map((row) => row.clientWidth / row.scrollWidth);
       const ratio = ratios.length ? Math.min(1, ...ratios) : 1;
-      setOfficialFontPx(Math.max(14, Math.floor(desired * ratio * 0.98 * 10) / 10));
+      setOfficialFontPx(Math.max(11, Math.floor(desired * ratio * 0.96 * 10) / 10));
     };
     raf = requestAnimationFrame(fitOfficialLines);
     const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
@@ -884,7 +884,7 @@ export const HafsTajweedPageView = ({
                       const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
                       const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
                       const html = word.kind === 'word'
-                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text))
+                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text.replace(/\u06DF/g, '\u0652')))
                         : word.text;
                       return (
                         <span
