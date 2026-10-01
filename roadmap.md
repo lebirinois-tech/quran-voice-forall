@@ -1,11 +1,8 @@
 # Feuille de route
 
 ## En cours
-- Vérifier le PDF Warsh Tajweed fourni sur Scribd, isoler ses 604 pages coraniques officielles et confirmer son droit d’intégration hors ligne.
-- Télécharger le Mushaf Qaloun Tajweed depuis Archive.org, vérifier sa pagination, isoler ses 604 pages coraniques officielles et lui appliquer le même traitement que Warsh.
-- Remplacer la recomposition actuelle par les trois Mushafs Tajweed Médine 15 lignes issus de sources réutilisables, puis superposer uniquement les fonds thématiques sans déplacer le texte.
-- Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
-- Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
+- Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
+- Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
 
 ## À faire
