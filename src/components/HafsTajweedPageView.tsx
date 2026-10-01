@@ -781,7 +781,7 @@ export const HafsTajweedPageView = ({
               }}
             >
 
-              {showBismillah && (
+              {showBismillah && !usesOfficialMedinaLines && (
                 <p
                   data-bismillah
                   dir="rtl"
@@ -802,12 +802,17 @@ export const HafsTajweedPageView = ({
           lang="ar"
           className={cn(
             'quran-text tajweed-text mx-auto w-full max-w-3xl text-foreground',
+            usesOfficialMedinaLines && 'grid min-h-0 flex-1 grid-rows-[repeat(15,minmax(0,1fr))]',
             riwaya === 'hafs' && 'font-mushaf-hafs',
             riwaya === 'warsh' && 'font-mushaf-warsh',
             riwaya === 'qalun' && 'font-mushaf-qalun'
           )}
           style={{
-            fontSize: fontPx ? `${fontPx}px` : 'clamp(18px, 6vw, 34px)',
+            fontSize: usesOfficialMedinaLines
+              ? `${officialFontPx}px`
+              : fontPx
+                ? `${fontPx}px`
+                : 'clamp(18px, 6vw, 34px)',
             // L'alignement à droite conserve l'espacement naturel du texte
             // coranique. La justification forcée étirait chaque ligne et
             // créait des vides artificiels entre les mots, surtout en bas.
@@ -818,14 +823,81 @@ export const HafsTajweedPageView = ({
             textAlignLast: 'center',
             wordSpacing: 'normal',
             
-            lineHeight,
+            lineHeight: usesOfficialMedinaLines ? 1 : lineHeight,
             flexShrink: 0,
             fontWeight: 400,
             overflowWrap: 'break-word',
           }}
 
         >
-          {pageSections.map((section) => {
+          {usesOfficialMedinaLines && officialMedinaLines ? (
+            Array.from({ length: 15 }, (_, index) => index + 1).map((lineNumber) => {
+              const words = officialMedinaLines[lineNumber] ?? [];
+              const first = words[0];
+              const nextContentLine = Array.from({ length: 15 - lineNumber }, (_, offset) =>
+                officialMedinaLines[lineNumber + offset + 1] ?? []
+              ).find((line) => line.length > 0);
+              const isHeaderGap = words.length === 0 && nextContentLine?.[0]?.verse === 1;
+              const nextSurah = isHeaderGap ? nextContentLine?.[0]?.surah : undefined;
+              const previousLine = lineNumber > 1 ? officialMedinaLines[lineNumber - 1] ?? [] : [];
+              const isFirstHeaderGap = isHeaderGap && previousLine.length > 0;
+              const headerSurah = nextSurah ? surahs.find((item) => item.number === nextSurah) : undefined;
+
+              return (
+                <div
+                  key={`medina-line-${lineNumber}`}
+                  data-medina-line={lineNumber}
+                  className="flex min-w-0 items-center justify-center whitespace-nowrap text-center"
+                >
+                  {isHeaderGap ? (
+                    <span className="font-amiri font-bold text-foreground">
+                      {isFirstHeaderGap || lineNumber === 1
+                        ? `سورة ${headerSurah?.nameArabic ?? ''}`
+                        : nextSurah !== 9
+                          ? 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
+                          : ''}
+                    </span>
+                  ) : (
+                    words.map((word, wordPosition) => {
+                      const theme = getPrimaryThemeForVerse(word.surah, word.verse).theme;
+                      const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
+                      const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
+                      const html = word.kind === 'word'
+                        ? sanitizeTajweedHtml(applyAutoTajweed(word.text))
+                        : word.text;
+                      return (
+                        <span
+                          key={`${word.surah}-${word.verse}-${word.kind}-${wordPosition}`}
+                          data-verse={word.surah === surahNumber ? word.verse : undefined}
+                          data-w={word.kind === 'word' ? word.wordIndex : undefined}
+                          onClick={() => {
+                            setMenuSurah(word.surah);
+                            setMenuVerse(word.verse);
+                          }}
+                          className={cn(
+                            'cursor-pointer px-[0.08em]',
+                            isCurrent && 'bg-primary/20',
+                            wordActive && 'tw-word-active'
+                          )}
+                          style={{
+                            backgroundColor: theme && !isCurrent
+                              ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
+                              : undefined,
+                          }}
+                        >
+                          {word.kind === 'end' ? (
+                            <span className="text-primary font-bold">۝{word.text}</span>
+                          ) : (
+                            <span dangerouslySetInnerHTML={{ __html: html }} />
+                          )}
+                        </span>
+                      );
+                    })
+                  )}
+                </div>
+              );
+            })
+          ) : pageSections.map((section) => {
             const sectionSurah = surahs.find((s) => s.number === section.surahNumber);
             const isMainSurah = section.surahNumber === surahNumber;
             return (
@@ -909,7 +981,7 @@ export const HafsTajweedPageView = ({
             </span>
             );
           })}
-          {pageSections.every((s) => s.groups.every((g) => g.verses.length === 0)) && (
+          {!usesOfficialMedinaLines && pageSections.every((s) => s.groups.every((g) => g.verses.length === 0)) && (
             <p className="text-center text-muted-foreground text-base">
               Aucun verset sur cette page.
             </p>
