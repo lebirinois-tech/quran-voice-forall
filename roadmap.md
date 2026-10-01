@@ -1,7 +1,7 @@
 # Feuille de route
 
 ## En cours
-- Reproduire exactement les 604 pages du Mushaf Médine avec leurs coupures officielles mot par mot, puis superposer Tajweed et coloriage thématique sans modifier la géométrie.
+- Vérifier sur mobile le coloriage thématique complet des 604 pages Hafs sans modification des coupures Médine.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable.
 - Donner une réponse claire sur les crédits consommés par les corrections répétées et l’accès au support.
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
@@ -10,6 +10,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Classification thématique complète des 6 236 versets Hafs reliée aux 604 pages Médine, avec la palette pastel propre à l’application.
 - Calibrage réinitialisé et recalculé avec la fonte propre à chaque lecture : Hafs, Warsh et Qaloun visent tous exactement 15 lignes.
 - Répartition stabilisée sur 15 lignes visibles dans les pages représentatives contrôlées, avec les polices Médine embarquées propres à Hafs, Warsh et Qaloun ; aucun débordement n’y est visible.
 - Suppression des couleurs thématiques approximatives appliquées par défaut à une sourate entière : seuls les passages documentés sont colorés.

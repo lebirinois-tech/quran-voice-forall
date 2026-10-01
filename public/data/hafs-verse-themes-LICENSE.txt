@@ -1,0 +1,9 @@
+The thematic annotations in hafs-verse-themes.json are derived from:
+QSAC — Quran Semantic Annotation Corpus, version 1.0
+Copyright (c) Ahmad Bilal and contributors
+Source: https://github.com/dev-ahmadbilal/quran-semantic-annotation-corpus
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+The application maps QSAC annotations to its own twelve-color thematic palette.
+The Quran text and Medina page geometry are not part of this derived file.
