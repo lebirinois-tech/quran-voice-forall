@@ -683,7 +683,8 @@ export const HafsTajweedPageView = ({
         if (available <= 0) return;
         let used = 0;
         Array.from(row.children).forEach((child) => {
-          used += (child as HTMLElement).getBoundingClientRect().width;
+          const element = child as HTMLElement;
+          used += Math.max(element.getBoundingClientRect().width, element.scrollWidth);
         });
         if (used > 0) ratio = Math.min(ratio, available / used);
       });
@@ -923,7 +924,7 @@ export const HafsTajweedPageView = ({
                       <span
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
-                        className="inline-flex min-w-0 items-center gap-[0.2em] rounded-[0.12em] px-[0.08em]"
+                        className="inline-flex shrink-0 items-center gap-[0.2em] rounded-[0.12em] px-[0.08em]"
                         style={{
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
