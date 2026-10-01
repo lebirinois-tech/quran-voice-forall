@@ -155,15 +155,15 @@
     font-family: 'Amiri', serif;
   }
 
-  .font-warsh, .font-mushaf-warsh {
+  .font-warsh, .quran-text.font-mushaf-warsh {
     font-family: 'warsh-medina', 'Amiri', serif;
   }
 
-  .font-mushaf-hafs {
+  .quran-text.font-mushaf-hafs {
     font-family: 'hafs-medina', 'Amiri', serif;
   }
 
-  .font-mushaf-qalun {
+  .quran-text.font-mushaf-qalun {
     font-family: 'qalun-medina', 'Amiri', serif;
   }
 

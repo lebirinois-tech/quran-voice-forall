@@ -517,35 +517,13 @@ export const HafsTajweedPageView = ({
       const measureAt = (px: number, lh: number) => {
         textEl.style.fontSize = `${px}px`;
         textEl.style.lineHeight = String(lh);
-        const tops: number[] = [];
-        // Un rectangle est produit pour chaque ligne traversée par un verset,
-        // y compris son médaillon de fin. Cela correspond aux lignes que voit
-        // réellement la lectrice, sans compter séparément les lettres Tajweed.
-        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
-          const range = document.createRange();
-          range.selectNodeContents(node);
-          Array.from(range.getClientRects()).forEach((rect) => {
-            if (rect.width > 1 && rect.height > 1) tops.push(rect.top);
-          });
-        });
-        tops.sort((a, b) => a - b);
-        const uniqueTops: number[] = [];
-        // Les signes diacritiques et les spans Tajweed d'une même ligne ont
-        // souvent des rectangles décalés de plusieurs pixels. Une tolérance
-        // fixe de 3 px les comptait comme des lignes supplémentaires, puis
-        // réduisait à tort tout le texte en un petit bloc. La tolérance suit
-        // désormais la hauteur réelle d'une ligne typographique.
-        // Un intervalle proche d'une demi-ligne fusionnait parfois deux vraies
-        // lignes avec les fontes Warsh et Qaloun. Le calcul choisissait alors
-        // une police énorme pour Warsh, ou minuscule pour Qaloun. Un quart de
-        // ligne suffit à réunir les rectangles de diacritiques sans confondre
-        // deux lignes imprimées distinctes.
-        const sameLineTolerance = Math.max(4, px * lh * 0.24);
-        tops.forEach((top) => {
-          if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
-        });
-        const lineCount = uniqueTops.length;
-        return { height: textEl.scrollHeight, lineCount };
+        const height = textEl.scrollHeight;
+        // Les rectangles DOM des lettres Tajweed et de leurs diacritiques se
+        // chevauchent différemment selon la riwaya. Ils ne constituent donc pas
+        // un compteur fiable. La hauteur typographique donne directement le
+        // nombre de lignes réellement peintes, quelle que soit la police.
+        const lineCount = Math.max(1, Math.round(height / (px * lh)));
+        return { height, lineCount };
       };
 
       const MEDINA_LINE_COUNT = currentPage === 1 ? 7 : 15;
