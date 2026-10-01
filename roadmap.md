@@ -9,6 +9,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Calibrage réinitialisé et recalculé avec la fonte propre à chaque lecture : Hafs, Warsh et Qaloun visent tous exactement 15 lignes.
 - Répartition stabilisée sur 15 lignes visibles dans les pages représentatives contrôlées, avec les polices Médine embarquées propres à Hafs, Warsh et Qaloun ; aucun débordement n’y est visible.
 - Suppression des couleurs thématiques approximatives appliquées par défaut à une sourate entière : seuls les passages documentés sont colorés.
 - Titres thématiques retirés des trois Mushafs pour ne conserver que les aplats de couleur lorsque l’intitulé n’est pas fiable.

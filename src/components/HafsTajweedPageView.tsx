@@ -472,7 +472,7 @@ export const HafsTajweedPageView = ({
     sigRef.current = '';
     lastTargetRef.current = 0;
     measuredRef.current = false;
-  }, [currentPage, surahNumber, fontScalePct, lineSpacingPct]);
+  }, [currentPage, surahNumber, riwaya, fontScalePct, lineSpacingPct]);
 
   useLayoutEffect(() => {
     const measure = (force = false) => {
@@ -500,7 +500,9 @@ export const HafsTajweedPageView = ({
       // La hauteur du cadre varie de quelques pixels sur mobile (barre
       // d'adresse qui se masque) : on ignore ces micro-variations, sinon la
       // page « tremble » en permanence.
-      const sig = `${content.length}|${Math.round(textEl.clientWidth)}`;
+      // La lecture fait partie de la signature : Hafs, Warsh et Qaloun ont
+      // chacun leur propre métrique de fonte, même à contenu égal.
+      const sig = `${riwaya}|${content.length}|${Math.round(textEl.clientWidth)}`;
       const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
       const overflow = frameEl.scrollHeight - frameEl.clientHeight;
       const overflowing = overflow > 2;
@@ -617,7 +619,13 @@ export const HafsTajweedPageView = ({
       schedule(false);
       if (ticks >= 16) window.clearInterval(poll);
     }, 250);
-    (document as any).fonts?.ready?.then?.(() => schedule(false));
+    const fontFamily =
+      riwaya === 'warsh' ? 'warsh-medina' : riwaya === 'qalun' ? 'qalun-medina' : 'hafs-medina';
+    const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
+    // Attendre explicitement la fonte de la lecture courante évite que Hafs
+    // ou Qaloun soient calibrés avec la fonte de secours avant son chargement.
+    fontSet?.load?.(`24px ${fontFamily}`).then(() => schedule(true));
+    fontSet?.ready?.then?.(() => schedule(true));
 
     const frameEl = frameRef.current;
     let roTimer = 0;
@@ -642,7 +650,7 @@ export const HafsTajweedPageView = ({
       ro?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontScale, lineSpacing, currentPage, surahNumber]);
+  }, [fontScale, lineSpacing, currentPage, surahNumber, riwaya]);
 
 
 
