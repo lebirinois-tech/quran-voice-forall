@@ -8,9 +8,11 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Titres thématiques retirés des trois Mushafs pour ne conserver que les aplats de couleur lorsque l’intitulé n’est pas fiable.
+- Présentation du texte des trois Mushafs alignée sur la référence محفظ الوحيين : lignes équilibrées sur toute la largeur et aplats pastel continus sans ligne vide.
 - Vue Mushaf épurée : numéro de page centré et cliquable, champs « Go » et titre intérieur retirés, texte coranique agrandi et recentré.
 - Suppression de la justification forcée et des grands vides entre les mots dans les titres et les versets, sur les trois Mushafs pages.
-- Coloriage thématique des trois Mushafs rapproché de محفظ الوحيين : blocs pastel continus, bandeau arabe assorti au début de chaque thème, Tajweed préservé.
+- Coloriage thématique des trois Mushafs rapproché de محفظ الوحيين : blocs pastel continus sans titre incertain, Tajweed préservé.
 - Validation sur téléphone réel : Hafs, Warsh et Qaloun s’affichent maintenant en 15 lignes.
 - Publication de la correction de mise en page après validation mobile.
 - Suppression du centrage vertical qui tassait les versets au milieu du cadre ; contenu ancré en haut et interligne borné.
