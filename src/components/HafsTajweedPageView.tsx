@@ -766,12 +766,12 @@ export const HafsTajweedPageView = ({
         )}
         style={{
           backgroundColor: 'hsl(195, 80%, 96%)',
-          paddingInline: 'calc(env(safe-area-inset-left, 0px) + clamp(0.5rem, 3vw, 1.5rem))',
+          paddingInline: 'calc(env(safe-area-inset-left, 0px) + 2px)',
         }}
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
-          className="mx-auto h-full w-full max-w-3xl overflow-hidden [container-type:inline-size]"
+          className="mx-auto h-full w-full overflow-hidden [container-type:inline-size]"
         >
           <div
             className="relative flex h-full w-full flex-col rounded-xl border-[3px] p-1 shadow-lg sm:p-1.5"
