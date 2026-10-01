@@ -1,7 +1,6 @@
 # Feuille de route
 
 ## En cours
-- Rétablir tous les caractères coraniques et supprimer l’effet haché : mots rapprochés en lignes continues, sans mot masqué, sur les trois Mushafs.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
@@ -11,6 +10,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Texte intégral rétabli et lignes de mots regroupées ; les petits zéros défectueux restent dans le texte mais deviennent transparents sur Android, sans supprimer de caractères.
 - Suppression à l’affichage des petits zéros coraniques que certaines polices mobiles transformaient en gros cercles noirs dispersés dans les versets, sur les trois Mushafs.
 - Coloriage par paragraphes de sens (558 rukû‘ traditionnels) sur Hafs, Warsh et Qaloun : couleur unique par paragraphe, paragraphes voisins toujours de couleurs différentes.
 - Remplacement des points noirs de fin de verset par des médaillons Médine lisibles sur Hafs, Warsh et Qaloun, sans modifier les lignes ni les fonds thématiques.

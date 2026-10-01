@@ -45,6 +45,13 @@ const BAA = 'ب';
 const MADDAH = '\u0653';
 const SUPERSCRIPT_ALEF = '\u0670';
 
+/**
+ * Conserve les zéros orthographiques dans le texte tout en les rendant
+ * transparents : certaines polices Android les dessinent comme de gros points.
+ */
+export const concealBrokenMobileQuranZeros = (html: string): string =>
+  html.replace(/[\u06DF\u06E0]/g, '<span style="color: #00000000;">$&</span>');
+
 // Letters triggering Ikhfa after noon-sakin / tanween (15 letters)
 const IKHFA_LETTERS = new Set([
   'ت','ث','ج','د','ذ','ز','س','ش','ص','ض','ط','ظ','ف','ق','ك',
