@@ -823,9 +823,6 @@ export const HafsTajweedPageView = ({
             )}
             {section.groups.map((group, gi) => {
             const theme = group.theme;
-            const themeTitle = theme
-              ? `${theme.emoji} ${theme.labels.fr} · ${theme.labels.ar}${group.curated ? '' : ' (thème dominant de la sourate)'}`
-              : undefined;
             return (
             <span
               key={`g-${gi}`}
@@ -833,8 +830,7 @@ export const HafsTajweedPageView = ({
               data-curated={group.curated ? '1' : '0'}
               style={{
                 // Chaque thème forme un véritable aplat continu, comme sur la
-                // page imprimée de référence. Le titre reste inline dans la
-                // première ligne afin de ne créer aucun vide supplémentaire.
+                // page imprimée de référence, sans titre potentiellement imprécis.
                 display: 'block',
                 backgroundColor: theme
                   ? `hsl(${theme.bgHsl} / ${thematicPaperOpacity})`
@@ -843,21 +839,6 @@ export const HafsTajweedPageView = ({
                 paddingInline: theme ? '0.08em' : undefined,
               }}
             >
-              {theme && (
-                <span
-                  dir="rtl"
-                  data-theme-title={theme.id}
-                  title={themeTitle}
-                  className="mx-[0.12em] inline-flex items-center justify-center rounded-sm border px-[0.35em] py-[0.03em] align-middle font-amiri text-[0.46em] font-bold leading-[1.2]"
-                  style={{
-                    backgroundColor: `hsl(${theme.hsl} / 0.24)`,
-                    borderColor: `hsl(${theme.hsl} / 0.42)`,
-                    color: `hsl(${theme.hsl})`,
-                  }}
-                >
-                  {theme.labels.ar}
-                </span>
-              )}
               {group.verses.map((v) => {
                 // Seule la sourate ouverte est interactive (lecture, menu,
                 // surbrillance) ; les versets des sourates voisines présents
@@ -874,7 +855,6 @@ export const HafsTajweedPageView = ({
                       setMenuSurah(section.surahNumber);
                       setMenuVerse(v.number);
                     }}
-                    title={themeTitle}
                     style={{
                       // Le fond est porté par chaque verset, et non uniquement
                       // par le groupe : toute l'âyah reste ainsi colorée, même
