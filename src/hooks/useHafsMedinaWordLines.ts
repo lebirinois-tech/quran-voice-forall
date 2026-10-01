@@ -60,6 +60,9 @@ export const useHafsMedinaWordLines = (page: number, enabled: boolean) => {
         for (let line = 2; line <= 15; line += 1) {
           const endings = unpacked[line].filter((word) => word.kind === 'end');
           for (const ending of endings) {
+            if (unpacked[line].some((word) =>
+              word.kind === 'word' && word.surah === ending.surah && word.verse === ending.verse
+            )) continue;
             for (let previous = line - 1; previous >= 1; previous -= 1) {
               if (unpacked[previous].some((word) =>
                 word.kind === 'word' && word.surah === ending.surah && word.verse === ending.verse
