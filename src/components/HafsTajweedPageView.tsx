@@ -955,6 +955,10 @@ export const HafsTajweedPageView = ({
                         {run.words.map((word, wordPosition) => {
                           const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
                           const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
+                          const isAllahName = word.kind === 'word' && word.text
+                            .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+                            .replace(/\u0671/g, '\u0627')
+                            .includes('\u0627\u0644\u0644\u0647');
                           const html = word.kind === 'word'
                             ? sanitizeTajweedHtml(applyAutoTajweed(word.text.replace(/\u06DF/g, '\u0652')))
                             : word.text;
@@ -969,6 +973,7 @@ export const HafsTajweedPageView = ({
                               }}
                               className={cn(
                                 'cursor-pointer px-[0.1em]',
+                                isAllahName && '[&_span]:!text-foreground',
                                 isCurrent && 'bg-primary/20',
                                 wordActive && 'tw-word-active'
                               )}
