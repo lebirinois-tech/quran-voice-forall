@@ -160,7 +160,9 @@ export const HafsTajweedPageView = ({
       : startPage
   );
   const officialMedinaLines = useHafsMedinaWordLines(currentPage, riwaya === 'hafs');
-  const hafsVerseThemes = useHafsVerseThemes(riwaya === 'hafs');
+  // Les thèmes sont indexés par référence sourate:verset et sont donc partagés
+  // par les trois riwayat ; seule la graphie Tajweed varie.
+  const verseThemes = useHafsVerseThemes(true);
   const usesOfficialMedinaLines = riwaya === 'hafs' && officialMedinaLines !== null;
   const [officialFontPx, setOfficialFontPx] = useState(24);
 
@@ -325,7 +327,7 @@ export const HafsTajweedPageView = ({
   // Regroupe les versets consécutifs (d'une même sourate) partageant le MÊME
   // thème dominant unique (Tafsir Mawdou'i). Un seul thème par bloc => une
   // seule couleur, pas de dégradé : lisible et cohérent dans toutes les sourates.
-  const groupByTheme = (
+  const groupByTheme = useCallback((
     sNo: number,
     list: { number: number; html: string }[]
   ) => {
@@ -336,7 +338,11 @@ export const HafsTajweedPageView = ({
       verses: { number: number; html: string }[];
     }[] = [];
     for (const v of list) {
-      const { theme, curated } = getPrimaryThemeForVerse(sNo, v.number);
+      const indexedThemeId = verseThemes?.[`${sNo}:${v.number}`];
+      const indexedTheme = indexedThemeId ? getThemeById(indexedThemeId) : undefined;
+      const fallback = getPrimaryThemeForVerse(sNo, v.number);
+      const theme = indexedTheme ?? fallback.theme;
+      const curated = indexedTheme !== undefined || fallback.curated;
       const key = theme?.id ?? 'none';
       const last = groups[groups.length - 1];
       if (last && last.key === key) {
@@ -346,7 +352,7 @@ export const HafsTajweedPageView = ({
       }
     }
     return groups;
-  };
+  }, [verseThemes]);
 
 
   // Auto-scroll current verse into view
@@ -400,8 +406,7 @@ export const HafsTajweedPageView = ({
         ),
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullPageGroups, pageVerses, surahNumber, buildVerseHtml]);
+  }, [fullPageGroups, pageVerses, surahNumber, buildVerseHtml, groupByTheme]);
 
   const currentWords = useMemo(() => {
     if (!currentVerse) return null;
@@ -872,7 +877,7 @@ export const HafsTajweedPageView = ({
                     </span>
                   ) : (
                     words.map((word, wordPosition) => {
-                      const indexedThemeId = hafsVerseThemes?.[`${word.surah}:${word.verse}`];
+                      const indexedThemeId = verseThemes?.[`${word.surah}:${word.verse}`];
                       const theme = indexedThemeId
                         ? getThemeById(indexedThemeId)
                         : getPrimaryThemeForVerse(word.surah, word.verse).theme;
