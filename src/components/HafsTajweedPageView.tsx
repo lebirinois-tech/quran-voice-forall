@@ -535,7 +535,12 @@ export const HafsTajweedPageView = ({
         // fixe de 3 px les comptait comme des lignes supplémentaires, puis
         // réduisait à tort tout le texte en un petit bloc. La tolérance suit
         // désormais la hauteur réelle d'une ligne typographique.
-        const sameLineTolerance = Math.max(4, px * lh * 0.45);
+        // Un intervalle proche d'une demi-ligne fusionnait parfois deux vraies
+        // lignes avec les fontes Warsh et Qaloun. Le calcul choisissait alors
+        // une police énorme pour Warsh, ou minuscule pour Qaloun. Un quart de
+        // ligne suffit à réunir les rectangles de diacritiques sans confondre
+        // deux lignes imprimées distinctes.
+        const sameLineTolerance = Math.max(4, px * lh * 0.24);
         tops.forEach((top) => {
           if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
         });
