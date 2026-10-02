@@ -1,8 +1,6 @@
 # Feuille de route
 
 ## En cours
-- Rétablir la flèche « page suivante » dans la barre inférieure sur les petits écrans.
-- Affiner le découpage thématique dans l’esprit de محفظ الوحيين, avec accès au Tafsir موضوعي, palette et taille de lecture cohérentes, sans reprendre de données propriétaires.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
@@ -12,6 +10,8 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Découpage thématique complet en 558 passages continus sur les 6 236 versets, partagé par Hafs, Warsh et Qaloun ; le menu et le Tafsir موضوعي affichent désormais le thème exact de l'aplat touché.
+- Flèches « page suivante » et « page précédente » rétablies dans la barre inférieure sur les petits écrans.
 - Fonds thématiques Hafs regroupés en aplats pastel légers et continus par passage, au lieu d'un rectangle séparé derrière chaque mot ; Tajweed et coupures Médine inchangés.
 - Coloriage par paragraphes de sens (558 rukû‘ traditionnels) sur Hafs, Warsh et Qaloun : couleur unique par paragraphe, paragraphes voisins toujours de couleurs différentes.
 - Remplacement des points noirs de fin de verset par des médaillons Médine lisibles sur Hafs, Warsh et Qaloun, sans modifier les lignes ni les fonds thématiques.

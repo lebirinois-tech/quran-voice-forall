@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { getThemesForVerse, QuranTheme } from '@/data/quranThemes';
+import { getThemeById, getThemesForVerse, QuranTheme, type ThemeId } from '@/data/quranThemes';
 import { getOfflineTafsir } from '@/lib/offlineTafsir';
 
 type Lang = 'ar' | 'fr' | 'en';
@@ -24,12 +24,16 @@ const writeCache = (s: number, v: number, lang: Lang, text: string) => {
 interface Props {
   surahNumber: number;
   verseNumber: number;
+  indexedThemeId?: ThemeId;
   isOpen: boolean;
   onToggle: () => void;
 }
 
-export const ThematicTafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Props) => {
-  const themes = getThemesForVerse(surahNumber, verseNumber);
+export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, isOpen, onToggle }: Props) => {
+  const indexedTheme = indexedThemeId ? getThemeById(indexedThemeId) : undefined;
+  // Dans les pages Mushaf, afficher le thème exact du passage QSAC utilisé
+  // pour l'aplat. Les autres vues conservent la classification détaillée.
+  const themes = indexedTheme ? [indexedTheme] : getThemesForVerse(surahNumber, verseNumber);
   const [activeLang, setActiveLang] = useState<Lang>('fr');
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

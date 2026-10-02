@@ -1629,7 +1629,9 @@ export const HafsTajweedPageView = ({
             </DialogTitle>
           </DialogHeader>
           {menuVerse !== null && (() => {
-            const themes = getThemesForVerse(menuSurah, menuVerse);
+            const indexedThemeId = verseThemes?.[`${menuSurah}:${menuVerse}`];
+            const indexedTheme = indexedThemeId ? getThemeById(indexedThemeId) : undefined;
+            const themes = indexedTheme ? [indexedTheme] : getThemesForVerse(menuSurah, menuVerse);
             const isMenuMainSurah = menuSurah === surahNumber;
             return (
               <div className="flex flex-col gap-2">
@@ -1801,6 +1803,7 @@ export const HafsTajweedPageView = ({
             <ThematicTafsirPanel
               surahNumber={menuSurah}
               verseNumber={themeVerse}
+              indexedThemeId={verseThemes?.[`${menuSurah}:${themeVerse}`]}
               isOpen={true}
               onToggle={() => setThemeVerse(null)}
             />
