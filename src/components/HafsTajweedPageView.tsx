@@ -1117,7 +1117,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Verset précédent"
             onClick={() => onPreviousVerse?.()}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
           >
             <SkipBack className="h-5 w-5" />
           </Button>
@@ -1186,7 +1186,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Verset suivant"
             onClick={() => onNextVerse?.()}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
           >
             <SkipForward className="h-5 w-5" />
           </Button>
