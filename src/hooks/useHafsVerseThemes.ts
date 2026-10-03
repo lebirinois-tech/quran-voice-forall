@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import type { ThemeId } from '@/data/quranThemes';
+import { MUSHAF_PAGES_VERSION } from '@/lib/hafsMushafVersion';
 
 type HafsVerseThemes = Record<string, ThemeId>;
 
 let themesPromise: Promise<HafsVerseThemes> | null = null;
 
 const loadThemes = () => {
-  themesPromise ??= fetch('/data/hafs-verse-themes.json', { cache: 'force-cache' }).then((response) => {
+  themesPromise ??= fetch(`/data/hafs-verse-themes.json?v=${encodeURIComponent(MUSHAF_PAGES_VERSION)}`, {
+    cache: 'force-cache',
+  }).then((response) => {
     if (!response.ok) throw new Error(`Hafs themes HTTP ${response.status}`);
     return response.json() as Promise<HafsVerseThemes>;
   });
