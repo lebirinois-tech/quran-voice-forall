@@ -10,11 +10,11 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
-- Injection visible du découpage thématique complet : l’index des 6 236 versets est désormais renouvelé avec chaque version, y compris sur les téléphones ayant conservé une ancienne copie ; début d’Al-Baqara séparé en 1–2 puis 3–5 selon la référence validée.
-- Découpage thématique complet en 558 passages continus sur les 6 236 versets, partagé par Hafs, Warsh et Qaloun ; le menu et le Tafsir موضوعي affichent désormais le thème exact de l'aplat touché.
+- Injection visible du découpage thématique complet en 560 passages : l’index des 6 236 versets est désormais renouvelé avec chaque version, y compris sur les téléphones ayant conservé une ancienne copie ; début d’Al-Baqara séparé en 1–2 puis 3–5 selon la référence validée.
+- Découpage thématique complet en 560 passages continus sur les 6 236 versets, partagé par Hafs, Warsh et Qaloun ; le menu et le Tafsir موضوعي affichent désormais le thème exact de l'aplat touché.
 - Flèches « page suivante » et « page précédente » rétablies dans la barre inférieure sur les petits écrans.
 - Fonds thématiques Hafs regroupés en aplats pastel légers et continus par passage, au lieu d'un rectangle séparé derrière chaque mot ; Tajweed et coupures Médine inchangés.
-- Coloriage par paragraphes de sens (558 rukû‘ traditionnels) sur Hafs, Warsh et Qaloun : couleur unique par paragraphe, paragraphes voisins toujours de couleurs différentes.
+- Coloriage par paragraphes de sens sur Hafs, Warsh et Qaloun : couleur unique par paragraphe, paragraphes voisins toujours de couleurs différentes.
 - Remplacement des points noirs de fin de verset par des médaillons Médine lisibles sur Hafs, Warsh et Qaloun, sans modifier les lignes ni les fonds thématiques.
 - Coloriage thématique complet unifié sur Hafs, Warsh et Qaloun avec le même index verset et la palette propre à l’application.
 - Classification thématique complète des 6 236 versets Hafs reliée aux 604 pages Médine, avec la palette pastel propre à l’application.
