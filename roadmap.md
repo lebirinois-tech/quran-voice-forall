@@ -10,6 +10,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Injection visible du découpage thématique complet : l’index des 6 236 versets est désormais renouvelé avec chaque version, y compris sur les téléphones ayant conservé une ancienne copie ; début d’Al-Baqara séparé en 1–2 puis 3–5 selon la référence validée.
 - Découpage thématique complet en 558 passages continus sur les 6 236 versets, partagé par Hafs, Warsh et Qaloun ; le menu et le Tafsir موضوعي affichent désormais le thème exact de l'aplat touché.
 - Flèches « page suivante » et « page précédente » rétablies dans la barre inférieure sur les petits écrans.
 - Fonds thématiques Hafs regroupés en aplats pastel légers et continus par passage, au lieu d'un rectangle séparé derrière chaque mot ; Tajweed et coupures Médine inchangés.
