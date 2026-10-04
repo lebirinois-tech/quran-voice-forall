@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
@@ -59,6 +59,7 @@ interface HafsTajweedPageViewProps {
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
+  onSwitchToVerses?: () => void;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -92,6 +93,7 @@ export const HafsTajweedPageView = ({
   audioControls,
   voiceControls,
   settingsControls,
+  onSwitchToVerses,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -1242,6 +1244,27 @@ export const HafsTajweedPageView = ({
           </SheetHeader>
 
           <div className="mt-4 space-y-4">
+            <section>
+              <h4 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Mode de lecture</h4>
+              <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-2">
+                <Button type="button" className="gap-2" aria-pressed="true">
+                  <BookOpen className="h-4 w-4" />
+                  Pages / صفحات
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="gap-2"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onSwitchToVerses?.();
+                  }}
+                >
+                  <FileText className="h-4 w-4" />
+                  Versets / آيات
+                </Button>
+              </div>
+            </section>
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Pages</h4>
               <div className="mb-2 text-center text-sm font-medium text-foreground">
