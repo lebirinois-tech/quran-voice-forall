@@ -31,6 +31,7 @@ const STORAGE_KEYS = {
   TEXT_DISPLAY_STYLE: 'quran-text-display-style',
   FONT_SIZE: 'quran-font-size',
   VERSE_VIEW_MODE: 'quran-verse-view-mode',
+  PAGES_HAFS_DEFAULT_MIGRATION: 'quran-pages-hafs-default-v47',
 };
 
 const DEFAULT_BACKGROUND = 'hsl(45, 30%, 96%)';
@@ -49,6 +50,13 @@ export const useAppSettings = () => {
 
   const [textDisplayStyle, setTextDisplayStyle] = useState<TextDisplayStyle>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE);
+    // Une seule migration rend le Mushaf Hafs en pages immédiatement visible
+    // sur les appareils qui avaient encore l'ancien mode Versets mémorisé.
+    if (!localStorage.getItem(STORAGE_KEYS.PAGES_HAFS_DEFAULT_MIGRATION)) {
+      localStorage.setItem(STORAGE_KEYS.PAGES_HAFS_DEFAULT_MIGRATION, '1');
+      localStorage.setItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE, 'pages-hafs');
+      return 'pages-hafs';
+    }
     // Migration : les anciens modes retirés basculent vers un équivalent conservé.
     const ALLOWED: TextDisplayStyle[] = [
       'tajweed',
@@ -79,7 +87,7 @@ export const useAppSettings = () => {
       localStorage.setItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE, MIGRATIONS[saved]);
       return MIGRATIONS[saved];
     }
-    return 'tajweed';
+    return 'pages-hafs';
   });
 
   const [fontSize, setFontSize] = useState<FontSize>(() => {

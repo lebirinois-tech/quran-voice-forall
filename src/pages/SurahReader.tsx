@@ -21,7 +21,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Play } from 'lucide-react';
+import { Loader2, FileText, Layers, Play, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -235,6 +235,24 @@ const SurahReader = () => {
   };
 
   const isMushafMode = isMushafImageMode;
+
+  const switchToPages = useCallback(() => {
+    const target = appSettings.textDisplayStyle === 'warsh-tajweed'
+      ? 'pages-warsh'
+      : appSettings.textDisplayStyle === 'qalun-tajweed'
+        ? 'pages-qalun'
+        : 'pages-hafs';
+    appSettings.onTextDisplayStyleChange(target);
+  }, [appSettings.textDisplayStyle, appSettings.onTextDisplayStyleChange]);
+
+  const switchToVerses = useCallback(() => {
+    const target = appSettings.textDisplayStyle === 'pages-warsh'
+      ? 'warsh-tajweed'
+      : appSettings.textDisplayStyle === 'pages-qalun'
+        ? 'qalun-tajweed'
+        : 'tajweed';
+    appSettings.onTextDisplayStyleChange(target);
+  }, [appSettings.textDisplayStyle, appSettings.onTextDisplayStyleChange]);
 
   // ---- Affichage « page par page » pour le mode versets (coloriage thématique conservé) ----
   const isPagedVerseView = !isMushafImageMode && appSettings.verseViewMode === 'page';
@@ -525,6 +543,14 @@ const SurahReader = () => {
 
         {/* Quick Navigation */}
         {!isMushafMode && <div className="max-w-lg mx-auto mb-6 animate-fade-in">
+          <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-2">
+            <Button type="button" variant="default" className="gap-2" aria-pressed="true">
+              <FileText className="h-4 w-4" /> Versets / آيات
+            </Button>
+            <Button type="button" variant="ghost" className="gap-2" onClick={switchToPages}>
+              <BookOpen className="h-4 w-4" /> Pages / صفحات
+            </Button>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {/* Page Navigation */}
             <div className="bg-card border border-border rounded-xl p-3">
@@ -718,6 +744,7 @@ const SurahReader = () => {
               audioControls={audioPlayerControls}
               voiceControls={voiceCommandControls}
               settingsControls={mushafSettingsControls}
+              onSwitchToVerses={switchToVerses}
             />
           )}
 
