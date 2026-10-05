@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
-import { getThemesForVerse } from '@/data/quranThemes';
+import { getThemesForVerse, getThemeById } from '@/data/quranThemes';
+import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
@@ -238,7 +239,10 @@ export const VerseCard = ({
   const isEvenPage = pageNumber % 2 === 0;
 
   // Themes this verse belongs to (curated mapping)
-  const verseThemes = getThemesForVerse(surahNumber, verse.number);
+  // Même index thématique que les pages Mushaf : couleurs identiques 1:1.
+  const indexedThemes = useHafsVerseThemes(true);
+  const indexedTheme = indexedThemes ? getThemeById(indexedThemes[`${surahNumber}:${verse.number}`]) : undefined;
+  const verseThemes = indexedTheme ? [indexedTheme] : indexedThemes ? [] : getThemesForVerse(surahNumber, verse.number);
   const primaryTheme = verseThemes[0];
 
   // Hafs Tajweed — use the same simplified 4-color scheme as Warsh / Qalun
@@ -356,7 +360,7 @@ export const VerseCard = ({
         ...(primaryTheme && !isPlaying
           ? {
               borderLeft: `4px solid hsl(${primaryTheme.hsl})`,
-              backgroundColor: `hsl(${primaryTheme.hsl} / 0.08)`,
+              backgroundColor: `hsl(${primaryTheme.bgHsl} / 0.7)`,
               backgroundImage: verseThemes.length > 1
                 ? `linear-gradient(135deg, hsl(${verseThemes[0].hsl} / 0.10) 0%, hsl(${verseThemes[1].hsl} / 0.10) 100%)`
                 : undefined,

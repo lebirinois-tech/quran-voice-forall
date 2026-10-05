@@ -924,6 +924,10 @@ export const HafsTajweedPageView = ({
                 return runs;
               }, []);
 
+              // Lignes courtes (fin de sourate, pages 1–2) : mots resserrés et centrés,
+              // l'aplat thématique couvre toujours toute la largeur.
+              const isShortLine = !isHeaderGap && words.length > 0 && words.length <= 4;
+
               return (
                 <div
                   key={`medina-line-${lineNumber}`}
@@ -947,7 +951,10 @@ export const HafsTajweedPageView = ({
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
                         data-theme-run=""
-                        className="flex flex-auto items-center justify-between self-stretch"
+                        className={cn(
+                          'flex flex-auto items-center self-stretch',
+                          isShortLine ? 'justify-center gap-x-[0.3em]' : 'justify-between'
+                        )}
                         style={{
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
