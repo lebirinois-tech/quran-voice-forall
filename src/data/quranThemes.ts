@@ -39,7 +39,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'tawhid',
     // Palette « مصحف التفصيل الموضوعي » (style محفظ الوحيين) : bleu = آيات الله وقدرته
     hsl: '214 80% 42%',
-    bgHsl: '214 70% 90%',
+    bgHsl: '200 85% 87%',
     emoji: '☝️',
     labels: { ar: 'التوحيد', fr: 'Unicité (Tawhid)', en: 'Oneness of God' },
     descriptions: {
@@ -52,7 +52,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'prayer',
     // brun = آيات الأحكام
     hsl: '28 50% 40%',
-    bgHsl: '30 45% 88%',
+    bgHsl: '32 60% 86%',
     emoji: '🕌',
     labels: { ar: 'الصلاة', fr: 'Prière (Salât)', en: 'Prayer (Salah)' },
     descriptions: {
@@ -65,7 +65,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'prophets',
     // jaune = قصص الرسل والأنبياء
     hsl: '45 92% 40%',
-    bgHsl: '45 80% 88%',
+    bgHsl: '52 95% 84%',
     emoji: '📜',
     labels: { ar: 'الأنبياء والرسل', fr: 'Prophètes & Messagers', en: 'Prophets & Messengers' },
     descriptions: {
@@ -78,7 +78,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'hereafter',
     // orange = يوم القيامة وعلاماته
     hsl: '22 90% 46%',
-    bgHsl: '25 70% 88%',
+    bgHsl: '24 95% 86%',
     emoji: '⚖️',
     labels: { ar: 'اليوم الآخر', fr: 'Au-delà / Jour dernier', en: 'The Hereafter' },
     descriptions: {
@@ -91,7 +91,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'mercy',
     // vert = الجنة ووصف المؤمنين ورحمة الله
     hsl: '150 60% 36%',
-    bgHsl: '150 50% 90%',
+    bgHsl: '110 50% 86%',
     emoji: '💗',
     labels: { ar: 'الرحمة والمغفرة', fr: 'Miséricorde & Pardon', en: 'Mercy & Forgiveness' },
     descriptions: {
@@ -104,7 +104,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'patience',
     // vert foncé (famille verte) = الصبر والثبات
     hsl: '170 60% 32%',
-    bgHsl: '170 50% 90%',
+    bgHsl: '160 45% 85%',
     emoji: '🌿',
     labels: { ar: 'الصبر', fr: 'Patience (Sabr)', en: 'Patience (Sabr)' },
     descriptions: {
@@ -117,7 +117,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'family',
     // brun rougeâtre (famille des الأحكام)
     hsl: '12 55% 44%',
-    bgHsl: '15 45% 90%',
+    bgHsl: '12 70% 89%',
     emoji: '👨‍👩‍👧',
     labels: { ar: 'الأسرة والوالدين', fr: 'Famille & Parents', en: 'Family & Parents' },
     descriptions: {
@@ -130,7 +130,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'charity',
     // vert olive = الإنفاق والزكاة
     hsl: '85 55% 36%',
-    bgHsl: '85 50% 90%',
+    bgHsl: '75 55% 85%',
     emoji: '🤲',
     labels: { ar: 'الإنفاق والزكاة', fr: 'Aumône & Zakât', en: 'Charity & Zakat' },
     descriptions: {
@@ -143,7 +143,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'knowledge',
     // bleu ciel = التفكر في خلق الله
     hsl: '199 80% 42%',
-    bgHsl: '200 70% 90%',
+    bgHsl: '192 80% 86%',
     emoji: '📖',
     labels: { ar: 'العلم والتفكر', fr: 'Savoir & Réflexion', en: 'Knowledge & Reflection' },
     descriptions: {
@@ -156,7 +156,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'repentance',
     // violet = القرآن الكريم والرجوع إلى الله
     hsl: '275 55% 50%',
-    bgHsl: '275 50% 90%',
+    bgHsl: '270 55% 90%',
     emoji: '🌙',
     labels: { ar: 'التوبة', fr: 'Repentir (Tawba)', en: 'Repentance (Tawba)' },
     descriptions: {
@@ -169,7 +169,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'stories',
     // jaune doré = قصص الأمم السابقة
     hsl: '40 85% 42%',
-    bgHsl: '40 70% 88%',
+    bgHsl: '38 90% 85%',
     emoji: '🏛️',
     labels: { ar: 'القصص القرآني', fr: 'Récits coraniques', en: 'Quranic Stories' },
     descriptions: {
@@ -182,7 +182,7 @@ export const QURAN_THEMES: QuranTheme[] = [
     id: 'jihad-nafs',
     // rouge = التحذير ومجاهدة النفس
     hsl: '0 65% 46%',
-    bgHsl: '0 55% 90%',
+    bgHsl: '345 70% 90%',
     emoji: '🛡️',
     labels: { ar: 'جهاد النفس', fr: 'Combat de l’âme', en: 'Struggle of the Soul' },
     descriptions: {
