@@ -14,6 +14,7 @@ import { TafsirPanel } from './TafsirPanel';
 import { ThematicTafsirPanel } from './ThematicTafsirPanel';
 import { getThemesForVerse, getThemeById } from '@/data/quranThemes';
 import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
+import { getThematicParagraph } from '@/lib/thematicParagraph';
 
 // Safety net: if tajweed text ever arrives unparsed (e.g. contains [h:1[...]),
 // convert it to colored HTML so we never render the raw markers to the user.
@@ -244,6 +245,7 @@ export const VerseCard = ({
   const indexedTheme = indexedThemes ? getThemeById(indexedThemes[`${surahNumber}:${verse.number}`]) : undefined;
   const verseThemes = indexedTheme ? [indexedTheme] : indexedThemes ? [] : getThemesForVerse(surahNumber, verse.number);
   const primaryTheme = verseThemes[0];
+  const paragraph = getThematicParagraph(indexedThemes, surahNumber, verse.number);
 
   // Hafs Tajweed — use the same simplified 4-color scheme as Warsh / Qalun
   // (Madd red, Ghunnah green, Qalqalah blue, Iqlab orange) so the Ghunnah
@@ -369,31 +371,6 @@ export const VerseCard = ({
           : {}),
       }}
     >
-      {/* Theme tags (Tafsir Mawdou'i — trilingual) */}
-      {verseThemes.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {verseThemes.map((t) => (
-            <span
-              key={t.id}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border-2 shadow-sm"
-              style={{
-                backgroundColor: `hsl(${t.hsl} / 0.18)`,
-                borderColor: `hsl(${t.hsl} / 0.6)`,
-                color: `hsl(${t.hsl})`,
-              }}
-              title={`${t.labels.fr} · ${t.labels.ar} · ${t.labels.en}`}
-            >
-              <span className="text-sm">{t.emoji}</span>
-              <span>{t.labels.fr}</span>
-              <span className="opacity-70">·</span>
-              <span className="font-arabic">{t.labels.ar}</span>
-              <span className="opacity-70">·</span>
-              <span className="italic">{t.labels.en}</span>
-            </span>
-          ))}
-        </div>
-      )}
-
       {/* Verse Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -613,6 +590,8 @@ export const VerseCard = ({
         <ThematicTafsirPanel
           surahNumber={surahNumber}
           verseNumber={verse.number}
+          indexedThemeId={paragraph?.themeId}
+          paragraph={paragraph}
           isOpen={isThematicOpen}
           onToggle={() => setIsThematicOpen(!isThematicOpen)}
         />

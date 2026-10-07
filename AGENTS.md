@@ -1,5 +1,7 @@
 # Architecture
 
+- Verse-mode thematic tafsir resolves a contiguous same-theme run within one surah from the shared local index and displays every member's bundled text and tafsir; this avoids merging unrelated passages or presenting a single-verse analysis as a paragraph commentary.
+
 - Les trois Mushafs pages utilisent les polices Unicode KFGQPC embarquées correspondant à Hafs, Warsh et Qaloun afin de préserver la géométrie Médine hors ligne.
 - Le Mushaf Hafs utilise les coupures Médine officielles mot par mot des 604 pages ; le navigateur ne doit jamais recalculer ces coupures.
 - Le coloriage thématique ne peut modifier les coupures de lignes : chaque suite de mots d'un même thème porte un aplat pastel continu et seuls les passages documentés sont colorés.
