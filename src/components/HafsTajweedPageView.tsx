@@ -1811,11 +1811,22 @@ export const HafsTajweedPageView = ({
             const arabicHtml = pageVerse?.html ?? versesTajweed[detailVerse] ?? mainVerse?.text;
             if (!arabicHtml) return null;
             return (
-              <MushafVerseStudy
-                surahNumber={menuSurah}
-                verseNumber={detailVerse}
-                arabicHtml={arabicHtml}
-              />
+              <div className="space-y-4">
+                <MushafVerseStudy
+                  surahNumber={menuSurah}
+                  verseNumber={detailVerse}
+                  arabicHtml={arabicHtml}
+                />
+                {/* Tafsir thématique de la fiche du passage, ouvert d'emblée. */}
+                <ThematicTafsirPanel
+                  key={`${menuSurah}:${detailVerse}`}
+                  surahNumber={menuSurah}
+                  verseNumber={detailVerse}
+                  indexedThemeId={verseThemes?.[`${menuSurah}:${detailVerse}`]}
+                  isOpen={true}
+                  onToggle={() => setThemeVerse(detailVerse)}
+                />
+              </div>
             );
           })()}
         </DialogContent>
