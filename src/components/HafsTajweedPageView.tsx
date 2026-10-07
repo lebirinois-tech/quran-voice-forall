@@ -677,8 +677,14 @@ export const HafsTajweedPageView = ({
     // s'adapte automatiquement à tout écran (petit téléphone, tablette, grand
     // écran), puis le filet de sécurité ci-dessous réduit si une ligne dépasse.
     // Relue à chaque ajustement pour suivre les rotations et redimensionnements.
-    const currentDesired = () =>
-      Math.min(64, Math.max(11, (frameRef.current?.clientWidth ?? 360) * 0.068 * fontScale));
+    // Taille plafonnée aussi par la hauteur : sur un écran large (PC), les
+    // 15 rangées ne doivent jamais se chevaucher.
+    const currentDesired = () => {
+      const byWidth = (frameRef.current?.clientWidth ?? 360) * 0.068 * fontScale;
+      const h = frameRef.current?.clientHeight ?? 0;
+      const byHeight = h > 0 ? (h / 15) * 0.82 : byWidth;
+      return Math.min(64, Math.max(10, Math.min(byWidth, byHeight)));
+    };
     let raf = 0;
     let timer = 0;
     let roTimer = 0;
@@ -774,6 +780,8 @@ export const HafsTajweedPageView = ({
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
           className="mx-auto h-full w-full overflow-hidden [container-type:inline-size]"
+          // Format portrait d'une page Médine, comme sur téléphone, même sur écran large.
+          style={{ maxWidth: 'calc(100dvh * 0.7)' }}
         >
           <div
             className="relative flex h-full w-full flex-col rounded-xl border-[3px] p-1 shadow-lg sm:p-1.5"
