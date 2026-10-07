@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getThemeById, getThemesForVerse, QuranTheme, type ThemeId } from '@/data/quranThemes';
 import { getOfflineTafsir } from '@/lib/offlineTafsir';
+import { ParagraphTafsir } from './ParagraphTafsir';
+import type { ThematicParagraph } from '@/lib/thematicParagraph';
 
 type Lang = 'ar' | 'fr' | 'en';
 
@@ -25,11 +27,12 @@ interface Props {
   surahNumber: number;
   verseNumber: number;
   indexedThemeId?: ThemeId;
+  paragraph?: ThematicParagraph;
   isOpen: boolean;
   onToggle: () => void;
 }
 
-export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, isOpen, onToggle }: Props) => {
+export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, paragraph, isOpen, onToggle }: Props) => {
   const indexedTheme = indexedThemeId ? getThemeById(indexedThemeId) : undefined;
   // Dans les pages Mushaf, afficher le thème exact du passage QSAC utilisé
   // pour l'aplat. Les autres vues conservent la classification détaillée.
@@ -55,7 +58,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
 
   // Load from cache when panel opens or lang changes
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || paragraph) return;
     let cancelled = false;
     (async () => {
       const cached = readCache(surahNumber, verseNumber, activeLang);
@@ -68,7 +71,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
       if (!cancelled) await refreshAvailability();
     })();
     return () => { cancelled = true; };
-  }, [isOpen, activeLang, surahNumber, verseNumber]);
+  }, [isOpen, activeLang, surahNumber, verseNumber, paragraph]);
 
   // Stop speech on close
   useEffect(() => {
@@ -187,7 +190,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
           </div>
 
           {/* Theme descriptions (only if curated) */}
-          {themes.length > 0 && (
+          {!paragraph && themes.length > 0 && (
           <div className="space-y-2">
             {themes.map((t) => (
               <p
@@ -216,7 +219,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
           )}
 
           {/* AI-generated verse-specific thematic explanation */}
-          <div className="pt-3 border-t border-border/50">
+          {paragraph ? <ParagraphTafsir paragraph={paragraph} lang={activeLang} /> : <div className="pt-3 border-t border-border/50">
             {text ? (
               <>
                 <div className="flex items-center justify-between mb-2 gap-2">
@@ -283,7 +286,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
                     : 'توليد شرح موضوعي لهذه الآية'}
               </Button>
             )}
-          </div>
+          </div>}
         </div>
       )}
     </div>
