@@ -1,7 +1,6 @@
 # Feuille de route
 
 ## En cours
-- Retirer les titres thématiques en vue Versets et réunir les versets du même passage dans le Tafsir موضوعي.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
@@ -11,6 +10,9 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Titres thématiques retirés en vue Versets ; le Tafsir موضوعي réunit tous les versets consécutifs du passage touché, en trois langues et hors connexion.
+- Warsh et Qaloun alignés sur Hafs : pages calibrées sur 15 lignes et même index de couleurs en modes Pages et Versets ; police Qaloun officielle aussi en vue Versets.
+- Suivi audio allégé : le mot récité est uniquement souligné, sans fond ni surbrillance du verset.
 - Découpage plus fin en 1 035 paragraphes de sens sur les 114 sourates, paragraphes voisins toujours de couleurs différentes (Pages et Versets).
 - Injection visible du découpage thématique complet en 560 passages : l’index des 6 236 versets est désormais renouvelé avec chaque version, y compris sur les téléphones ayant conservé une ancienne copie ; début d’Al-Baqara séparé en 1–2 puis 3–5 selon la référence validée.
 - Découpage thématique complet en 560 passages continus sur les 6 236 versets, partagé par Hafs, Warsh et Qaloun ; le menu et le Tafsir موضوعي affichent désormais le thème exact de l'aplat touché.

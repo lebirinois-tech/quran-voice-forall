@@ -22,6 +22,7 @@ import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
 import { useHafsMedinaWordLines, type MedinaLineWord } from '@/hooks/useHafsMedinaWordLines';
 import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
+import { getThematicParagraph } from '@/lib/thematicParagraph';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -165,6 +166,14 @@ export const HafsTajweedPageView = ({
   // Les thèmes sont indexés par référence sourate:verset et sont donc partagés
   // par les trois riwayat ; seule la graphie Tajweed varie.
   const verseThemes = useHafsVerseThemes(true);
+  const detailParagraph = useMemo(
+    () => detailVerse === null ? undefined : getThematicParagraph(verseThemes, menuSurah, detailVerse),
+    [detailVerse, menuSurah, verseThemes]
+  );
+  const themeParagraph = useMemo(
+    () => themeVerse === null ? undefined : getThematicParagraph(verseThemes, menuSurah, themeVerse),
+    [menuSurah, themeVerse, verseThemes]
+  );
   const usesOfficialMedinaLines = riwaya === 'hafs' && officialMedinaLines !== null;
   const [officialFontPx, setOfficialFontPx] = useState(24);
 
@@ -373,7 +382,7 @@ export const HafsTajweedPageView = ({
 
   // ——— Synchronisation Tajweed / récitation ———
   // Le texte coloré du verset en cours est découpé en mots (les couleurs des
-  // règles restent intactes) et le mot récité est surligné en suivant la
+  // règles restent intactes) et le mot récité est souligné en suivant la
   // progression de l'audio, pondérée par la longueur de chaque mot.
   const buildVerseHtml = useCallback(
     (v: Verse) => {
@@ -991,7 +1000,6 @@ export const HafsTajweedPageView = ({
                               className={cn(
                                 'cursor-pointer px-[0.1em]',
                                 isAllahName && '[&_span]:!text-foreground',
-                                isCurrent && 'bg-primary/20',
                                 wordActive && 'tw-word-active'
                               )}
                             >
@@ -1077,13 +1085,7 @@ export const HafsTajweedPageView = ({
                       WebkitBoxDecorationBreak: 'clone',
                       paddingInline: undefined,
                     }}
-                    className={cn(
-                      'inline cursor-pointer transition-colors',
-                      isCurrent &&
-                        (isAudioPlaying
-                          ? 'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40'
-                          : 'bg-primary/20 ring-2 ring-primary/60')
-                    )}
+                    className="inline cursor-pointer"
                   >
                     <span data-mushaf-verse-content dangerouslySetInnerHTML={{ __html: html }} />
                     <span
@@ -1831,6 +1833,7 @@ export const HafsTajweedPageView = ({
                   surahNumber={menuSurah}
                   verseNumber={detailVerse}
                   indexedThemeId={verseThemes?.[`${menuSurah}:${detailVerse}`]}
+                  paragraph={detailParagraph}
                   isOpen={true}
                   onToggle={() => setThemeVerse(detailVerse)}
                 />
@@ -1853,6 +1856,7 @@ export const HafsTajweedPageView = ({
               surahNumber={menuSurah}
               verseNumber={themeVerse}
               indexedThemeId={verseThemes?.[`${menuSurah}:${themeVerse}`]}
+              paragraph={themeParagraph}
               isOpen={true}
               onToggle={() => setThemeVerse(null)}
             />
