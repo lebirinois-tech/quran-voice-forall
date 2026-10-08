@@ -373,7 +373,7 @@ export const HafsTajweedPageView = ({
 
   // ——— Synchronisation Tajweed / récitation ———
   // Le texte coloré du verset en cours est découpé en mots (les couleurs des
-  // règles restent intactes) et le mot récité est surligné en suivant la
+  // règles restent intactes) et le mot récité est souligné en suivant la
   // progression de l'audio, pondérée par la longueur de chaque mot.
   const buildVerseHtml = useCallback(
     (v: Verse) => {
@@ -991,7 +991,6 @@ export const HafsTajweedPageView = ({
                               className={cn(
                                 'cursor-pointer px-[0.1em]',
                                 isAllahName && '[&_span]:!text-foreground',
-                                isCurrent && 'bg-primary/20',
                                 wordActive && 'tw-word-active'
                               )}
                             >
@@ -1077,13 +1076,7 @@ export const HafsTajweedPageView = ({
                       WebkitBoxDecorationBreak: 'clone',
                       paddingInline: undefined,
                     }}
-                    className={cn(
-                      'inline cursor-pointer transition-colors',
-                      isCurrent &&
-                        (isAudioPlaying
-                          ? 'bg-primary/40 ring-4 ring-primary shadow-lg shadow-primary/40'
-                          : 'bg-primary/20 ring-2 ring-primary/60')
-                    )}
+                    className="inline cursor-pointer"
                   >
                     <span data-mushaf-verse-content dangerouslySetInnerHTML={{ __html: html }} />
                     <span

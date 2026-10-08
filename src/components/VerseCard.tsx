@@ -338,7 +338,7 @@ export const VerseCard = ({
       case 'warsh-tajweed':
         return `font-warsh ${sizeClass} leading-loose text-foreground`;
       case 'qalun-tajweed':
-        return `font-amiri ${sizeClass} leading-loose text-foreground`;
+        return `font-mushaf-qalun ${sizeClass} leading-loose text-foreground`;
       default:
         return `quran-text ${sizeClass} leading-relaxed`;
     }
