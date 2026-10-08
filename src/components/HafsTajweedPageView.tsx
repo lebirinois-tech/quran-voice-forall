@@ -22,6 +22,7 @@ import { useFullscreen } from '@/hooks/useFullscreen';
 import { VerseRecorder } from './VerseRecorder';
 import { useHafsMedinaWordLines, type MedinaLineWord } from '@/hooks/useHafsMedinaWordLines';
 import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
+import { getThematicParagraph } from '@/lib/thematicParagraph';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -165,6 +166,14 @@ export const HafsTajweedPageView = ({
   // Les thèmes sont indexés par référence sourate:verset et sont donc partagés
   // par les trois riwayat ; seule la graphie Tajweed varie.
   const verseThemes = useHafsVerseThemes(true);
+  const detailParagraph = useMemo(
+    () => detailVerse === null ? undefined : getThematicParagraph(verseThemes, menuSurah, detailVerse),
+    [detailVerse, menuSurah, verseThemes]
+  );
+  const themeParagraph = useMemo(
+    () => themeVerse === null ? undefined : getThematicParagraph(verseThemes, menuSurah, themeVerse),
+    [menuSurah, themeVerse, verseThemes]
+  );
   const usesOfficialMedinaLines = riwaya === 'hafs' && officialMedinaLines !== null;
   const [officialFontPx, setOfficialFontPx] = useState(24);
 
@@ -1824,6 +1833,7 @@ export const HafsTajweedPageView = ({
                   surahNumber={menuSurah}
                   verseNumber={detailVerse}
                   indexedThemeId={verseThemes?.[`${menuSurah}:${detailVerse}`]}
+                  paragraph={detailParagraph}
                   isOpen={true}
                   onToggle={() => setThemeVerse(detailVerse)}
                 />
@@ -1846,6 +1856,7 @@ export const HafsTajweedPageView = ({
               surahNumber={menuSurah}
               verseNumber={themeVerse}
               indexedThemeId={verseThemes?.[`${menuSurah}:${themeVerse}`]}
+              paragraph={themeParagraph}
               isOpen={true}
               onToggle={() => setThemeVerse(null)}
             />
