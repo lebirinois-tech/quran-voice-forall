@@ -2,6 +2,8 @@
 
 ## En cours
 - Retirer les titres thématiques en vue Versets et réunir les versets du même passage dans le Tafsir موضوعي.
+- Aligner Warsh et Qaloun sur Hafs : pages de 15 lignes, coloriage thématique identique en Pages et Versets.
+- Remplacer la surbrillance pleine des mots pendant l’audio par un simple soulignement lisible.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
 - Terminer le contrôle automatisé des 604 pages de chaque riwaya ; le contrôle complet dépasse actuellement la durée maximale d’une exécution.
