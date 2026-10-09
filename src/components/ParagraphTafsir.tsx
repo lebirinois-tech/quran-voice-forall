@@ -6,6 +6,7 @@ import { getOfflineVerseTranslation } from '@/lib/offlineVerseTranslations';
 import type { ThematicParagraph } from '@/lib/thematicParagraph';
 import { surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
+import { getThemeById } from '@/data/quranThemes';
 
 type Lang = 'ar' | 'fr' | 'en';
 interface Entry { number: number; arabic: string; translation: string | null; tafsir: string | null }
@@ -92,6 +93,15 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
           {lang === 'fr' ? (speaking ? 'Arrêter' : 'Écouter le Tafsir') : lang === 'en' ? (speaking ? 'Stop' : 'Listen to tafsir') : (speaking ? 'إيقاف' : 'استماع للتفسير')}
         </Button>
       </div>
+      {(() => {
+        const official = getThemeById(paragraph.themeId);
+        return official && paragraph.themeId.startsWith('m') ? (
+          <div dir="rtl" className="rounded-md border-r-4 p-3 text-right font-arabic text-lg leading-9 text-foreground" style={{ backgroundColor: `hsl(${official.bgHsl})`, borderColor: `hsl(${official.hsl})` }}>
+            <span className="block text-xs font-semibold text-muted-foreground">التفسير الموضوعي</span>
+            {official.labels.ar}
+          </div>
+        ) : null;
+      })()}
       {loading ? <Loader2 aria-label="Chargement du paragraphe" className="h-5 w-5 animate-spin text-primary" /> : failed ? <p role="alert">{unavailable}</p> : (
         <div className="divide-y divide-border">
           {entries.map(entry => (
