@@ -52,6 +52,18 @@ const parseTajweedFallback = (text: string): string => {
   return html;
 };
 
+// Marqueur de fin de verset (رقم الآية) affiché après le texte arabe,
+// comme dans un Mushaf imprimé — aide au repérage pendant la mémorisation.
+const toArabicDigits = (n: number) =>
+  String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+const verseEndNumberHtml = (n: number) =>
+  ` <span class="verse-end-number">${toArabicDigits(n)}</span>`;
+const VerseEndNumber = ({ n }: { n: number }) => (
+  <span className="verse-end-number" aria-hidden="true">
+    {toArabicDigits(n)}
+  </span>
+);
+
 interface VerseCardProps {
   id?: string;
   verse: Verse;
@@ -467,13 +479,13 @@ export const VerseCard = ({
         <p 
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
-          dangerouslySetInnerHTML={{ __html: effectiveTajweedHtml }}
+          dangerouslySetInnerHTML={{ __html: effectiveTajweedHtml + verseEndNumberHtml(verse.number) }}
         />
       ) : textDisplayStyle === 'warsh-tajweed' && warshTajweedHtml ? (
         <p
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
-          dangerouslySetInnerHTML={{ __html: warshTajweedHtml }}
+          dangerouslySetInnerHTML={{ __html: warshTajweedHtml + verseEndNumberHtml(verse.number) }}
         />
       ) : textDisplayStyle === 'warsh-tajweed' && warshText ? (
         <p 
@@ -481,12 +493,13 @@ export const VerseCard = ({
           dir="rtl"
         >
           {warshText}
+          <VerseEndNumber n={verse.number} />
         </p>
       ) : textDisplayStyle === 'qalun-tajweed' && qalunTajweedHtml ? (
         <p
           className={cn(getTextClassName(), "mb-4 text-right tajweed-text")}
           dir="rtl"
-          dangerouslySetInnerHTML={{ __html: qalunTajweedHtml }}
+          dangerouslySetInnerHTML={{ __html: qalunTajweedHtml + verseEndNumberHtml(verse.number) }}
         />
       ) : textDisplayStyle === 'qalun-tajweed' && qalunText ? (
         <p
@@ -494,6 +507,7 @@ export const VerseCard = ({
           dir="rtl"
         >
           {qalunText}
+          <VerseEndNumber n={verse.number} />
         </p>
       ) : (
         <p 
@@ -501,6 +515,7 @@ export const VerseCard = ({
           dir="rtl"
         >
           {verse.text}
+          <VerseEndNumber n={verse.number} />
         </p>
       )}
 
