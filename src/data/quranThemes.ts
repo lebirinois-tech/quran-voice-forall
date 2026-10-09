@@ -10,6 +10,7 @@
  */
 
 export type ThemeId =
+  | `m${number}`
   | 'tawhid'
   | 'prayer'
   | 'prophets'
@@ -509,7 +510,28 @@ export const getPrimaryThemeForVerse = (
   return { theme: null, curated: false };
 };
 
-export const getThemeById = (id: ThemeId) => QURAN_THEMES.find((t) => t.id === id);
+/** Official thematic passages (Tafsir Mawdou'i, 1 277 passages) registered at runtime. */
+const MAWDUI_COLORS: Array<[string, string]> = [
+  ['223 53% 53%', '223 60% 86%'], // #456DC7 bleu
+  ['36 96% 67%', '38 95% 84%'], // #FCBB5B pêche
+  ['341 64% 70%', '341 70% 88%'], // #E382A0 rose
+  ['150 75% 25%', '145 45% 82%'], // #106E3E vert
+  ['270 45% 55%', '270 50% 88%'],
+  ['180 45% 40%', '180 45% 85%'],
+];
+const mawduiRegistry = new Map<string, QuranTheme>();
+export const registerMawduiPassages = (passages: Record<string, { t: string; c: number }>) => {
+  for (const [id, { t, c }] of Object.entries(passages)) {
+    const [hsl, bgHsl] = MAWDUI_COLORS[c % MAWDUI_COLORS.length];
+    mawduiRegistry.set(id, {
+      id: id as ThemeId, hsl, bgHsl, emoji: '📖',
+      labels: { ar: t, fr: t, en: t },
+      descriptions: { ar: t, fr: t, en: t },
+    });
+  }
+};
+
+export const getThemeById = (id: ThemeId) => mawduiRegistry.get(id) ?? QURAN_THEMES.find((t) => t.id === id);
 
 
 /** Localized label for a theme in a given language. */
