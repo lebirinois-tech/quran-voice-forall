@@ -4,10 +4,13 @@ import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
+import { SettingsDialog } from '@/components/SettingsDialog';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const appSettings = useAppSettings();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
 
   // Sur l'APK natif (Capacitor) ou en mode standalone installé, on ouvre
@@ -62,6 +65,18 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="fixed top-4 left-4 z-50 rounded-full bg-gradient-islamic shadow-lg">
+        <SettingsDialog
+          reciter={appSettings.reciter}
+          onReciterChange={appSettings.onReciterChange}
+          backgroundColor={appSettings.backgroundColor}
+          onBackgroundColorChange={appSettings.onBackgroundColorChange}
+          textDisplayStyle={appSettings.textDisplayStyle}
+          onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+          fontSize={appSettings.fontSize}
+          onFontSizeChange={appSettings.onFontSizeChange}
+        />
+      </div>
       {/* Theme Toggle */}
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

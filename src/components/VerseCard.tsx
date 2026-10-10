@@ -55,7 +55,7 @@ const parseTajweedFallback = (text: string): string => {
 // Marqueur de fin de verset (رقم الآية) affiché après le texte arabe,
 // comme dans un Mushaf imprimé — aide au repérage pendant la mémorisation.
 const toArabicDigits = (n: number) =>
-  String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+  String(n);
 const verseEndNumberHtml = (n: number) =>
   ` <span class="verse-end-number">${toArabicDigits(n)}</span>`;
 const VerseEndNumber = ({ n }: { n: number }) => (

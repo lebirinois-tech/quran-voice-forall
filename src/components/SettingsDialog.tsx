@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Settings, Volume2, Download, Palette, Check, Type, TextCursor } from 'lucide-react';
+import { Settings, Volume2, Download, Palette, Check, Type, TextCursor, Languages } from 'lucide-react';
+import { useTtsLang } from '@/hooks/useTtsLang';
+import { getStoredVoiceLang, setStoredVoiceLang, VoiceLang } from '@/hooks/useVoiceCommands';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -101,6 +103,12 @@ export const SettingsDialog = ({
   triggerLabel,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [, setTtsLang] = useTtsLang();
+  const [appLang, setAppLangState] = useState<VoiceLang>(getStoredVoiceLang);
+  const setAppLang = (l: VoiceLang) => {
+    setAppLangState(l);
+    localStorage.setItem('app-lang', l);
+  };
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
 
@@ -188,6 +196,40 @@ export const SettingsDialog = ({
         </DialogHeader>
         
         <div className="space-y-4 py-2">
+          {/* Langue d'exécution */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <Languages className="h-3.5 w-3.5 text-primary" />
+              Langue / اللغة / Language
+            </Label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {([
+                { id: 'fr', name: '🇫🇷 Français' },
+                { id: 'ar', name: '🇸🇦 العربية' },
+                { id: 'en', name: '🇬🇧 English' },
+              ] as const).map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => {
+                    setAppLang(l.id);
+                    setStoredVoiceLang(l.id);
+                    setTtsLang(l.id === 'en' ? 'en' : 'fr');
+                    toast.success(l.name);
+                  }}
+                  className={cn(
+                    'p-2 rounded-lg border-2 text-xs font-medium text-foreground transition-all',
+                    appLang === l.id ? 'border-primary bg-primary/10' : 'border-border bg-muted/50'
+                  )}
+                >
+                  {l.name}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Commandes vocales et lecture des traductions / الأوامر الصوتية وقراءة الترجمة
+            </p>
+          </div>
+
           {/* Récitateur — automatique selon la riwaya affichée */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">

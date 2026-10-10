@@ -1,5 +1,5 @@
 const toArabicDigits = (n: number) =>
-  n.toString().replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[+d]);
+  n.toString();
 
 export const TOTAL_MUSHAF_PAGES = 604;
 
