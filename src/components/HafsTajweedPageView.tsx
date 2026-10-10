@@ -65,7 +65,7 @@ interface HafsTajweedPageViewProps {
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
 const toArabicDigits = (n: number) =>
-  String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+  String(n);
 
 export const HafsTajweedPageView = ({
   surahNumber,
@@ -1008,7 +1008,7 @@ export const HafsTajweedPageView = ({
                                   aria-label={`Fin du verset ${word.text}`}
                                   className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
                                 >
-                                  {word.text}
+                                  {word.text.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))}
                                 </span>
                               ) : (
                                 <span dangerouslySetInnerHTML={{ __html: html }} />
