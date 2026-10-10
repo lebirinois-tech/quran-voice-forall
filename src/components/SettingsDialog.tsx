@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Settings, Volume2, Download, Palette, Check, Type, TextCursor, Languages } from 'lucide-react';
 import { useTtsLang } from '@/hooks/useTtsLang';
-import { getStoredVoiceLang, setStoredVoiceLang, VoiceLang } from '@/hooks/useVoiceCommands';
+import { setStoredVoiceLang } from '@/hooks/useVoiceCommands';
+import { useAppLang, setAppLang, useT, AppLang } from '@/lib/i18n';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -34,58 +35,28 @@ interface SettingsDialogProps {
 }
 
 const BACKGROUND_COLORS = [
-  { id: 'default', name: 'Crème / كريمي', value: 'hsl(45, 30%, 96%)' },
-  { id: 'white', name: 'Blanc / أبيض', value: 'hsl(0, 0%, 100%)' },
-  { id: 'sepia', name: 'Sépia / بني داكن', value: 'hsl(35, 40%, 90%)' },
-  { id: 'dark', name: 'Sombre / داكن', value: 'hsl(150, 30%, 8%)' },
-  { id: 'night', name: 'Nuit / ليلي', value: 'hsl(220, 20%, 12%)' },
-  { id: 'emerald-light', name: 'Émeraude / زمردي', value: 'hsl(158, 30%, 95%)' },
+  { id: 'default', key: 'bgDefault' as const, value: 'hsl(45, 30%, 96%)' },
+  { id: 'white', key: 'bgWhite' as const, value: 'hsl(0, 0%, 100%)' },
+  { id: 'sepia', key: 'bgSepia' as const, value: 'hsl(35, 40%, 90%)' },
+  { id: 'dark', key: 'bgDark' as const, value: 'hsl(150, 30%, 8%)' },
+  { id: 'night', key: 'bgNight' as const, value: 'hsl(220, 20%, 12%)' },
+  { id: 'emerald-light', key: 'bgEmerald' as const, value: 'hsl(158, 30%, 95%)' },
 ];
 
 const TEXT_DISPLAY_STYLES = [
-  { 
-    id: 'tajweed' as TextDisplayStyle, 
-    name: 'Hafs Tajweed (verset) / حفص تجويد', 
-    description: 'Texte Hafs coloré verset par verset',
-    icon: '🎨'
-  },
-  { 
-    id: 'warsh-tajweed' as TextDisplayStyle, 
-    name: 'Warsh Tajweed (verset) / ورش تجويد', 
-    description: 'Texte Warsh verset par verset avec Tajweed coloré',
-    icon: '🕌'
-  },
-  {
-    id: 'qalun-tajweed' as TextDisplayStyle,
-    name: 'Qalun Tajweed (verset) / قالون تجويد',
-    description: 'Texte Qalun verset par verset avec Tajweed coloré',
-    icon: '🟢'
-  },
-  { 
-    id: 'pages-hafs' as TextDisplayStyle, 
-    name: 'Mushaf Hafs (pages) / مصحف حفص', 
-    description: 'Mushaf Hafs Tajweed page par page — hors ligne',
-    icon: '📖'
-  },
-  { 
-    id: 'pages-warsh' as TextDisplayStyle, 
-    name: 'Mushaf Warsh (pages) / مصحف ورش', 
-    description: 'Mushaf Warsh Tajweed page par page — hors ligne',
-    icon: '📜'
-  },
-  { 
-    id: 'pages-qalun' as TextDisplayStyle, 
-    name: 'Mushaf Qalun (pages) / مصحف قالون', 
-    description: 'Mushaf Qalun Tajweed page par page — hors ligne',
-    icon: '📗'
-  },
+  { id: 'tajweed' as TextDisplayStyle, key: 'styleHafsVerse' as const, descKey: 'styleHafsVerseDesc' as const, icon: '🎨' },
+  { id: 'warsh-tajweed' as TextDisplayStyle, key: 'styleWarshVerse' as const, descKey: 'styleWarshVerseDesc' as const, icon: '🕌' },
+  { id: 'qalun-tajweed' as TextDisplayStyle, key: 'styleQalunVerse' as const, descKey: 'styleQalunVerseDesc' as const, icon: '🟢' },
+  { id: 'pages-hafs' as TextDisplayStyle, key: 'styleHafsPages' as const, descKey: 'styleHafsPagesDesc' as const, icon: '📖' },
+  { id: 'pages-warsh' as TextDisplayStyle, key: 'styleWarshPages' as const, descKey: 'styleWarshPagesDesc' as const, icon: '📜' },
+  { id: 'pages-qalun' as TextDisplayStyle, key: 'styleQalunPages' as const, descKey: 'styleQalunPagesDesc' as const, icon: '📗' },
 ];
 
 const FONT_SIZES = [
-  { id: 'small' as FontSize, name: 'Petit / صغير', size: 'text-2xl' },
-  { id: 'medium' as FontSize, name: 'Moyen / متوسط', size: 'text-3xl' },
-  { id: 'large' as FontSize, name: 'Grand / كبير', size: 'text-4xl' },
-  { id: 'xlarge' as FontSize, name: 'Très grand / كبير جداً', size: 'text-5xl' },
+  { id: 'small' as FontSize, key: 'fontSmall' as const },
+  { id: 'medium' as FontSize, key: 'fontMedium' as const },
+  { id: 'large' as FontSize, key: 'fontLarge' as const },
+  { id: 'xlarge' as FontSize, key: 'fontXLarge' as const },
 ];
 
 export const SettingsDialog = ({
@@ -104,10 +75,12 @@ export const SettingsDialog = ({
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [, setTtsLang] = useTtsLang();
-  const [appLang, setAppLangState] = useState<VoiceLang>(getStoredVoiceLang);
-  const setAppLang = (l: VoiceLang) => {
-    setAppLangState(l);
-    localStorage.setItem('app-lang', l);
+  const appLang = useAppLang();
+  const t = useT();
+  const changeLang = (l: AppLang) => {
+    setAppLang(l);
+    setStoredVoiceLang(l);
+    setTtsLang(l === 'en' ? 'en' : 'fr');
   };
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -120,23 +93,22 @@ export const SettingsDialog = ({
   const handleDownloadSurah = async () => {
     const surahNumber = getCurrentSurahNumber();
     if (!surahNumber) {
-      toast.info('Ouvrez une sourate pour télécharger son audio');
+      toast.info(t('openSurahToDownload'));
       return;
     }
 
     setIsDownloadingSurah(true);
     setDownloadProgress(0);
-    
+
     try {
       const edition = RECITERS[reciter]?.id ?? 'ar.husary';
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`);
       const data = await response.json();
-      
+
       if (data.code === 200 && data.data?.ayahs) {
         const ayahs = data.data.ayahs;
         const surahName = data.data.englishName || `Surah-${surahNumber}`;
-        
-        // Download all verses
+
         for (let i = 0; i < ayahs.length; i++) {
           const ayah = ayahs[i];
           if (ayah?.audio) {
@@ -152,15 +124,14 @@ export const SettingsDialog = ({
             URL.revokeObjectURL(url);
           }
           setDownloadProgress(Math.round(((i + 1) / ayahs.length) * 100));
-          // Small delay to prevent browser blocking
           await new Promise(resolve => setTimeout(resolve, 200));
         }
-        
-        toast.success(`Sourate ${surahName} téléchargée (${ayahs.length} versets)`);
+
+        toast.success(`${surahName} (${ayahs.length})`);
       }
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Erreur de téléchargement');
+      toast.error(t('downloadError'));
     } finally {
       setIsDownloadingSurah(false);
       setDownloadProgress(0);
@@ -168,10 +139,9 @@ export const SettingsDialog = ({
   };
 
   const handleOpenQuranDownloadLink = () => {
-    // Open external link for full Quran download using correct QuranicAudio ID
     const quranicAudioId = RECITERS[reciter]?.quranicAudioId ?? 18;
     window.open(`https://quranicaudio.com/quran/${quranicAudioId}`, '_blank');
-    toast.info('Redirection vers QuranicAudio pour le Quran complet');
+    toast.info(t('redirectQuranicAudio'));
   };
 
   return (
@@ -181,26 +151,29 @@ export const SettingsDialog = ({
           variant="ghost"
           size={triggerLabel ? 'default' : 'icon'}
           className={cn('text-primary-foreground hover:bg-primary-foreground/10', triggerClassName)}
-          aria-label="Paramètres"
+          aria-label={t('settings')}
         >
           <Settings className="h-5 w-5" />
           {triggerLabel && <span>{triggerLabel}</span>}
         </Button>
       </DialogTrigger>
-      <DialogContent className="z-[120] sm:max-w-md bg-card border-border max-h-[85vh] overflow-y-auto">
+      <DialogContent
+        className="z-[120] sm:max-w-md bg-card border-border max-h-[85vh] overflow-y-auto"
+        dir={appLang === 'ar' ? 'rtl' : 'ltr'}
+      >
         <DialogHeader>
           <DialogTitle className="text-foreground flex items-center gap-2 text-base">
             <Settings className="h-4 w-4" />
-            Paramètres / الإعدادات
+            {t('settings')}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-2">
-          {/* Langue d'exécution */}
+          {/* Langue de l'application */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Languages className="h-3.5 w-3.5 text-primary" />
-              Langue / اللغة / Language
+              {t('language')}
             </Label>
             <div className="grid grid-cols-3 gap-1.5">
               {([
@@ -211,9 +184,7 @@ export const SettingsDialog = ({
                 <button
                   key={l.id}
                   onClick={() => {
-                    setAppLang(l.id);
-                    setStoredVoiceLang(l.id);
-                    setTtsLang(l.id === 'en' ? 'en' : 'fr');
+                    changeLang(l.id);
                     toast.success(l.name);
                   }}
                   className={cn(
@@ -225,25 +196,21 @@ export const SettingsDialog = ({
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Commandes vocales et lecture des traductions / الأوامر الصوتية وقراءة الترجمة
-            </p>
+            <p className="text-xs text-muted-foreground">{t('languageHint')}</p>
           </div>
 
           {/* Récitateur — automatique selon la riwaya affichée */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Volume2 className="h-3.5 w-3.5 text-primary" />
-              Récitateur / القارئ
+              {t('reciter')}
             </Label>
             <div className="p-3 rounded-lg bg-muted/50 border border-border">
               <p className="text-sm text-foreground">
                 {RECITERS[getSafeReciter(reciter)].name} /{' '}
                 <span dir="rtl" className="font-amiri">{RECITERS[getSafeReciter(reciter)].nameAr}</span>
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                L'audio suit automatiquement la riwaya choisie (Hafs, Warsh, Qalun) — الصوت يتبع الرواية المختارة
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">{t('reciterAuto')}</p>
             </div>
           </div>
 
@@ -251,7 +218,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Type className="h-3.5 w-3.5 text-primary" />
-              Style d'affichage / نمط العرض
+              {t('displayStyle')}
             </Label>
             <RadioGroup
               value={textDisplayStyle}
@@ -264,22 +231,19 @@ export const SettingsDialog = ({
                   className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                 >
                   <RadioGroupItem value={style.id} id={`style-${style.id}`} className="h-3.5 w-3.5" />
-                  <Label
-                    htmlFor={`style-${style.id}`}
-                    className="flex-1 cursor-pointer"
-                  >
+                  <Label htmlFor={`style-${style.id}`} className="flex-1 cursor-pointer">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{style.icon}</span>
                       <div>
-                        <p className="text-foreground text-sm font-medium">{style.name}</p>
-                        <p className="text-xs text-muted-foreground">{style.description}</p>
+                        <p className="text-foreground text-sm font-medium">{t(style.key)}</p>
+                        <p className="text-xs text-muted-foreground">{t(style.descKey)}</p>
                       </div>
                     </div>
                   </Label>
                   {textDisplayStyle === style.id && <Check className="h-3.5 w-3.5 text-primary" />}
                 </div>
               ))}
-          </RadioGroup>
+            </RadioGroup>
           </div>
 
           {/* Verse view mode — only relevant for verse-based (non "pages-") styles */}
@@ -287,12 +251,12 @@ export const SettingsDialog = ({
             <div className="space-y-2">
               <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
                 <Type className="h-3.5 w-3.5 text-primary" />
-                Affichage des versets / عرض الآيات
+                {t('verseDisplay')}
               </Label>
               <div className="grid grid-cols-2 gap-1.5">
                 {([
-                  { id: 'scroll' as VerseViewMode, name: 'Défilement / تمرير', desc: 'Toutes les pages à la suite' },
-                  { id: 'page' as VerseViewMode, name: 'Page par page / صفحة بصفحة', desc: 'Une page du Mushaf à la fois' },
+                  { id: 'scroll' as VerseViewMode, nameKey: 'scrollMode' as const, descKey: 'scrollModeDesc' as const },
+                  { id: 'page' as VerseViewMode, nameKey: 'pageMode' as const, descKey: 'pageModeDesc' as const },
                 ]).map((m) => (
                   <button
                     key={m.id}
@@ -302,25 +266,22 @@ export const SettingsDialog = ({
                         ? 'border-primary ring-2 ring-primary/30 bg-primary/10'
                         : 'border-border hover:border-primary/50 bg-muted/50'
                     }`}
-                    aria-label={m.name}
+                    aria-label={t(m.nameKey)}
                   >
-                    <span className="block text-xs font-medium text-foreground">{m.name}</span>
-                    <span className="block text-[10px] text-muted-foreground">{m.desc}</span>
+                    <span className="block text-xs font-medium text-foreground">{t(m.nameKey)}</span>
+                    <span className="block text-[10px] text-muted-foreground">{t(m.descKey)}</span>
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Le coloriage thématique des versets est conservé dans les deux modes.
-              </p>
+              <p className="text-xs text-muted-foreground">{t('themeKept')}</p>
             </div>
           )}
-
 
           {/* Font Size */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <TextCursor className="h-3.5 w-3.5 text-primary" />
-              Taille de police / حجم الخط
+              {t('fontSize')}
             </Label>
             <div className="grid grid-cols-2 gap-1.5">
               {FONT_SIZES.map((size) => (
@@ -332,11 +293,9 @@ export const SettingsDialog = ({
                       ? 'border-primary ring-2 ring-primary/30 bg-primary/10'
                       : 'border-border hover:border-primary/50 bg-muted/50'
                   }`}
-                  aria-label={size.name}
+                  aria-label={t(size.key)}
                 >
-                  <span className="text-xs font-medium text-foreground">
-                    {size.name}
-                  </span>
+                  <span className="text-xs font-medium text-foreground">{t(size.key)}</span>
                 </button>
               ))}
             </div>
@@ -346,7 +305,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Palette className="h-3.5 w-3.5 text-primary" />
-              Couleur de fond / لون الخلفية
+              {t('bgColor')}
             </Label>
             <div className="grid grid-cols-3 gap-1.5">
               {BACKGROUND_COLORS.map((color) => (
@@ -359,7 +318,7 @@ export const SettingsDialog = ({
                       : 'border-border hover:border-primary/50'
                   }`}
                   style={{ backgroundColor: color.value }}
-                  aria-label={color.name}
+                  aria-label={t(color.key)}
                 >
                   <span
                     className={`text-xs font-medium ${
@@ -368,7 +327,7 @@ export const SettingsDialog = ({
                         : 'text-foreground'
                     }`}
                   >
-                    {color.name}
+                    {t(color.key)}
                   </span>
                 </button>
               ))}
@@ -382,7 +341,7 @@ export const SettingsDialog = ({
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Download className="h-3.5 w-3.5 text-primary" />
-              Télécharger l'audio / تحميل الصوت
+              {t('downloadAudio')}
             </Label>
             <div className="space-y-1.5">
               <Button
@@ -395,12 +354,12 @@ export const SettingsDialog = ({
                 {isDownloadingSurah ? (
                   <>
                     <Download className="h-3.5 w-3.5 mr-2 animate-pulse" />
-                    تحميل... {downloadProgress}%
+                    {downloadProgress}%
                   </>
                 ) : (
                   <>
                     <Download className="h-3.5 w-3.5 mr-2" />
-                    📖 Sourate / السورة
+                    📖 {t('surahDownload')}
                   </>
                 )}
               </Button>
@@ -411,11 +370,11 @@ export const SettingsDialog = ({
                 onClick={handleOpenQuranDownloadLink}
               >
                 <Download className="h-3.5 w-3.5 mr-2" />
-                📚 Quran complet / القرآن كاملاً
+                📚 {t('fullQuran')}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Récitateur / القارئ: {RECITERS[getSafeReciter(reciter)].name} / {RECITERS[getSafeReciter(reciter)].nameAr}
+              {t('reciter')}: {RECITERS[getSafeReciter(reciter)].name} / {RECITERS[getSafeReciter(reciter)].nameAr}
             </p>
           </div>
         </div>
