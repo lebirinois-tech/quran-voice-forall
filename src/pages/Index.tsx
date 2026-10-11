@@ -124,12 +124,18 @@ const Index = () => {
       <main className="container mx-auto px-4 py-6">
         {/* Auth Section */}
         <section className="mb-6 flex items-center justify-between gap-3 animate-fade-in">
-          <Link to="/reset">
-            <Button variant="outline" size="sm" className="gap-2">
-              <RotateCcw className="h-4 w-4" />
-              {t('reset')}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="default" size="sm" className="gap-2" onClick={checkForUpdate} disabled={isChecking}>
+              <RefreshCw className={cn('h-4 w-4', isChecking && 'animate-spin')} />
+              {isChecking ? t('checking') : t('updateCheck')}
             </Button>
-          </Link>
+            <Link to="/reset">
+              <Button variant="outline" size="sm" className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                {t('reset')}
+              </Button>
+            </Link>
+          </div>
           {authLoading ? (
             <div className="h-10 w-24 bg-muted animate-pulse rounded-lg" />
           ) : isAuthenticated ? (

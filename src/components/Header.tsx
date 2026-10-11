@@ -44,7 +44,6 @@ export const Header = ({
   verseViewMode = 'scroll',
   onVerseViewModeChange,
 }: HeaderProps) => {
-  const [ttsLang, setTtsLang] = useTtsLang();
   const t = useT();
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">

@@ -1233,6 +1233,16 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
+            aria-label="Accueil / الرئيسية / Home"
+            onClick={() => window.location.assign('/app')}
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
             aria-label="Ouvrir les commandes"
             onClick={() => setMenuOpen(true)}
             onDoubleClick={() => setShowMenuButton(false)}
