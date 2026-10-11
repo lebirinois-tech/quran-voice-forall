@@ -6,6 +6,7 @@ import { SettingsDialog } from './SettingsDialog';
 import { ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize, VerseViewMode } from '@/hooks/useAppSettings';
 import { useTtsLang } from '@/hooks/useTtsLang';
+import { useT } from '@/lib/i18n';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -45,6 +46,7 @@ export const Header = ({
   onVerseViewModeChange,
 }: HeaderProps) => {
   const [ttsLang, setTtsLang] = useTtsLang();
+  const t = useT();
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
       <div className="container mx-auto px-4 py-4">
@@ -57,7 +59,7 @@ export const Header = ({
                 size="icon"
                 onClick={onBack}
                 className="text-primary-foreground hover:bg-primary-foreground/10"
-                aria-label="Retour à l'accueil"
+                aria-label={t('backHome')}
               >
                 <Home className="h-5 w-5" />
               </Button>
@@ -69,10 +71,10 @@ export const Header = ({
             
             <div>
               <h1 className="text-lg md:text-xl font-bold text-primary-foreground">
-                Quran Accès Pour Tous
+                {t('appTitle')}
               </h1>
               <p className="text-xs text-primary-foreground/70 hidden sm:block">
-                Le Coran accessible à tous
+                {t('appSubtitle')}
               </p>
             </div>
           </div>
@@ -85,7 +87,7 @@ export const Header = ({
               <Select value={ttsLang} onValueChange={(v) => setTtsLang(v as 'fr' | 'en')}>
                 <SelectTrigger
                   className="h-7 w-[110px] border-0 bg-transparent text-primary-foreground text-xs focus:ring-0 focus:ring-offset-0"
-                  aria-label="Langue de lecture"
+                  aria-label={t('readingLang')}
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -100,7 +102,7 @@ export const Header = ({
               <Select value={ttsLang} onValueChange={(v) => setTtsLang(v as 'fr' | 'en')}>
                 <SelectTrigger
                   className="h-9 w-[70px] bg-primary-foreground/10 border-0 text-primary-foreground text-xs"
-                  aria-label="Langue de lecture"
+                  aria-label={t('readingLang')}
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -133,7 +135,7 @@ export const Header = ({
                   "text-primary-foreground hover:bg-primary-foreground/10",
                   isContinuousMode && "bg-primary-foreground/20 ring-2 ring-primary-foreground/50"
                 )}
-                aria-label={isContinuousMode ? "Désactiver le mode mains libres" : "Activer le mode mains libres"}
+                aria-label={isContinuousMode ? t('handsFreeOff') : t('handsFreeOn')}
                 aria-pressed={isContinuousMode}
               >
                 {isContinuousMode ? (
@@ -151,7 +153,7 @@ export const Header = ({
                 "text-primary-foreground hover:bg-primary-foreground/10",
                 isAccessibilityMode && "bg-primary-foreground/20"
               )}
-              aria-label="Mode accessibilité"
+              aria-label={t('accessibilityMode')}
               aria-pressed={isAccessibilityMode}
             >
               <Accessibility className="h-5 w-5" />

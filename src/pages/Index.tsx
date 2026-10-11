@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apkDownloadUrl } from '@/lib/apkDownload';
 import { ipaDownloadUrl } from '@/lib/ipaDownload';
+import { useT } from '@/lib/i18n';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const Index = () => {
   const [juzNumber, setJuzNumber] = useState('');
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const appSettings = useAppSettings();
+  const t = useT();
   const { user, isAuthenticated, signOut, loading: authLoading } = useAuth();
   const { fetchProgress, getLastRead, progress } = useReadingProgress();
   const { isChecking, checkForUpdate } = useUpdateCheck();
@@ -40,9 +42,9 @@ const Index = () => {
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
-      toast.error('Erreur lors de la déconnexion');
+      toast.error(t('logoutError'));
     } else {
-      toast.success('Déconnexion réussie');
+      toast.success(t('logoutSuccess'));
     }
   };
 
@@ -51,12 +53,12 @@ const Index = () => {
 
   const handleNavigateToSurah = (surahNumber: number) => {
     navigate(`/surah/${surahNumber}`);
-    toast.success(`Ouverture de la sourate ${surahNumber}`);
+    toast.success(`${t('openSurah')} ${surahNumber}`);
   };
 
   const handleNavigateToPage = (pageNum: number) => {
     if (pageNum < 1 || pageNum > 604) {
-      toast.error('Numéro de page invalide (1-604)');
+      toast.error(t('invalidPage'));
       return;
     }
     
@@ -75,16 +77,16 @@ const Index = () => {
     }
     
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
-    toast.success(`Navigation vers page ${pageNum} (Sourate ${targetSurah})`);
+    toast.success(`${t('navToPage')} ${pageNum} (${t('surahs')} ${targetSurah})`);
   };
 
   const handleNavigateToJuz = (juzNum: number) => {
     const juz = juzMapping[juzNum];
     if (juz) {
       navigate(`/surah/${juz.surah}`);
-      toast.success(`Navigation vers Juz ${juzNum} - ${juz.name}`);
+      toast.success(`${t('navToJuz')} ${juzNum} - ${juz.name}`);
     } else {
-      toast.error('Numéro de Juz invalide (1-30)');
+      toast.error(t('invalidJuz'));
     }
   };
 
@@ -125,7 +127,7 @@ const Index = () => {
           <Link to="/reset">
             <Button variant="outline" size="sm" className="gap-2">
               <RotateCcw className="h-4 w-4" />
-              Réinitialiser
+              {t('reset')}
             </Button>
           </Link>
           {authLoading ? (
@@ -138,14 +140,14 @@ const Index = () => {
               </span>
               <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
                 <LogOut className="h-4 w-4" />
-                Déconnexion
+                {t('logout')}
               </Button>
             </div>
           ) : (
             <Link to="/auth">
               <Button variant="default" size="sm" className="gap-2">
                 <LogIn className="h-4 w-4" />
-                Connexion
+                {t('login')}
               </Button>
             </Link>
           )}
@@ -161,9 +163,9 @@ const Index = () => {
                     <History className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Reprendre la lecture</p>
+                    <p className="text-sm text-muted-foreground">{t('resumeReading')}</p>
                     <p className="font-semibold text-foreground">
-                      {lastReadSurah.name} - Verset {lastRead.verse_number}
+                      {lastReadSurah.name} - {t('verse')} {lastRead.verse_number}
                     </p>
                   </div>
                 </div>
@@ -171,7 +173,7 @@ const Index = () => {
                   onClick={() => navigate(`/surah/${lastRead.surah_number}?verse=${lastRead.verse_number}`)}
                   size="sm"
                 >
-                  Continuer
+                  {t('continue')}
                 </Button>
               </div>
             </div>
@@ -184,10 +186,10 @@ const Index = () => {
             <BookOpen className="h-12 w-12 text-primary" />
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            Bienvenue dans le Saint Coran
+            {t('welcome')}
           </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Lisez, écoutez et mémorisez le Coran avec des commandes vocales pour une accessibilité totale
+          <p dir={t.lang === 'ar' ? 'rtl' : 'ltr'} className="text-muted-foreground max-w-md mx-auto">
+            {t('welcomeSub')}
           </p>
         </section>
 
@@ -196,7 +198,7 @@ const Index = () => {
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
             <h3 className="text-lg font-semibold text-foreground mb-4 text-center flex items-center justify-center gap-2">
               <Download className="h-5 w-5 text-primary" />
-              <span>Installer l'application <span className="text-sm font-normal text-muted-foreground">/ تثبيت التطبيق</span></span>
+              <span>{t('installApp')} <span className="text-sm font-normal text-muted-foreground">/ {t.alt('installApp')}</span></span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* PWA Install */}
@@ -205,7 +207,7 @@ const Index = () => {
                   <Smartphone className="h-6 w-6 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground text-sm">PWA / Site</p>
-                    <p className="text-xs text-muted-foreground">Installer sur téléphone</p>
+                    <p className="text-xs text-muted-foreground">{t('installOnPhone')}</p>
                   </div>
                 </div>
               </Link>
@@ -215,7 +217,7 @@ const Index = () => {
                   <Download className="h-6 w-6 text-secondary" />
                   <div>
                     <p className="font-semibold text-foreground text-sm">Android APK</p>
-                    <p className="text-xs text-muted-foreground">Télécharger l'APK</p>
+                    <p className="text-xs text-muted-foreground">{t('downloadApk')}</p>
                   </div>
                 </div>
               </a>
@@ -225,13 +227,13 @@ const Index = () => {
                   <Apple className="h-6 w-6 text-accent" />
                   <div>
                     <p className="font-semibold text-foreground text-sm">iOS IPA</p>
-                    <p className="text-xs text-muted-foreground">IPA non signé</p>
+                    <p className="text-xs text-muted-foreground">{t('unsignedIpa')}</p>
                   </div>
                 </div>
               </a>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">
-              L'APK s'installe directement sur Android. L'IPA nécessite une signature Apple Developer pour un iPhone physique.
+            <p dir={t.lang === 'ar' ? 'rtl' : 'ltr'} className="text-xs text-muted-foreground text-center mt-3">
+              {t('installNote')}
             </p>
           </div>
         </section>
@@ -261,7 +263,7 @@ const Index = () => {
               aria-pressed={!appSettings.textDisplayStyle.startsWith('pages-')}
             >
               <FileText className="h-4 w-4" />
-              <span>Versets <span className="opacity-70 text-xs">/ آيات</span></span>
+              <span>{t('verses')} <span className="opacity-70 text-xs">/ {t.alt('verses')}</span></span>
             </button>
             <button
               type="button"
@@ -283,7 +285,7 @@ const Index = () => {
               aria-pressed={appSettings.textDisplayStyle.startsWith('pages-')}
             >
               <BookOpen className="h-4 w-4" />
-              <span>Pages <span className="opacity-70 text-xs">/ صفحات</span></span>
+              <span>{t('pages')} <span className="opacity-70 text-xs">/ {t.alt('pages')}</span></span>
             </button>
           </div>
 
@@ -318,7 +320,7 @@ const Index = () => {
           </div>
 
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Choisissez le mode d'affichage et la riwaya (Tajweed coloré dans les trois lectures)
+            {t('chooseMode')}
           </p>
         </section>
 
@@ -336,7 +338,7 @@ const Index = () => {
           
           {!voiceCommands.isSupported && (
             <p className="text-sm text-muted-foreground text-center">
-              Les commandes vocales ne sont pas supportées par votre navigateur
+              {t('voiceNotSupported')}
             </p>
           )}
         </section>
@@ -348,7 +350,7 @@ const Index = () => {
             <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">Aller à la page</span>
+                <span className="text-sm font-medium text-foreground">{t('goToPage')}</span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -359,7 +361,7 @@ const Index = () => {
                   value={pageNumber}
                   onChange={(e) => setPageNumber(e.target.value)}
                   className="h-10 text-base bg-background"
-                  aria-label="Numéro de page"
+                  aria-label={t('pageNumber')}
                 />
                 <Button 
                   onClick={() => {
@@ -369,7 +371,7 @@ const Index = () => {
                   size="sm"
                   className="px-4"
                 >
-                  Go
+                  {t('go')}
                 </Button>
               </div>
             </div>
@@ -378,7 +380,7 @@ const Index = () => {
             <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Layers className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">Aller au Juz</span>
+                <span className="text-sm font-medium text-foreground">{t('goToJuz')}</span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -389,7 +391,7 @@ const Index = () => {
                   value={juzNumber}
                   onChange={(e) => setJuzNumber(e.target.value)}
                   className="h-10 text-base bg-background"
-                  aria-label="Numéro de Juz"
+                  aria-label={t('juzNumber')}
                 />
                 <Button 
                   onClick={() => {
@@ -399,7 +401,7 @@ const Index = () => {
                   size="sm"
                   className="px-4"
                 >
-                  Go
+                  {t('go')}
                 </Button>
               </div>
             </div>
@@ -412,11 +414,11 @@ const Index = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Rechercher une sourate..."
+              placeholder={t('searchSurah')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12 text-base bg-card border-border focus-accessible"
-              aria-label="Rechercher une sourate"
+              aria-label={t('searchSurah')}
             />
           </div>
         </section>
@@ -425,22 +427,22 @@ const Index = () => {
         <section className="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto animate-fade-in" style={{ animationDelay: '0.15s' }}>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
             <p className="text-2xl font-bold text-primary">114</p>
-            <p className="text-xs text-muted-foreground">Sourates</p>
+            <p className="text-xs text-muted-foreground">{t('surahs')}</p>
           </div>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
             <p className="text-2xl font-bold text-secondary">6236</p>
-            <p className="text-xs text-muted-foreground">Versets</p>
+            <p className="text-xs text-muted-foreground">{t('verses')}</p>
           </div>
           <div className="text-center p-4 bg-card rounded-xl border border-border">
             <p className="text-2xl font-bold text-primary">604</p>
-            <p className="text-xs text-muted-foreground">Pages</p>
+            <p className="text-xs text-muted-foreground">{t('pages')}</p>
           </div>
         </section>
 
         {/* Surah List */}
         <section className="mb-8">
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <span className="gold-underline">Liste des Sourates</span>
+            <span className="gold-underline">{t('surahList')}</span>
             <span className="text-sm font-normal text-muted-foreground">
               ({filteredSurahs.length})
             </span>
@@ -463,7 +465,7 @@ const Index = () => {
 
           {filteredSurahs.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Aucune sourate trouvée</p>
+              <p className="text-muted-foreground">{t('noSurahFound')}</p>
             </div>
           )}
         </section>
@@ -482,21 +484,21 @@ const Index = () => {
             <Link to="/audio-library">
               <Button variant="outline" className="gap-2">
                 <Music className="h-4 w-4" />
-                Bibliothèque Audio
+                {t('audioLibrary')}
               </Button>
             </Link>
             {/* Install Button */}
             <Link to="/install">
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                Installer l'application
+                {t('installApp')}
               </Button>
             </Link>
             {/* APK Download Button */}
             <Button asChild variant="secondary" className="gap-2">
               <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer">
                 <Download className="h-4 w-4" />
-                Télécharger l'APK
+                {t('downloadApk')}
               </a>
             </Button>
             {/* Update Check Button */}
@@ -507,13 +509,13 @@ const Index = () => {
               disabled={isChecking}
             >
               <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
-              {isChecking ? 'Vérification...' : 'Rechercher une mise à jour'}
+              {isChecking ? t('checking') : t('updateCheck')}
             </Button>
             {/* Reset Button */}
             <Link to="/reset">
               <Button variant="outline" className="gap-2">
                 <RotateCcw className="h-4 w-4" />
-                Réinitialiser l'application
+                {t('resetApp')}
               </Button>
             </Link>
           </div>
@@ -521,10 +523,10 @@ const Index = () => {
           <BuildVersionBadge className="mb-4" />
 
           <p className="text-sm text-muted-foreground">
-            Quran Accès Pour Tous © {new Date().getFullYear()}
+            {t('appTitle')} © {new Date().getFullYear()}
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
-            Le Saint Coran accessible à tous
+            {t('appSubtitle')}
           </p>
         </div>
       </footer>

@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { cn } from '@/lib/utils';
 import type { VoiceLang } from '@/hooks/useVoiceCommands';
+import { useT } from '@/lib/i18n';
 
 interface VoiceCommandButtonProps {
   isListening: boolean;
@@ -27,6 +28,7 @@ export const VoiceCommandButton = ({
   onLangChange,
   className,
 }: VoiceCommandButtonProps) => {
+  const t = useT();
   if (!isSupported) return null;
 
   return (
@@ -58,7 +60,7 @@ export const VoiceCommandButton = ({
             "rounded-full transition-all duration-300",
             isListening && "voice-pulse bg-secondary"
           )}
-          aria-label={isListening ? "Arrêter l'écoute" : "Activer la commande vocale"}
+          aria-label={isListening ? t('stopListening') : t('startVoiceCommand')}
         >
           {isListening ? (
             <Mic className="h-6 w-6 animate-pulse" />
