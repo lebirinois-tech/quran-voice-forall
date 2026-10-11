@@ -26,6 +26,9 @@ export const useAppLang = (): AppLang => {
     window.addEventListener(EVENT, handler);
     return () => window.removeEventListener(EVENT, handler);
   }, []);
+  useEffect(() => {
+    if (typeof document !== 'undefined') document.documentElement.lang = lang;
+  }, [lang]);
   return lang;
 };
 
@@ -209,12 +212,29 @@ const dict: Dict = {
     ar: 'تطبيق متاح للجميع',
     en: 'An accessible app for everyone',
   },
+  // Footer / misc
+  go: { fr: 'Aller', ar: 'اذهب', en: 'Go' },
+  updateCheck: { fr: 'Rechercher une mise à jour', ar: 'التحقق من التحديثات', en: 'Check for updates' },
+  checking: { fr: 'Vérification...', ar: 'جارٍ التحقق...', en: 'Checking...' },
+  resetApp: { fr: "Réinitialiser l'application", ar: 'إعادة تعيين التطبيق', en: 'Reset the app' },
+  toggleTheme: { fr: 'Changer de thème', ar: 'تغيير السمة', en: 'Toggle theme' },
 };
 
 export const translate = (key: keyof typeof dict, lang: AppLang): string =>
   dict[key]?.[lang] ?? dict[key]?.fr ?? key;
 
-export const useT = () => {
+export const translateAlt = (key: string, lang: AppLang): string =>
+  lang === 'ar' ? dict[key]?.en ?? '' : dict[key]?.ar ?? '';
+
+export type TFunc = ((key: string) => string) & {
+  alt: (key: string) => string;
+  lang: AppLang;
+};
+
+export const useT = (): TFunc => {
   const lang = useAppLang();
-  return (key: keyof typeof dict) => translate(key, lang);
+  const t = ((key: string) => translate(key, lang)) as TFunc;
+  t.alt = (key: string) => translateAlt(key, lang);
+  t.lang = lang;
+  return t;
 };
