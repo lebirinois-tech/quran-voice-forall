@@ -1,10 +1,12 @@
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun } from 'lucide-react';
+import { Download, Smartphone, Monitor, Apple, BookOpen, Mic, Volume2, Moon, Sun, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { SettingsDialog } from '@/components/SettingsDialog';
+import { AppLangSwitcher } from '@/components/AppLangSwitcher';
+import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useT } from '@/lib/i18n';
 
@@ -13,6 +15,7 @@ const Landing = () => {
   const { theme, setTheme } = useTheme();
   const appSettings = useAppSettings();
   const t = useT();
+  const { isChecking, checkForUpdate } = useUpdateCheck();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
 
   // Sur l'APK natif (Capacitor) ou en mode standalone installé, on ouvre
@@ -52,17 +55,31 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed top-4 left-4 z-50 rounded-full bg-gradient-islamic shadow-lg">
-        <SettingsDialog
-          reciter={appSettings.reciter}
-          onReciterChange={appSettings.onReciterChange}
-          backgroundColor={appSettings.backgroundColor}
-          onBackgroundColorChange={appSettings.onBackgroundColorChange}
-          textDisplayStyle={appSettings.textDisplayStyle}
-          onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
-          fontSize={appSettings.fontSize}
-          onFontSizeChange={appSettings.onFontSizeChange}
-        />
+      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
+        <div className="rounded-full bg-gradient-islamic shadow-lg">
+          <SettingsDialog
+            reciter={appSettings.reciter}
+            onReciterChange={appSettings.onReciterChange}
+            backgroundColor={appSettings.backgroundColor}
+            onBackgroundColorChange={appSettings.onBackgroundColorChange}
+            textDisplayStyle={appSettings.textDisplayStyle}
+            onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+            fontSize={appSettings.fontSize}
+            onFontSizeChange={appSettings.onFontSizeChange}
+          />
+        </div>
+        <AppLangSwitcher className="bg-card border border-border shadow-lg text-foreground" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={checkForUpdate}
+          disabled={isChecking}
+          className="gap-1 rounded-full shadow-lg"
+          aria-label={t('updateCheck')}
+        >
+          <RefreshCw className={isChecking ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+          <span className="hidden sm:inline">{t('updateCheck')}</span>
+        </Button>
       </div>
       {/* Theme Toggle */}
       <button

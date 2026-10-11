@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
@@ -1228,6 +1228,16 @@ export const HafsTajweedPageView = ({
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Accueil / الرئيسية / Home"
+            onClick={() => window.location.assign('/app')}
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
+          >
+            <Home className="h-5 w-5" />
           </Button>
           <Button
             type="button"

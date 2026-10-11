@@ -1,12 +1,11 @@
-import { BookOpen, Home, Accessibility, Radio, Podcast, Languages } from 'lucide-react';
+import { Home, Accessibility, Radio, Podcast } from 'lucide-react';
 import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from './SettingsDialog';
 import { ReciterId } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize, VerseViewMode } from '@/hooks/useAppSettings';
-import { useTtsLang } from '@/hooks/useTtsLang';
 import { useT } from '@/lib/i18n';
+import { AppLangSwitcher } from './AppLangSwitcher';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -45,7 +44,6 @@ export const Header = ({
   verseViewMode = 'scroll',
   onVerseViewModeChange,
 }: HeaderProps) => {
-  const [ttsLang, setTtsLang] = useTtsLang();
   const t = useT();
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
@@ -53,21 +51,15 @@ export const Header = ({
         <div className="flex items-center justify-between">
           {/* Left side */}
           <div className="flex items-center gap-3">
-            {showBackButton ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="text-primary-foreground hover:bg-primary-foreground/10"
-                aria-label={t('backHome')}
-              >
-                <Home className="h-5 w-5" />
-              </Button>
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-primary-foreground" />
-              </div>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onBack ?? (() => window.location.assign('/'))}
+              className="text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-full"
+              aria-label={t('backHome')}
+            >
+              <Home className="h-5 w-5" />
+            </Button>
             
             <div>
               <h1 className="text-lg md:text-xl font-bold text-primary-foreground">
@@ -81,37 +73,7 @@ export const Header = ({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* TTS Language Selector */}
-            <div className="hidden sm:flex items-center gap-1 bg-primary-foreground/10 rounded-full px-2 py-1">
-              <Languages className="h-4 w-4 text-primary-foreground" />
-              <Select value={ttsLang} onValueChange={(v) => setTtsLang(v as 'fr' | 'en')}>
-                <SelectTrigger
-                  className="h-7 w-[110px] border-0 bg-transparent text-primary-foreground text-xs focus:ring-0 focus:ring-offset-0"
-                  aria-label={t('readingLang')}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                  <SelectItem value="en">🇬🇧 English</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Mobile: compact selector */}
-            <div className="sm:hidden">
-              <Select value={ttsLang} onValueChange={(v) => setTtsLang(v as 'fr' | 'en')}>
-                <SelectTrigger
-                  className="h-9 w-[70px] bg-primary-foreground/10 border-0 text-primary-foreground text-xs"
-                  aria-label={t('readingLang')}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fr">🇫🇷 FR</SelectItem>
-                  <SelectItem value="en">🇬🇧 EN</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <AppLangSwitcher className="bg-primary-foreground/10 text-primary-foreground" />
             {onReciterChange && onBackgroundColorChange && onTextDisplayStyleChange && onFontSizeChange && (
               <SettingsDialog
                 reciter={reciter}
