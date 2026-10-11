@@ -484,21 +484,21 @@ const Index = () => {
             <Link to="/audio-library">
               <Button variant="outline" className="gap-2">
                 <Music className="h-4 w-4" />
-                Bibliothèque Audio
+                {t('audioLibrary')}
               </Button>
             </Link>
             {/* Install Button */}
             <Link to="/install">
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                Installer l'application
+                {t('installApp')}
               </Button>
             </Link>
             {/* APK Download Button */}
             <Button asChild variant="secondary" className="gap-2">
               <a href={apkDownloadUrl} target="_blank" rel="noopener noreferrer">
                 <Download className="h-4 w-4" />
-                Télécharger l'APK
+                {t('downloadApk')}
               </a>
             </Button>
             {/* Update Check Button */}
@@ -509,13 +509,13 @@ const Index = () => {
               disabled={isChecking}
             >
               <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
-              {isChecking ? 'Vérification...' : 'Rechercher une mise à jour'}
+              {isChecking ? t('checking') : t('updateCheck')}
             </Button>
             {/* Reset Button */}
             <Link to="/reset">
               <Button variant="outline" className="gap-2">
                 <RotateCcw className="h-4 w-4" />
-                Réinitialiser l'application
+                {t('resetApp')}
               </Button>
             </Link>
           </div>
@@ -523,7 +523,7 @@ const Index = () => {
           <BuildVersionBadge className="mb-4" />
 
           <p className="text-sm text-muted-foreground">
-            Quran Accès Pour Tous © {new Date().getFullYear()}
+            {t('appTitle')} © {new Date().getFullYear()}
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
             Le Saint Coran accessible à tous
