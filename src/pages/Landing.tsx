@@ -6,11 +6,13 @@ import { useEffect } from 'react';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { useT } from '@/lib/i18n';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const appSettings = useAppSettings();
+  const t = useT();
   const { deferredPrompt, isInstalled, install } = usePwaInstall();
 
   // Sur l'APK natif (Capacitor) ou en mode standalone installé, on ouvre
@@ -43,24 +45,9 @@ const Landing = () => {
   };
 
   const features = [
-    {
-      icon: BookOpen,
-      title: 'Coran Complet',
-      titleAr: 'القرآن الكامل',
-      description: '114 sourates avec texte arabe et traduction française'
-    },
-    {
-      icon: Mic,
-      title: 'Commandes Vocales',
-      titleAr: 'الأوامر الصوتية',
-      description: 'Navigation mains-libres pour une accessibilité totale'
-    },
-    {
-      icon: Volume2,
-      title: 'Récitation Audio',
-      titleAr: 'التلاوة الصوتية',
-      description: 'Écoutez les récitations par des récitateurs renommés'
-    }
+    { icon: BookOpen, k: 'featQuran' as const, dk: 'featQuranDesc' as const },
+    { icon: Mic, k: 'featVoice' as const, dk: 'featVoiceDesc' as const },
+    { icon: Volume2, k: 'featAudio' as const, dk: 'featAudioDesc' as const },
   ];
 
   return (
@@ -81,7 +68,7 @@ const Landing = () => {
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         className="fixed top-4 right-4 z-50 p-2 rounded-full bg-card border border-border shadow-lg"
-        aria-label="Toggle theme"
+        aria-label={t('toggleTheme')}
       >
         {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
       </button>
@@ -94,13 +81,13 @@ const Landing = () => {
             <div className="w-28 h-28 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl border-4 border-primary/20 animate-scale-in">
               <img
                 src="/pwa-512x512.png" 
-                alt="Apprenons le Coran" 
+                alt={t('landingTitle')} 
                 className="w-full h-full object-cover"
               />
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-in">
-              Apprenons le Coran
+              {t('landingTitle')}
             </h1>
             
             <p className="text-2xl md:text-3xl font-arabic text-primary mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -108,8 +95,7 @@ const Landing = () => {
             </p>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Application coranique accessible avec commandes vocales, 
-              récitation audio et mode hors-ligne.
+              {t('landingTagline')}
             </p>
 
             {/* CTA Buttons */}
@@ -121,7 +107,7 @@ const Landing = () => {
                   className="gap-2 text-lg px-8 py-6"
                 >
                   <BookOpen className="h-5 w-5" />
-                  Ouvrir l'Application
+                  {t('openApp')}
                 </Button>
               ) : (
                 <>
@@ -131,7 +117,7 @@ const Landing = () => {
                     className="gap-2 text-lg px-8 py-6 shadow-lg"
                   >
                     <Download className="h-5 w-5" />
-                    Installer Gratuitement
+                    {t('installFree')}
                   </Button>
                   <Button 
                     onClick={openApp}
@@ -139,7 +125,7 @@ const Landing = () => {
                     size="lg" 
                     className="gap-2 text-lg px-8 py-6"
                   >
-                    Essayer en Ligne
+                    {t('tryOnline')}
                   </Button>
                 </>
               )}
@@ -165,7 +151,7 @@ const Landing = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
-            Fonctionnalités
+            {t('features')}
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -178,9 +164,9 @@ const Landing = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-1">{feature.title}</h3>
-                <p className="text-primary font-arabic mb-3">{feature.titleAr}</p>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-foreground mb-1">{t(feature.k)}</h3>
+                <p className="text-primary font-arabic mb-3">{t.alt(feature.k)}</p>
+                <p className="text-muted-foreground">{t(feature.dk)}</p>
               </div>
             ))}
           </div>
@@ -191,10 +177,10 @@ const Landing = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-4">
-            Télécharger l'Application
+            {t('downloadApp')}
           </h2>
           <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-            Installez l'application sur votre appareil pour un accès rapide et hors-ligne
+            {t('downloadAppSub')}
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -205,22 +191,22 @@ const Landing = () => {
                   <Monitor className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Ordinateur</h3>
+                  <h3 className="font-semibold text-foreground">{t('computer')}</h3>
                   <p className="text-sm text-muted-foreground">Windows / Mac / Linux</p>
                 </div>
               </div>
               <ol className="space-y-2 text-sm text-foreground mb-4">
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                  <span>Ouvrez Chrome ou Edge</span>
+                  <span>{t('stepOpenChrome')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                  <span>Cliquez sur l'icône d'installation ⬇️</span>
+                  <span>{t('stepClickInstall')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                  <span>Confirmez "Installer"</span>
+                  <span>{t('stepConfirmInstall')}</span>
                 </li>
               </ol>
               <Button 
@@ -228,7 +214,7 @@ const Landing = () => {
                 variant="outline" 
                 className="w-full"
               >
-                Instructions détaillées
+                {t('detailedInstructions')}
               </Button>
             </div>
 
@@ -246,15 +232,15 @@ const Landing = () => {
               <ol className="space-y-2 text-sm text-foreground mb-4">
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                  <span>Ouvrez le menu ⋮</span>
+                  <span>{t('stepOpenMenu')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                  <span>"Installer l'application"</span>
+                  <span>{t('stepInstallApp')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                  <span>Confirmez "Installer"</span>
+                  <span>{t('stepConfirmInstall')}</span>
                 </li>
               </ol>
               <Button 
@@ -262,7 +248,7 @@ const Landing = () => {
                 className="w-full gap-2"
               >
                 <Download className="h-4 w-4" />
-                Installer
+                {t('install')}
               </Button>
             </div>
 
@@ -280,15 +266,15 @@ const Landing = () => {
               <ol className="space-y-2 text-sm text-foreground mb-4">
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                  <span>Appuyez sur Partager ↗</span>
+                  <span>{t('stepShare')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                  <span>"Sur l'écran d'accueil"</span>
+                  <span>{t('stepHomeScreen')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                  <span>Appuyez "Ajouter"</span>
+                  <span>{t('stepAdd')}</span>
                 </li>
               </ol>
               <Button 
@@ -296,7 +282,7 @@ const Landing = () => {
                 variant="outline" 
                 className="w-full"
               >
-                Instructions détaillées
+                {t('detailedInstructions')}
               </Button>
             </div>
           </div>
@@ -309,19 +295,19 @@ const Landing = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto text-center">
             <div>
               <span className="text-2xl">📴</span>
-              <p className="text-sm font-medium text-foreground mt-2">Mode Hors-ligne</p>
+              <p className="text-sm font-medium text-foreground mt-2">{t('offlineMode')}</p>
             </div>
             <div>
               <span className="text-2xl">⚡</span>
-              <p className="text-sm font-medium text-foreground mt-2">Chargement Rapide</p>
+              <p className="text-sm font-medium text-foreground mt-2">{t('fastLoading')}</p>
             </div>
             <div>
               <span className="text-2xl">🆓</span>
-              <p className="text-sm font-medium text-foreground mt-2">100% Gratuit</p>
+              <p className="text-sm font-medium text-foreground mt-2">{t('free100')}</p>
             </div>
             <div>
               <span className="text-2xl">🔒</span>
-              <p className="text-sm font-medium text-foreground mt-2">Sécurisé</p>
+              <p className="text-sm font-medium text-foreground mt-2">{t('secure')}</p>
             </div>
           </div>
         </div>
@@ -331,7 +317,7 @@ const Landing = () => {
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 Apprenons le Coran - Application accessible pour tous
+            © {new Date().getFullYear()} {t('landingTitle')} - {t('footerRights')}
           </p>
           <p className="text-primary font-arabic mt-2">
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
