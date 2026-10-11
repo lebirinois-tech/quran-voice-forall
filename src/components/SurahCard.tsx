@@ -1,5 +1,6 @@
 import { Surah } from '@/data/surahs';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 
 interface SurahCardProps {
   surah: Surah;
@@ -8,6 +9,7 @@ interface SurahCardProps {
 }
 
 export const SurahCard = ({ surah, onClick, isSelected }: SurahCardProps) => {
+  const t = useT();
   return (
     <button
       onClick={onClick}
@@ -16,7 +18,7 @@ export const SurahCard = ({ surah, onClick, isSelected }: SurahCardProps) => {
         "flex items-center gap-4 text-left transition-all duration-300",
         isSelected && "border-primary bg-primary/5 shadow-soft"
       )}
-      aria-label={`Ouvrir ${surah.name}`}
+      aria-label={`${t('openSurah')} ${surah.name}`}
     >
       {/* Surah Number Badge */}
       <div className="surah-badge w-12 h-14 flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
@@ -39,7 +41,7 @@ export const SurahCard = ({ surah, onClick, isSelected }: SurahCardProps) => {
           </span>
           <span className="text-xs text-muted-foreground/60">•</span>
           <span className="text-xs text-muted-foreground">
-            {surah.versesCount} versets
+            {surah.versesCount} {t('versesUnit')}
           </span>
         </div>
         <span className={cn(
@@ -48,7 +50,7 @@ export const SurahCard = ({ surah, onClick, isSelected }: SurahCardProps) => {
             ? "bg-primary/10 text-primary" 
             : "bg-secondary/20 text-secondary-foreground"
         )}>
-          {surah.revelationType === 'Meccan' ? 'Mecquoise' : 'Médinoise'}
+          {surah.revelationType === 'Meccan' ? t('meccan') : t('medinan')}
         </span>
       </div>
     </button>

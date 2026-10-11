@@ -188,7 +188,7 @@ const Index = () => {
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             {t('welcome')}
           </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
+          <p dir={t.lang === 'ar' ? 'rtl' : 'ltr'} className="text-muted-foreground max-w-md mx-auto">
             {t('welcomeSub')}
           </p>
         </section>
@@ -232,7 +232,7 @@ const Index = () => {
                 </div>
               </a>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">
+            <p dir={t.lang === 'ar' ? 'rtl' : 'ltr'} className="text-xs text-muted-foreground text-center mt-3">
               {t('installNote')}
             </p>
           </div>

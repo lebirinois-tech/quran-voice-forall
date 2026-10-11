@@ -218,6 +218,11 @@ const dict: Dict = {
   checking: { fr: 'Vérification...', ar: 'جارٍ التحقق...', en: 'Checking...' },
   resetApp: { fr: "Réinitialiser l'application", ar: 'إعادة تعيين التطبيق', en: 'Reset the app' },
   toggleTheme: { fr: 'Changer de thème', ar: 'تغيير السمة', en: 'Toggle theme' },
+  versesUnit: { fr: 'versets', ar: 'آية', en: 'verses' },
+  meccan: { fr: 'Mecquoise', ar: 'مكية', en: 'Meccan' },
+  medinan: { fr: 'Médinoise', ar: 'مدنية', en: 'Medinan' },
+  stopListening: { fr: "Arrêter l'écoute", ar: 'إيقاف الاستماع', en: 'Stop listening' },
+  startVoiceCommand: { fr: 'Activer la commande vocale', ar: 'تفعيل الأمر الصوتي', en: 'Enable voice command' },
 };
 
 export const translate = (key: keyof typeof dict, lang: AppLang): string =>
