@@ -526,7 +526,7 @@ const Index = () => {
             {t('appTitle')} © {new Date().getFullYear()}
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
-            Le Saint Coran accessible à tous
+            {t('appSubtitle')}
           </p>
         </div>
       </footer>
