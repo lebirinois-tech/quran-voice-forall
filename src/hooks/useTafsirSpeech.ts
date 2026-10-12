@@ -29,17 +29,15 @@ export function useTafsirSpeech(scope: string) {
     active.current = true;
     setSpeakingLang(lang);
     window.dispatchEvent(new CustomEvent('app:tts-start'));
-    synth.cancel();
-    synth.resume();
     try {
       const voices = await loadTafsirVoices(synth);
       if (session.current !== id) return;
       const voice = selectTafsirVoice(voices, lang);
-      // Never read Arabic using the device's French/English default voice.
+      // Prefer an Arabic voice, but never stay silent: some devices expose
+      // Arabic TTS without listing it in getVoices(), so speak anyway with
+      // the ar-SA locale and let the engine pick its Arabic voice.
       if (lang === 'ar' && !voice) {
-        toast.error('لا يتوفر صوت عربي على هذا الجهاز. يرجى تثبيت صوت عربي من إعدادات تحويل النص إلى كلام.');
-        finish();
-        return;
+        toast.info('سيُقرأ التفسير بالصوت الافتراضي للجهاز. لصوت عربي أفضل، ثبّت صوتًا عربيًا من إعدادات تحويل النص إلى كلام.');
       }
       const chunks = splitTafsirSpeech(text);
       let index = 0;
