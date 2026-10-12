@@ -61,11 +61,11 @@ export const Header = ({
               <Home className="h-5 w-5" />
             </Button>
             
-            <div>
-              <h1 className="text-lg md:text-xl font-bold text-primary-foreground">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg md:text-xl font-bold text-primary-foreground whitespace-nowrap leading-tight">
                 {t('appTitle')}
               </h1>
-              <p className="text-xs text-primary-foreground/70 hidden sm:block">
+              <p className="text-[10px] sm:text-xs text-primary-foreground/70 hidden md:block whitespace-nowrap">
                 {t('appSubtitle')}
               </p>
             </div>
