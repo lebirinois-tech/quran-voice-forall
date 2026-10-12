@@ -1,6 +1,7 @@
 # Feuille de route
 
 ## En cours
+- Améliorer la lecture arabe du Tafsir en vue Versets : voix arabe dédiée, préférence masculine et pauses conservées ; vérifier les trois lecteurs de Tafsir.
 - Corriger uniquement le coloriage Warsh/Qaloun signalé sur les deuxième et quatrième pages d’Al-Baqara ; contrôler les correspondances thématiques sur toutes les sourates, sans toucher à la mise en page.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
