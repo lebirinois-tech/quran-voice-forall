@@ -54,13 +54,6 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     }
   }, [isOpen, surahNumber, verseNumber]);
 
-  // Stop speech when panel closes
-  useEffect(() => {
-    if (!isOpen && speakingLang) {
-      stopSpeaking();
-    }
-  }, [isOpen]);
-
   const fetchTafsir = async () => {
     setIsLoading(true);
     setError(null);
