@@ -123,40 +123,17 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-6">
         {/* Auth Section */}
-        <section className="mb-6 flex items-center justify-between gap-3 animate-fade-in">
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="default" size="sm" className="gap-2" onClick={checkForUpdate} disabled={isChecking}>
-              <RefreshCw className={cn('h-4 w-4', isChecking && 'animate-spin')} />
-              {isChecking ? t('checking') : t('updateCheck')}
+        <section className="mb-6 flex items-center justify-center gap-2 animate-fade-in">
+          <Button variant="default" size="sm" className="gap-2" onClick={checkForUpdate} disabled={isChecking}>
+            <RefreshCw className={cn('h-4 w-4', isChecking && 'animate-spin')} />
+            {isChecking ? t('checking') : t('updateCheck')}
+          </Button>
+          <Link to="/reset">
+            <Button variant="outline" size="sm" className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              {t('reset')}
             </Button>
-            <Link to="/reset">
-              <Button variant="outline" size="sm" className="gap-2">
-                <RotateCcw className="h-4 w-4" />
-                {t('reset')}
-              </Button>
-            </Link>
-          </div>
-          {authLoading ? (
-            <div className="h-10 w-24 bg-muted animate-pulse rounded-lg" />
-          ) : isAuthenticated ? (
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="text-sm text-muted-foreground flex min-w-0 items-center gap-2 truncate">
-                <User className="h-4 w-4" />
-                {user?.email?.split('@')[0]}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                {t('logout')}
-              </Button>
-            </div>
-          ) : (
-            <Link to="/auth">
-              <Button variant="default" size="sm" className="gap-2">
-                <LogIn className="h-4 w-4" />
-                {t('login')}
-              </Button>
-            </Link>
-          )}
+          </Link>
         </section>
 
         {/* Continue Reading Section */}
