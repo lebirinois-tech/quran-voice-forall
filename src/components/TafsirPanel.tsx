@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, Volume2, VolumeX, Loader2, ChevronDown, ChevronUp, Languages } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -6,6 +6,7 @@ import { getCachedTafsir, saveTafsirToCache } from '@/hooks/useTafsirCache';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getOfflineTafsir } from '@/lib/offlineTafsir';
+import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
 
 interface TafsirPanelProps {
   surahNumber: number;
@@ -42,23 +43,9 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
   const [translatingFr, setTranslatingFr] = useState(false);
   const [translatingEn, setTranslatingEn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [speakingLang, setSpeakingLang] = useState<'ar' | 'fr' | 'en' | null>(null);
+  const { speakingLang, toggle } = useTafsirSpeech(`${surahNumber}:${verseNumber}:${isOpen}`);
+  const toggleSpeech = (lang: 'ar' | 'fr' | 'en', text: string | null) => { if (text) void toggle(lang, text); };
   const [error, setError] = useState<string | null>(null);
-
-  const speakSessionIdRef = useRef(0);
-  const ttsActiveRef = useRef(false);
-
-  const notifyTtsStart = useCallback(() => {
-    if (ttsActiveRef.current) return;
-    ttsActiveRef.current = true;
-    window.dispatchEvent(new CustomEvent('app:tts-start'));
-  }, []);
-
-  const notifyTtsEnd = useCallback(() => {
-    if (!ttsActiveRef.current) return;
-    ttsActiveRef.current = false;
-    window.dispatchEvent(new CustomEvent('app:tts-end'));
-  }, []);
 
   // Fetch Tafsir when panel opens
   useEffect(() => {
@@ -152,100 +139,6 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
     } finally {
       setLoading(false);
     }
-  };
-
-  const speakTafsir = useCallback(async (lang: 'ar' | 'fr' | 'en', textToSpeak: string) => {
-    if (!textToSpeak || !('speechSynthesis' in window)) return;
-
-    const sessionId = ++speakSessionIdRef.current;
-
-    const ensureVoices = async (): Promise<SpeechSynthesisVoice[]> => {
-      const synth = window.speechSynthesis;
-      const initial = synth.getVoices();
-      if (initial.length > 0) return initial;
-
-      return await new Promise((resolve) => {
-        const prev = synth.onvoiceschanged;
-        const done = () => {
-          const v = synth.getVoices();
-          synth.onvoiceschanged = prev ?? null;
-          resolve(v);
-        };
-        synth.onvoiceschanged = () => { done(); };
-        setTimeout(done, 800);
-      });
-    };
-
-    const splitText = (text: string, maxLen = 220) => {
-      const cleaned = text.replace(/\s+/g, ' ').trim();
-      if (cleaned.length <= maxLen) return [cleaned];
-
-      const parts = cleaned.split(/(?<=[\.!؟\?؛،])\s+/).map((s) => s.trim()).filter(Boolean);
-      const chunks: string[] = [];
-      let buf = '';
-      for (const p of parts) {
-        if (!buf) { buf = p; continue; }
-        if ((buf + ' ' + p).length <= maxLen) { buf = buf + ' ' + p; }
-        else { chunks.push(buf); buf = p; }
-      }
-      if (buf) chunks.push(buf);
-      return chunks.length ? chunks : [cleaned];
-    };
-
-    try {
-      const synth = window.speechSynthesis;
-      notifyTtsStart();
-      synth.cancel();
-      synth.resume();
-      await new Promise((r) => setTimeout(r, 350));
-
-      const voices = await ensureVoices();
-      if (sessionId !== speakSessionIdRef.current) { notifyTtsEnd(); return; }
-
-      const pickVoice = (target: 'ar' | 'fr' | 'en') => {
-        const prefix = target;
-        return voices.find((v) => v.lang?.toLowerCase().startsWith(prefix))
-          || voices.find((v) => v.name?.toLowerCase().includes(
-            target === 'ar' ? 'arab' : target === 'fr' ? 'french' : 'english'
-          ));
-      };
-      const chosenVoice = pickVoice(lang);
-
-      const chunks = splitText(textToSpeak);
-      let idx = 0;
-      const speakNext = () => {
-        if (sessionId !== speakSessionIdRef.current) return;
-        if (idx >= chunks.length) { setSpeakingLang(null); notifyTtsEnd(); return; }
-
-        const u = new SpeechSynthesisUtterance(chunks[idx++]);
-        u.rate = 0.9; u.pitch = 1; u.volume = 1;
-        if (chosenVoice) { u.voice = chosenVoice; u.lang = chosenVoice.lang; }
-        else { u.lang = lang; }
-
-        u.onstart = () => setSpeakingLang(lang);
-        u.onend = () => speakNext();
-        u.onerror = (event) => { console.error('Speech error:', event.error); setSpeakingLang(null); notifyTtsEnd(); };
-        synth.speak(u);
-      };
-      speakNext();
-    } catch (e) {
-      console.error('Speech synthesis failed:', e);
-      setSpeakingLang(null);
-      notifyTtsEnd();
-    }
-  }, [notifyTtsStart, notifyTtsEnd]);
-
-  const stopSpeaking = useCallback(() => {
-    speakSessionIdRef.current += 1;
-    window.speechSynthesis.cancel();
-    setSpeakingLang(null);
-    notifyTtsEnd();
-  }, [notifyTtsEnd]);
-
-  const toggleSpeech = (lang: 'ar' | 'fr' | 'en', text: string | null) => {
-    if (speakingLang === lang) { stopSpeaking(); return; }
-    if (speakingLang) { stopSpeaking(); }
-    if (text) speakTafsir(lang, text);
   };
 
   return (
