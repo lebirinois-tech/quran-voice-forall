@@ -55,40 +55,6 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
-        <div className="rounded-full bg-gradient-islamic shadow-lg">
-          <SettingsDialog
-            reciter={appSettings.reciter}
-            onReciterChange={appSettings.onReciterChange}
-            backgroundColor={appSettings.backgroundColor}
-            onBackgroundColorChange={appSettings.onBackgroundColorChange}
-            textDisplayStyle={appSettings.textDisplayStyle}
-            onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
-            fontSize={appSettings.fontSize}
-            onFontSizeChange={appSettings.onFontSizeChange}
-          />
-        </div>
-        <AppLangSwitcher className="bg-card border border-border shadow-lg text-foreground" />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={checkForUpdate}
-          disabled={isChecking}
-          className="gap-1 rounded-full shadow-lg"
-          aria-label={t('updateCheck')}
-        >
-          <RefreshCw className={isChecking ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
-          <span className="hidden sm:inline">{t('updateCheck')}</span>
-        </Button>
-      </div>
-      {/* Theme Toggle */}
-      <button
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-card border border-border shadow-lg"
-        aria-label={t('toggleTheme')}
-      >
-        {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-      </button>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pattern-islamic">
