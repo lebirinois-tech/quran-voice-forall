@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
           responseModalities: ["AUDIO"],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } },
         },
-        stream_format: "audio",
+        stream_format: "sse",
       }),
     });
     if (!upstream.ok) {
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     }
     return new Response(upstream.body, {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": upstream.headers.get("Content-Type") ?? "audio/wav", "Cache-Control": "no-cache" },
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
     });
   } catch (e) {
     console.error(e);
