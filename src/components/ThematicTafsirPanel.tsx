@@ -100,7 +100,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
           ? 'Échec de la génération du tafsir thématique'
           : activeLang === 'en'
             ? 'Failed to generate thematic tafsir'
-            : 'فشل توليد التفسير الموضوعي',
+            : 'فشل توليد التفسير',
         { description: e?.message || String(e) },
       );
     } finally {
@@ -119,7 +119,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
       >
         <span className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-sm">التفسير الموضوعي / Tafsir thématique / Thematic Tafsir</span>
+          <span className="text-sm">التفسير / Tafsir</span>
         </span>
         {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </Button>

@@ -103,7 +103,7 @@ const Landing = () => {
               />
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-in">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 whitespace-nowrap animate-fade-in">
               {t('landingTitle')}
             </h1>
             

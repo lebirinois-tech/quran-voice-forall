@@ -78,7 +78,7 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
         const official = getThemeById(paragraph.themeId);
         return official && paragraph.themeId.startsWith('m') ? (
           <div dir="rtl" className="rounded-md border-r-4 p-3 text-right font-arabic text-lg leading-9 text-foreground" style={{ backgroundColor: `hsl(${official.bgHsl})`, borderColor: `hsl(${official.hsl})` }}>
-            <span className="block text-xs font-semibold text-muted-foreground">التفسير الموضوعي</span>
+            <span className="block text-xs font-semibold text-muted-foreground">التفسير</span>
             {official.labels.ar}
           </div>
         ) : null;

@@ -144,7 +144,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
       >
         <span className="flex items-center gap-2">
           <BookOpen className="h-4 w-4" />
-          <span className="text-sm">التفسير الموضوعي / Tafsir</span>
+          <span className="text-sm">التفسير / Tafsir</span>
         </span>
         {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </Button>
