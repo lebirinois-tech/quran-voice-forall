@@ -8,6 +8,7 @@ import { getThemeById, getThemesForVerse, QuranTheme, type ThemeId } from '@/dat
 import { getOfflineTafsir } from '@/lib/offlineTafsir';
 import { ParagraphTafsir } from './ParagraphTafsir';
 import type { ThematicParagraph } from '@/lib/thematicParagraph';
+import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
 
 type Lang = 'ar' | 'fr' | 'en';
 
@@ -40,7 +41,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
   const [activeLang, setActiveLang] = useState<Lang>('fr');
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [speakingLang, setSpeakingLang] = useState<Lang | null>(null);
+  const { speakingLang, toggle: toggleSpeak } = useTafsirSpeech(`${surahNumber}:${verseNumber}:${isOpen}:${activeLang}`);
   const [availability, setAvailability] = useState<Record<Lang, string | null>>({ ar: null, fr: null, en: null });
 
   const refreshAvailability = async () => {
@@ -73,13 +74,6 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
     return () => { cancelled = true; };
   }, [isOpen, activeLang, surahNumber, verseNumber, paragraph]);
 
-  // Stop speech on close
-  useEffect(() => {
-    if (!isOpen && speakingLang) {
-      window.speechSynthesis?.cancel();
-      setSpeakingLang(null);
-    }
-  }, [isOpen, speakingLang]);
 
   const generate = async () => {
     setLoading(true);
@@ -114,28 +108,6 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
     }
   };
 
-  const toggleSpeak = (lang: Lang, t: string) => {
-    if (!('speechSynthesis' in window)) return;
-    if (speakingLang === lang) {
-      window.speechSynthesis.cancel();
-      setSpeakingLang(null);
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const chunks = t.replace(/\s+/g, ' ').match(/.{1,220}(\s|$)/g) || [t];
-    let i = 0;
-    const speakNext = () => {
-      if (i >= chunks.length) { setSpeakingLang(null); return; }
-      const u = new SpeechSynthesisUtterance(chunks[i++]);
-      u.lang = lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-US' : 'ar-SA';
-      u.rate = 0.9;
-      u.onend = speakNext;
-      u.onerror = () => setSpeakingLang(null);
-      window.speechSynthesis.speak(u);
-    };
-    setSpeakingLang(lang);
-    speakNext();
-  };
 
   return (
     <div className="mt-3 border-t border-border/50 pt-3">

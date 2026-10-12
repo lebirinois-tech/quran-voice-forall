@@ -7,6 +7,7 @@ import type { ThematicParagraph } from '@/lib/thematicParagraph';
 import { surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
 import { getThemeById } from '@/data/quranThemes';
+import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
 
 type Lang = 'ar' | 'fr' | 'en';
 interface Entry { number: number; arabic: string; translation: string | null; tafsir: string | null }
@@ -24,8 +25,9 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
   const { surah, start, end } = paragraph;
+  const { speakingLang, toggle } = useTafsirSpeech(`${surah}:${start}:${end}:${lang}`);
+  const speaking = speakingLang !== null;
   const unavailable = lang === 'fr' ? 'Contenu indisponible' : lang === 'en' ? 'Content unavailable' : 'المحتوى غير متوفر';
 
   useEffect(() => {
@@ -56,30 +58,9 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
     return () => { cancelled = true; };
   }, [surah, start, end, lang]);
 
-  useEffect(() => {
-    return () => { window.speechSynthesis?.cancel(); };
-  }, [surah, start, end, lang]);
-  useEffect(() => { setSpeaking(false); }, [surah, start, end, lang]);
-
   function toggleSpeak() {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    if (speaking) { setSpeaking(false); return; }
     const text = entries.map(entry => entry.tafsir ?? '').filter(Boolean).join(' ');
-    const chunks = text.match(/[^.!؟。]+[.!؟。]?/g) ?? [text];
-    let position = 0;
-    const next = () => {
-      const chunk = chunks[position++];
-      if (!chunk) { setSpeaking(false); return; }
-      const utterance = new SpeechSynthesisUtterance(chunk);
-      utterance.lang = lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-US' : 'ar-SA';
-      utterance.rate = 0.9;
-      utterance.onend = next;
-      utterance.onerror = () => setSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    };
-    setSpeaking(true);
-    next();
+    void toggle(lang, text);
   }
 
   return (

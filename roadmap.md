@@ -12,6 +12,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Lecture arabe du Tafsir : sélection explicite d’un صوت عربي avec préférence masculine, pauses et signes vocaliques conservés ; tests et parcours d’écoute vérifiés avec voix simulées. Qualité réelle de la prononciation dépend du moteur vocal installé et reste à valider sur appareil.
 - Traduction complète des menus en français, arabe et anglais : en-tête, accueil (installation, modes Versets/Pages, sourate, recherche, Juz, pied de page), écran de bienvenue et cartes des sourates (mecquoise/médinoise, nombre de versets).
 - Hafs : découpage officiel du Tafsir موضوعي de محفظ الوحيين (1 277 passages, 103 pour Al-Baqara), couleurs d'origine et titre de chaque passage dans le Tafsir.
 - Titres thématiques retirés en vue Versets ; le Tafsir موضوعي réunit tous les versets consécutifs du passage touché, en trois langues et hors connexion.
