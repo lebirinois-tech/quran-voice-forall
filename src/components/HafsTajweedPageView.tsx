@@ -1752,7 +1752,7 @@ export const HafsTajweedPageView = ({
                   className="justify-start gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Tafsir thématique (Mawdou3i)
+                  Tafsir · التفسير
                 </Button>
                 <Button
                   variant="ghost"
@@ -1858,7 +1858,7 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Tafsir thématique — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {themeVerse}
+              Tafsir — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {themeVerse}
             </DialogTitle>
           </DialogHeader>
           {themeVerse !== null && (

@@ -41,7 +41,7 @@ export const AppLangSwitcher = ({ className }: { className?: string }) => {
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               active
                 ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                : 'opacity-90 hover:opacity-100',
             )}
           >
             {opt.label}
