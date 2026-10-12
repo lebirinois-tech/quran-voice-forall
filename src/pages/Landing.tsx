@@ -92,22 +92,20 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pattern-islamic">
-        <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="container mx-auto px-4 pt-20 pb-16 md:pt-24 md:pb-24">
           <div className="max-w-4xl mx-auto text-center">
+            <h1 className="whitespace-nowrap font-bold font-arabic text-primary mb-6 animate-fade-in text-[clamp(1.4rem,7vw,3rem)]" dir="rtl">
+              القرآن الكريم للجميع
+            </h1>
+
             {/* App Icon */}
             <div className="w-28 h-28 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl border-4 border-primary/20 animate-scale-in">
               <img
                 src="/pwa-512x512.png" 
-                alt={t('landingTitle')} 
+                alt="القرآن الكريم للجميع" 
                 className="w-full h-full object-cover"
               />
             </div>
-
-            <h1 className="flex items-baseline justify-center gap-2 whitespace-nowrap font-bold text-foreground mb-6 animate-fade-in text-[clamp(0.95rem,4.6vw,3rem)]">
-              <span>{t('landingTitle')}</span>
-              <span className="text-primary/60">·</span>
-              <span className="font-arabic text-primary" dir="rtl">القرآن الكريم للجميع</span>
-            </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
               {t('landingTagline')}
