@@ -1,5 +1,7 @@
 # Architecture
 
+- All Tafsir readers use the shared useTafsirSpeech hook and tafsirSpeech helpers for voice selection, bounded punctuation-aware chunks and cancellation; this prevents Arabic narration from using a non-Arabic default and consistently prefers identifiable male Arabic voices without altering the source text.
+
 - Verse-mode thematic tafsir resolves a contiguous same-theme run within one surah from the shared local index and displays every member's bundled text and tafsir; this avoids merging unrelated passages or presenting a single-verse analysis as a paragraph commentary.
 
 - Les trois Mushafs pages utilisent les polices Unicode KFGQPC embarquées correspondant à Hafs, Warsh et Qaloun afin de préserver la géométrie Médine hors ligne.
