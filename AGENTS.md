@@ -1,6 +1,6 @@
 # Architecture
 
-- All Tafsir readers use the shared useTafsirSpeech hook and tafsirSpeech helpers for voice selection, bounded punctuation-aware chunks and cancellation; this prevents Arabic narration from using a non-Arabic default and consistently prefers identifiable male Arabic voices without altering the source text.
+- All Tafsir readers use the shared useTafsirSpeech hook: cloud male voice via the tafsir-tts function with clips cached in IndexedDB, falling back to device speech only when offline/transient errors occur; device voices mispronounce Fusha.
 
 - Verse-mode thematic tafsir resolves a contiguous same-theme run within one surah from the shared local index and displays every member's bundled text and tafsir; this avoids merging unrelated passages or presenting a single-verse analysis as a paragraph commentary.
 
