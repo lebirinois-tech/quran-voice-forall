@@ -103,13 +103,11 @@ const Landing = () => {
               />
             </div>
 
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 whitespace-nowrap animate-fade-in">
-              {t('landingTitle')}
+            <h1 className="flex items-baseline justify-center gap-2 whitespace-nowrap font-bold text-foreground mb-6 animate-fade-in text-[clamp(0.95rem,4.6vw,3rem)]">
+              <span>{t('landingTitle')}</span>
+              <span className="text-primary/60">·</span>
+              <span className="font-arabic text-primary" dir="rtl">القرآن الكريم للجميع</span>
             </h1>
-            
-            <p className="text-2xl md:text-3xl font-arabic text-primary mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              القرآن الكريم للجميع
-            </p>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
               {t('landingTagline')}
