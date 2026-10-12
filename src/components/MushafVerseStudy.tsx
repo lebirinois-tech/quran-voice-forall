@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Languages, Loader2 } from 'lucide-react';
+import { BookOpen, Languages, Loader2, Volume2, VolumeX } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { getPrimaryThemeForVerse } from '@/data/quranThemes';
 import { getOfflineTafsir } from '@/lib/offlineTafsir';
 import { getOfflineVerseTranslation } from '@/lib/offlineVerseTranslations';
+import { getAppLang } from '@/lib/i18n';
+import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
 
 type Lang = 'ar' | 'fr' | 'en';
 
@@ -21,6 +24,12 @@ const languageLabels: Record<Lang, string> = {
   en: 'English',
 };
 
+const listenLabels: Record<Lang, { play: string; stop: string }> = {
+  ar: { play: 'استماع', stop: 'إيقاف' },
+  fr: { play: 'Écouter', stop: 'Arrêter' },
+  en: { play: 'Listen', stop: 'Stop' },
+};
+
 const sectionLabels: Record<Lang, { verse: string; tafsir: string; unavailable: string }> = {
   ar: { verse: 'الآية الكريمة', tafsir: 'التفسير الميسر', unavailable: 'المحتوى غير متوفر' },
   fr: { verse: 'Traduction du verset', tafsir: 'Tafsir du verset', unavailable: 'Contenu indisponible' },
@@ -28,10 +37,14 @@ const sectionLabels: Record<Lang, { verse: string; tafsir: string; unavailable: 
 };
 
 export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: MushafVerseStudyProps) => {
-  const [activeLang, setActiveLang] = useState<Lang>('fr');
+  const [activeLang, setActiveLang] = useState<Lang>(() => {
+    const l = getAppLang();
+    return (l === 'ar' || l === 'fr' || l === 'en') ? l : 'fr';
+  });
   const [translations, setTranslations] = useState<Partial<Record<Lang, string>>>({});
   const [tafsirs, setTafsirs] = useState<Partial<Record<Lang, string>>>({});
   const [loading, setLoading] = useState(true);
+  const { speakingLang, toggle } = useTafsirSpeech(`${surahNumber}:${verseNumber}:${activeLang}`);
   const { theme } = useMemo(() => getPrimaryThemeForVerse(surahNumber, verseNumber), [surahNumber, verseNumber]);
   const safeArabicHtml = useMemo(() => sanitizeTajweedHtml(arabicHtml), [arabicHtml]);
 
@@ -102,7 +115,18 @@ export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: Musha
                 style={{ backgroundColor: theme ? `hsl(${theme.bgHsl} / 0.7)` : undefined }}
               >
                 <BookOpen className="h-4 w-4 text-primary" />
-                {labels.tafsir}
+                <span className="flex-1">{labels.tafsir}</span>
+                {tafsir && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn('h-7 gap-1 px-2 text-xs', speakingLang === lang && 'border-primary bg-primary/10')}
+                    onClick={() => toggle(lang, tafsir)}
+                  >
+                    {speakingLang === lang ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                    {speakingLang === lang ? listenLabels[lang].stop : listenLabels[lang].play}
+                  </Button>
+                )}
               </div>
               {loading ? (
                 <div className="flex justify-center p-6"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
