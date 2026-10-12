@@ -92,13 +92,51 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pattern-islamic">
-        <div className="container mx-auto px-4 pt-20 pb-16 md:pt-24 md:pb-24">
+        <div className="container mx-auto px-4 pt-5 pb-16 md:pt-8 md:pb-24">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="whitespace-nowrap font-bold font-arabic text-primary mb-6 animate-fade-in text-[clamp(1.4rem,7vw,3rem)]" dir="rtl">
+            <h1 className="whitespace-nowrap font-bold font-arabic text-primary mb-4 animate-fade-in text-[clamp(1.4rem,7vw,3rem)]" dir="rtl">
               القرآن الكريم للجميع
             </h1>
 
+            {/* Controls: settings, language, update, theme */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="rounded-full bg-gradient-islamic shadow-sm">
+                <SettingsDialog
+                  reciter={appSettings.reciter}
+                  onReciterChange={appSettings.onReciterChange}
+                  backgroundColor={appSettings.backgroundColor}
+                  onBackgroundColorChange={appSettings.onBackgroundColorChange}
+                  textDisplayStyle={appSettings.textDisplayStyle}
+                  onTextDisplayStyleChange={appSettings.onTextDisplayStyleChange}
+                  fontSize={appSettings.fontSize}
+                  onFontSizeChange={appSettings.onFontSizeChange}
+                />
+              </div>
+              <AppLangSwitcher className="bg-card border border-border shadow-sm text-foreground" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={checkForUpdate}
+                disabled={isChecking}
+                className="gap-1 rounded-full shadow-sm"
+                aria-label={t('updateCheck')}
+              >
+                <RefreshCw className={isChecking ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+                <span className="hidden sm:inline">{t('updateCheck')}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="rounded-full shadow-sm"
+                aria-label={t('toggleTheme')}
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+            </div>
+
             {/* App Icon */}
+
             <div className="w-28 h-28 mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl border-4 border-primary/20 animate-scale-in">
               <img
                 src="/pwa-512x512.png" 
