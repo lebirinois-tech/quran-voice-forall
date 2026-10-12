@@ -47,7 +47,10 @@ export const Header = ({
   const t = useT();
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-3">
+        <h1 className="text-center text-lg sm:text-xl md:text-2xl font-bold text-primary-foreground whitespace-nowrap leading-tight mb-2">
+          {t('appTitle')}
+        </h1>
         <div className="flex items-center justify-between">
           {/* Left side */}
           <div className="flex items-center gap-3">
@@ -60,15 +63,6 @@ export const Header = ({
             >
               <Home className="h-5 w-5" />
             </Button>
-            
-            <div className="min-w-0">
-              <h1 className="text-sm sm:text-lg md:text-xl font-bold text-primary-foreground whitespace-nowrap leading-tight">
-                {t('appTitle')}
-              </h1>
-              <p className="text-[10px] sm:text-xs text-primary-foreground/70 hidden md:block whitespace-nowrap">
-                {t('appSubtitle')}
-              </p>
-            </div>
           </div>
 
           {/* Right side */}
