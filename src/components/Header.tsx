@@ -1,4 +1,5 @@
-import { Home, Accessibility, Radio, Podcast } from 'lucide-react';
+import { Home, Accessibility, Radio, Podcast, LogIn, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from './SettingsDialog';
@@ -45,6 +46,7 @@ export const Header = ({
   onVerseViewModeChange,
 }: HeaderProps) => {
   const t = useT();
+  const { isAuthenticated, signOut, loading: authLoading } = useAuth();
   return (
     <header className="sticky top-0 z-50 bg-gradient-islamic shadow-soft">
       <div className="container mx-auto px-4 py-3">
@@ -63,6 +65,17 @@ export const Header = ({
             >
               <Home className="h-5 w-5" />
             </Button>
+            {!authLoading && (isAuthenticated ? (
+              <Button variant="ghost" size="sm" onClick={() => signOut()} className="gap-1 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-full">
+                <LogOut className="h-4 w-4" />
+                <span className="text-xs">{t('logout')}</span>
+              </Button>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={() => window.location.assign('/auth')} className="gap-1 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-full">
+                <LogIn className="h-4 w-4" />
+                <span className="text-xs">{t('login')}</span>
+              </Button>
+            ))}
           </div>
 
           {/* Right side */}
