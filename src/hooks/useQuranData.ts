@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Verse } from '@/data/surahs';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { stripLeadingBasmala, stripLeadingBasmalaHtml, surahHasHeaderBasmala } from '@/lib/basmala';
 import { getSurahText, putSurahText } from '@/lib/offlineTextStore';
 
@@ -96,12 +97,35 @@ export const useQuranData = (surahNumber: number) => {
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchVerses = async () => {
       setIsLoading(true);
       setError(null);
       setIsOffline(false);
 
       try {
+        // The checked-in Uthmani corpus is authoritative in both online and
+        // offline readers. Never replace it with the incompatible API marks.
+        const bundled = await loadBundledSurah(surahNumber);
+        if (!bundled) throw new Error('Verified Hafs corpus unavailable');
+        const combinedVerses: Verse[] = bundled.arabic.map((ayah, index) => ({
+          number: ayah.numberInSurah,
+          text: ayah.text,
+          translation: bundled.translation[index]?.text || '',
+          page: ayah.page,
+        }));
+        const tajweedMap: Record<number, string> = {};
+        bundled.arabic.forEach((ayah) => {
+          tajweedMap[ayah.numberInSurah] = sanitizeTajweedHtml(applyAutoTajweed(ayah.text));
+        });
+        await saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
+        if (cancelled) return;
+        const cleaned = removeDuplicateBasmala(surahNumber, combinedVerses, tajweedMap);
+        setVerses(cleaned.verses);
+        setVersesTajweed(cleaned.tajweed);
+        setIsOffline(!navigator.onLine);
+        return;
+        /* Legacy API pipeline retained below temporarily but never executed.
         // Fetch Uthmanic Arabic text, Tajweed text, and French translation
         const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
@@ -137,7 +161,9 @@ export const useQuranData = (surahNumber: number) => {
         } else {
           throw new Error('Failed to fetch Quran data');
         }
+        */
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching Quran data:', err);
 
         // Try loading from offline cache
@@ -160,8 +186,8 @@ export const useQuranData = (surahNumber: number) => {
               page: ayah.page,
             }));
             const tajweedMap: Record<number, string> = {};
-            bundled.tajweed.forEach((ayah) => {
-              tajweedMap[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
+            bundled.arabic.forEach((ayah) => {
+              tajweedMap[ayah.numberInSurah] = sanitizeTajweedHtml(applyAutoTajweed(ayah.text));
             });
             const cleaned = removeDuplicateBasmala(surahNumber, combinedVerses, tajweedMap);
             setVerses(cleaned.verses);
@@ -172,11 +198,12 @@ export const useQuranData = (surahNumber: number) => {
           }
         }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchVerses();
+    return () => { cancelled = true; };
   }, [surahNumber]);
 
   return { verses, versesTajweed, isLoading, error, isOffline };

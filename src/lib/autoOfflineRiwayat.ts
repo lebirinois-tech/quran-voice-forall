@@ -8,6 +8,7 @@
  */
 
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
+import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { putSurahText, getCachedSurahNumbers } from '@/lib/offlineTextStore';
 import { getDataset, putDataset } from '@/lib/offlineDatasetStore';
 
@@ -15,7 +16,7 @@ export const WARSH_DATASET_KEY = 'warsh-data-v10';
 export const QALUN_DATASET_KEY = 'qalun-data-v10';
 
 const BOOTSTRAP_KEY = 'quran-auto-offline-riwayat';
-const BOOTSTRAP_VERSION = '2026-08-24-riwayat-v1';
+const BOOTSTRAP_VERSION = '2026-10-13-hafs-verified';
 const TEXT_CACHE_STATUS = 'quran-text-cache-status';
 
 export interface AutoOfflineProgress {
@@ -63,7 +64,9 @@ const markSurahCached = (surahNumber: number) => {
 
 /** Hafs : texte + traduction + Tajweed des 114 sourates. */
 const cacheHafsText = async () => {
-  const already = new Set(await getCachedSurahNumbers());
+  // Refresh all Hafs entries on a corpus-version change; old keys alone
+  // do not establish that their text has been corrected.
+  const already = new Set<number>();
   if (already.size >= 114) {
     emit({ step: 'hafs', percent: 100 });
     return;
@@ -84,8 +87,8 @@ const cacheHafsText = async () => {
           page: ayah.page,
         }));
         const tajweed: Record<number, string> = {};
-        bundled.tajweed.forEach((ayah) => {
-          tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
+        bundled.arabic.forEach((ayah) => {
+          tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(applyAutoTajweed(ayah.text));
         });
         if (await putSurahText(s, { verses, tajweed, timestamp: Date.now() })) markSurahCached(s);
       }

@@ -346,13 +346,13 @@ export const VerseCard = ({
     const sizeClass = getFontSizeClass();
     switch (textDisplayStyle) {
       case 'tajweed':
-        return `quran-text ${sizeClass} leading-relaxed`;
+        return `quran-text font-mushaf-hafs ${sizeClass} leading-relaxed`;
       case 'warsh-tajweed':
         return `font-warsh ${sizeClass} leading-loose text-foreground`;
       case 'qalun-tajweed':
         return `font-mushaf-qalun ${sizeClass} leading-loose text-foreground`;
       default:
-        return `quran-text ${sizeClass} leading-relaxed`;
+        return `quran-text font-mushaf-hafs ${sizeClass} leading-relaxed`;
     }
   };
 
