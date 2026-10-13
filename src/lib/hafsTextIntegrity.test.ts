@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { applyAutoTajweed } from './autoTajweed';
 
 type Ayah = { numberInSurah: number; text: string };
@@ -25,10 +26,11 @@ describe('Hafs Uthmani text integrity', () => {
       for (const ayah of data.arabic) {
         count++;
         expect(words.get(`${surah}:${ayah.numberInSurah}`)?.join(' ')).toBe(ayah.text);
-        expect(ayah.text).not.toContain('\u06ED');
       }
     }
     expect(count).toBe(6236);
+    const text = Object.values(corpus).flatMap((surah) => surah.arabic.map((ayah) => ayah.text)).join('\n');
+    expect(createHash('sha256').update(text).digest('hex')).toBe('3a802babd61fd0835121feea6c054e16df4809417968e1f7b58aa18cdbae6e66');
   });
 
   it('does not display false meem marks in the reported examples', () => {
@@ -42,6 +44,7 @@ describe('Hafs Uthmani text integrity', () => {
   it('preserves authentic iqlab signs and every character when applying colours', () => {
     const text = corpus['2'].arabic[26].text;
     expect(text).toContain('مِنۢ بَعْدِ');
+    expect(corpus['2'].arabic[40].text).toContain('كَافِرٍۭ بِهِۦ');
     expect(applyAutoTajweed(text).replace(/<[^>]*>/g, '')).toBe(text);
   });
 });
