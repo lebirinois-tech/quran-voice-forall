@@ -8,14 +8,15 @@
  */
 
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
-import { putSurahText, getCachedSurahNumbers } from '@/lib/offlineTextStore';
+import { applyAutoTajweed } from '@/lib/autoTajweed';
+import { putSurahText } from '@/lib/offlineTextStore';
 import { getDataset, putDataset } from '@/lib/offlineDatasetStore';
 
 export const WARSH_DATASET_KEY = 'warsh-data-v10';
 export const QALUN_DATASET_KEY = 'qalun-data-v10';
 
 const BOOTSTRAP_KEY = 'quran-auto-offline-riwayat';
-const BOOTSTRAP_VERSION = '2026-08-24-riwayat-v1';
+const BOOTSTRAP_VERSION = '2026-10-13-hafs-verified';
 const TEXT_CACHE_STATUS = 'quran-text-cache-status';
 
 export interface AutoOfflineProgress {
@@ -27,25 +28,6 @@ export const AUTO_OFFLINE_EVENT = 'quran-auto-offline-progress';
 
 const emit = (detail: AutoOfflineProgress) => {
   window.dispatchEvent(new CustomEvent<AutoOfflineProgress>(AUTO_OFFLINE_EVENT, { detail }));
-};
-
-const TAJWEED_COLORS: Record<string, string> = {
-  h: '#AAAAAA', s: '#AAAAAA', l: '#AAAAAA', u: '#AAAAAA', d: '#AAAAAA', b: '#AAAAAA',
-  g: '#2AAD2A',
-  f: '#DD0000', c: '#DD0000', n: '#DD0000',
-  p: '#CC0000', m: '#BB0000', o: '#AA0000',
-  a: '#B266D9', w: '#B266D9',
-  q: '#2E6ECB',
-  i: '#D4740C',
-};
-
-const parseTajweedText = (text: string): string => {
-  let result = text;
-  Object.entries(TAJWEED_COLORS).forEach(([marker, color]) => {
-    const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
-    result = result.replace(regex, `<span style="color: ${color};">$1</span>`);
-  });
-  return result;
 };
 
 interface BundledAyah { text: string; numberInSurah: number; page: number }
@@ -63,7 +45,9 @@ const markSurahCached = (surahNumber: number) => {
 
 /** Hafs : texte + traduction + Tajweed des 114 sourates. */
 const cacheHafsText = async () => {
-  const already = new Set(await getCachedSurahNumbers());
+  // Refresh all Hafs entries on a corpus-version change; old keys alone
+  // do not establish that their text has been corrected.
+  const already = new Set<number>();
   if (already.size >= 114) {
     emit({ step: 'hafs', percent: 100 });
     return;
@@ -84,8 +68,8 @@ const cacheHafsText = async () => {
           page: ayah.page,
         }));
         const tajweed: Record<number, string> = {};
-        bundled.tajweed.forEach((ayah) => {
-          tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
+        bundled.arabic.forEach((ayah) => {
+          tajweed[ayah.numberInSurah] = sanitizeTajweedHtml(applyAutoTajweed(ayah.text));
         });
         if (await putSurahText(s, { verses, tajweed, timestamp: Date.now() })) markSurahCached(s);
       }

@@ -12,6 +12,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Hafs : source Uthmani vérifiée sur 6 236 versets et tous les mots des 604 pages, signes de tanween incompatibles corrigés, signes d’iqlab authentiques conservés, cache versionné ; exemples 3:191 et 4:2–4 contrôlés en navigateur. Non publié ; validation visuelle exhaustive et relecture spécialisée non effectuées.
 - Lecture arabe du Tafsir : sélection explicite d’un صوت عربي avec préférence masculine, pauses et signes vocaliques conservés ; tests et parcours d’écoute vérifiés avec voix simulées. Qualité réelle de la prononciation dépend du moteur vocal installé et reste à valider sur appareil.
 - Traduction complète des menus en français, arabe et anglais : en-tête, accueil (installation, modes Versets/Pages, sourate, recherche, Juz, pied de page), écran de bienvenue et cartes des sourates (mecquoise/médinoise, nombre de versets).
 - Hafs : découpage officiel du Tafsir موضوعي de محفظ الوحيين (1 277 passages, 103 pour Al-Baqara), couleurs d'origine et titre de chaque passage dans le Tafsir.

@@ -161,6 +161,7 @@
 
   .quran-text.font-mushaf-hafs {
     font-family: 'hafs-medina', 'Amiri', serif;
+    font-synthesis: none;
   }
 
   .quran-text.font-mushaf-qalun {

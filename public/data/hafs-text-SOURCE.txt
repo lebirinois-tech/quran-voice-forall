@@ -1,0 +1,18 @@
+Hafs Uthmani text correction — 2026-10-13
+
+Reference: Quran Foundation / Quran.com API v4
+https://api.quran.com/api/v4/quran/verses/uthmani
+Field: text_uthmani; all 6,236 verse keys.
+
+The Arabic fields of quran-hafs-fr.json and the word text fields of
+hafs-medina-word-lines.json match this reference exactly after trimming
+outer whitespace. Existing page numbers, line numbers, packed word slots,
+verse references, translations, and verse-ending slots are unchanged.
+Packed multi-token slots retain their original grouping.
+
+The former Al Quran Cloud encoding contained U+06ED following tanween and
+U+06E2 in places where this Uthmani reference does not contain them. These
+displayed as extraneous meem marks with the application's Quran fonts.
+Correct U+06E2 iqlab signs present in the reference are preserved.
+
+This is a technical source comparison, not a scholarly certification.

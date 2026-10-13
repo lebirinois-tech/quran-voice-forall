@@ -10,7 +10,10 @@ export interface CachedSurahData {
   verses: Array<{ number: number; text: string; translation: string; page?: number }>;
   tajweed: Record<number, string>;
   timestamp: number;
+  textVersion?: string;
 }
+
+export const HAFS_TEXT_VERSION = '2026-10-13-uthmani-verified';
 
 const DB_NAME = 'quran-offline-text';
 const DB_VERSION = 1;
@@ -64,11 +67,12 @@ const readLegacy = (surahNumber: number): CachedSurahData | null => {
 
 export const getSurahText = async (surahNumber: number): Promise<CachedSurahData | null> => {
   const fromDb = await tx<CachedSurahData>('readonly', (s) => s.get(surahNumber));
-  return fromDb ?? readLegacy(surahNumber);
+  const cached = fromDb ?? readLegacy(surahNumber);
+  return cached?.textVersion === HAFS_TEXT_VERSION ? cached : null;
 };
 
 export const putSurahText = async (surahNumber: number, data: CachedSurahData): Promise<boolean> => {
-  const ok = await tx('readwrite', (s) => s.put(data, surahNumber));
+  const ok = await tx('readwrite', (s) => s.put({ ...data, textVersion: HAFS_TEXT_VERSION }, surahNumber));
   return ok !== null;
 };
 

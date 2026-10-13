@@ -10,3 +10,4 @@
 - Hafs, Warsh et Qaloun partagent le même index local de 6 236 références thématiques dérivé de QSAC CC BY 4.0 et la même palette propre à l’application, car le thème dépend du verset et non de sa graphie.
 - Hafs (police KFGQPC) : U+06DF est remplacé par U+0652 à l'affichage, car le glyphe 06DF de cette police est un gros disque noir pleine largeur ; le 0652 de cette police est le petit zéro rond correct.
 - The first-run reading mode is Pages Hafs, with a persistent Pages/Verses switch available inside the reader, so thematic Mushaf pages are immediately discoverable.
+- Hafs Arabic text must come from the bundled Quran.com Uthmani corpus, shared with the packed Medina words; never overwrite it with Al Quran Cloud text or stale unversioned caches, because their tanween encoding displays false meem marks in our fonts.
