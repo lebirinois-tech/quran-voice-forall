@@ -125,43 +125,6 @@ export const useQuranData = (surahNumber: number) => {
         setVersesTajweed(cleaned.tajweed);
         setIsOffline(!navigator.onLine);
         return;
-        /* Legacy API pipeline retained below temporarily but never executed.
-        // Fetch Uthmanic Arabic text, Tajweed text, and French translation
-        const [arabicResponse, tajweedResponse, translationResponse] = await Promise.all([
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`),
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-tajweed`),
-          fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/fr.hamidullah`),
-        ]);
-
-        const arabicData: QuranApiResponse = await arabicResponse.json();
-        const tajweedData: QuranApiResponse = await tajweedResponse.json();
-        const translationData: QuranApiResponse = await translationResponse.json();
-
-        if (arabicData.code === 200 && translationData.code === 200) {
-          const combinedVerses: Verse[] = arabicData.data.ayahs.map((ayah, index) => ({
-            number: ayah.numberInSurah,
-            text: ayah.text,
-            translation: translationData.data.ayahs[index]?.text || '',
-            page: ayah.page,
-          }));
-
-          const tajweedMap: Record<number, string> = {};
-          if (tajweedData.code === 200) {
-            tajweedData.data.ayahs.forEach((ayah) => {
-              tajweedMap[ayah.numberInSurah] = sanitizeTajweedHtml(parseTajweedText(ayah.text));
-            });
-          }
-
-          // Cache for offline use
-          await saveSurahToCache(surahNumber, combinedVerses, tajweedMap);
-
-          const cleaned = removeDuplicateBasmala(surahNumber, combinedVerses, tajweedMap);
-          setVerses(cleaned.verses);
-          setVersesTajweed(cleaned.tajweed);
-        } else {
-          throw new Error('Failed to fetch Quran data');
-        }
-        */
       } catch (err) {
         if (cancelled) return;
         console.error('Error fetching Quran data:', err);

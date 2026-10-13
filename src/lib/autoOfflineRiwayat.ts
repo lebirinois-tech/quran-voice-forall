@@ -9,7 +9,7 @@
 
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
-import { putSurahText, getCachedSurahNumbers } from '@/lib/offlineTextStore';
+import { putSurahText } from '@/lib/offlineTextStore';
 import { getDataset, putDataset } from '@/lib/offlineDatasetStore';
 
 export const WARSH_DATASET_KEY = 'warsh-data-v10';
@@ -28,25 +28,6 @@ export const AUTO_OFFLINE_EVENT = 'quran-auto-offline-progress';
 
 const emit = (detail: AutoOfflineProgress) => {
   window.dispatchEvent(new CustomEvent<AutoOfflineProgress>(AUTO_OFFLINE_EVENT, { detail }));
-};
-
-const TAJWEED_COLORS: Record<string, string> = {
-  h: '#AAAAAA', s: '#AAAAAA', l: '#AAAAAA', u: '#AAAAAA', d: '#AAAAAA', b: '#AAAAAA',
-  g: '#2AAD2A',
-  f: '#DD0000', c: '#DD0000', n: '#DD0000',
-  p: '#CC0000', m: '#BB0000', o: '#AA0000',
-  a: '#B266D9', w: '#B266D9',
-  q: '#2E6ECB',
-  i: '#D4740C',
-};
-
-const parseTajweedText = (text: string): string => {
-  let result = text;
-  Object.entries(TAJWEED_COLORS).forEach(([marker, color]) => {
-    const regex = new RegExp(`\\[${marker}(?::\\d+)?\\[([^\\]]+)\\]`, 'g');
-    result = result.replace(regex, `<span style="color: ${color};">$1</span>`);
-  });
-  return result;
 };
 
 interface BundledAyah { text: string; numberInSurah: number; page: number }
