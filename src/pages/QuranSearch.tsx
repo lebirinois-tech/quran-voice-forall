@@ -202,7 +202,7 @@ const QuranSearch = () => {
 
         <div className="text-center mt-8">
           <Link to="/index">
-            <Button variant="outline">{t('home')}</Button>
+            <Button variant="outline">{t('backHome')}</Button>
           </Link>
         </div>
       </main>
