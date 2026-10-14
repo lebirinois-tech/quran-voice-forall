@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Reset from "./pages/Reset";
 import AudioLibrary from "./pages/AudioLibrary";
 import AudioUpload from "./pages/AudioUpload";
+import QuranSearch from "./pages/QuranSearch";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/audio-library" element={<AudioLibrary />} />
                 <Route path="/audio-upload" element={<AudioUpload />} />
+                <Route path="/search" element={<QuranSearch />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

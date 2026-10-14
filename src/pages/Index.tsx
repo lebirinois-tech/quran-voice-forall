@@ -404,6 +404,12 @@ const Index = () => {
               aria-label={t('searchSurah')}
             />
           </div>
+          <Link to="/search" className="block mt-2">
+            <Button variant="outline" className="w-full gap-2">
+              <Search className="h-4 w-4" />
+              {t('quranSearchTitle')}
+            </Button>
+          </Link>
         </section>
 
         {/* Stats */}
