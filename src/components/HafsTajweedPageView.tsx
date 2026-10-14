@@ -724,7 +724,7 @@ export const HafsTajweedPageView = ({
       // Taille uniforme pour toutes les pages : même valeur pour un même
       // écran, indépendante de la longueur des lignes de la page affichée.
       // Réduction seulement en cas de vrai dépassement (rare), légère.
-      let size = Math.floor(currentDesired() * 0.92 * 10) / 10;
+      let size = Math.floor(currentDesired() * 0.82 * 10) / 10;
       root.style.fontSize = `${size}px`;
       for (let i = 0; i < 6 && size > 10 && worstRatio() < 0.97; i += 1) {
         size = Math.max(10, Math.floor(size * 0.98 * 10) / 10);
