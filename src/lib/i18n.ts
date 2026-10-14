@@ -223,6 +223,17 @@ const dict: Dict = {
   medinan: { fr: 'Médinoise', ar: 'مدنية', en: 'Medinan' },
   stopListening: { fr: "Arrêter l'écoute", ar: 'إيقاف الاستماع', en: 'Stop listening' },
   startVoiceCommand: { fr: 'Activer la commande vocale', ar: 'تفعيل الأمر الصوتي', en: 'Enable voice command' },
+  // Quran full-text search
+  quranSearchTitle: { fr: 'Recherche dans le Coran', ar: 'البحث في القرآن الكريم', en: 'Search the Quran' },
+  quranSearchPlaceholder: { fr: 'Tapez un mot ou une phrase du Coran...', ar: 'اكتب كلمة أو عبارة من القرآن...', en: 'Type a word or phrase from the Quran...' },
+  quranSearchHint: {
+    fr: 'La recherche ignore les voyelles et les signes : tapez simplement les lettres.',
+    ar: 'البحث يتجاهل التشكيل والعلامات: اكتب الحروف فقط.',
+    en: 'Search ignores diacritics: just type the letters.',
+  },
+  quranSearchResults: { fr: 'résultat(s)', ar: 'نتيجة', en: 'result(s)' },
+  quranSearchNoResults: { fr: 'Aucun verset trouvé', ar: 'لم يتم العثور على آية', en: 'No verse found' },
+  quranSearchError: { fr: 'Impossible de charger le texte', ar: 'تعذر تحميل النص', en: 'Could not load the text' },
 };
 
 export const translate = (key: keyof typeof dict, lang: AppLang): string =>
