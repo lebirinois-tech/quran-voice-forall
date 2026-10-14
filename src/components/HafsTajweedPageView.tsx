@@ -721,14 +721,13 @@ export const HafsTajweedPageView = ({
       return ratio;
     };
     const fitOfficialLines = () => {
-      const desired = currentDesired();
-      let size = desired;
+      // Taille uniforme pour toutes les pages : même valeur pour un même
+      // écran, indépendante de la longueur des lignes de la page affichée.
+      // Réduction seulement en cas de vrai dépassement (rare), légère.
+      let size = Math.floor(currentDesired() * 0.92 * 10) / 10;
       root.style.fontSize = `${size}px`;
-      size = Math.max(10, Math.floor(desired * Math.min(1, worstRatio()) * 0.97 * 10) / 10);
-      root.style.fontSize = `${size}px`;
-      // Filet de sécurité : réduire tant qu'une ligne dépasse encore.
-      for (let i = 0; i < 12 && size > 10 && worstRatio() < 0.995; i += 1) {
-        size = Math.max(10, Math.floor(size * 0.97 * 10) / 10);
+      for (let i = 0; i < 6 && size > 10 && worstRatio() < 0.97; i += 1) {
+        size = Math.max(10, Math.floor(size * 0.98 * 10) / 10);
         root.style.fontSize = `${size}px`;
       }
       setOfficialFontPx(size);
@@ -907,7 +906,7 @@ export const HafsTajweedPageView = ({
             // ne modifie PAS les métriques du texte (contrairement à
             // font-weight synthétique), donc les coupures de lignes
             // officielles de Médine restent intactes, aucun mot ne bouge.
-            WebkitTextStroke: riwaya === 'hafs' ? undefined : '0.022em currentColor',
+            WebkitTextStroke: riwaya === 'hafs' ? '0.018em currentColor' : '0.022em currentColor',
             fontWeight: 400,
             overflowWrap: 'break-word',
           }}
