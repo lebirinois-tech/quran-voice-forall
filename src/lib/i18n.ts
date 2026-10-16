@@ -156,6 +156,7 @@ const dict: Dict = {
   invalidJuz: { fr: 'Numéro de Juz invalide (1-30)', ar: 'رقم جزء غير صالح (1-30)', en: 'Invalid Juz number (1-30)' },
   openSurah: { fr: 'Ouverture de la sourate', ar: 'فتح السورة', en: 'Opening surah' },
   navToPage: { fr: 'Navigation vers page', ar: 'الانتقال إلى الصفحة', en: 'Navigating to page' },
+  page: { fr: 'Page', ar: 'صفحة', en: 'Page' },
   navToJuz: { fr: 'Navigation vers Juz', ar: 'الانتقال إلى الجزء', en: 'Navigating to Juz' },
   // Landing page
   landingTitle: { fr: 'Apprenons le Coran', ar: 'لنتعلم القرآن', en: 'Let us learn the Quran' },

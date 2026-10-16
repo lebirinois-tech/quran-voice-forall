@@ -19,6 +19,7 @@ import { useWarshData } from '@/hooks/useWarshData';
 import { useQalunData } from '@/hooks/useQalunData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
+import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play, BookOpen } from 'lucide-react';
@@ -167,6 +168,19 @@ const SurahReader = () => {
       }
     }
   }, [searchParams, verses, isMushafImageMode, num]);
+
+  // Save last reading position locally for everyone (offline, no account needed)
+  useEffect(() => {
+    if (!num) return;
+    const verse = quranAudio.currentVerse > 0 ? quranAudio.currentVerse : null;
+    if (!verse && !currentMushafPage) return;
+    saveLocalReadingPosition({
+      surah: num,
+      verse,
+      page: currentMushafPage,
+      style: appSettings.textDisplayStyle,
+    });
+  }, [num, quranAudio.currentVerse, currentMushafPage, appSettings.textDisplayStyle]);
 
   // Auto-save reading progress when verse changes
   useEffect(() => {
