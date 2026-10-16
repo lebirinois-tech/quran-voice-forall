@@ -19,6 +19,7 @@ import { useWarshData } from '@/hooks/useWarshData';
 import { useQalunData } from '@/hooks/useQalunData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
+import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play, BookOpen } from 'lucide-react';
