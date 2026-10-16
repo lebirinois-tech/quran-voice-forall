@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { loadLocalReadingPosition } from '@/lib/readingPosition';
 import { OfflineRiwayatStatus } from "@/components/OfflineRiwayatStatus";
 import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -160,7 +161,7 @@ const Index = () => {
         </section>
 
         {/* Continue Reading Section */}
-        {isAuthenticated && lastReadSurah && (
+        {lastReadSurah && lastRead && lastReadUrl && (
           <section className="mb-6 animate-fade-in">
             <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
               <div className="flex items-center justify-between">
