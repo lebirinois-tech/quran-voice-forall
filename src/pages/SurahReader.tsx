@@ -168,6 +168,19 @@ const SurahReader = () => {
     }
   }, [searchParams, verses, isMushafImageMode, num]);
 
+  // Save last reading position locally for everyone (offline, no account needed)
+  useEffect(() => {
+    if (!num) return;
+    const verse = quranAudio.currentVerse > 0 ? quranAudio.currentVerse : null;
+    if (!verse && !currentMushafPage) return;
+    saveLocalReadingPosition({
+      surah: num,
+      verse,
+      page: currentMushafPage,
+      style: appSettings.textDisplayStyle,
+    });
+  }, [num, quranAudio.currentVerse, currentMushafPage, appSettings.textDisplayStyle]);
+
   // Auto-save reading progress when verse changes
   useEffect(() => {
     if (isAuthenticated && quranAudio.currentVerse > 0 && quranAudio.currentVerse !== lastSavedVerse) {
