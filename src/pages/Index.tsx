@@ -48,8 +48,31 @@ const Index = () => {
     }
   };
 
-  const lastRead = getLastRead();
-  const lastReadSurah = lastRead ? surahs.find(s => s.number === lastRead.surah_number) : null;
+  const cloudLastRead = getLastRead();
+  const localLastRead = useMemo(() => loadLocalReadingPosition(), []);
+  // Signed-in users: cloud progress wins; everyone else: local position.
+  const lastRead = isAuthenticated && cloudLastRead
+    ? { surah: cloudLastRead.surah_number, verse: cloudLastRead.verse_number, page: null as number | null }
+    : localLastRead
+      ? { surah: localLastRead.surah, verse: localLastRead.verse, page: localLastRead.page }
+      : null;
+  const lastReadSurah = lastRead ? surahs.find(s => s.number === lastRead.surah) : null;
+  const lastReadUrl = lastRead
+    ? `/surah/${lastRead.surah}${lastRead.page ? `?page=${lastRead.page}` : lastRead.verse ? `?verse=${lastRead.verse}` : ''}`
+    : null;
+
+  // Auto-resume last reading position once per app launch (when reopening the app)
+  useEffect(() => {
+    if (!lastReadUrl) return;
+    try {
+      if (sessionStorage.getItem('quran-auto-resumed')) return;
+      sessionStorage.setItem('quran-auto-resumed', '1');
+    } catch {
+      // sessionStorage unavailable — still resume
+    }
+    navigate(lastReadUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleNavigateToSurah = (surahNumber: number) => {
     navigate(`/surah/${surahNumber}`);
