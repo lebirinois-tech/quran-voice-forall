@@ -726,8 +726,8 @@ export const HafsTajweedPageView = ({
       // Réduction seulement en cas de vrai dépassement (rare), légère.
       let size = Math.floor(currentDesired() * 0.82 * 10) / 10;
       root.style.fontSize = `${size}px`;
-      for (let i = 0; i < 6 && size > 10 && worstRatio() < 0.97; i += 1) {
-        size = Math.max(10, Math.floor(size * 0.98 * 10) / 10);
+      for (let i = 0; i < 40 && size > 10 && worstRatio() < 0.995; i += 1) {
+        size = Math.max(10, Math.floor(size * 0.985 * 10) / 10);
         root.style.fontSize = `${size}px`;
       }
       setOfficialFontPx(size);
