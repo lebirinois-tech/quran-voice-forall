@@ -172,12 +172,12 @@ const Index = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">{t('resumeReading')}</p>
                     <p className="font-semibold text-foreground">
-                      {lastReadSurah.name} - {t('verse')} {lastRead.verse_number}
+                      {lastReadSurah.name}{lastRead.page ? ` - ${t('page')} ${lastRead.page}` : lastRead.verse ? ` - ${t('verse')} ${lastRead.verse}` : ''}
                     </p>
                   </div>
                 </div>
-                <Button 
-                  onClick={() => navigate(`/surah/${lastRead.surah_number}?verse=${lastRead.verse_number}`)}
+                <Button
+                  onClick={() => navigate(lastReadUrl)}
                   size="sm"
                 >
                   {t('continue')}
