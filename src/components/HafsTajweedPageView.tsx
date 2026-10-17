@@ -1086,10 +1086,20 @@ export const HafsTajweedPageView = ({
                     }}
                     className="inline cursor-pointer"
                   >
+                    {juzStartKeys.has(`${section.surahNumber}:${v.number}`) && (
+                      <span
+                        aria-label={`Début du Juz ${getJuzForVerse(section.surahNumber, v.number)}`}
+                        className="mx-[0.08em] inline-flex size-[1.3em] shrink-0 items-center justify-center rounded-full border-[0.08em] bg-background/70 align-middle font-amiri text-[0.55em] font-bold leading-none"
+                        style={{ borderColor: 'hsl(var(--verse-number))', color: 'hsl(var(--verse-number))' }}
+                      >
+                        ۞
+                      </span>
+                    )}
                     <span data-mushaf-verse-content dangerouslySetInnerHTML={{ __html: html }} />
-                    <span
+                     <span
                       aria-label={`Fin du verset ${v.number}`}
-                      className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
+                      className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none"
+                      style={{ borderColor: 'hsl(var(--verse-number))', color: 'hsl(var(--verse-number))' }}
                     >
                       {toArabicDigits(v.number)}
                     </span>{' '}
