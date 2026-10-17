@@ -5,6 +5,11 @@ import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse } from '@/data/surahs';
+
+// Clés "sourate:verset" des versets où commence un Juz (pour la marque ۞).
+const juzStartKeys = new Set(
+  Object.values(juzMapping).map((s) => `${s.surah}:${s.verse}`)
+);
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { splitHtmlIntoWords, wordIndexForProgress } from '@/lib/tajweedWordSync';
@@ -906,7 +911,7 @@ export const HafsTajweedPageView = ({
             // ne modifie PAS les métriques du texte (contrairement à
             // font-weight synthétique), donc les coupures de lignes
             // officielles de Médine restent intactes, aucun mot ne bouge.
-            WebkitTextStroke: riwaya === 'hafs' ? '0.018em currentColor' : '0.022em currentColor',
+            WebkitTextStroke: '0.022em currentColor',
             fontWeight: 400,
             overflowWrap: 'break-word',
           }}
