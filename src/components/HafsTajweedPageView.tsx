@@ -822,7 +822,7 @@ export const HafsTajweedPageView = ({
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="min-w-0 truncate rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
+                className="min-w-0 shrink-0 whitespace-nowrap rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
                 style={{ color: 'hsl(43, 62%, 25%)' }}
                 aria-label="Choisir une sourate"
               >

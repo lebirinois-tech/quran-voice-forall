@@ -1,11 +1,7 @@
-const toArabicDigits = (n: number) =>
-  n.toString();
-
 export const TOTAL_MUSHAF_PAGES = 604;
 
 /**
- * Affichage uniforme du numéro de page du Mushaf : « ٢ · Page 2 / 604 ».
- * Utilisé dans tous les modes d'affichage (pages Tajweed, texte par page…).
+ * Affichage uniforme et compact du numéro de page du Mushaf : « 55 / 604 ».
  */
 export const MushafPageBadge = ({
   page,
@@ -14,10 +10,7 @@ export const MushafPageBadge = ({
   page: number;
   className?: string;
 }) => (
-  <span className={className}>
-    <span dir="rtl" className="font-amiri">
-      {toArabicDigits(page)}
-    </span>
-    {' · '}Page {page} / {TOTAL_MUSHAF_PAGES}
+  <span className={className} dir="ltr">
+    {page} / {TOTAL_MUSHAF_PAGES}
   </span>
 );
