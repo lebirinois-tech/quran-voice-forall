@@ -1,3 +1,4 @@
+import { juzMapping } from '@/data/surahs';
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
@@ -266,7 +267,7 @@ export const VerseCard = ({
   // is intentionally ignored here.
   const effectiveTajweedHtml =
     textDisplayStyle === 'tajweed'
-      ? sanitizeTajweedHtml(applyAutoTajweed(verse.text))
+      ? sanitizeTajweedHtml(applyAutoTajweed(verse.text.replace(/\u06DF/g, '\u0652')))
       : undefined;
 
   // Auto-Tajweed coloring for Warsh / Qalun verse-by-verse modes
@@ -333,11 +334,11 @@ export const VerseCard = ({
   // Map fontSize setting to Tailwind classes
   const getFontSizeClass = () => {
     switch (fontSize) {
-      case 'small': return 'text-3xl md:text-4xl';
-      case 'medium': return 'text-4xl md:text-5xl';
-      case 'large': return 'text-5xl md:text-6xl';
-      case 'xlarge': return 'text-6xl md:text-7xl';
-      default: return 'text-4xl md:text-5xl';
+      case 'small': return 'text-4xl md:text-5xl';
+      case 'medium': return 'text-5xl md:text-6xl';
+      case 'large': return 'text-6xl md:text-7xl';
+      case 'xlarge': return 'text-7xl md:text-8xl';
+      default: return 'text-5xl md:text-6xl';
     }
   };
 
@@ -470,6 +471,13 @@ export const VerseCard = ({
         </div>
       </div>
 
+      {Object.entries(juzMapping).find(([, j]) => j.surah === surahNumber && j.verse === verse.number && !(j.surah === 1)) && (
+        <div className="mb-3 flex items-center justify-center gap-2 font-arabic font-bold verse-juz-marker" dir="rtl">
+          <span aria-hidden>۞</span>
+          <span>بداية الجزء {Object.entries(juzMapping).find(([, j]) => j.surah === surahNumber && j.verse === verse.number)?.[0]}</span>
+          <span aria-hidden>★</span>
+        </div>
+      )}
       {/* Arabic Text */}
       {hideText ? (
         <div className="mb-4 py-8 text-center rounded-lg bg-muted/30 border border-dashed border-border">
@@ -514,7 +522,7 @@ export const VerseCard = ({
           className={cn(getTextClassName(), "mb-4 text-right")}
           dir="rtl"
         >
-          {verse.text}
+          {verse.text.replace(/\u06DF/g, '\u0652')}
           <VerseEndNumber n={verse.number} />
         </p>
       )}

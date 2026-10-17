@@ -307,6 +307,10 @@
 .tajweed-text {
   color: hsl(var(--foreground));
 }
+:root { --verse-number: 221 83% 45%; }
+.dark { --verse-number: 213 94% 68%; }
+.verse-juz-marker { color: hsl(var(--verse-number)); font-size: 1.1rem; }
+.font-mushaf-hafs { -webkit-text-stroke: 0.018em currentColor; }
 
 /* Numéro de fin de verset (رقم الآية) en mode Versets — cercle doré
    comme dans un Mushaf imprimé, taille réduite pour ne pas gêner la lecture. */
@@ -315,9 +319,10 @@
   min-width: 1.8em;
   padding: 0 0.12em;
   margin-inline-start: 0.35em;
-  border: 2px solid hsl(var(--primary));
+  border: 2px solid hsl(var(--verse-number));
   border-radius: 9999px;
-  color: hsl(var(--primary));
+  color: hsl(var(--verse-number));
+  font-weight: 700;
   font-size: 0.55em;
   line-height: 1.9;
   text-align: center;
