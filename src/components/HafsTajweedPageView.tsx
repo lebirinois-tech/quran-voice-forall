@@ -1007,10 +1007,20 @@ export const HafsTajweedPageView = ({
                                 wordActive && 'tw-word-active'
                               )}
                             >
+                              {word.kind === 'word' && word.wordIndex === 0 && juzStartKeys.has(`${word.surah}:${word.verse}`) && (
+                                <span
+                                  aria-label={`Début du Juz ${getJuzForVerse(word.surah, word.verse)}`}
+                                  className="mx-[0.08em] inline-flex size-[1.3em] shrink-0 items-center justify-center rounded-full border-[0.08em] bg-background/70 align-middle font-amiri text-[0.55em] font-bold leading-none"
+                                  style={{ borderColor: 'hsl(var(--verse-number))', color: 'hsl(var(--verse-number))' }}
+                                >
+                                  ۞
+                                </span>
+                              )}
                               {word.kind === 'end' ? (
                                 <span
                                   aria-label={`Fin du verset ${word.text}`}
-                                  className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] border-primary bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none text-primary"
+                                  className="mx-[0.04em] inline-flex size-[1.22em] shrink-0 items-center justify-center rounded-full border-[0.08em] bg-background/70 align-middle font-amiri text-[0.5em] font-bold leading-none"
+                                  style={{ borderColor: 'hsl(var(--verse-number))', color: 'hsl(var(--verse-number))' }}
                                 >
                                   {word.text.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))}
                                 </span>
