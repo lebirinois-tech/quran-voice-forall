@@ -928,6 +928,10 @@ export const HafsTajweedPageView = ({
               const nextSurah = isHeaderGap ? nextContentLine?.[0]?.surah : undefined;
               const previousLine = lineNumber > 1 ? officialMedinaLines[lineNumber - 1] ?? [] : [];
               const isFirstHeaderGap = isHeaderGap && previousLine.length > 0;
+              const followingLine = officialMedinaLines[lineNumber + 1] ?? [];
+              // Une seule ligne d'en-tête disponible (sourate débutant ligne 2) :
+              // titre et Basmala partagent cette ligne pour ne jamais omettre la Basmala.
+              const isSingleHeaderGap = isHeaderGap && (lineNumber === 1 || previousLine.length > 0) && followingLine.length > 0;
               const headerSurah = nextSurah ? surahs.find((item) => item.number === nextSurah) : undefined;
               const themedRuns = words.reduce<Array<{
                 key: string;
@@ -960,7 +964,9 @@ export const HafsTajweedPageView = ({
                 >
                   {isHeaderGap ? (
                     <span className="font-amiri font-bold text-foreground">
-                      {isFirstHeaderGap || lineNumber === 1
+                      {isSingleHeaderGap
+                        ? `سورة ${headerSurah?.nameArabic ?? ''}${nextSurah && surahHasHeaderBasmala(nextSurah) ? '  ۞  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' : ''}`
+                        : isFirstHeaderGap || lineNumber === 1
                         ? `سورة ${headerSurah?.nameArabic ?? ''}`
                         : nextSurah !== 9
                           ? 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
@@ -974,9 +980,12 @@ export const HafsTajweedPageView = ({
                         data-theme-run=""
                         className={cn(
                           'flex flex-auto items-center self-stretch',
-                          isShortLine ? 'justify-center gap-x-[0.3em]' : 'justify-between'
+                          isShortLine ? 'justify-center gap-x-[0.3em]' : 'justify-around'
                         )}
                         style={{
+                          // Espace réparti selon le nombre de mots : un thème d'un seul mot
+                          // ne crée plus de grand vide artificiel.
+                          flex: isShortLine ? undefined : `${run.words.length} 1 auto`,
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
                             : undefined,
