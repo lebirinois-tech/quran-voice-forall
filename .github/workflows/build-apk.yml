@@ -114,7 +114,7 @@ jobs:
         run: |
           mkdir -p artifacts
           APK_PATH=$(find android/app/build/outputs/apk -name '*debug*.apk' | head -n 1)
-          if [ -z "$APK PATH" ]; then echo "APK introuvable"; exit 1; fi
+          if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then echo "APK introuvable"; exit 1; fi
           cp "$APK_PATH" artifacts/quran-acces-pour-tous.apk
 
       - name: Upload APK artifact
