@@ -28,6 +28,7 @@ import { VerseRecorder } from './VerseRecorder';
 import { useHafsMedinaWordLines, type MedinaLineWord } from '@/hooks/useHafsMedinaWordLines';
 import { useHafsVerseThemes } from '@/hooks/useHafsVerseThemes';
 import { getThematicParagraph } from '@/lib/thematicParagraph';
+import { getMushafOpeningRows } from '@/lib/mushafOpeningLayout';
 
 interface HafsTajweedPageViewProps {
   surahNumber: number;
@@ -180,6 +181,7 @@ export const HafsTajweedPageView = ({
     [menuSurah, themeVerse, verseThemes]
   );
   const usesOfficialMedinaLines = riwaya === 'hafs' && officialMedinaLines !== null;
+  const officialRows = useMemo(() => officialMedinaLines ? getMushafOpeningRows(officialMedinaLines) : [], [officialMedinaLines]);
   const [officialFontPx, setOfficialFontPx] = useState(24);
 
   const prevSurahRef = useRef(surahNumber);
@@ -620,7 +622,8 @@ export const HafsTajweedPageView = ({
       // Chaque ligne reçoit exactement la même part de la hauteur disponible.
       // Contrairement à l'ancien second ajustement, aucune ligne ne peut être
       // tassée au milieu ni changer d'espacement après le chargement Android.
-      const lh = Number(Math.max(MEASURE_LH, target / Math.max(1, MEDINA_LINE_COUNT * px)).toFixed(3));
+      const openingRows = textEl.querySelectorAll('[data-surah-opening-row]').length;
+      const lh = Number(Math.max(MEASURE_LH, target / Math.max(1, (MEDINA_LINE_COUNT + openingRows) * px)).toFixed(3));
 
       textEl.style.fontSize = prevFs;
       textEl.style.lineHeight = prevLh;
@@ -696,7 +699,7 @@ export const HafsTajweedPageView = ({
     const currentDesired = () => {
       const byWidth = (frameRef.current?.clientWidth ?? 360) * 0.068 * fontScale;
       const h = frameRef.current?.clientHeight ?? 0;
-      const byHeight = h > 0 ? (h / 15) * 0.82 : byWidth;
+      const byHeight = h > 0 ? (h / Math.max(15, officialRows.length)) * 0.82 : byWidth;
       return Math.min(64, Math.max(10, Math.min(byWidth, byHeight)));
     };
     let raf = 0;
@@ -757,7 +760,7 @@ export const HafsTajweedPageView = ({
       window.clearTimeout(roTimer);
       ro?.disconnect();
     };
-  }, [usesOfficialMedinaLines, officialMedinaLines, currentPage, fontScale, themeOpacityPct]);
+  }, [usesOfficialMedinaLines, officialMedinaLines, officialRows, currentPage, fontScale, themeOpacityPct]);
 
 
 
@@ -884,12 +887,13 @@ export const HafsTajweedPageView = ({
           lang="ar"
           className={cn(
             'quran-text tajweed-text mx-auto w-full max-w-3xl text-foreground',
-            usesOfficialMedinaLines && 'grid min-h-0 flex-1 grid-rows-[repeat(15,minmax(0,1fr))]',
+            usesOfficialMedinaLines && 'grid min-h-0 flex-1',
             riwaya === 'hafs' && 'font-mushaf-hafs',
             riwaya === 'warsh' && 'font-mushaf-warsh',
             riwaya === 'qalun' && 'font-mushaf-qalun'
           )}
           style={{
+            gridTemplateRows: usesOfficialMedinaLines ? `repeat(${officialRows.length}, minmax(0, 1fr))` : undefined,
             fontSize: usesOfficialMedinaLines
               ? `${officialFontPx}px`
               : fontPx
@@ -918,21 +922,18 @@ export const HafsTajweedPageView = ({
 
         >
           {usesOfficialMedinaLines && officialMedinaLines ? (
-            Array.from({ length: 15 }, (_, index) => index + 1).map((lineNumber) => {
+            officialRows.map((row, rowIndex) => {
+              if (row.kind !== 'content') {
+                const headerSurah = surahs.find(item => item.number === row.surah);
+                return (
+                  <div key={`opening-${rowIndex}`} data-surah-opening-row={row.kind} data-opening-surah={row.surah}
+                    className="flex min-h-0 w-full items-center justify-center whitespace-nowrap text-center font-amiri font-bold text-foreground">
+                    {row.kind === 'title' ? `سورة ${headerSurah?.nameArabic ?? ''}` : 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'}
+                  </div>
+                );
+              }
+              const lineNumber = row.line;
               const words = officialMedinaLines[lineNumber] ?? [];
-              const first = words[0];
-              const nextContentLine = Array.from({ length: 15 - lineNumber }, (_, offset) =>
-                officialMedinaLines[lineNumber + offset + 1] ?? []
-              ).find((line) => line.length > 0);
-              const isHeaderGap = words.length === 0 && nextContentLine?.[0]?.verse === 1;
-              const nextSurah = isHeaderGap ? nextContentLine?.[0]?.surah : undefined;
-              const previousLine = lineNumber > 1 ? officialMedinaLines[lineNumber - 1] ?? [] : [];
-              const isFirstHeaderGap = isHeaderGap && previousLine.length > 0;
-              const followingLine = officialMedinaLines[lineNumber + 1] ?? [];
-              // Une seule ligne d'en-tête disponible (sourate débutant ligne 2) :
-              // titre et Basmala partagent cette ligne pour ne jamais omettre la Basmala.
-              const isSingleHeaderGap = isHeaderGap && (lineNumber === 1 || previousLine.length > 0) && followingLine.length > 0;
-              const headerSurah = nextSurah ? surahs.find((item) => item.number === nextSurah) : undefined;
               const themedRuns = words.reduce<Array<{
                 key: string;
                 theme: ReturnType<typeof getPrimaryThemeForVerse>['theme'];
@@ -951,7 +952,7 @@ export const HafsTajweedPageView = ({
 
               // Lignes courtes (fin de sourate, pages 1–2) : mots resserrés et centrés,
               // l'aplat thématique couvre toujours toute la largeur.
-              const isShortLine = !isHeaderGap && words.length > 0 && words.length <= 4;
+              const isShortLine = words.length > 0 && words.length <= 4;
 
               return (
                 <div
@@ -959,21 +960,10 @@ export const HafsTajweedPageView = ({
                   data-medina-line={lineNumber}
                   className={cn(
                     'flex w-full min-w-0 items-center whitespace-nowrap',
-                    isHeaderGap ? 'justify-center text-center' : 'justify-between'
+                    'justify-between'
                   )}
                 >
-                  {isHeaderGap ? (
-                    <span className="font-amiri font-bold text-foreground">
-                      {isSingleHeaderGap
-                        ? `سورة ${headerSurah?.nameArabic ?? ''}${nextSurah && surahHasHeaderBasmala(nextSurah) ? '  ۞  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' : ''}`
-                        : isFirstHeaderGap || lineNumber === 1
-                        ? `سورة ${headerSurah?.nameArabic ?? ''}`
-                        : nextSurah !== 9
-                          ? 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
-                          : ''}
-                    </span>
-                  ) : (
-                    themedRuns.map((run, runPosition) => (
+                  {themedRuns.map((run, runPosition) => (
                       <span
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
@@ -1040,8 +1030,7 @@ export const HafsTajweedPageView = ({
                           );
                         })}
                       </span>
-                    ))
-                  )}
+                    ))}
                 </div>
               );
             })
@@ -1050,12 +1039,20 @@ export const HafsTajweedPageView = ({
             const isMainSurah = section.surahNumber === surahNumber;
             return (
             <span key={`sec-${section.surahNumber}`} style={{ display: 'inline' }}>
+            {section.startsHere && (
+              <span data-surah-opening-row="title" data-opening-surah={section.surahNumber}
+                className="block w-full text-center font-amiri font-bold text-foreground">
+                سورة {sectionSurah?.nameArabic ?? ''}
+              </span>
+            )}
             {section.startsHere && surahHasHeaderBasmala(section.surahNumber) && (
               <span
                 dir="rtl"
                 style={{ display: 'block', width: '100%', textAlign: 'center' }}
               >
                 <span
+                  data-surah-opening-row="basmala"
+                  data-opening-surah={section.surahNumber}
                   className="block font-amiri font-extrabold text-foreground"
                   style={{ fontSize: '1.0em', margin: '0.1em 0 0.15em' }}
                 >
