@@ -53,3 +53,4 @@
 
 ## Open
 - [ ] Auto-resume last reading position on app reopen (local, all users) + banner; then publish
+- [ ] Mushaf Hafs : afficher les images officielles du Mushaf Tajweed (15 lignes) avec le coloriage thématique actuel superposé
