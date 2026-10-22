@@ -1,8 +1,7 @@
 # Feuille de route
 
 ## En cours
-- Unifier les ouvertures de sourate (titre puis Basmala séparés) dans les trois Mushafs, vérifier texte et géométrie, puis publier web/PWA ; APK bloqué sans accès GitHub autorisé pour déclencher le workflow.
-- Publier les dernières modifications du site ; APK : corriger la vérification du fichier puis lancer « Build Android APK » sur GitHub (bloqué ici : aucun accès GitHub autorisé pour déclencher la compilation).
+- APK : lancer « Build Android APK » sur GitHub pour embarquer les ouvertures de sourate unifiées (bloqué ici : aucun accès GitHub autorisé pour déclencher la compilation).
 - Corriger uniquement le coloriage Warsh/Qaloun signalé sur les deuxième et quatrième pages d’Al-Baqara ; contrôler les correspondances thématiques sur toutes les sourates, sans toucher à la mise en page.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
