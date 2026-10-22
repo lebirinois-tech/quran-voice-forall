@@ -1,8 +1,7 @@
 # Feuille de route
 
 ## En cours
-- Unifier les ouvertures de sourate (titre puis Basmala séparés) dans les trois Mushafs, vérifier texte et géométrie, puis publier web/PWA ; APK bloqué sans accès GitHub autorisé pour déclencher le workflow.
-- Publier les dernières modifications du site ; APK : corriger la vérification du fichier puis lancer « Build Android APK » sur GitHub (bloqué ici : aucun accès GitHub autorisé pour déclencher la compilation).
+- APK : lancer « Build Android APK » sur GitHub pour embarquer les ouvertures de sourate unifiées (bloqué ici : aucun accès GitHub autorisé pour déclencher la compilation).
 - Corriger uniquement le coloriage Warsh/Qaloun signalé sur les deuxième et quatrième pages d’Al-Baqara ; contrôler les correspondances thématiques sur toutes les sourates, sans toucher à la mise en page.
 - Décision prise (choix B) : conserver le rendu actuel de Warsh et Qaloun (15 lignes, Tajweed, coloriage des thèmes, audio, Tafsir) ; les PDF Warsh/Qaloun servent uniquement de référence de contrôle visuel, aucune intégration d'images.
 - Générer l’APK Android avec les trois Mushafs validés en 15 lignes et le rendre téléchargeable (lancement du workflow GitHub Actions par l’utilisatrice).
@@ -14,6 +13,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Ouvertures de sourate unifiées dans les trois Mushafs : titre seul sur sa ligne puis Basmala centrée en dessous (Yunus, Hud, An-Nisa, etc.), sans déplacer aucun mot des coupures Médine ; 13 tests validés, contrôle visuel pages 208/221/77, publié le 22 octobre 2026.
 - Recherche plein texte dans tout le Coran (page /search, insensible au tachkile et aux formes des lettres), navigation directe vers le verset ; publiée le 16 octobre 2026.
 - Hafs : taille de police uniforme sur toutes les pages (même valeur par écran) ; marge de sécurité resserrée (0,995, 40 itérations) pour qu'aucune lettre ne soit coupée au bord.
 - Hafs : source Uthmani vérifiée sur 6 236 versets et tous les mots des 604 pages, signes de tanween incompatibles corrigés, signes d’iqlab authentiques conservés (99 mîm bas, 510 mîm haut), cache versionné ; pages 3 et 4 d’Al-Baqara contrôlées en navigateur sur écran d’ordinateur et de téléphone, aucune marque parasite ni signe superposé ; publié le 13 octobre 2026.
