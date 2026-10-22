@@ -13,6 +13,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Ouvertures de sourate unifiées dans les trois Mushafs : titre seul sur sa ligne puis Basmala centrée en dessous (Yunus, Hud, An-Nisa, etc.), sans déplacer aucun mot des coupures Médine ; 13 tests validés, contrôle visuel pages 208/221/77, publié le 22 octobre 2026.
 - Recherche plein texte dans tout le Coran (page /search, insensible au tachkile et aux formes des lettres), navigation directe vers le verset ; publiée le 16 octobre 2026.
 - Hafs : taille de police uniforme sur toutes les pages (même valeur par écran) ; marge de sécurité resserrée (0,995, 40 itérations) pour qu'aucune lettre ne soit coupée au bord.
 - Hafs : source Uthmani vérifiée sur 6 236 versets et tous les mots des 604 pages, signes de tanween incompatibles corrigés, signes d’iqlab authentiques conservés (99 mîm bas, 510 mîm haut), cache versionné ; pages 3 et 4 d’Al-Baqara contrôlées en navigateur sur écran d’ordinateur et de téléphone, aucune marque parasite ni signe superposé ; publié le 13 octobre 2026.
