@@ -1002,9 +1002,13 @@ export const HafsTajweedPageView = ({
                               }}
                               className={cn(
                                 'cursor-pointer px-[0.1em]',
+                                !isShortLine && 'flex justify-center',
                                 isAllahName && '[&_span]:!text-foreground',
                                 wordActive && 'tw-word-active'
                               )}
+                              // L'espace libre est réparti à parts égales entre tous les mots
+                              // de la ligne : aucun mot isolé ne crée un grand vide.
+                              style={isShortLine ? undefined : { flex: '1 1 auto' }}
                             >
                               {word.kind === 'word' && word.wordIndex === 0 && juzStartKeys.has(`${word.surah}:${word.verse}`) && (
                                 <span
