@@ -1,6 +1,7 @@
 # Feuille de route
 
 ## En cours
+- Mise à jour intelligente APK/PWA : détection au lancement, toutes les 5 minutes et au retour en ligne ; proposition du nouvel APK, mise à jour automatique du site.
 - (Terminé 22 octobre 2026) APK n° 191 lancé depuis la connexion GitHub du projet et publié dans l'édition « latest » : https://github.com/lebirinois-tech/quran-voice-forall/releases/download/latest/quran-acces-pour-tous.apk
 
 - Corriger uniquement le coloriage Warsh/Qaloun signalé sur les deuxième et quatrième pages d’Al-Baqara ; contrôler les correspondances thématiques sur toutes les sourates, sans toucher à la mise en page.
