@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshCw, CheckCircle2, AlertCircle, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { LOCAL_VERSION, fetchDeployedVersion, formatBuildTime, type VersionInfo } from '@/lib/buildVersion';
+import { LOCAL_VERSION, formatBuildTime, type VersionInfo } from '@/lib/buildVersion';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
+import { fetchInstalledUpdateVersion, hasInstalledUpdate, isNativeApp } from '@/lib/appUpdates';
 
 export const BuildVersionBadge = ({ className }: { className?: string }) => {
   const [remote, setRemote] = useState<VersionInfo | null>(null);
@@ -12,7 +13,7 @@ export const BuildVersionBadge = ({ className }: { className?: string }) => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    setRemote(await fetchDeployedVersion());
+    setRemote(await fetchInstalledUpdateVersion());
     setLoading(false);
   }, []);
 
@@ -21,7 +22,7 @@ export const BuildVersionBadge = ({ className }: { className?: string }) => {
   }, [load]);
 
   const unknown = !remote;
-  const upToDate = remote && remote.buildId === LOCAL_VERSION.buildId;
+  const upToDate = remote && !hasInstalledUpdate(remote);
 
   return (
     <div className={cn('mx-auto max-w-md rounded-lg border border-border/60 bg-muted/30 p-3 text-xs', className)}>
@@ -36,7 +37,7 @@ export const BuildVersionBadge = ({ className }: { className?: string }) => {
       </p>
 
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-border/50 pt-2">
-        <span className="font-medium text-foreground">Dernière version déployée</span>
+        <span className="font-medium text-foreground">{isNativeApp() ? 'Dernière version Android' : 'Dernière version déployée'}</span>
         <code className="rounded bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground">
           {loading ? '…' : remote?.buildId ?? 'inconnue'}
         </code>
@@ -75,7 +76,6 @@ export const BuildVersionBadge = ({ className }: { className?: string }) => {
               className="h-7 px-2"
               onClick={async () => {
                 await checkForUpdate();
-                window.location.reload();
               }}
               disabled={isChecking}
             >

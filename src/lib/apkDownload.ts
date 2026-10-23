@@ -1,5 +1,5 @@
-const apkFileName = 'quran-acces-pour-tous.apk';
-const githubRepository =
+export const apkFileName = 'quran-acces-pour-tous.apk';
+export const githubRepository =
   import.meta.env.VITE_GITHUB_REPOSITORY || 'lebirinois-tech/quran-voice-forall';
 
 export const apkDownloadUrl =

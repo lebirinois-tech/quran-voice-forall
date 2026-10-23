@@ -68,6 +68,8 @@ jobs:
           bunx cap sync android
 
       - name: Set Android compatibility (minSdk 24 = Android 7+)
+        env:
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
         run: |
           node - <<'NODE'
           const fs = require('fs');
@@ -79,6 +81,10 @@ jobs:
           }
           fs.writeFileSync(p, src);
           console.log(src);
+          const appGradle = 'android/app/build.gradle';
+          let app = fs.readFileSync(appGradle, 'utf8');
+          app = app.replace(/versionCode\s+\d+/, `versionCode ${1000 + Number(process.env.ANDROID_VERSION_CODE)}`);
+          fs.writeFileSync(appGradle, app);
           NODE
           # APK universel : on garde la configuration Capacitor par défaut
           # (pas de patch de android/app/build.gradle, source d'échecs répétés).
@@ -134,3 +140,16 @@ jobs:
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish exact APK version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const version = JSON.parse(fs.readFileSync('dist/version.json', 'utf8'));
+          fs.writeFileSync('/tmp/apk-release-notes.txt',
+            'APK Android généré automatiquement depuis le dernier commit.\n\n' +
+            '<!-- quran-apk-version:' + JSON.stringify(version) + ' -->\n');
+          NODE
+          gh release edit latest --repo "${{ github.repository }}" --notes-file /tmp/apk-release-notes.txt

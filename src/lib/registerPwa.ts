@@ -1,4 +1,15 @@
 import { registerSW } from "virtual:pwa-register";
+import { isNativeApp } from './appUpdates';
+
+let registered = false;
+let activeRegistration: ServiceWorkerRegistration | undefined;
+let applyUpdate: (() => Promise<void>) | undefined;
+
+export const checkPwaUpdate = async () => {
+  if (!shouldRegisterPwa()) return;
+  await activeRegistration?.update();
+  if (applyUpdate) await applyUpdate();
+};
 
 const isInIframe = () => {
   try {
@@ -9,10 +20,12 @@ const isInIframe = () => {
 };
 
 const isBlockedServiceWorkerHost = () => {
-  const host = window.location.hostname;
+  const host = window.location.hostname.toLowerCase();
   return (
     host.startsWith("id-preview--") ||
     host.startsWith("preview--") ||
+    (/\.(?:lovable\.app|gpt-eng\.com|gptengineer\.run)$/.test(host) &&
+      /^(?:(?:id-preview|preview)(?:-[a-z0-9]+)?--|project--.+-dev$)/.test(host.split('.')[0])) ||
     host === "lovableproject.com" ||
     host.endsWith(".lovableproject.com") ||
     host === "lovableproject-dev.com" ||
@@ -38,8 +51,9 @@ export const clearAppShellServiceWorkers = async () => {
 export const shouldRegisterPwa = () => {
   return (
     import.meta.env.PROD &&
+    !isNativeApp() &&
     "serviceWorker" in navigator &&
-    !window.location.search.includes("sw=off") &&
+    new URLSearchParams(window.location.search).get('sw') !== 'off' &&
     !isInIframe() &&
     !isBlockedServiceWorkerHost()
   );
@@ -51,11 +65,19 @@ export const registerQuranPwa = (onNeedRefresh?: (update: () => Promise<void>) =
     return;
   }
 
+  if (registered) return;
+  registered = true;
+
   let updateSW: ((reloadPage?: boolean) => Promise<void>) | undefined;
   updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
-      if (updateSW) onNeedRefresh?.(() => updateSW?.(true) ?? Promise.resolve());
+      applyUpdate = () => updateSW?.(true) ?? Promise.resolve();
+      onNeedRefresh?.(applyUpdate);
+      void applyUpdate().catch(() => undefined);
+    },
+    onRegisteredSW(_url, registration) {
+      activeRegistration = registration;
     },
     onOfflineReady() {
       window.dispatchEvent(new CustomEvent("quran-app-offline-ready"));
