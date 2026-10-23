@@ -927,7 +927,15 @@ export const HafsTajweedPageView = ({
             riwaya === 'qalun' && 'font-mushaf-qalun'
           )}
           style={{
-            gridTemplateRows: usesOfficialMedinaLines ? `repeat(${officialRows.length}, minmax(0, 1fr))` : undefined,
+            // Pages 1-2 (Al-Fatiha, début Al-Baqarah) : bloc centré verticalement
+            // dans la page, comme dans le Mushaf imprimé.
+            gridTemplateRows: usesOfficialMedinaLines
+              ? currentPage <= 2
+                ? `repeat(${officialRows.length}, auto)`
+                : `repeat(${officialRows.length}, minmax(0, 1fr))`
+              : undefined,
+            alignContent: usesOfficialMedinaLines && currentPage <= 2 ? 'center' : undefined,
+            rowGap: usesOfficialMedinaLines && currentPage <= 2 ? '0.55em' : undefined,
             fontSize: usesOfficialMedinaLines
               ? `${officialFontPx}px`
               : fontPx
