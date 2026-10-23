@@ -712,7 +712,7 @@ export const HafsTajweedPageView = ({
         inner.style.transform = '';
         inner.style.width = '';
         inner.style.justifyContent = '';
-        inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flexGrow = ''; r.style.justifyContent = ''; });
+        inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flex = `${r.dataset.grow ?? 1} 1 auto`; r.style.justifyContent = ''; });
       });
     };
     // Largeur naturelle des mots d'une ligne (sans étirement).
@@ -1003,6 +1003,7 @@ export const HafsTajweedPageView = ({
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
                         data-theme-run=""
+                        data-grow={run.words.length}
                         className="flex items-center justify-between gap-x-[0.18em] self-stretch px-[0.08em]"
                         style={{
                           // Le sous-titre thématique remplit l'espace en proportion du nombre de mots.
