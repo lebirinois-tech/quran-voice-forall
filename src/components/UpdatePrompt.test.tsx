@@ -13,6 +13,7 @@ beforeEach(() => {
   Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
   mocks.native.mockReturnValue(true);
+  mocks.open.mockResolvedValue(undefined);
   mocks.newer.mockReturnValue(true);
   mocks.fetch.mockResolvedValue({ buildId: 'new-apk', buildTime: '2026-10-24T00:00:00Z' });
 });
