@@ -707,37 +707,71 @@ export const HafsTajweedPageView = ({
     let roTimer = 0;
     // Largeur réelle du contenu d'une ligne = somme des mots (indépendant du
     // sens RTL et de justify-between, qui masquait le dépassement à gauche).
+    const resetStretch = () => {
+      root.querySelectorAll<HTMLElement>('[data-line-inner]').forEach((inner) => {
+        inner.style.transform = '';
+        inner.style.width = '';
+        inner.style.justifyContent = '';
+        inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flex = `${r.dataset.grow ?? 1} 1 auto`; r.style.justifyContent = ''; });
+      });
+    };
+    // Largeur naturelle des mots d'une ligne (sans étirement).
+    const naturalWidth = (row: HTMLElement) => {
+      let used = 0;
+      row.querySelectorAll<HTMLElement>('[data-theme-run] > span').forEach((word) => {
+        used += word.getBoundingClientRect().width;
+      });
+      return used;
+    };
     const worstRatio = () => {
       let ratio = 1;
       root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
         const available = row.clientWidth;
         if (available <= 0) return;
-        let used = 0;
-        Array.from(row.children).forEach((child) => {
-          const element = child as HTMLElement;
-          if (element.hasAttribute('data-theme-run')) {
-            // Les aplats s'étirent (justification) : mesurer les mots eux-mêmes.
-            Array.from(element.children).forEach((word) => {
-              used += (word as HTMLElement).getBoundingClientRect().width;
-            });
-          } else {
-            used += Math.max(element.getBoundingClientRect().width, element.scrollWidth);
-          }
-        });
+        const inner = row.querySelector<HTMLElement>('[data-line-inner]');
+        if (!inner) return;
+        inner.style.width = 'max-content';
+        const used = inner.getBoundingClientRect().width;
+        inner.style.width = '';
         if (used > 0) ratio = Math.min(ratio, available / used);
       });
       return ratio;
     };
+    // Comme le calligraphe du Mushaf de Médine : chaque ligne remplit le cadre
+    // d'un bord à l'autre. Les lignes peu remplies élargissent légèrement les
+    // lettres (sans casser les liaisons), le reste est réparti entre les mots.
+    const stretchLines = () => {
+      root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
+        const inner = row.querySelector<HTMLElement>('[data-line-inner]');
+        const available = row.clientWidth;
+        if (!inner || available <= 0) return;
+        inner.style.width = 'max-content';
+        const used = inner.getBoundingClientRect().width;
+        inner.style.width = '';
+        if (used <= 0) return;
+        const fill = used / available;
+        // Ligne de fin de sourate très courte : pas d'étirement excessif.
+        if (fill < 0.45 || currentPage <= 2) {
+          inner.style.justifyContent = 'center';
+          inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flexGrow = '0'; r.style.justifyContent = 'center'; });
+          return;
+        }
+        const scale = Math.min(1.35, Math.max(1, (available * 0.985) / used));
+        if (scale > 1.005) {
+          inner.style.width = `${100 / scale}%`;
+          inner.style.transform = `scaleX(${scale})`;
+        }
+      });
+    };
     const fitOfficialLines = () => {
-      // Taille uniforme pour toutes les pages : même valeur pour un même
-      // écran, indépendante de la longueur des lignes de la page affichée.
-      // Réduction seulement en cas de vrai dépassement (rare), légère.
+      resetStretch();
       let size = Math.floor(currentDesired() * 0.82 * 10) / 10;
       root.style.fontSize = `${size}px`;
       for (let i = 0; i < 40 && size > 10 && worstRatio() < 0.995; i += 1) {
         size = Math.max(10, Math.floor(size * 0.985 * 10) / 10);
         root.style.fontSize = `${size}px`;
       }
+      stretchLines();
       setOfficialFontPx(size);
     };
     raf = requestAnimationFrame(fitOfficialLines);
@@ -957,18 +991,23 @@ export const HafsTajweedPageView = ({
                 <div
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
-                  className={cn(
-                    'flex w-full min-w-0 items-center justify-center whitespace-nowrap'
-                  )}
+                  className="flex w-full min-w-0 items-center overflow-visible whitespace-nowrap"
                 >
+                  <div
+                    data-line-inner=""
+                    className="flex h-full w-full items-stretch justify-between"
+                    style={{ transformOrigin: 'right center' }}
+                  >
                   {themedRuns.map((run, runPosition) => (
                       <span
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
                         data-theme-run=""
-                        className="flex flex-none items-center justify-center gap-x-[0.22em] self-stretch px-[0.11em]"
+                        data-grow={run.words.length}
+                        className="flex items-center justify-between gap-x-[0.18em] self-stretch px-[0.08em]"
                         style={{
-                          // Espacement arabe naturel et constant : aucun étirement forcé.
+                          // Le sous-titre thématique remplit l'espace en proportion du nombre de mots.
+                          flex: `${run.words.length} 1 auto`,
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
                             : undefined,
@@ -1024,6 +1063,7 @@ export const HafsTajweedPageView = ({
                         })}
                       </span>
                     ))}
+                  </div>
                 </div>
               );
             })
