@@ -124,6 +124,9 @@ export const HafsTajweedPageView = ({
   const [showMenuButton, setShowMenuButton] = useState(true);
   const [pageInput, setPageInput] = useState('');
   const [verseInput, setVerseInput] = useState('');
+  // Sourate choisie dans la liste, en attente de validation par « Aller ».
+  const [pendingSurah, setPendingSurah] = useState<number | null>(null);
+  useEffect(() => setPendingSurah(null), [surahNumber]);
 
   // Réglages de lisibilité, persistés : échelle de la police (%) et
   // opacité des fonds thématiques (0 à 0.4).
@@ -1403,24 +1406,34 @@ export const HafsTajweedPageView = ({
               <div className="space-y-2 rounded-2xl border border-border bg-card p-3">
                 <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Sourate — السورة</label>
-                  <Select
-                    value={String(surahNumber)}
-                    onValueChange={(v) => {
-                      setMenuOpen(false);
-                      onNavigateToSurah?.(Number(v));
-                    }}
-                  >
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Choisir une sourate" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[120] max-h-72">
-                      {surahs.map((s) => (
-                        <SelectItem key={s.number} value={String(s.number)}>
-                          {s.number}. {s.name} — {s.nameArabic}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select
+                      value={String(pendingSurah ?? surahNumber)}
+                      onValueChange={(v) => setPendingSurah(Number(v))}
+                    >
+                      <SelectTrigger className="h-11 flex-1">
+                        <SelectValue placeholder="Choisir une sourate" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[120] max-h-72">
+                        {surahs.map((s) => (
+                          <SelectItem key={s.number} value={String(s.number)}>
+                            {s.number}. {s.name} — {s.nameArabic}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      className="h-11 px-5"
+                      disabled={pendingSurah === null || pendingSurah === surahNumber}
+                      onClick={() => {
+                        if (pendingSurah === null) return;
+                        setMenuOpen(false);
+                        onNavigateToSurah?.(pendingSurah);
+                      }}
+                    >
+                      Aller — اذهب
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
