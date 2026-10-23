@@ -3,7 +3,7 @@
 ## En cours
 - Mise à jour intelligente APK/PWA codée et testée (9 tests, Android simulé) : publication du site demandée le 23 octobre 2026 à 22:58 UTC ; APK n° 192 terminé avec succès (contrôle GitHub à 23:01 UTC). Attente : installation initiale sur tablette ; installation Android réelle non vérifiée ici.
 - (Terminé 24 octobre 2026) APK généré automatiquement par GitHub à chaque modification du projet ; problème de redirection tablette résolu par l’utilisateur.
-- Installation tablette : l’utilisateur signale une redirection vers le site, sans installation ; attendre le type de tablette et le bouton touché avant de modifier le parcours.
+- (Terminé 24 octobre 2026) Installation tablette : la redirection vers le site est résolue, l'utilisateur confirme que tout fonctionne.
 - (Terminé 22 octobre 2026) APK n° 191 lancé depuis la connexion GitHub du projet et publié dans l'édition « latest » : https://github.com/lebirinois-tech/quran-voice-forall/releases/download/latest/quran-acces-pour-tous.apk
 
 - Corriger uniquement le coloriage Warsh/Qaloun signalé sur les deuxième et quatrième pages d’Al-Baqara ; contrôler les correspondances thématiques sur toutes les sourates, sans toucher à la mise en page.
@@ -16,6 +16,7 @@
 - Ajouter un choix mémorisé « une page / deux pages côte à côte » dans les trois Mushafs pages, uniquement à partir de la sourate 2 Al-Baqara.
 
 ## Fait récemment
+- Cartouche décoré du titre de sourate ajouté en mode Versets (Hafs, Warsh, Qaloun), avec plus d'air vertical pour les jambages inférieurs ; 23 tests validés, contrôle visuel Playwright ; site publié et APK n° 196 généré avec succès le 23 octobre 2026 à 23:32 UTC.
 - Ouvertures de sourate unifiées dans les trois Mushafs : titre seul sur sa ligne puis Basmala centrée en dessous (Yunus, Hud, An-Nisa, etc.), sans déplacer aucun mot des coupures Médine ; 13 tests validés, contrôle visuel pages 208/221/77, publié le 22 octobre 2026.
 - Recherche plein texte dans tout le Coran (page /search, insensible au tachkile et aux formes des lettres), navigation directe vers le verset ; publiée le 16 octobre 2026.
 - Hafs : taille de police uniforme sur toutes les pages (même valeur par écran) ; marge de sécurité resserrée (0,995, 40 itérations) pour qu'aucune lettre ne soit coupée au bord.
