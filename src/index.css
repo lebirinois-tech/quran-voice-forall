@@ -365,6 +365,11 @@
 .surah-title-frame::before { margin-inline-end: 0.5em; }
 .surah-title-frame::after { margin-inline-start: 0.5em; }
 
+/* En mode Versets, le cartouche est affiché grand et hors de la grille des
+   15 lignes : on lui donne plus d'air vertical pour que les jambages
+   inférieurs (ر، ق) ne touchent pas le filet doré intérieur. */
+.surah-title-frame--verse { padding-block: 0.18em; }
+
 /* Suivi de la récitation mot à mot : un trait net sous le mot conserve
    intégralement les couleurs du Tajweed et la lisibilité du verset. */
 [data-w] {
