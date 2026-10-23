@@ -728,7 +728,11 @@ export const HafsTajweedPageView = ({
       root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
         const available = row.clientWidth;
         if (available <= 0) return;
-        const used = naturalWidth(row) * 1.04;
+        const inner = row.querySelector<HTMLElement>('[data-line-inner]');
+        if (!inner) return;
+        inner.style.width = 'max-content';
+        const used = inner.getBoundingClientRect().width;
+        inner.style.width = '';
         if (used > 0) ratio = Math.min(ratio, available / used);
       });
       return ratio;
@@ -740,8 +744,11 @@ export const HafsTajweedPageView = ({
       root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
         const inner = row.querySelector<HTMLElement>('[data-line-inner]');
         const available = row.clientWidth;
-        const used = naturalWidth(row);
-        if (!inner || available <= 0 || used <= 0) return;
+        if (!inner || available <= 0) return;
+        inner.style.width = 'max-content';
+        const used = inner.getBoundingClientRect().width;
+        inner.style.width = '';
+        if (used <= 0) return;
         const fill = used / available;
         // Ligne de fin de sourate très courte : pas d'étirement excessif.
         if (fill < 0.45) {
@@ -749,7 +756,7 @@ export const HafsTajweedPageView = ({
           inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flexGrow = '0'; r.style.justifyContent = 'center'; });
           return;
         }
-        const scale = Math.min(1.35, Math.max(1, (available * 0.97) / used));
+        const scale = Math.min(1.35, Math.max(1, (available * 0.985) / used));
         if (scale > 1.005) {
           inner.style.width = `${100 / scale}%`;
           inner.style.transform = `scaleX(${scale})`;
