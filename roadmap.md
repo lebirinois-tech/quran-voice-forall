@@ -1,7 +1,8 @@
 # Feuille de route
 
 ## En cours
-- Mise à jour intelligente APK/PWA codée et testée (9 tests, Android simulé) : publication du site demandée le 23 octobre 2026 à 22:58 UTC ; APK n° 192 lancé via GitHub sur le commit « Added auto-update detection », en file d’attente lors du contrôle. Attente externe : fin de génération puis installation initiale sur téléphone ; installation Android réelle non vérifiée ici.
+- Mise à jour intelligente APK/PWA codée et testée (9 tests, Android simulé) : publication du site demandée le 23 octobre 2026 à 22:58 UTC ; APK n° 192 terminé avec succès (contrôle GitHub à 23:01 UTC). Attente : installation initiale sur tablette ; installation Android réelle non vérifiée ici.
+- Installation tablette : l’utilisateur signale une redirection vers le site, sans installation ; attendre le type de tablette et le bouton touché avant de modifier le parcours.
 - (Terminé 22 octobre 2026) APK n° 191 lancé depuis la connexion GitHub du projet et publié dans l'édition « latest » : https://github.com/lebirinois-tech/quran-voice-forall/releases/download/latest/quran-acces-pour-tous.apk
 
 - Corriger uniquement le coloriage Warsh/Qaloun signalé sur les deuxième et quatrième pages d’Al-Baqara ; contrôler les correspondances thématiques sur toutes les sourates, sans toucher à la mise en page.
