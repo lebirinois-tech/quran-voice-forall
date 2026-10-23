@@ -959,8 +959,7 @@ export const HafsTajweedPageView = ({
                   key={`medina-line-${lineNumber}`}
                   data-medina-line={lineNumber}
                   className={cn(
-                    'flex w-full min-w-0 items-center whitespace-nowrap',
-                    'justify-between'
+                    'flex w-full min-w-0 items-center justify-center whitespace-nowrap'
                   )}
                 >
                   {themedRuns.map((run, runPosition) => (
@@ -968,14 +967,9 @@ export const HafsTajweedPageView = ({
                         key={`${lineNumber}-${run.key}-${runPosition}`}
                         data-theme={run.theme?.id}
                         data-theme-run=""
-                        className={cn(
-                          'flex flex-auto items-center self-stretch',
-                          isShortLine ? 'justify-center gap-x-[0.3em]' : 'justify-around'
-                        )}
+                        className="flex flex-none items-center justify-center gap-x-[0.22em] self-stretch px-[0.11em]"
                         style={{
-                          // Espace réparti selon le nombre de mots : un thème d'un seul mot
-                          // ne crée plus de grand vide artificiel.
-                          flex: isShortLine ? undefined : `${run.words.length} 1 auto`,
+                          // Espacement arabe naturel et constant : aucun étirement forcé.
                           backgroundColor: run.theme
                             ? `hsl(${run.theme.bgHsl} / ${thematicPaperOpacity})`
                             : undefined,
@@ -1001,14 +995,10 @@ export const HafsTajweedPageView = ({
                                 setMenuVerse(word.verse);
                               }}
                               className={cn(
-                                'cursor-pointer px-[0.1em]',
-                                !isShortLine && 'flex justify-center',
+                                'cursor-pointer',
                                 isAllahName && '[&_span]:!text-foreground',
                                 wordActive && 'tw-word-active'
                               )}
-                              // L'espace libre est réparti à parts égales entre tous les mots
-                              // de la ligne : aucun mot isolé ne crée un grand vide.
-                              style={isShortLine ? undefined : { flex: '1 1 auto' }}
                             >
                               {word.kind === 'word' && word.wordIndex === 0 && juzStartKeys.has(`${word.surah}:${word.verse}`) && (
                                 <span
