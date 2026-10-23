@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshCw, CheckCircle2, AlertCircle, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { LOCAL_VERSION, fetchDeployedVersion, formatBuildTime, type VersionInfo } from '@/lib/buildVersion';
+import { LOCAL_VERSION, formatBuildTime, type VersionInfo } from '@/lib/buildVersion';
 import { useUpdateCheck } from '@/components/UpdatePrompt';
 import { fetchInstalledUpdateVersion, hasInstalledUpdate, isNativeApp } from '@/lib/appUpdates';
 

@@ -1,3 +1,5 @@
+import { fetchUpdateJson } from './fetchUpdateJson';
+
 export interface VersionInfo {
   buildId: string;
   buildTime: string;
@@ -11,9 +13,7 @@ export const LOCAL_VERSION: VersionInfo = {
 /** Récupère la version déployée (sans cache ni service worker). */
 export const fetchDeployedVersion = async (): Promise<VersionInfo | null> => {
   try {
-    const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(12000) });
-    if (!res.ok) return null;
-    const data = (await res.json()) as Partial<VersionInfo>;
+    const data = await fetchUpdateJson(`/version.json?t=${Date.now()}`) as Partial<VersionInfo> | null;
     if (typeof data?.buildId !== 'string' || typeof data.buildTime !== 'string') return null;
     return { buildId: data.buildId, buildTime: data.buildTime ?? '' };
   } catch {
