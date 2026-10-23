@@ -546,7 +546,7 @@ const SurahReader = () => {
           </div>
           <h2 className="font-amiri text-4xl md:text-5xl mb-2">
             {/* Cartouche décoratif identique au rendu Pages (Hafs/Warsh/Qaloun). */}
-            <span className="surah-title-frame">سورة {surah.nameArabic}</span>
+            <span className="surah-title-frame surah-title-frame--verse">سورة {surah.nameArabic}</span>
           </h2>
           <h3 className="text-xl font-semibold text-foreground mb-1">
             {surah.name}
