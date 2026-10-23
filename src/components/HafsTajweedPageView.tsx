@@ -751,7 +751,7 @@ export const HafsTajweedPageView = ({
         if (used <= 0) return;
         const fill = used / available;
         // Ligne de fin de sourate très courte : pas d'étirement excessif.
-        if (fill < 0.45) {
+        if (fill < 0.45 || currentPage <= 2) {
           inner.style.justifyContent = 'center';
           inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flexGrow = '0'; r.style.justifyContent = 'center'; });
           return;
