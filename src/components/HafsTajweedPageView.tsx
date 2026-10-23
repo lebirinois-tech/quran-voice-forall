@@ -952,7 +952,6 @@ export const HafsTajweedPageView = ({
 
               // Lignes courtes (fin de sourate, pages 1–2) : mots resserrés et centrés,
               // l'aplat thématique couvre toujours toute la largeur.
-              const isShortLine = words.length > 0 && words.length <= 4;
 
               return (
                 <div
