@@ -124,6 +124,9 @@ export const HafsTajweedPageView = ({
   const [showMenuButton, setShowMenuButton] = useState(true);
   const [pageInput, setPageInput] = useState('');
   const [verseInput, setVerseInput] = useState('');
+  // Sourate choisie dans la liste, en attente de validation par « Aller ».
+  const [pendingSurah, setPendingSurah] = useState<number | null>(null);
+  useEffect(() => setPendingSurah(null), [surahNumber]);
 
   // Réglages de lisibilité, persistés : échelle de la police (%) et
   // opacité des fonds thématiques (0 à 0.4).
