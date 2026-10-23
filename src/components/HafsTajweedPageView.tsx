@@ -970,7 +970,12 @@ export const HafsTajweedPageView = ({
                 return (
                   <div key={`opening-${rowIndex}`} data-surah-opening-row={row.kind} data-opening-surah={row.surah}
                     className="flex min-h-0 w-full items-center justify-center whitespace-nowrap text-center font-amiri font-bold text-foreground">
-                    {row.kind === 'title' ? `سورة ${headerSurah?.nameArabic ?? ''}` : 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'}
+                    {row.kind === 'title' ? (
+                      // Cartouche décoratif, comme le titre encadré du Mushaf imprimé.
+                      <span className="surah-title-frame" style={{ fontSize: '0.9em' }}>
+                        سورة {headerSurah?.nameArabic ?? ''}
+                      </span>
+                    ) : 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'}
                   </div>
                 );
               }
