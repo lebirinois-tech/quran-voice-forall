@@ -711,6 +711,8 @@ export const HafsTajweedPageView = ({
       root.querySelectorAll<HTMLElement>('[data-line-inner]').forEach((inner) => {
         inner.style.transform = '';
         inner.style.width = '';
+        inner.style.justifyContent = '';
+        inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flexGrow = ''; r.style.justifyContent = ''; });
       });
     };
     // Largeur naturelle des mots d'une ligne (sans étirement).
@@ -742,7 +744,11 @@ export const HafsTajweedPageView = ({
         if (!inner || available <= 0 || used <= 0) return;
         const fill = used / available;
         // Ligne de fin de sourate très courte : pas d'étirement excessif.
-        if (fill < 0.45) return;
+        if (fill < 0.45) {
+          inner.style.justifyContent = 'center';
+          inner.querySelectorAll<HTMLElement>('[data-theme-run]').forEach((r) => { r.style.flexGrow = '0'; r.style.justifyContent = 'center'; });
+          return;
+        }
         const scale = Math.min(1.35, Math.max(1, (available * 0.97) / used));
         if (scale > 1.005) {
           inner.style.width = `${100 / scale}%`;
