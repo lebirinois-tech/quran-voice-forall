@@ -2,6 +2,15 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.lovable/**'
+
+concurrency:
+  group: build-apk
+  cancel-in-progress: true
 
 
 permissions:
