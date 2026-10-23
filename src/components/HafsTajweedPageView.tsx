@@ -707,37 +707,58 @@ export const HafsTajweedPageView = ({
     let roTimer = 0;
     // Largeur réelle du contenu d'une ligne = somme des mots (indépendant du
     // sens RTL et de justify-between, qui masquait le dépassement à gauche).
+    const resetStretch = () => {
+      root.querySelectorAll<HTMLElement>('[data-line-inner]').forEach((inner) => {
+        inner.style.transform = '';
+        inner.style.width = '';
+      });
+    };
+    // Largeur naturelle des mots d'une ligne (sans étirement).
+    const naturalWidth = (row: HTMLElement) => {
+      let used = 0;
+      row.querySelectorAll<HTMLElement>('[data-theme-run] > span').forEach((word) => {
+        used += word.getBoundingClientRect().width;
+      });
+      return used;
+    };
     const worstRatio = () => {
       let ratio = 1;
       root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
         const available = row.clientWidth;
         if (available <= 0) return;
-        let used = 0;
-        Array.from(row.children).forEach((child) => {
-          const element = child as HTMLElement;
-          if (element.hasAttribute('data-theme-run')) {
-            // Les aplats s'étirent (justification) : mesurer les mots eux-mêmes.
-            Array.from(element.children).forEach((word) => {
-              used += (word as HTMLElement).getBoundingClientRect().width;
-            });
-          } else {
-            used += Math.max(element.getBoundingClientRect().width, element.scrollWidth);
-          }
-        });
+        const used = naturalWidth(row) * 1.04;
         if (used > 0) ratio = Math.min(ratio, available / used);
       });
       return ratio;
     };
+    // Comme le calligraphe du Mushaf de Médine : chaque ligne remplit le cadre
+    // d'un bord à l'autre. Les lignes peu remplies élargissent légèrement les
+    // lettres (sans casser les liaisons), le reste est réparti entre les mots.
+    const stretchLines = () => {
+      root.querySelectorAll<HTMLElement>('[data-medina-line]').forEach((row) => {
+        const inner = row.querySelector<HTMLElement>('[data-line-inner]');
+        const available = row.clientWidth;
+        const used = naturalWidth(row);
+        if (!inner || available <= 0 || used <= 0) return;
+        const fill = used / available;
+        // Ligne de fin de sourate très courte : pas d'étirement excessif.
+        if (fill < 0.45) return;
+        const scale = Math.min(1.35, Math.max(1, (available * 0.97) / used));
+        if (scale > 1.005) {
+          inner.style.width = `${100 / scale}%`;
+          inner.style.transform = `scaleX(${scale})`;
+        }
+      });
+    };
     const fitOfficialLines = () => {
-      // Taille uniforme pour toutes les pages : même valeur pour un même
-      // écran, indépendante de la longueur des lignes de la page affichée.
-      // Réduction seulement en cas de vrai dépassement (rare), légère.
+      resetStretch();
       let size = Math.floor(currentDesired() * 0.82 * 10) / 10;
       root.style.fontSize = `${size}px`;
       for (let i = 0; i < 40 && size > 10 && worstRatio() < 0.995; i += 1) {
         size = Math.max(10, Math.floor(size * 0.985 * 10) / 10);
         root.style.fontSize = `${size}px`;
       }
+      stretchLines();
       setOfficialFontPx(size);
     };
     raf = requestAnimationFrame(fitOfficialLines);
