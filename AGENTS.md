@@ -1,4 +1,5 @@
 # Architecture
+- Updates compare native installations only to the GitHub `latest` APK release version marker (legacy asset timestamp fallback), never to the web deployment; the singleton PWA registrar applies updates and the global monitor checks launch/foreground/online/5-minute intervals without reinstalling native bundles.
 
 - All Tafsir readers use the shared useTafsirSpeech hook: cloud male voice via the tafsir-tts function with clips cached in IndexedDB, falling back to device speech only when offline/transient errors occur; device voices mispronounce Fusha.
 
