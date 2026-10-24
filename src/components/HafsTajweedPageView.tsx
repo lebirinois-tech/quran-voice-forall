@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
-import { juzMapping, getJuzForVerse } from '@/data/surahs';
+import { juzMapping, getJuzForVerse, surahPageStart } from '@/data/surahs';
 
 // Clés "sourate:verset" des versets où commence un Juz (pour la marque ۞).
 const juzStartKeys = new Set(
