@@ -85,19 +85,25 @@ jobs:
           const p = 'android/app/build.gradle';
           let app = fs.readFileSync(p, 'utf8');
           if (!app.includes('signingConfigs')) {
-            app = app.replace(/android\s*\{/, `android {
-    signingConfigs {
-        quran {
-            storeFile rootProject.file('../signing/quran-acces.keystore')
-            storePassword 'quran-acces-2026'
-            keyAlias 'quran'
-            keyPassword 'quran-acces-2026'
-        }
-    }`);
-            app = app.replace(/buildTypes\s*\{/, `buildTypes {
-        debug {
-            signingConfig signingConfigs.quran
-        }`);
+            const sc = [
+              'android {',
+              '    signingConfigs {',
+              '        quran {',
+              "            storeFile rootProject.file('../signing/quran-acces.keystore')",
+              "            storePassword 'quran-acces-2026'",
+              "            keyAlias 'quran'",
+              "            keyPassword 'quran-acces-2026'",
+              '        }',
+              '    }',
+            ].join('\n');
+            app = app.replace(/android\s*\{/, sc);
+            const bt = [
+              'buildTypes {',
+              '        debug {',
+              '            signingConfig signingConfigs.quran',
+              '        }',
+            ].join('\n');
+            app = app.replace(/buildTypes\s*\{/, bt);
             fs.writeFileSync(p, app);
           }
           console.log('Stable signing configured');
