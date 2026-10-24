@@ -1426,11 +1426,25 @@ export const HafsTajweedPageView = ({
                         <SelectValue placeholder="Choisir une sourate" />
                       </SelectTrigger>
                       <SelectContent className="z-[120] max-h-72">
-                        {surahs.map((s) => (
+                        <div className="sticky top-0 z-10 bg-popover p-1">
+                          <Input
+                            value={surahQuery}
+                            onChange={(e) => setSurahQuery(e.target.value)}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            placeholder="Rechercher une sourate — ابحث عن سورة"
+                            className="h-9"
+                          />
+                        </div>
+                        {filteredSurahOptions.map((s) => (
                           <SelectItem key={s.number} value={String(s.number)}>
                             {s.number}. {s.name} — {s.nameArabic}
                           </SelectItem>
                         ))}
+                        {filteredSurahOptions.length === 0 && (
+                          <div className="p-2 text-center text-sm text-muted-foreground">
+                            Aucune sourate trouvée — لا توجد سورة
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                     <Button
