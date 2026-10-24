@@ -12,6 +12,7 @@ import {
 } from './ui/select';
 import { cn } from '@/lib/utils';
 import { surahs } from '@/data/surahs';
+import { clampLocation, compareLocations, type RecitationSession } from '@/lib/recitationSession';
 import {
   RECITERS,
   RECITER_IDS,
@@ -27,6 +28,7 @@ export interface RecitationStartConfig {
   repeat: { mode: RepeatMode; count: number; rangeStart?: number; rangeEnd?: number };
   /** 0 = بدون انتظار (aucune pause) ; sinon multiplicateur de la durée du verset. */
   gapMultiplier: number;
+  session: RecitationSession;
 }
 
 interface RecitationMenuProps {
@@ -42,6 +44,7 @@ interface RecitationMenuProps {
   repeatSettings: RepeatSettings;
   repeatPause: RepeatPauseSettings;
   highlightEnabled: boolean;
+  session: RecitationSession | null;
   onHighlightChange: (enabled: boolean) => void;
   onPause: () => void;
   onReciterChange: (reciter: ReciterId) => void;
@@ -90,6 +93,7 @@ export const RecitationMenu = ({
   repeatSettings,
   repeatPause,
   highlightEnabled,
+  session,
   onHighlightChange,
   onPause,
   onReciterChange,
@@ -99,6 +103,9 @@ export const RecitationMenu = ({
   const [startSurah, setStartSurah] = useState(surahNumber);
   const [startVerse, setStartVerse] = useState(String(currentVerse || 1));
   const [stopEnabled, setStopEnabled] = useState(repeatSettings.mode === 'range');
+  const [stopSurah, setStopSurah] = useState(surahNumber);
+  const [untilQuranEnd, setUntilQuranEnd] = useState(false);
+  const [validationError, setValidationError] = useState('');
   const [stopVerse, setStopVerse] = useState(String(repeatSettings.rangeEnd ?? totalVerses));
   const [verseRepeatCount, setVerseRepeatCount] = useState(
     repeatSettings.mode === 'verse' ? repeatSettings.count : 1
@@ -114,8 +121,11 @@ export const RecitationMenu = ({
     if (!open) return;
     setStartSurah(surahNumber);
     setStartVerse(String(currentVerse || 1));
-    setStopEnabled(repeatSettings.mode === 'range');
-    setStopVerse(String(repeatSettings.rangeEnd ?? totalVerses));
+    setStopEnabled(session ? !(session.end.surah === 114 && session.end.verse === 6) : repeatSettings.mode === 'range');
+    setStopSurah(session?.end.surah ?? surahNumber);
+    setUntilQuranEnd(session?.end.surah === 114 && session.end.verse === 6);
+    setValidationError('');
+    setStopVerse(String(session?.end.verse ?? repeatSettings.rangeEnd ?? totalVerses));
     setVerseRepeatCount(repeatSettings.mode === 'verse' ? repeatSettings.count : 1);
     setRangeRepeatCount(repeatSettings.mode === 'range' ? repeatSettings.count : 1);
     setVerseGap(repeatPause.enabled ? repeatPause.multiplier : 0);
@@ -131,22 +141,21 @@ export const RecitationMenu = ({
       onPause();
       return;
     }
-    const startV = Math.min(Math.max(1, parseInt(startVerse) || 1), startMax);
-    const stopV = Math.min(Math.max(1, parseInt(stopVerse) || totalVerses), totalVerses);
-    const sameSurah = startSurah === surahNumber;
-    const useRange = stopEnabled && sameSurah && stopV > startV;
-
-    const repeat: RecitationStartConfig['repeat'] = useRange
-      ? { mode: 'range', count: rangeRepeatCount, rangeStart: startV, rangeEnd: stopV }
-      : !stopEnabled && verseRepeatCount !== 1
-        ? { mode: 'verse', count: verseRepeatCount }
-        : { mode: 'none', count: 1 };
-
+    const start = clampLocation({ surah: startSurah, verse: parseInt(startVerse) || 1 });
+    const end = untilQuranEnd ? { surah: 114, verse: 6 }
+      : stopEnabled ? clampLocation({ surah: stopSurah, verse: parseInt(stopVerse) || 1 })
+      : { surah: start.surah, verse: startMax };
+    if (compareLocations(end, start) < 0) {
+      setValidationError('Choisissez un arrêt après le début. / اختر نهاية بعد البداية');
+      return;
+    }
+    setValidationError('');
     onStart({
-      surah: startSurah,
-      verse: startV,
-      repeat,
-      gapMultiplier: useRange ? rangeGap : verseGap,
+      surah: start.surah,
+      verse: start.verse,
+      repeat: verseRepeatCount !== 1 ? { mode: 'verse', count: verseRepeatCount } : { mode: 'none', count: 1 },
+      gapMultiplier: rangeRepeatCount !== 1 ? rangeGap : verseGap,
+      session: { start, end, passageCount: rangeRepeatCount, completedPassages: 0 },
     });
   };
 
@@ -289,7 +298,7 @@ export const RecitationMenu = ({
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
                   checked={stopEnabled}
-                  onCheckedChange={(checked) => setStopEnabled(checked === true)}
+                  onCheckedChange={(checked) => { setStopEnabled(checked === true); setUntilQuranEnd(false); }}
                   aria-label="آية أخرى / Un autre verset"
                 />
                 <span className="text-sm text-foreground">آية أخرى / Un verset précis</span>
@@ -302,15 +311,30 @@ export const RecitationMenu = ({
                   <Input
                     type="number"
                     min={1}
-                    max={totalVerses}
+                    max={surahs.find((s) => s.number === stopSurah)?.versesCount ?? 1}
                     value={stopVerse}
                     onChange={(e) => setStopVerse(e.target.value)}
                     className="h-10 text-sm"
                     aria-label="آية الإيقاف / Verset d'arrêt"
-                    placeholder={`1-${totalVerses}`}
+                    placeholder={`1-${surahs.find((s) => s.number === stopSurah)?.versesCount ?? 1}`}
                   />
                 </div>
               )}
+              {stopEnabled && (
+                <Select value={String(stopSurah)} onValueChange={(v) => { setStopSurah(Number(v)); setStopVerse('1'); setValidationError(''); }}>
+                  <SelectTrigger className="h-auto min-h-10 text-xs" aria-label="Sourate d’arrêt / سورة الإيقاف"><SelectValue /></SelectTrigger>
+                  <SelectContent className="z-[110] max-h-64">
+                    {surahs.filter((s) => s.number >= startSurah).map((s) => (
+                      <SelectItem key={s.number} value={String(s.number)} className="text-xs">{s.number} - {s.name} / {s.nameArabic}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <label className="flex items-center gap-2 cursor-pointer pt-2">
+                <Checkbox checked={untilQuranEnd} onCheckedChange={(checked) => { setUntilQuranEnd(checked === true); setStopEnabled(false); setValidationError(''); }} aria-label="Jusqu’à la fin du Coran / إلى نهاية القرآن" />
+                <span className="text-sm text-foreground">إلى نهاية القرآن / Jusqu’à la fin du Coran</span>
+              </label>
+              {validationError && <p role="alert" className="text-sm text-destructive">{validationError}</p>}
             </div>
           </Section>
 

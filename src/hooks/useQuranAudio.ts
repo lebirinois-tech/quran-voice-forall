@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getOfflineAudioUrl } from '@/lib/offlineAudioStore';
+import { advanceRecitation, type RecitationSession } from '@/lib/recitationSession';
 
 // Interface moved inside hook for better organization
 
@@ -98,6 +99,7 @@ interface UseQuranAudioOptions {
   totalVerses: number;
   reciter?: ReciterId;
   onVerseChange?: (verseNumber: number) => void;
+  onSurahChange?: (surah: number, verse: number) => void;
 }
 
 const normalizePlaybackSpeed = (speed: number) => {
@@ -220,7 +222,8 @@ export const useQuranAudio = ({
   surahNumber, 
   totalVerses, 
   reciter: externalReciter = 'husary',
-  onVerseChange 
+  onVerseChange,
+  onSurahChange
 }: UseQuranAudioOptions) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -248,6 +251,16 @@ export const useQuranAudio = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalReciter]);
   
+  const [recitationSession, _setRecitationSession] = useState<RecitationSession | null>(null);
+  const sessionRef = useRef<RecitationSession | null>(null);
+  const activeSurahRef = useRef(surahNumber);
+  const onSurahChangeRef = useRef(onSurahChange);
+  useEffect(() => { onSurahChangeRef.current = onSurahChange; }, [onSurahChange]);
+  const playVerseAtRef = useRef<(surah: number, verse: number) => void>(() => {});
+  const setRecitationSession = useCallback((session: RecitationSession | null) => {
+    sessionRef.current = session;
+    _setRecitationSession(session);
+  }, []);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playVerseRef = useRef<(verseNumber: number) => void>(() => {});
   const currentVerseRef = useRef(1);
@@ -403,9 +416,37 @@ export const useQuranAudio = ({
             playVerseRef.current(v);
           }, waitMs);
         } else {
-          setTimeout(() => playVerseRef.current(v), 300);
+          pauseTimeoutRef.current = window.setTimeout(() => { clearRepeatPauseTimers(); playVerseRef.current(v); }, 300);
         }
       };
+
+      const session = sessionRef.current;
+      if (session) {
+        if (mode === 'verse' && (count === 0 || rc < count - 1)) {
+          setCurrentRepeatCount(prev => prev + 1);
+          play(cv);
+          return;
+        }
+        setCurrentRepeatCount(0);
+        const advance = advanceRecitation(session, { surah: activeSurahRef.current, verse: cv });
+        setRecitationSession({ ...session, completedPassages: advance.completedPassages });
+        if (!advance.next) {
+          toast.success(session.end.surah === 114 && session.end.verse === 6 ? 'Fin du Coran / نهاية القرآن' : 'Fin de la récitation / نهاية التلاوة');
+          return;
+        }
+        const next = advance.next;
+        clearRepeatPauseTimers();
+        const waitMs = rp.enabled && verseDurationMs > 0 ? Math.max(500, verseDurationMs * rp.multiplier) : 300;
+        if (rp.enabled && verseDurationMs > 0) {
+          setIsPausingForRepeat(true);
+          setPauseRemainingSec(Math.ceil(waitMs / 1000));
+        }
+        pauseTimeoutRef.current = window.setTimeout(() => {
+          clearRepeatPauseTimers();
+          playVerseAtRef.current(next.surah, next.verse);
+        }, waitMs);
+        return;
+      }
 
       if (mode === 'verse') {
         const shouldRepeat = count === 0 || rc < count - 1;
@@ -544,6 +585,11 @@ export const useQuranAudio = ({
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
     clearRepeatPauseTimers();
+    if (targetSurah !== activeSurahRef.current) onSurahChangeRef.current?.(targetSurah, verseNumber);
+    activeSurahRef.current = targetSurah;
+    currentVerseRef.current = verseNumber;
+    setCurrentVerse(verseNumber);
+    setIsPlaying(false);
     setIsLoading(true);
     
     try {
@@ -587,8 +633,9 @@ export const useQuranAudio = ({
 
   // Keep ref in sync so the auto-play effect always calls the latest version
   useEffect(() => {
-    playVerseRef.current = playVerse;
-  }, [playVerse]);
+    playVerseAtRef.current = playVerseAt;
+    playVerseRef.current = (verse) => playVerseAt(activeSurahRef.current, verse);
+  }, [playVerseAt]);
 
   const play = useCallback(() => {
     if (audioRef.current?.src) {
@@ -727,6 +774,8 @@ export const useQuranAudio = ({
   );
 
   return {
+    recitationSession,
+    setRecitationSession,
     isPlaying,
     isLoading,
     currentVerse,

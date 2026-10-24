@@ -167,7 +167,8 @@ const SurahReader = () => {
 
   const quranAudio = useQuranAudio({
     surahNumber: num,
-    totalVerses: verses.length || 1,
+    totalVerses: surahs.find((s) => s.number === num)?.versesCount ?? 1,
+    onSurahChange: (targetSurah, verse) => navigate(`/surah/${targetSurah}?verse=${verse}`),
     reciter: appSettings.reciter,
     onVerseChange: handleVerseChange,
   });
@@ -442,39 +443,15 @@ const SurahReader = () => {
     toast.success('Lecture démarrée');
   }, [quranAudio, isMushafMode, currentPageVerseRange, verses.length]);
 
-  // Lecture demandée depuis le menu « التلاوة الصوتية » vers une autre sourate :
-  // la navigation recharge la page, puis la lecture démarre automatiquement.
-  useEffect(() => {
-    const pending = sessionStorage.getItem('quran-autoplay-verse');
-    if (!pending || verses.length === 0) return;
-    sessionStorage.removeItem('quran-autoplay-verse');
-    const v = Math.min(Math.max(1, parseInt(pending) || 1), verses.length);
-    quranAudio.playVerse(v);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verses.length]);
-
   const handleRecitationStart = useCallback((config: RecitationStartConfig) => {
-    quranAudio.setRepeatPauseSettings({
-      enabled: config.gapMultiplier > 0,
-      multiplier: config.gapMultiplier > 0 ? config.gapMultiplier : 1,
-    });
-    if (config.surah === num) {
-      quranAudio.setRepeatMode(
-        config.repeat.mode,
-        config.repeat.count,
-        config.repeat.rangeStart,
-        config.repeat.rangeEnd
-      );
-      quranAudio.playVerse(config.verse);
-    } else {
-      // Les plages de répétition sont propres à la sourate affichée.
-      quranAudio.setRepeatMode('none', 1);
-      sessionStorage.setItem('quran-autoplay-verse', String(config.verse));
-      navigate(`/surah/${config.surah}`);
-    }
+    quranAudio.pause();
+    quranAudio.setRecitationSession(config.session);
+    quranAudio.setRepeatPauseSettings({ enabled: config.gapMultiplier > 0, multiplier: config.gapMultiplier || 1 });
+    quranAudio.setRepeatMode(config.repeat.mode, config.repeat.count, config.repeat.rangeStart, config.repeat.rangeEnd);
+    quranAudio.playVerseAt(config.surah, config.verse);
     setRecitationMenuOpen(false);
     toast.success('Lecture démarrée');
-  }, [num, quranAudio, navigate]);
+  }, [quranAudio]);
 
   const voiceCommands = useVoiceCommands({
     onPlay: handlePlayRequest,
@@ -1146,6 +1123,7 @@ const SurahReader = () => {
         playbackSpeed={quranAudio.playbackSpeed}
         repeatSettings={quranAudio.repeatSettings}
         repeatPause={quranAudio.repeatPause}
+        session={quranAudio.recitationSession}
         highlightEnabled={audioHighlight}
         onHighlightChange={handleAudioHighlightChange}
         onPause={quranAudio.pause}
