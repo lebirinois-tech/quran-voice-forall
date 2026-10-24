@@ -822,8 +822,8 @@ const SurahReader = () => {
                         <section
                           key={pageNum}
                           aria-label={`Page ${pageNum}`}
-                          className={`rounded-2xl border border-border overflow-hidden shadow-sm ${
-                            isEvenPage ? 'bg-card' : 'bg-muted/30'
+                          className={`rounded-2xl border-[3px] overflow-hidden shadow-md ${
+                            isEvenPage ? 'bg-card border-secondary' : 'bg-muted/30 border-primary'
                           }`}
                         >
                           {/* Page header — sticky breadcrumb + play button */}
