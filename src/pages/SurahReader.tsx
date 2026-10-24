@@ -105,6 +105,37 @@ const SurahReader = () => {
     isMushafImageMode ? currentMushafPage : null,
     appSettings.textDisplayStyle
   );
+  // Double page côte à côte (choix mémorisé), sur écran large en paysage.
+  const [twoPageMode, setTwoPageMode] = useState<boolean>(
+    () => localStorage.getItem('mushaf-two-pages') === '1'
+  );
+  const [isWideScreen, setIsWideScreen] = useState<boolean>(
+    () => typeof window !== 'undefined' && window.innerWidth >= 900 && window.innerWidth > window.innerHeight
+  );
+  useEffect(() => {
+    const onResize = () => setIsWideScreen(window.innerWidth >= 900 && window.innerWidth > window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  const toggleTwoPageMode = useCallback(() => {
+    setTwoPageMode((v) => {
+      localStorage.setItem('mushaf-two-pages', v ? '0' : '1');
+      return !v;
+    });
+  }, []);
+  const spreadActive = isMushafImageMode && twoPageMode && isWideScreen && currentMushafPage != null;
+  const companionPage = spreadActive
+    ? (currentMushafPage! % 2 === 1 ? currentMushafPage! + 1 : currentMushafPage! - 1)
+    : null;
+  const { groups: companionGroups } = useFullMushafPage(
+    companionPage && companionPage >= 1 && companionPage <= 604 ? companionPage : null,
+    appSettings.textDisplayStyle
+  );
+  const companionSurah = companionGroups?.[0]?.surahNumber ?? null;
+  const companionVerses = useMemo<Verse[]>(() => {
+    const g = companionGroups?.find((x) => x.surahNumber === companionSurah);
+    return g ? g.verses.map((v) => ({ number: v.number, text: '', translation: '', page: companionPage! })) : [];
+  }, [companionGroups, companionSurah, companionPage]);
   const isLoadingTextSource =
     (effectiveDisplayStyle === 'warsh-tajweed' && isLoadingWarsh) ||
     (effectiveDisplayStyle === 'qalun-tajweed' && isLoadingQalun);
