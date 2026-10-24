@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
-import { juzMapping, getJuzForVerse } from '@/data/surahs';
+import { juzMapping, getJuzForVerse, surahPageStart } from '@/data/surahs';
 
 // Clés "sourate:verset" des versets où commence un Juz (pour la marque ۞).
 const juzStartKeys = new Set(
@@ -185,7 +185,12 @@ export const HafsTajweedPageView = ({
   }, [lineSpacingPct]);
 
   const { startPage, endPage } = useMemo(() => {
-    if (verses.length === 0) return { startPage: 1, endPage: 1 };
+    if (verses.length === 0) {
+      // Pendant le chargement, afficher directement la page de la sourate demandée
+      // (et non la page 1 d'Al-Fatiha).
+      const p = surahPageStart[surahNumber] ?? 1;
+      return { startPage: p, endPage: p };
+    }
     const pages = verses.map((v) => v.page ?? 1);
     return { startPage: Math.min(...pages), endPage: Math.max(...pages) };
   }, [verses]);
