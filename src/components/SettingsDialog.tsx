@@ -207,8 +207,7 @@ export const SettingsDialog = ({
             </Label>
             <div className="p-3 rounded-lg bg-muted/50 border border-border">
               <p className="text-sm text-foreground">
-                {RECITERS[getSafeReciter(reciter)].name} /{' '}
-                <span dir="rtl" className="font-amiri">{RECITERS[getSafeReciter(reciter)].nameAr}</span>
+                {appLang === 'ar' ? RECITERS[getSafeReciter(reciter)].nameAr : RECITERS[getSafeReciter(reciter)].name}
               </p>
               <p className="text-xs text-muted-foreground mt-1">{t('reciterAuto')}</p>
             </div>
@@ -374,7 +373,7 @@ export const SettingsDialog = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('reciter')}: {RECITERS[getSafeReciter(reciter)].name} / {RECITERS[getSafeReciter(reciter)].nameAr}
+              {t('reciter')}: {appLang === 'ar' ? RECITERS[getSafeReciter(reciter)].nameAr : RECITERS[getSafeReciter(reciter)].name}
             </p>
           </div>
         </div>

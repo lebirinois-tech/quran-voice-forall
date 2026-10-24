@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -59,6 +60,7 @@ const JUZ_START_PAGES: Record<number, number> = {
 
 
 const SurahReader = () => {
+  const t = useT();
   const navigate = useNavigate();
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [searchParams] = useSearchParams();
@@ -167,7 +169,8 @@ const SurahReader = () => {
 
   const quranAudio = useQuranAudio({
     surahNumber: num,
-    totalVerses: verses.length || 1,
+    totalVerses: surahs.find((s) => s.number === num)?.versesCount ?? 1,
+    onSurahChange: (targetSurah, verse) => navigate(`/surah/${targetSurah}?verse=${verse}`),
     reciter: appSettings.reciter,
     onVerseChange: handleVerseChange,
   });
@@ -442,39 +445,15 @@ const SurahReader = () => {
     toast.success('Lecture démarrée');
   }, [quranAudio, isMushafMode, currentPageVerseRange, verses.length]);
 
-  // Lecture demandée depuis le menu « التلاوة الصوتية » vers une autre sourate :
-  // la navigation recharge la page, puis la lecture démarre automatiquement.
-  useEffect(() => {
-    const pending = sessionStorage.getItem('quran-autoplay-verse');
-    if (!pending || verses.length === 0) return;
-    sessionStorage.removeItem('quran-autoplay-verse');
-    const v = Math.min(Math.max(1, parseInt(pending) || 1), verses.length);
-    quranAudio.playVerse(v);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verses.length]);
-
   const handleRecitationStart = useCallback((config: RecitationStartConfig) => {
-    quranAudio.setRepeatPauseSettings({
-      enabled: config.gapMultiplier > 0,
-      multiplier: config.gapMultiplier > 0 ? config.gapMultiplier : 1,
-    });
-    if (config.surah === num) {
-      quranAudio.setRepeatMode(
-        config.repeat.mode,
-        config.repeat.count,
-        config.repeat.rangeStart,
-        config.repeat.rangeEnd
-      );
-      quranAudio.playVerse(config.verse);
-    } else {
-      // Les plages de répétition sont propres à la sourate affichée.
-      quranAudio.setRepeatMode('none', 1);
-      sessionStorage.setItem('quran-autoplay-verse', String(config.verse));
-      navigate(`/surah/${config.surah}`);
-    }
+    quranAudio.pause();
+    quranAudio.setRecitationSession(config.session);
+    quranAudio.setRepeatPauseSettings({ enabled: config.gapMultiplier > 0, multiplier: config.gapMultiplier || 1 });
+    quranAudio.setRepeatMode(config.repeat.mode, config.repeat.count, config.repeat.rangeStart, config.repeat.rangeEnd);
+    quranAudio.playVerseAt(config.surah, config.verse);
     setRecitationMenuOpen(false);
     toast.success('Lecture démarrée');
-  }, [num, quranAudio, navigate]);
+  }, [quranAudio]);
 
   const voiceCommands = useVoiceCommands({
     onPlay: handlePlayRequest,
@@ -580,7 +559,7 @@ const SurahReader = () => {
       onFontSizeChange={appSettings.onFontSizeChange}
       verseViewMode={appSettings.verseViewMode}
       onVerseViewModeChange={appSettings.onVerseViewModeChange}
-      triggerLabel="Ouvrir les paramètres"
+      triggerLabel={t('settings')}
       triggerClassName="w-full justify-start gap-2 border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
     />
   );
@@ -634,10 +613,10 @@ const SurahReader = () => {
         {!isMushafMode && <div className="max-w-lg mx-auto mb-6 animate-fade-in">
           <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-2">
             <Button type="button" variant="default" className="gap-2" aria-pressed="true">
-              <FileText className="h-4 w-4" /> Versets / آيات
+              <FileText className="h-4 w-4" /> {t('verses')}
             </Button>
             <Button type="button" variant="ghost" className="gap-2" onClick={switchToPages}>
-              <BookOpen className="h-4 w-4" /> Pages / صفحات
+              <BookOpen className="h-4 w-4" /> {t('pages')}
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -656,7 +635,7 @@ const SurahReader = () => {
                   value={pageInput}
                   onChange={(e) => setPageInput(e.target.value)}
                   className="h-9 text-sm bg-background"
-                  aria-label="Numéro de page"
+                  aria-label={t('pageNumber')}
                 />
                 <Button 
                   onClick={() => {
@@ -691,7 +670,7 @@ const SurahReader = () => {
                   value={juzInput}
                   onChange={(e) => setJuzInput(e.target.value)}
                   className="h-9 text-sm bg-background"
-                  aria-label="Numéro de Juz"
+                  aria-label={t('juzNumber')}
                 />
                 <Button 
                   onClick={() => {
@@ -1074,7 +1053,7 @@ const SurahReader = () => {
                             else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
                           }}
                           disabled={versePageNum <= 1}
-                          aria-label="Page précédente"
+                          aria-label={t('prevPage')}
                         >
                           ‹ Précédent
                         </Button>
@@ -1103,7 +1082,7 @@ const SurahReader = () => {
                             else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
                           }}
                           disabled={versePageNum >= 604}
-                          aria-label="Page suivante"
+                          aria-label={t('nextPage')}
                         >
                           Suivant ›
                         </Button>
@@ -1129,7 +1108,7 @@ const SurahReader = () => {
         type="button"
         onClick={() => setRecitationMenuOpen(true)}
         className="fixed bottom-28 left-4 z-[90] flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-        aria-label="التلاوة الصوتية — menu de récitation audio"
+        aria-label={t('audioMenu')}
       >
         <Headphones className="h-6 w-6" />
       </button>
@@ -1146,6 +1125,7 @@ const SurahReader = () => {
         playbackSpeed={quranAudio.playbackSpeed}
         repeatSettings={quranAudio.repeatSettings}
         repeatPause={quranAudio.repeatPause}
+        session={quranAudio.recitationSession}
         highlightEnabled={audioHighlight}
         onHighlightChange={handleAudioHighlightChange}
         onPause={quranAudio.pause}

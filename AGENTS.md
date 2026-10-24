@@ -15,3 +15,5 @@
 - Surah opening rows are derived separately from official word rows; expand a single header slot when necessary instead of moving or dropping Quran words, so consistent openings preserve text integrity.
 - The Android APK workflow runs on every push to main (plus manual dispatch) with cancel-in-progress concurrency, so each publish refreshes the latest release without manual requests.
 - APK signing uses the committed stable keystore `signing/quran-acces.keystore` (alias `quran`), injected into the generated `android/app/build.gradle` by the workflow; never revert to per-runner debug keys, or Android rejects updates with a package conflict.
+
+- Recitation stop locations and cross-surah passage progression use the shared recitationSession module; the audio hook owns the session and active surah while reader navigation follows it, so endpoints and repetition counters survive surah changes.

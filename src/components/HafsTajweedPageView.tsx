@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home } from 'lucide-react';
 import { Button } from './ui/button';
@@ -115,6 +116,8 @@ export const HafsTajweedPageView = ({
   twoPageMode = false,
   onToggleTwoPage,
 }: HafsTajweedPageViewProps) => {
+  const t = useT();
+  const lang = t.lang;
   const surah = surahs.find((s) => s.number === surahNumber);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef);
@@ -896,14 +899,14 @@ export const HafsTajweedPageView = ({
                 onClick={() => setMenuOpen(true)}
                 className="min-w-0 shrink-0 whitespace-nowrap rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
                 style={{ color: 'hsl(43, 62%, 25%)' }}
-                aria-label="Choisir une sourate"
+                aria-label={t('chooseSurah')}
               >
                 سورة {surah?.nameArabic ?? ''}
               </button>
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                aria-label="Choisir une page"
+                aria-label={t('choosePage')}
                 className="whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-xs font-bold shadow-sm sm:text-sm"
                 style={{
                   backgroundColor: 'hsl(195, 80%, 96%)',
@@ -918,7 +921,7 @@ export const HafsTajweedPageView = ({
                 onClick={() => setMenuOpen(true)}
                 className="min-w-0 truncate rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
                 style={{ color: 'hsl(43, 62%, 25%)' }}
-                aria-label="Choisir un Juz"
+                aria-label={t('chooseJuz')}
               >
                 الجزء {toArabicDigits(currentJuz)}
               </button>
@@ -1235,7 +1238,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label="Page suivante"
+            aria-label={t('nextPage')}
             onClick={goNext}
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
@@ -1245,7 +1248,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label="Verset précédent"
+            aria-label={t('prevVerse')}
             onClick={() => onPreviousVerse?.()}
             className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
           >
@@ -1254,7 +1257,7 @@ export const HafsTajweedPageView = ({
           <Button
             type="button"
             size="icon"
-            aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
+            aria-label={isAudioPlaying ? t('pause') : t('play')}
             onClick={() => onPlayPause?.()}
             className="h-11 w-11 shrink-0 rounded-full shadow-lg"
           >
@@ -1271,7 +1274,7 @@ export const HafsTajweedPageView = ({
             >
               <span className="flex items-center gap-1 text-[10px] font-bold leading-none">
                 <ListMusic className="h-3 w-3" />
-                {{ verse: 'Verset', page: 'Page', surah: 'Sourate', juz: 'Juz' }[activeScope]}
+                {t(activeScope)}
               </span>
               <span className="mt-0.5 text-[9px] leading-none text-muted-foreground">
                 {scopeDetailLabel}
@@ -1314,7 +1317,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label="Verset suivant"
+            aria-label={t('nextVerse')}
             onClick={() => onNextVerse?.()}
             className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
           >
@@ -1324,7 +1327,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label="Page précédente"
+            aria-label={t('prevPage')}
             onClick={goPrev}
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
@@ -1334,7 +1337,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            aria-label={isFullscreen ? t('exitFullscreen') : t('fullscreen')}
             onClick={toggleFullscreen}
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
@@ -1344,7 +1347,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label="Accueil / الرئيسية / Home"
+            aria-label={t('backHome')}
             onClick={() => window.location.assign('/app')}
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
@@ -1354,7 +1357,7 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label="Ouvrir les commandes"
+            aria-label={t('mushafControls')}
             onClick={() => setMenuOpen(true)}
             onDoubleClick={() => setShowMenuButton(false)}
             className="h-9 w-9 shrink-0 rounded-full text-primary"
@@ -1366,11 +1369,11 @@ export const HafsTajweedPageView = ({
               type="button"
               size="sm"
               variant={twoPageMode ? 'default' : 'ghost'}
-              aria-label={twoPageMode ? 'Une seule page — صفحة واحدة' : 'Deux pages — صفحتان'}
+              aria-label={twoPageMode ? t('onePage') : t('twoPages')}
               aria-pressed={!!twoPageMode}
               onClick={onToggleTwoPage}
               className="h-9 shrink-0 rounded-full px-2 text-xs font-bold"
-              title={twoPageMode ? 'Une seule page — صفحة واحدة' : 'Deux pages côte à côte — صفحتان'}
+              title={twoPageMode ? t('onePage') : t('twoPages')}
             >
               {twoPageMode ? '1' : '2'} <BookOpen className="ml-1 h-4 w-4" />
             </Button>
@@ -1380,7 +1383,7 @@ export const HafsTajweedPageView = ({
         <button
           type="button"
           onClick={() => setShowMenuButton(true)}
-          aria-label="Afficher le bouton des commandes"
+          aria-label={t('mushafControls')}
           className="fixed bottom-0 left-1/2 z-[80] h-8 w-24 -translate-x-1/2 rounded-t-full bg-primary/15"
         >
           <span className="mx-auto block h-1 w-10 rounded-full bg-primary/60" />
@@ -1389,19 +1392,19 @@ export const HafsTajweedPageView = ({
 
       {/* Quick access Sheet: settings, audio, recording */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="bottom" className="z-[90] max-h-[88dvh] rounded-t-2xl overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+        <SheetContent dir={t.lang === 'ar' ? 'rtl' : 'ltr'} side="bottom" className="z-[90] max-h-[88dvh] rounded-t-2xl overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
           <SheetHeader>
-            <SheetTitle>Commandes du Mushaf</SheetTitle>
-            <SheetDescription>Navigation, son, répétition, voix et enregistrement.</SheetDescription>
+            <SheetTitle>{t('mushafControls')}</SheetTitle>
+            <SheetDescription className="sr-only">{t('mushafControls')}</SheetDescription>
           </SheetHeader>
 
           <div className="mt-4 space-y-4">
             <section>
-              <h4 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Mode de lecture</h4>
+              <h4 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">{t('readingMode')}</h4>
               <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-2">
                 <Button type="button" className="gap-2" aria-pressed="true">
                   <BookOpen className="h-4 w-4" />
-                  Pages / صفحات
+                  {t('pages')}
                 </Button>
                 <Button
                   type="button"
@@ -1413,12 +1416,12 @@ export const HafsTajweedPageView = ({
                   }}
                 >
                   <FileText className="h-4 w-4" />
-                  Versets / آيات
+                  {t('verses')}
                 </Button>
               </div>
             </section>
             <section>
-              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Pages</h4>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('pages')}</h4>
               <div className="mb-2 text-center text-sm font-medium text-foreground">
                 {surah?.name} · Page {currentPage}/604
                 {currentVerse ? ` · Verset ${currentVerse}` : ''}
@@ -1431,7 +1434,7 @@ export const HafsTajweedPageView = ({
                   className="h-12 justify-center gap-2"
                 >
                   <ChevronLeft className="h-5 w-5" />
-                  Page suivante
+                  {t('nextPage')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1439,7 +1442,7 @@ export const HafsTajweedPageView = ({
                   disabled={currentPage <= 1}
                   className="h-12 justify-center gap-2"
                 >
-                  Page précédente
+                  {t('prevPage')}
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
@@ -1447,18 +1450,18 @@ export const HafsTajweedPageView = ({
 
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-                Navigation — الانتقال
+                {t('navigation')}
               </h4>
               <div className="space-y-2 rounded-2xl border border-border bg-card p-3">
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Sourate — السورة</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">{t('surah')}</label>
                   <div className="flex gap-2">
                     <Select
                       value={String(pendingSurah ?? surahNumber)}
                       onValueChange={(v) => setPendingSurah(Number(v))}
                     >
                       <SelectTrigger className="h-11 flex-1">
-                        <SelectValue placeholder="Choisir une sourate" />
+                        <SelectValue placeholder={t('chooseSurah')} />
                       </SelectTrigger>
                       <SelectContent className="z-[120] max-h-72">
                         <div className="sticky top-0 z-10 bg-popover p-1">
@@ -1466,18 +1469,18 @@ export const HafsTajweedPageView = ({
                             value={surahQuery}
                             onChange={(e) => setSurahQuery(e.target.value)}
                             onKeyDown={(e) => e.stopPropagation()}
-                            placeholder="Rechercher une sourate — ابحث عن سورة"
+                            placeholder={t('searchSurah')}
                             className="h-9"
                           />
                         </div>
                         {filteredSurahOptions.map((s) => (
                           <SelectItem key={s.number} value={String(s.number)}>
-                            {s.number}. {s.name} — {s.nameArabic}
+                            {s.number}. {t.lang === 'ar' ? s.nameArabic : s.name}
                           </SelectItem>
                         ))}
                         {filteredSurahOptions.length === 0 && (
                           <div className="p-2 text-center text-sm text-muted-foreground">
-                            Aucune sourate trouvée — لا توجد سورة
+                            {t('noSurahFound')}
                           </div>
                         )}
                       </SelectContent>
@@ -1491,14 +1494,14 @@ export const HafsTajweedPageView = ({
                         onNavigateToSurah?.(pendingSurah);
                       }}
                     >
-                      Aller — اذهب
+                      {t('go')}
                     </Button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-xs text-muted-foreground">Page — الصفحة</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t('page')}</label>
                     <div className="flex gap-2">
                       <Input
                         type="number"
@@ -1521,14 +1524,14 @@ export const HafsTajweedPageView = ({
                           }
                         }}
                       >
-                        Aller
+                        {t('go')}
                       </Button>
                     </div>
                   </div>
 
                   <div>
                     <label className="mb-1 block text-xs text-muted-foreground">
-                      Verset — الآية
+                      {t('verse')}
                     </label>
                     <div className="flex gap-2">
                       <Input
@@ -1552,7 +1555,7 @@ export const HafsTajweedPageView = ({
                           }
                         }}
                       >
-                        Aller
+                        {t('go')}
                       </Button>
                     </div>
                   </div>
@@ -1560,7 +1563,7 @@ export const HafsTajweedPageView = ({
 
 
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Juz (1-30) — الجزء</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">{t('juz')}</label>
                   <Select
                     value={String(currentJuz)}
                     onValueChange={(v) => {
@@ -1569,12 +1572,12 @@ export const HafsTajweedPageView = ({
                     }}
                   >
                     <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Choisir un Juz" />
+                      <SelectValue placeholder={t('chooseJuz')} />
                     </SelectTrigger>
                     <SelectContent className="z-[120] max-h-72">
                       {Array.from({ length: 30 }, (_, i) => i + 1).map((j) => (
                         <SelectItem key={j} value={String(j)}>
-                          Juz {j} — {juzMapping[j]?.name ?? ''}
+                          {t('juz')} {j}{t.lang === 'ar' ? ` — ${juzMapping[j]?.name ?? ''}` : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1584,11 +1587,11 @@ export const HafsTajweedPageView = ({
             </section>
 
             <section>
-              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Audio</h4>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('audio')}</h4>
               {audioControls ?? (
                 <div className="flex items-center gap-2 rounded-2xl border border-border bg-card p-3">
                   {onPreviousVerse && (
-                    <Button size="icon" variant="outline" onClick={onPreviousVerse} aria-label="Verset précédent">
+                    <Button size="icon" variant="outline" onClick={onPreviousVerse} aria-label={t('prevVerse')}>
                       <SkipBack className="h-4 w-4" />
                     </Button>
                   )}
@@ -1597,13 +1600,13 @@ export const HafsTajweedPageView = ({
                       size="icon"
                       onClick={() => { onPlayPause(); }}
                       className="h-11 w-11 rounded-full"
-                      aria-label={isAudioPlaying ? 'Pause' : 'Lecture'}
+                      aria-label={isAudioPlaying ? t('pause') : t('play')}
                     >
                       {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                     </Button>
                   )}
                   {onNextVerse && (
-                    <Button size="icon" variant="outline" onClick={onNextVerse} aria-label="Verset suivant">
+                    <Button size="icon" variant="outline" onClick={onNextVerse} aria-label={t('nextVerse')}>
                       <SkipForward className="h-4 w-4" />
                     </Button>
                   )}
@@ -1617,7 +1620,7 @@ export const HafsTajweedPageView = ({
 
             {voiceControls && (
               <section>
-                <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Commande vocale</h4>
+                <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('voiceCommand')}</h4>
                 <div className="rounded-2xl border border-border bg-card p-3">
                   {voiceControls}
                 </div>
@@ -1625,7 +1628,7 @@ export const HafsTajweedPageView = ({
             )}
 
             <section>
-              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Enregistrement (Hifz)</h4>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('recording')}</h4>
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
@@ -1638,18 +1641,18 @@ export const HafsTajweedPageView = ({
                 }}
               >
                 <Mic className="h-4 w-4" />
-                Enregistrer le verset {currentVerse ?? pageVerses[0]?.number ?? ''}
+                {t('recordVerse')} {currentVerse ?? pageVerses[0]?.number ?? ''}
               </Button>
             </section>
 
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-                Lisibilité — الوضوح
+                {t('readability')}
               </h4>
               <div className="space-y-3 rounded-2xl border border-border bg-card p-3">
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Taille de la police — حجم الخط</span>
+                    <span>{t('fontSize')}</span>
                     <span className="font-bold text-foreground">{fontScalePct}%</span>
                   </div>
                   <input
@@ -1660,12 +1663,12 @@ export const HafsTajweedPageView = ({
                     value={fontScalePct}
                     onChange={(e) => setFontScalePct(Number(e.target.value))}
                     className="w-full accent-primary"
-                    aria-label="Taille de la police"
+                    aria-label={t('fontSize')}
                   />
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Interlignage — تباعد الأسطر</span>
+                    <span>{t('lineSpacing')}</span>
                     <span className="font-bold text-foreground">{lineSpacingPct}%</span>
                   </div>
                   <input
@@ -1676,7 +1679,7 @@ export const HafsTajweedPageView = ({
                     value={lineSpacingPct}
                     onChange={(e) => setLineSpacingPct(Number(e.target.value))}
                     className="w-full accent-primary"
-                    aria-label="Interlignage"
+                    aria-label={t('lineSpacing')}
                   />
                 </div>
                 <div className="flex justify-end">
@@ -1690,12 +1693,12 @@ export const HafsTajweedPageView = ({
                       setThemeOpacityPct(20);
                     }}
                   >
-                    Réinitialiser — إعادة الضبط
+                    {t('reset')}
                   </Button>
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Fond des thèmes — خلفية المواضيع</span>
+                    <span>{t('themeBackground')}</span>
                     <span className="font-bold text-foreground">{themeOpacityPct}%</span>
                   </div>
                   <input
@@ -1706,7 +1709,7 @@ export const HafsTajweedPageView = ({
                     value={themeOpacityPct}
                     onChange={(e) => setThemeOpacityPct(Number(e.target.value))}
                     className="w-full accent-primary"
-                    aria-label="Opacité du fond thématique"
+                    aria-label={t('themeOpacity')}
                   />
                 </div>
                 <p className="text-[11px] text-muted-foreground">
@@ -1716,7 +1719,7 @@ export const HafsTajweedPageView = ({
             </section>
 
             <section>
-              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Paramètres</h4>
+              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('settings')}</h4>
               {settingsControls && <div className="mb-2">{settingsControls}</div>}
               <Button
                 variant="outline"
@@ -1727,7 +1730,7 @@ export const HafsTajweedPageView = ({
                 }}
               >
                 {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                {isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
+                {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
               </Button>
               <Button
                 variant="outline"
@@ -1738,7 +1741,7 @@ export const HafsTajweedPageView = ({
                 }}
               >
                 <RotateCcw className="h-4 w-4" />
-                Réinitialiser l'application
+                {t('resetApp')}
               </Button>
             </section>
           </div>
@@ -1749,7 +1752,7 @@ export const HafsTajweedPageView = ({
       <Dialog open={scopeOpen} onOpenChange={setScopeOpen}>
         <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
-            <DialogTitle>Choix de la lecture — اختيار القراءة</DialogTitle>
+            <DialogTitle>{t('chooseReading')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             {(['verse', 'page', 'surah', 'juz'] as const).map((key) => {
@@ -1774,7 +1777,7 @@ export const HafsTajweedPageView = ({
             <div className="space-y-1.5 pt-1">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Repeat className="h-3.5 w-3.5" />
-                Nombre de répétitions — عدد التكرار
+                {t('repeatCount')}
               </p>
               <div className="grid grid-cols-6 gap-1">
                 {[1, 2, 3, 5, 10, 0].map((n) => (
@@ -1845,7 +1848,7 @@ export const HafsTajweedPageView = ({
                           borderColor: `hsl(${t.hsl} / 0.55)`,
                         }}
                       >
-                        {t.emoji} {t.labels.fr}
+                        {t.emoji} {t.labels[lang]}
                       </span>
                     ))}
                   </div>
@@ -1862,7 +1865,7 @@ export const HafsTajweedPageView = ({
                       className="justify-start gap-2"
                     >
                       <Play className="h-4 w-4" />
-                      Écouter ce verset
+                      {t('listenVerse')}
                     </Button>
                   </>
                 )}
@@ -1876,7 +1879,7 @@ export const HafsTajweedPageView = ({
                     className="justify-start gap-2"
                   >
                     <Play className="h-4 w-4" />
-                    Ouvrir cette sourate pour l'écouter
+                    {t('openToListen')}
                   </Button>
                 )}
                 <Button
@@ -1889,7 +1892,7 @@ export const HafsTajweedPageView = ({
                   className="justify-start gap-2"
                 >
                   <BookOpen className="h-4 w-4" />
-                  Traduction et Tafsir · الترجمة والتفسير
+                  {t('translationTafsir')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1901,7 +1904,7 @@ export const HafsTajweedPageView = ({
                   className="justify-start gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Tafsir · التفسير
+                  {t('tafsir')}
                 </Button>
                 <Button
                   variant="ghost"
@@ -1909,7 +1912,7 @@ export const HafsTajweedPageView = ({
                   className="justify-start gap-2 text-muted-foreground"
                 >
                   <X className="h-4 w-4" />
-                  Annuler
+                  {t('cancel')}
                 </Button>
               </div>
             );
@@ -1928,14 +1931,14 @@ export const HafsTajweedPageView = ({
           {detailVerse !== null && (
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant={detailMode === 'verse' ? 'default' : 'outline'} onClick={() => setDetailMode('verse')}>
-                Ce verset · الآية
+                {t('thisVerse')}
               </Button>
               <Button size="sm" variant={detailMode === 'page' ? 'default' : 'outline'} onClick={() => setDetailMode('page')}>
-                <BookOpen className="h-4 w-4 mr-1" /> Page {currentPage} · الصفحة
+                <BookOpen className="h-4 w-4 mr-1" /> {t('page')} {currentPage}
               </Button>
               {onPlayRange && (
                 <Button size="sm" variant="secondary" onClick={() => { setDetailVerse(null); startScope('page'); }}>
-                  <Volume2 className="h-4 w-4 mr-1" /> Écouter la page
+                  <Volume2 className="h-4 w-4 mr-1" /> {t('listenPage')}
                 </Button>
               )}
             </div>

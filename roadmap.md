@@ -1,6 +1,8 @@
 # Feuille de route
 
 ## En cours
+- [ ] Afficher les menus dans la seule langue d’utilisation choisie (FR/AR/EN), notamment récitation et navigation Pages/Versets.
+- [ ] Menu audio Pages/Versets : ajouter sous le verset d’arrêt le choix d’une autre sourate et de son verset, ou la lecture jusqu’à la fin du Coran (capture du 24 octobre) ; vérifier le passage entre sourates et l’arrêt exact.
 - Mise à jour intelligente APK/PWA codée et testée (9 tests, Android simulé) : publication du site demandée le 23 octobre 2026 à 22:58 UTC ; APK n° 192 terminé avec succès (contrôle GitHub à 23:01 UTC). Attente : installation initiale sur tablette ; installation Android réelle non vérifiée ici.
 - (Terminé 24 octobre 2026) APK généré automatiquement par GitHub à chaque modification du projet ; problème de redirection tablette résolu par l’utilisateur.
 - (Terminé 24 octobre 2026) Installation tablette : la redirection vers le site est résolue, l'utilisateur confirme que tout fonctionne.
