@@ -50,6 +50,8 @@ interface HafsTajweedPageViewProps {
   isAudioPlaying?: boolean;
   /** Progression (0-100) de l'audio du verset en cours, pour le suivi des mots. */
   verseProgress?: number;
+  /** Surlignage/soulignement du verset récité (menu « التلاوة الصوتية »). */
+  highlightCurrentVerse?: boolean;
   onVerseClick?: (verseNumber: number) => void;
   onPlayPause?: () => void;
   onNextVerse?: () => void;
@@ -91,6 +93,7 @@ export const HafsTajweedPageView = ({
   currentVerse,
   isAudioPlaying,
   verseProgress = 0,
+  highlightCurrentVerse = true,
   onVerseClick,
   onPlayPause,
   onNextVerse,
@@ -476,12 +479,12 @@ export const HafsTajweedPageView = ({
     );
     nodes.forEach((n) => {
       const i = Number(n.dataset.w);
-      const active = !!isAudioPlaying && i === activeWordIndex;
-      const done = !!isAudioPlaying && i < activeWordIndex;
+      const active = highlightCurrentVerse && !!isAudioPlaying && i === activeWordIndex;
+      const done = highlightCurrentVerse && !!isAudioPlaying && i < activeWordIndex;
       n.classList.toggle('tw-word-active', active);
       n.classList.toggle('tw-word-done', done);
     });
-  }, [activeWordIndex, currentVerse, currentWords, isAudioPlaying, currentPage]);
+  }, [activeWordIndex, currentVerse, currentWords, isAudioPlaying, currentPage, highlightCurrentVerse]);
 
 
   // Swipe right (left-to-right) advances to the next page, swipe left goes back.
@@ -1059,7 +1062,7 @@ export const HafsTajweedPageView = ({
                       >
                         {run.words.map((word, wordPosition) => {
                           const isCurrent = word.surah === surahNumber && currentVerse === word.verse;
-                          const wordActive = isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
+                          const wordActive = highlightCurrentVerse && isCurrent && isAudioPlaying && word.kind === 'word' && word.wordIndex === activeWordIndex;
                           const isAllahName = word.kind === 'word' && word.text
                             .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
                             .replace(/\u0671/g, '\u0627')
