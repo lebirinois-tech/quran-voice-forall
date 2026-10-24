@@ -138,7 +138,9 @@ const saveRepeatPause = (settings: RepeatPauseSettings) => {
 
 const readSavedPlaybackSpeed = () => {
   if (typeof window === 'undefined') return 1;
-  return normalizePlaybackSpeed(Number(window.localStorage.getItem(PLAYBACK_SPEED_STORAGE_KEY)));
+  // `Number(null)` vaut 0 quand aucune vitesse n'est enregistrée : sans le
+  // `|| 1`, la vitesse par défaut tombait à 0.5x au lieu de 1x.
+  return normalizePlaybackSpeed(Number(window.localStorage.getItem(PLAYBACK_SPEED_STORAGE_KEY)) || 1);
 };
 
 const savePlaybackSpeed = (speed: number) => {

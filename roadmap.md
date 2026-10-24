@@ -59,6 +59,9 @@
 - [ ] Auto-resume last reading position on app reopen (local, all users) + banner; then publish
 - [ ] Mushaf Hafs : afficher les images officielles du Mushaf Tajweed (15 lignes) avec le coloriage thématique actuel superposé
 
+## En cours (24 octobre 2026, 07:20 UTC)
+- Menu « التلاوة الصوتية » coulissant commun aux modes Pages et Versets (lecture, récitateur, vitesse, début/arrêt, répétitions verset/passage, pauses) ; surbrillance claire de tout le verset récité à la place du soulignement mot à mot.
+
 ## En cours (24 octobre 2026, 23:50 UTC)
 - Conflit de signature APK (« package en conflit avec un package déjà présent ») : clé permanente `signing/quran-acces.keystore` créée et branchée sur le workflow ; l'utilisateur doit désinstaller l'ancienne application de la tablette UNE dernière fois, puis installer le nouvel APK signé ; ensuite les mises à jour passeront par-dessus sans désinstallation.
 - Bouton « Aller — اذهب » ajouté à côté de la liste des sourates (la sélection ne naviguait pas sur la tablette) ; vérifié Playwright : choix puis validation ouvre bien la sourate.

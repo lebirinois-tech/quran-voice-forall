@@ -7,6 +7,7 @@ import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { useFullMushafPage } from '@/hooks/useFullMushafPage';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { RecitationMenu, type RecitationStartConfig } from '@/components/RecitationMenu';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { TajweedLegend } from '@/components/TajweedLegend';
@@ -22,7 +23,7 @@ import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Play, BookOpen } from 'lucide-react';
+import { Loader2, FileText, Layers, Play, BookOpen, Headphones } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -109,6 +110,15 @@ const SurahReader = () => {
   const [twoPageMode, setTwoPageMode] = useState<boolean>(
     () => localStorage.getItem('mushaf-two-pages') === '1'
   );
+  // Menu « التلاوة الصوتية » (récitation audio), commun aux modes Pages et Versets.
+  const [recitationMenuOpen, setRecitationMenuOpen] = useState(false);
+  const [audioHighlight, setAudioHighlight] = useState<boolean>(
+    () => localStorage.getItem('quran-audio-highlight') !== '0'
+  );
+  const handleAudioHighlightChange = useCallback((enabled: boolean) => {
+    setAudioHighlight(enabled);
+    localStorage.setItem('quran-audio-highlight', enabled ? '1' : '0');
+  }, []);
   const [isWideScreen, setIsWideScreen] = useState<boolean>(
     () => typeof window !== 'undefined' && window.innerWidth >= 900 && window.innerWidth > window.innerHeight
   );
@@ -431,6 +441,40 @@ const SurahReader = () => {
     }
     toast.success('Lecture démarrée');
   }, [quranAudio, isMushafMode, currentPageVerseRange, verses.length]);
+
+  // Lecture demandée depuis le menu « التلاوة الصوتية » vers une autre sourate :
+  // la navigation recharge la page, puis la lecture démarre automatiquement.
+  useEffect(() => {
+    const pending = sessionStorage.getItem('quran-autoplay-verse');
+    if (!pending || verses.length === 0) return;
+    sessionStorage.removeItem('quran-autoplay-verse');
+    const v = Math.min(Math.max(1, parseInt(pending) || 1), verses.length);
+    quranAudio.playVerse(v);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verses.length]);
+
+  const handleRecitationStart = useCallback((config: RecitationStartConfig) => {
+    quranAudio.setRepeatPauseSettings({
+      enabled: config.gapMultiplier > 0,
+      multiplier: config.gapMultiplier > 0 ? config.gapMultiplier : 1,
+    });
+    if (config.surah === num) {
+      quranAudio.setRepeatMode(
+        config.repeat.mode,
+        config.repeat.count,
+        config.repeat.rangeStart,
+        config.repeat.rangeEnd
+      );
+      quranAudio.playVerse(config.verse);
+    } else {
+      // Les plages de répétition sont propres à la sourate affichée.
+      quranAudio.setRepeatMode('none', 1);
+      sessionStorage.setItem('quran-autoplay-verse', String(config.verse));
+      navigate(`/surah/${config.surah}`);
+    }
+    setRecitationMenuOpen(false);
+    toast.success('Lecture démarrée');
+  }, [num, quranAudio, navigate]);
 
   const voiceCommands = useVoiceCommands({
     onPlay: handlePlayRequest,
@@ -770,6 +814,7 @@ const SurahReader = () => {
               currentVerse={quranAudio.currentVerse}
               isAudioPlaying={quranAudio.isPlaying}
               verseProgress={quranAudio.progress}
+              highlightCurrentVerse={audioHighlight}
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               onPlayPause={() => (quranAudio.isPlaying ? quranAudio.pause() : handlePlayRequest())}
               onNextVerse={quranAudio.nextVerse}
@@ -952,7 +997,7 @@ const SurahReader = () => {
                                 verse={verse}
                                 surahNumber={surah.number}
                                 isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-                                isHighlighted={quranAudio.currentVerse === verse.number}
+                                isHighlighted={audioHighlight && quranAudio.currentVerse === verse.number}
                                 isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
                                 reciter={appSettings.reciter}
                                 textDisplayStyle={effectiveDisplayStyle}
@@ -1078,6 +1123,36 @@ const SurahReader = () => {
 
       {/* Audio Player — visible in all modes (verse-by-verse playback) */}
       {!isMushafMode && audioPlayerControls}
+
+      {/* Bouton du menu « التلاوة الصوتية » — visible dans les deux modes */}
+      <button
+        type="button"
+        onClick={() => setRecitationMenuOpen(true)}
+        className="fixed bottom-28 left-4 z-[90] flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        aria-label="التلاوة الصوتية — menu de récitation audio"
+      >
+        <Headphones className="h-6 w-6" />
+      </button>
+
+      <RecitationMenu
+        open={recitationMenuOpen}
+        onOpenChange={setRecitationMenuOpen}
+        surahNumber={num}
+        totalVerses={verses.length || 1}
+        isPlaying={quranAudio.isPlaying}
+        isLoading={quranAudio.isLoading}
+        currentVerse={quranAudio.currentVerse}
+        reciter={quranAudio.reciter}
+        playbackSpeed={quranAudio.playbackSpeed}
+        repeatSettings={quranAudio.repeatSettings}
+        repeatPause={quranAudio.repeatPause}
+        highlightEnabled={audioHighlight}
+        onHighlightChange={handleAudioHighlightChange}
+        onPause={quranAudio.pause}
+        onReciterChange={appSettings.onReciterChange}
+        onSpeedChange={quranAudio.changeSpeed}
+        onStart={handleRecitationStart}
+      />
     </div>
   );
 };
