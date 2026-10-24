@@ -796,6 +796,31 @@ const SurahReader = () => {
               voiceControls={voiceCommandControls}
               settingsControls={mushafSettingsControls}
               onSwitchToVerses={switchToVerses}
+              spreadSide={spreadActive ? (currentMushafPage! % 2 === 1 ? 'right' : 'left') : undefined}
+              twoPageMode={twoPageMode}
+              onToggleTwoPage={isWideScreen ? toggleTwoPageMode : undefined}
+            />
+          )}
+          {spreadActive && companionSurah && companionVerses.length > 0 && (
+            <HafsTajweedPageView
+              key={`companion-${appSettings.textDisplayStyle}-${companionPage}`}
+              isCompanion
+              spreadSide={companionPage! % 2 === 1 ? 'right' : 'left'}
+              surahNumber={companionSurah}
+              verses={companionVerses}
+              versesTajweed={{}}
+              preferProvidedTajweed={appSettings.textDisplayStyle !== 'pages-hafs'}
+              riwaya={
+                appSettings.textDisplayStyle === 'pages-warsh'
+                  ? 'warsh'
+                  : appSettings.textDisplayStyle === 'pages-qalun'
+                    ? 'qalun'
+                    : 'hafs'
+              }
+              fullPageGroups={companionGroups}
+              initialPage={companionPage!}
+              onPageRequest={handleNavigateToPage}
+              onNavigateToSurah={(s) => navigate(`/surah/${s}`)}
             />
           )}
 
