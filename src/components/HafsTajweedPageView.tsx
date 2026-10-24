@@ -834,6 +834,7 @@ export const HafsTajweedPageView = ({
       className={cn(
         'fixed inset-y-0 z-[70] h-[100dvh] bg-background overflow-hidden',
         spreadSide === 'left' ? 'left-0 w-1/2 border-r-2 border-secondary/60' : spreadSide === 'right' ? 'right-0 w-1/2' : 'inset-x-0 w-screen',
+        spreadSide && !isCompanion && 'z-[72]',
         isFullscreen && 'z-[75]'
       )}
     >
