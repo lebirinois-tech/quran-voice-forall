@@ -127,6 +127,17 @@ export const HafsTajweedPageView = ({
   // Sourate choisie dans la liste, en attente de validation par « Aller ».
   const [pendingSurah, setPendingSurah] = useState<number | null>(null);
   useEffect(() => setPendingSurah(null), [surahNumber]);
+  // Recherche dans la liste des sourates (nom français, arabe ou numéro).
+  const [surahQuery, setSurahQuery] = useState('');
+  const surahQueryTrim = surahQuery.trim();
+  const surahQueryLower = surahQueryTrim.toLowerCase();
+  const filteredSurahOptions = surahQueryTrim
+    ? surahs.filter((s) =>
+        s.name.toLowerCase().includes(surahQueryLower) ||
+        s.nameArabic.includes(surahQueryTrim) ||
+        String(s.number) === surahQueryTrim
+      )
+    : surahs;
 
   // Réglages de lisibilité, persistés : échelle de la police (%) et
   // opacité des fonds thématiques (0 à 0.4).
