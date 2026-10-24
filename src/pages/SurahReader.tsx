@@ -7,6 +7,7 @@ import { HafsTajweedPageView } from '@/components/HafsTajweedPageView';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { useFullMushafPage } from '@/hooks/useFullMushafPage';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { RecitationMenu, type RecitationStartConfig } from '@/components/RecitationMenu';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { TajweedLegend } from '@/components/TajweedLegend';
@@ -22,7 +23,7 @@ import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Play, BookOpen } from 'lucide-react';
+import { Loader2, FileText, Layers, Play, BookOpen, Headphones } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -109,6 +110,15 @@ const SurahReader = () => {
   const [twoPageMode, setTwoPageMode] = useState<boolean>(
     () => localStorage.getItem('mushaf-two-pages') === '1'
   );
+  // Menu « التلاوة الصوتية » (récitation audio), commun aux modes Pages et Versets.
+  const [recitationMenuOpen, setRecitationMenuOpen] = useState(false);
+  const [audioHighlight, setAudioHighlight] = useState<boolean>(
+    () => localStorage.getItem('quran-audio-highlight') !== '0'
+  );
+  const handleAudioHighlightChange = useCallback((enabled: boolean) => {
+    setAudioHighlight(enabled);
+    localStorage.setItem('quran-audio-highlight', enabled ? '1' : '0');
+  }, []);
   const [isWideScreen, setIsWideScreen] = useState<boolean>(
     () => typeof window !== 'undefined' && window.innerWidth >= 900 && window.innerWidth > window.innerHeight
   );
