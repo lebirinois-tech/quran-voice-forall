@@ -832,7 +832,7 @@ export const HafsTajweedPageView = ({
         }}
         className={cn(
           'relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
-          showMenuButton
+          showMenuButton || spreadSide
             ? 'pb-[calc(env(safe-area-inset-bottom,0px)+3.75rem)]'
             : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
         )}
@@ -1205,7 +1205,7 @@ export const HafsTajweedPageView = ({
       </div>
 
       {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
-      {showMenuButton ? (
+      {showMenuButton && !isCompanion ? (
         <div
           className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-center gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
@@ -1340,8 +1340,22 @@ export const HafsTajweedPageView = ({
           >
             <Menu className="h-5 w-5" />
           </Button>
+          {onToggleTwoPage && (
+            <Button
+              type="button"
+              size="sm"
+              variant={twoPageMode ? 'default' : 'ghost'}
+              aria-label={twoPageMode ? 'Une seule page — صفحة واحدة' : 'Deux pages — صفحتان'}
+              aria-pressed={!!twoPageMode}
+              onClick={onToggleTwoPage}
+              className="h-9 shrink-0 rounded-full px-2 text-xs font-bold"
+              title={twoPageMode ? 'Une seule page — صفحة واحدة' : 'Deux pages côte à côte — صفحتان'}
+            >
+              {twoPageMode ? '1' : '2'} <BookOpen className="ml-1 h-4 w-4" />
+            </Button>
+          )}
         </div>
-      ) : (
+      ) : isCompanion ? null : (
         <button
           type="button"
           onClick={() => setShowMenuButton(true)}
