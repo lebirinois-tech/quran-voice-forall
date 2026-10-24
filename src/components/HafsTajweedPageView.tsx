@@ -67,6 +67,12 @@ interface HafsTajweedPageViewProps {
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
   onSwitchToVerses?: () => void;
+  /** Affichage en double page : moitié de l'écran occupée par cette page. */
+  spreadSide?: 'left' | 'right';
+  /** Page compagne (lecture seule) : aucune barre de commandes. */
+  isCompanion?: boolean;
+  twoPageMode?: boolean;
+  onToggleTwoPage?: () => void;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -101,6 +107,10 @@ export const HafsTajweedPageView = ({
   voiceControls,
   settingsControls,
   onSwitchToVerses,
+  spreadSide,
+  isCompanion = false,
+  twoPageMode = false,
+  onToggleTwoPage,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -817,7 +827,8 @@ export const HafsTajweedPageView = ({
     <div
       ref={rootRef}
       className={cn(
-        'fixed inset-0 z-[70] h-[100dvh] w-screen bg-background overflow-hidden',
+        'fixed inset-y-0 z-[70] h-[100dvh] bg-background overflow-hidden',
+        spreadSide === 'left' ? 'left-0 w-1/2 border-r-2 border-secondary/60' : spreadSide === 'right' ? 'right-0 w-1/2' : 'inset-x-0 w-screen',
         isFullscreen && 'z-[75]'
       )}
     >
