@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -59,6 +60,7 @@ const JUZ_START_PAGES: Record<number, number> = {
 
 
 const SurahReader = () => {
+  const t = useT();
   const navigate = useNavigate();
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [searchParams] = useSearchParams();
@@ -557,7 +559,7 @@ const SurahReader = () => {
       onFontSizeChange={appSettings.onFontSizeChange}
       verseViewMode={appSettings.verseViewMode}
       onVerseViewModeChange={appSettings.onVerseViewModeChange}
-      triggerLabel="Ouvrir les paramètres"
+      triggerLabel={t('settings')}
       triggerClassName="w-full justify-start gap-2 border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
     />
   );
@@ -611,10 +613,10 @@ const SurahReader = () => {
         {!isMushafMode && <div className="max-w-lg mx-auto mb-6 animate-fade-in">
           <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-2">
             <Button type="button" variant="default" className="gap-2" aria-pressed="true">
-              <FileText className="h-4 w-4" /> Versets / آيات
+              <FileText className="h-4 w-4" /> {t('verses')}
             </Button>
             <Button type="button" variant="ghost" className="gap-2" onClick={switchToPages}>
-              <BookOpen className="h-4 w-4" /> Pages / صفحات
+              <BookOpen className="h-4 w-4" /> {t('pages')}
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -633,7 +635,7 @@ const SurahReader = () => {
                   value={pageInput}
                   onChange={(e) => setPageInput(e.target.value)}
                   className="h-9 text-sm bg-background"
-                  aria-label="Numéro de page"
+                  aria-label={t('pageNumber')}
                 />
                 <Button 
                   onClick={() => {
@@ -668,7 +670,7 @@ const SurahReader = () => {
                   value={juzInput}
                   onChange={(e) => setJuzInput(e.target.value)}
                   className="h-9 text-sm bg-background"
-                  aria-label="Numéro de Juz"
+                  aria-label={t('juzNumber')}
                 />
                 <Button 
                   onClick={() => {
@@ -1051,7 +1053,7 @@ const SurahReader = () => {
                             else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
                           }}
                           disabled={versePageNum <= 1}
-                          aria-label="Page précédente"
+                          aria-label={t('prevPage')}
                         >
                           ‹ Précédent
                         </Button>
@@ -1080,7 +1082,7 @@ const SurahReader = () => {
                             else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
                           }}
                           disabled={versePageNum >= 604}
-                          aria-label="Page suivante"
+                          aria-label={t('nextPage')}
                         >
                           Suivant ›
                         </Button>
@@ -1106,7 +1108,7 @@ const SurahReader = () => {
         type="button"
         onClick={() => setRecitationMenuOpen(true)}
         className="fixed bottom-28 left-4 z-[90] flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-        aria-label="التلاوة الصوتية — menu de récitation audio"
+        aria-label={t('audioMenu')}
       >
         <Headphones className="h-6 w-6" />
       </button>

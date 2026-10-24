@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n';
 import { Play, Pause, SkipBack, SkipForward, Volume2, Loader2, Download, Repeat, Repeat1, Gauge, Mic2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -75,6 +76,7 @@ export const AudioPlayer = ({
   className,
   embedded = false,
 }: AudioPlayerProps) => {
+  const t = useT();
   const verseProgress = ((currentVerse) / totalVerses) * 100;
   const [isDownloading, setIsDownloading] = useState(false);
   const [rangeStart, setRangeStart] = useState(currentVerse.toString());
@@ -200,10 +202,10 @@ export const AudioPlayer = ({
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-xs text-muted-foreground">
-              Verset {currentVerse} / {totalVerses}
+              {t('verse')} {currentVerse} / {totalVerses}
               {repeatSettings.mode !== 'none' && (
                 <span className="ml-2 text-primary">
-                  🔁 {repeatSettings.mode === 'verse' ? 'Verset' : `${repeatSettings.rangeStart}-${repeatSettings.rangeEnd}`}
+                  🔁 {repeatSettings.mode === 'verse' ? t('verse') : `${repeatSettings.rangeStart}-${repeatSettings.rangeEnd}`}
                   {repeatSettings.count > 0 ? ` (${currentRepeatCount + 1}/${repeatSettings.count})` : ' (∞)'}
                 </span>
               )}
@@ -211,7 +213,7 @@ export const AudioPlayer = ({
             {isLoading && (
               <span className="text-xs text-primary flex items-center gap-1">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Chargement...
+                {t('loading')}
               </span>
             )}
             {isPausingForRepeat && !isLoading && (
@@ -233,12 +235,12 @@ export const AudioPlayer = ({
                 onValueChange={(value) => onReciterChange(value as ReciterId)}
               >
                 <SelectTrigger className="w-full max-w-[180px] h-8 text-xs">
-                  <SelectValue placeholder="Récitateur" />
+                  <SelectValue placeholder={t('reciter')} />
                 </SelectTrigger>
                 <SelectContent>
                   {RECITER_IDS.map((key) => (
                     <SelectItem key={key} value={key} className="text-xs">
-                      {RECITERS[key].name} / {RECITERS[key].nameAr}
+                      {t.lang === 'ar' ? RECITERS[key].nameAr : RECITERS[key].name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -260,7 +262,7 @@ export const AudioPlayer = ({
               onClick={onPrevious}
               disabled={currentVerse <= 1 || isLoading}
               className="rounded-full"
-              aria-label="Verset précédent"
+              aria-label={t('prevVerse')}
             >
               <SkipBack className="h-5 w-5" />
             </Button>
@@ -271,7 +273,7 @@ export const AudioPlayer = ({
               onClick={isPlaying ? onPause : onPlay}
               disabled={isLoading}
               className="rounded-full"
-              aria-label={isPlaying ? "Pause" : "Lecture"}
+              aria-label={isPlaying ? t('pause') : t('play')}
             >
               {isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -288,7 +290,7 @@ export const AudioPlayer = ({
               onClick={onNext}
               disabled={currentVerse >= totalVerses || isLoading}
               className="rounded-full"
-              aria-label="Verset suivant"
+              aria-label={t('nextVerse')}
             >
               <SkipForward className="h-5 w-5" />
             </Button>
@@ -304,7 +306,7 @@ export const AudioPlayer = ({
                     "h-8 w-[64px] rounded-full px-2 text-xs font-bold",
                     playbackSpeed !== 1 && "text-primary border-primary bg-primary/10"
                   )}
-                  aria-label="Vitesse de lecture"
+                  aria-label={t('speed')}
                 >
                   <SelectValue>{playbackSpeed}x</SelectValue>
                 </SelectTrigger>
@@ -335,29 +337,29 @@ export const AudioPlayer = ({
                           "rounded-full h-8 gap-1 px-2",
                           repeatPause.enabled && "bg-primary text-primary-foreground"
                         )}
-                        aria-label="Pause pour répéter après le récitateur"
+                        aria-label={t('repeatPause')}
                       >
                         <Mic2 className="h-4 w-4" />
-                        <span className="text-[11px] font-medium">Répéter</span>
+                        <span className="text-[11px] font-medium">{t('repeat')}</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-72 z-[130] pointer-events-auto" align="end">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-2">
                           <div>
-                            <h4 className="font-medium text-sm">Pause pour répéter</h4>
+                            <h4 className="font-medium text-sm">{t('repeatPause')}</h4>
                             <p className="text-[11px] text-muted-foreground">
-                              Après chaque verset, marque une pause pour que vous puissiez répéter à voix haute.
+                              {t('pauseHint')}
                             </p>
                           </div>
                           <Switch
                             checked={repeatPause.enabled}
                             onCheckedChange={(checked) => onRepeatPauseChange({ enabled: checked })}
-                            aria-label="Activer la pause"
+                            aria-label={t('enablePause')}
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs">Durée de la pause</Label>
+                          <Label className="text-xs">{t('pauseDuration')}</Label>
                           <div className="grid grid-cols-4 gap-1">
                             {[
                               { v: 1, label: '1x' },
@@ -377,7 +379,7 @@ export const AudioPlayer = ({
                             ))}
                           </div>
                           <p className="text-[11px] text-muted-foreground">
-                            La pause dure la durée du verset multipliée par cette valeur.
+                            {t('gapHint')}
                           </p>
                         </div>
                       </div>
@@ -396,7 +398,7 @@ export const AudioPlayer = ({
                       "rounded-full",
                       repeatSettings.mode !== 'none' && "text-primary bg-primary/10"
                     )}
-                    aria-label="Options de répétition"
+                    aria-label={t('repeatOptions')}
                   >
                     {repeatSettings.mode === 'verse' ? (
                       <Repeat1 className="h-5 w-5" />
@@ -407,7 +409,7 @@ export const AudioPlayer = ({
                 </PopoverTrigger>
                 <PopoverContent className="w-72 z-[130] pointer-events-auto" align="end">
                   <div className="space-y-4">
-                    <h4 className="font-medium text-sm">Mode de répétition</h4>
+                    <h4 className="font-medium text-sm">{t('repeatMode')}</h4>
                     
                     {/* Quick options */}
                     <div className="grid grid-cols-2 gap-2">
@@ -417,7 +419,7 @@ export const AudioPlayer = ({
                         onClick={() => onRepeatModeChange('none', 1)}
                         className="text-xs"
                       >
-                        Désactivé
+                        {t('disabled')}
                       </Button>
                       <Button
                         variant={repeatSettings.mode === 'verse' ? 'default' : 'outline'}
@@ -425,13 +427,13 @@ export const AudioPlayer = ({
                         onClick={() => onRepeatModeChange('verse', parseInt(repeatCount) || 3)}
                         className="text-xs"
                       >
-                        Verset actuel
+                        {t('currentVerse')}
                       </Button>
                     </div>
 
                     {/* Repeat count */}
                     <div className="space-y-2">
-                      <Label className="text-xs">Nombre de répétitions</Label>
+                      <Label className="text-xs">{t('repeatCount')}</Label>
                       <div className="flex gap-2">
                         {['3', '5', '10', '0'].map((num) => (
                           <Button
@@ -459,7 +461,7 @@ export const AudioPlayer = ({
 
                     {/* Range selection */}
                     <div className="space-y-2 pt-2 border-t border-border">
-                      <Label className="text-xs">Répéter une plage de versets</Label>
+                      <Label className="text-xs">{t('repeatRange')}</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="number"
@@ -468,9 +470,9 @@ export const AudioPlayer = ({
                           value={rangeStart}
                           onChange={(e) => setRangeStart(e.target.value)}
                           className="h-8 text-xs"
-                          placeholder="Début"
+                          placeholder={t('start')}
                         />
-                        <span className="text-muted-foreground">à</span>
+                        <span className="text-muted-foreground">{t('to')}</span>
                         <Input
                           type="number"
                           min="1"
@@ -478,7 +480,7 @@ export const AudioPlayer = ({
                           value={rangeEnd}
                           onChange={(e) => setRangeEnd(e.target.value)}
                           className="h-8 text-xs"
-                          placeholder="Fin"
+                          placeholder={t('end')}
                         />
                       </div>
                       <Button
@@ -495,7 +497,7 @@ export const AudioPlayer = ({
                         }}
                         className="w-full text-xs"
                       >
-                        Répéter cette plage
+                        {t('repeatThisRange')}
                       </Button>
                     </div>
                   </div>
@@ -511,7 +513,7 @@ export const AudioPlayer = ({
                   size="icon"
                   disabled={isDownloading || isLoading}
                   className="rounded-full"
-                  aria-label="Options de téléchargement"
+                  aria-label={t('downloadOptions')}
                 >
                   {isDownloading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -522,7 +524,7 @@ export const AudioPlayer = ({
               </PopoverTrigger>
               <PopoverContent className="w-56 z-[130] pointer-events-auto" align="end">
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm mb-3">Télécharger l'audio</h4>
+                  <h4 className="font-medium text-sm mb-3">{t('downloadAudio')}</h4>
                   <Button
                     variant="outline"
                     size="sm"
@@ -531,7 +533,7 @@ export const AudioPlayer = ({
                     className="w-full justify-start text-xs"
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    Verset actuel ({currentVerse})
+                    {t('currentVerse')} ({currentVerse})
                   </Button>
                   <Button
                     variant="outline"
@@ -541,11 +543,11 @@ export const AudioPlayer = ({
                     className="w-full justify-start text-xs"
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    Sourate entière ({totalVerses} versets)
+                    {t('entireSurah')} ({totalVerses} {t('versesUnit')})
                   </Button>
                    <div className="pt-2 border-t border-border">
                     <p className="text-xs text-muted-foreground">
-                      Récitateur: {RECITERS[getSafeReciter(reciter)].name} / {RECITERS[getSafeReciter(reciter)].nameAr}
+                      {t('reciter')}: {t.lang === 'ar' ? RECITERS[getSafeReciter(reciter)].nameAr : RECITERS[getSafeReciter(reciter)].name}
                     </p>
                   </div>
                 </div>

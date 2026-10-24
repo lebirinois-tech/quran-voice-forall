@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n';
 import { useState } from 'react';
 import { Download, Check, Loader2, Wifi, BookOpen, FileText } from 'lucide-react';
 import { Button } from './ui/button';
@@ -20,6 +21,7 @@ const DOWNLOADABLE_RECITERS: { id: ReciterId; label: string }[] = [
 type DownloadTab = 'audio' | 'text' | 'tafsir';
 
 export const AudioCacheSettings = () => {
+  const t = useT();
   const { downloadSurahAudio, downloadAllSurahs, isDownloading: isAudioDownloading, downloadingSurah: audioDownloadingSurah, downloadingReciter, progress: audioProgress } = useAudioCache();
   const { downloadSurahTafsir, downloadAllTafsir, isDownloading: isTafsirDownloading, downloadingSurah: tafsirDownloadingSurah, progress: tafsirProgress } = useTafsirCache();
   const { downloadSurahText, downloadAllText, isDownloading: isTextDownloading, downloadingSurah: textDownloadingSurah, progress: textProgress } = useTextCache();
@@ -93,16 +95,16 @@ export const AudioCacheSettings = () => {
   const currentCachedCount = activeTab === 'audio' ? audioCachedCount : activeTab === 'text' ? textCachedCount : tafsirCachedCount;
 
   const tabs: { id: DownloadTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'audio', label: 'Audio', icon: <Download className="h-3 w-3" /> },
-    { id: 'text', label: 'Texte', icon: <FileText className="h-3 w-3" /> },
-    { id: 'tafsir', label: 'Tafsir', icon: <BookOpen className="h-3 w-3" /> },
+    { id: 'audio', label: t('audio'), icon: <Download className="h-3 w-3" /> },
+    { id: 'text', label: t('text'), icon: <FileText className="h-3 w-3" /> },
+    { id: 'tafsir', label: t('tafsir'), icon: <BookOpen className="h-3 w-3" /> },
   ];
 
   return (
     <div className="space-y-3">
       <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
         <Wifi className="h-3.5 w-3.5 text-primary" />
-        Pré-téléchargement hors-ligne / التحميل المسبق
+        {t('offlineDownload')}
       </Label>
 
       {/* Tab selector */}
@@ -136,7 +138,7 @@ export const AudioCacheSettings = () => {
                   : 'border-border hover:border-primary/50 bg-muted/50 text-foreground'
               }`}
             >
-              {r.label}
+              {t.lang === 'ar' ? RECITERS[r.id].nameAr : r.label}
             </button>
           ))}
         </div>
@@ -151,14 +153,14 @@ export const AudioCacheSettings = () => {
               : 'border-border hover:border-primary/50 bg-muted/50 text-foreground'
           }`}
         >
-          ⭐ Les trois lectures / الروايات الثلاث
+          {t('threeReadings')}
         </button>
       )}
 
       {/* Status */}
       <p className="text-xs text-muted-foreground">
-        {currentCachedCount}/114 sourates en cache
-        {activeTab === 'audio' && allRiwayat && ' (dans les trois lectures)'}
+        {currentCachedCount}/114 {t('cachedSurahs')}
+        {activeTab === 'audio' && allRiwayat && ` (${t('threeReadings')})`}
       </p>
 
       {activeTab === 'audio' && (
@@ -177,7 +179,7 @@ export const AudioCacheSettings = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Loader2 className="h-3 w-3 animate-spin" />
-            <span>Sourate {currentDownloadingSurah} — {currentProgress}%</span>
+            <span>{t('surah')} {currentDownloadingSurah} — {currentProgress}%</span>
           </div>
           <Progress value={currentProgress} className="h-2" />
         </div>
@@ -193,7 +195,7 @@ export const AudioCacheSettings = () => {
           disabled={isDownloading}
         >
           <Download className="h-3.5 w-3.5 mr-1" />
-          Tout télécharger
+          {t('downloadAll')}
         </Button>
         <Button
           variant="outline"
@@ -202,7 +204,7 @@ export const AudioCacheSettings = () => {
           onClick={() => setShowSurahList(!showSurahList)}
           disabled={isDownloading}
         >
-          {showSurahList ? 'Masquer' : 'Par sourate'}
+          {showSurahList ? t('hide') : t('bySurah')}
         </Button>
       </div>
 
@@ -224,7 +226,7 @@ export const AudioCacheSettings = () => {
                   }`}
                 >
                   <span className="truncate">
-                    {s.number}. {s.name} — {s.nameArabic}
+                    {s.number}. {t.lang === 'ar' ? s.nameArabic : s.name}
                   </span>
                   {cached ? (
                     <Check className="h-3 w-3 text-primary flex-shrink-0" />
