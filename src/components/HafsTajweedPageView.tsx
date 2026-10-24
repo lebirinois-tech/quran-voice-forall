@@ -67,6 +67,12 @@ interface HafsTajweedPageViewProps {
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
   onSwitchToVerses?: () => void;
+  /** Affichage en double page : moitié de l'écran occupée par cette page. */
+  spreadSide?: 'left' | 'right';
+  /** Page compagne (lecture seule) : aucune barre de commandes. */
+  isCompanion?: boolean;
+  twoPageMode?: boolean;
+  onToggleTwoPage?: () => void;
 }
 
 // Convert a Western digit to Arabic-Indic digits (٠-٩) for the verse marker.
@@ -101,6 +107,10 @@ export const HafsTajweedPageView = ({
   voiceControls,
   settingsControls,
   onSwitchToVerses,
+  spreadSide,
+  isCompanion = false,
+  twoPageMode = false,
+  onToggleTwoPage,
 }: HafsTajweedPageViewProps) => {
   const surah = surahs.find((s) => s.number === surahNumber);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -269,12 +279,17 @@ export const HafsTajweedPageView = ({
     [currentPage, onManualPageChange, onPageRequest, startPage, endPage]
   );
 
+  // En double page, on avance d'une paire (page impaire à droite, paire à gauche).
   const goPrev = useCallback(() => {
-    goToPage(currentPage - 1);
-  }, [currentPage, goToPage]);
+    if (!spreadSide) return goToPage(currentPage - 1);
+    const spreadStart = currentPage % 2 === 1 ? currentPage : currentPage - 1;
+    goToPage(Math.max(1, spreadStart - 2));
+  }, [currentPage, goToPage, spreadSide]);
   const goNext = useCallback(() => {
-    goToPage(currentPage + 1);
-  }, [currentPage, goToPage]);
+    if (!spreadSide) return goToPage(currentPage + 1);
+    const spreadStart = currentPage % 2 === 1 ? currentPage : currentPage - 1;
+    goToPage(Math.min(604, spreadStart + 2));
+  }, [currentPage, goToPage, spreadSide]);
 
   // Navigation directe vers un numéro de verset de la sourate courante :
   // on ouvre la page du Mushaf qui contient ce verset.
@@ -817,7 +832,9 @@ export const HafsTajweedPageView = ({
     <div
       ref={rootRef}
       className={cn(
-        'fixed inset-0 z-[70] h-[100dvh] w-screen bg-background overflow-hidden',
+        'fixed inset-y-0 z-[70] h-[100dvh] bg-background overflow-hidden',
+        spreadSide === 'left' ? 'left-0 w-1/2 border-r-2 border-secondary/60' : spreadSide === 'right' ? 'right-0 w-1/2' : 'inset-x-0 w-screen',
+        spreadSide && !isCompanion && 'z-[72]',
         isFullscreen && 'z-[75]'
       )}
     >
@@ -832,7 +849,7 @@ export const HafsTajweedPageView = ({
         }}
         className={cn(
           'relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
-          showMenuButton
+          showMenuButton || spreadSide
             ? 'pb-[calc(env(safe-area-inset-bottom,0px)+3.75rem)]'
             : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
         )}
@@ -1205,7 +1222,7 @@ export const HafsTajweedPageView = ({
       </div>
 
       {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
-      {showMenuButton ? (
+      {showMenuButton && !isCompanion ? (
         <div
           className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-center gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
@@ -1340,8 +1357,22 @@ export const HafsTajweedPageView = ({
           >
             <Menu className="h-5 w-5" />
           </Button>
+          {onToggleTwoPage && (
+            <Button
+              type="button"
+              size="sm"
+              variant={twoPageMode ? 'default' : 'ghost'}
+              aria-label={twoPageMode ? 'Une seule page — صفحة واحدة' : 'Deux pages — صفحتان'}
+              aria-pressed={!!twoPageMode}
+              onClick={onToggleTwoPage}
+              className="h-9 shrink-0 rounded-full px-2 text-xs font-bold"
+              title={twoPageMode ? 'Une seule page — صفحة واحدة' : 'Deux pages côte à côte — صفحتان'}
+            >
+              {twoPageMode ? '1' : '2'} <BookOpen className="ml-1 h-4 w-4" />
+            </Button>
+          )}
         </div>
-      ) : (
+      ) : isCompanion ? null : (
         <button
           type="button"
           onClick={() => setShowMenuButton(true)}
