@@ -544,9 +544,8 @@ const SurahReader = () => {
               {surah.number}
             </div>
           </div>
-          <h2 className="font-amiri text-4xl md:text-5xl mb-2">
-            {/* Cartouche décoratif identique au rendu Pages (Hafs/Warsh/Qaloun). */}
-            <span className="surah-title-frame surah-title-frame--verse">سورة {surah.nameArabic}</span>
+          <h2 className="font-amiri text-3xl text-primary mb-2">
+            {surah.nameArabic}
           </h2>
           <h3 className="text-xl font-semibold text-foreground mb-1">
             {surah.name}
@@ -689,6 +688,12 @@ const SurahReader = () => {
             appSettings.textDisplayStyle === 'pages-qalun') && <ThemeLegend />}
 
         <div className={isMushafMode ? 'mx-auto w-full max-w-3xl' : 'max-w-3xl mx-auto'}>
+          {/* Cartouche du titre, au début du texte coranique (au-dessus de la Basmala). */}
+          {!isMushafImageMode && !isMushafMode && (
+            <div className="text-center mb-4 font-amiri text-4xl md:text-5xl">
+              <span className="surah-title-frame surah-title-frame--verse">سورة {surah.nameArabic}</span>
+            </div>
+          )}
           {/* Bismillah - only show for text modes */}
           {surah.number !== 1 && surah.number !== 9 && !isMushafImageMode && (
             <div className="text-center mb-8 p-6 bg-card rounded-2xl border border-border shadow-soft animate-scale-in">
