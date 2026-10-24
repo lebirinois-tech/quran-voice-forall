@@ -279,12 +279,17 @@ export const HafsTajweedPageView = ({
     [currentPage, onManualPageChange, onPageRequest, startPage, endPage]
   );
 
+  // En double page, on avance d'une paire (page impaire à droite, paire à gauche).
   const goPrev = useCallback(() => {
-    goToPage(currentPage - 1);
-  }, [currentPage, goToPage]);
+    if (!spreadSide) return goToPage(currentPage - 1);
+    const spreadStart = currentPage % 2 === 1 ? currentPage : currentPage - 1;
+    goToPage(Math.max(1, spreadStart - 2));
+  }, [currentPage, goToPage, spreadSide]);
   const goNext = useCallback(() => {
-    goToPage(currentPage + 1);
-  }, [currentPage, goToPage]);
+    if (!spreadSide) return goToPage(currentPage + 1);
+    const spreadStart = currentPage % 2 === 1 ? currentPage : currentPage - 1;
+    goToPage(Math.min(604, spreadStart + 2));
+  }, [currentPage, goToPage, spreadSide]);
 
   // Navigation directe vers un numéro de verset de la sourate courante :
   // on ouvre la page du Mushaf qui contient ce verset.
