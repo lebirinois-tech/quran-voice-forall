@@ -14,3 +14,4 @@
 - Hafs Arabic text must come from the bundled Quran.com Uthmani corpus, shared with the packed Medina words; never overwrite it with Al Quran Cloud text or stale unversioned caches, because their tanween encoding displays false meem marks in our fonts.
 - Surah opening rows are derived separately from official word rows; expand a single header slot when necessary instead of moving or dropping Quran words, so consistent openings preserve text integrity.
 - The Android APK workflow runs on every push to main (plus manual dispatch) with cancel-in-progress concurrency, so each publish refreshes the latest release without manual requests.
+- APK signing uses the committed stable keystore `signing/quran-acces.keystore` (alias `quran`), injected into the generated `android/app/build.gradle` by the workflow; never revert to per-runner debug keys, or Android rejects updates with a package conflict.

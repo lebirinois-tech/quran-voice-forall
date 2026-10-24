@@ -127,6 +127,17 @@ export const HafsTajweedPageView = ({
   // Sourate choisie dans la liste, en attente de validation par « Aller ».
   const [pendingSurah, setPendingSurah] = useState<number | null>(null);
   useEffect(() => setPendingSurah(null), [surahNumber]);
+  // Recherche dans la liste des sourates (nom français, arabe ou numéro).
+  const [surahQuery, setSurahQuery] = useState('');
+  const surahQueryTrim = surahQuery.trim();
+  const surahQueryLower = surahQueryTrim.toLowerCase();
+  const filteredSurahOptions = surahQueryTrim
+    ? surahs.filter((s) =>
+        s.name.toLowerCase().includes(surahQueryLower) ||
+        s.nameArabic.includes(surahQueryTrim) ||
+        String(s.number) === surahQueryTrim
+      )
+    : surahs;
 
   // Réglages de lisibilité, persistés : échelle de la police (%) et
   // opacité des fonds thématiques (0 à 0.4).
@@ -1415,11 +1426,25 @@ export const HafsTajweedPageView = ({
                         <SelectValue placeholder="Choisir une sourate" />
                       </SelectTrigger>
                       <SelectContent className="z-[120] max-h-72">
-                        {surahs.map((s) => (
+                        <div className="sticky top-0 z-10 bg-popover p-1">
+                          <Input
+                            value={surahQuery}
+                            onChange={(e) => setSurahQuery(e.target.value)}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            placeholder="Rechercher une sourate — ابحث عن سورة"
+                            className="h-9"
+                          />
+                        </div>
+                        {filteredSurahOptions.map((s) => (
                           <SelectItem key={s.number} value={String(s.number)}>
                             {s.number}. {s.name} — {s.nameArabic}
                           </SelectItem>
                         ))}
+                        {filteredSurahOptions.length === 0 && (
+                          <div className="p-2 text-center text-sm text-muted-foreground">
+                            Aucune sourate trouvée — لا توجد سورة
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                     <Button
