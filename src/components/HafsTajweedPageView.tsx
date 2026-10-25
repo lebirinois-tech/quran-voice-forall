@@ -331,43 +331,43 @@ export const HafsTajweedPageView = ({
     const juzVerses = verses.filter((v) => getJuzForVerse(surahNumber, v.number) === currentJuz);
     const surahEnd = verses.length ? verses[verses.length - 1].number : verse;
     return {
-      verse: { start: verse, end: verse, label: `Verset ${verse} — الآية`, short: `V${verse}` },
+      verse: { start: verse, end: verse, label: `${t('verse')} ${verse}`, short: `V${verse}` },
       page: {
         start: pageVerses[0]?.number ?? verse,
         end: pageVerses[pageVerses.length - 1]?.number ?? verse,
-        label: `Page ${currentPage} — الصفحة`,
+        label: `${t('page')} ${currentPage}`,
         short: `P${currentPage}`,
       },
       surah: {
         start: verses[0]?.number ?? 1,
         end: surahEnd,
-        label: `Sourate ${surah?.name ?? surahNumber} — السورة`,
+        label: `${t('surah')} ${t.lang === 'ar' ? surah?.nameArabic : surah?.name}`,
         short: `S${surahNumber}`,
       },
       juz: {
         start: juzVerses[0]?.number ?? verse,
         end: juzVerses[juzVerses.length - 1]?.number ?? verse,
-        label: `Juz ${currentJuz} — الجزء`,
+        label: `${t('juz')} ${currentJuz}`,
         short: `J${currentJuz}`,
       },
     };
-  }, [pageVerses, currentVerse, verses, surahNumber, currentJuz, currentPage, surah]);
+  }, [pageVerses, currentVerse, verses, surahNumber, currentJuz, currentPage, surah, lang]);
 
   const scopeDetailLabel = useMemo(() => {
     const scope = playScopes[activeScope];
     const start = scope.start;
     const end = scope.end;
     if (activeScope === 'verse') {
-      return `Verset ${start}`;
+      return `${t('verse')} ${start}`;
     }
     if (activeScope === 'page') {
-      return `Page ${currentPage}, V${start}–${end}`;
+      return `${t('page')} ${currentPage}, ${start}–${end}`;
     }
     if (activeScope === 'surah') {
-      return `Sourate ${surahNumber}, V${start}–${end}`;
+      return `${t('surah')} ${surahNumber}, ${start}–${end}`;
     }
-    return `Juz ${currentJuz}, V${start}–${end}`;
-  }, [playScopes, activeScope, currentPage, surahNumber, currentJuz]);
+    return `${t('juz')} ${currentJuz}, ${start}–${end}`;
+  }, [playScopes, activeScope, currentPage, surahNumber, currentJuz, lang]);
 
   const startScope = useCallback(
     (key: keyof typeof playScopes) => {
@@ -1423,8 +1423,8 @@ export const HafsTajweedPageView = ({
             <section>
               <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('pages')}</h4>
               <div className="mb-2 text-center text-sm font-medium text-foreground">
-                {surah?.name} · Page {currentPage}/604
-                {currentVerse ? ` · Verset ${currentVerse}` : ''}
+                {t.lang === 'ar' ? surah?.nameArabic : surah?.name} · {t('page')} {currentPage}/604
+                {currentVerse ? ` · ${t('verse')} ${currentVerse}` : ''}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -1612,7 +1612,7 @@ export const HafsTajweedPageView = ({
                   )}
                   <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
                     <Volume2 className="h-3.5 w-3.5" />
-                    {currentVerse ? `Verset ${currentVerse}` : '—'}
+                    {currentVerse ? `${t('verse')} ${currentVerse}` : '—'}
                   </span>
                 </div>
               )}
@@ -1712,9 +1712,7 @@ export const HafsTajweedPageView = ({
                     aria-label={t('themeOpacity')}
                   />
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Les couleurs du Tajweed (règles de lecture) restent inchangées.
-                </p>
+                
               </div>
             </section>
 
@@ -1803,7 +1801,7 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Enregistrement — {surah?.name} · Verset {recorderVerse}
+              {t('recording')} — {surah?.name} · {t('verse')} {recorderVerse}
             </DialogTitle>
           </DialogHeader>
           {recorderVerse !== null && (() => {
@@ -1827,7 +1825,7 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-sm z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Verset {menuVerse} — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name}
+              {t('verse')} {menuVerse} — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name}
             </DialogTitle>
           </DialogHeader>
           {menuVerse !== null && (() => {
@@ -1925,7 +1923,7 @@ export const HafsTajweedPageView = ({
         <DialogContent className="w-full max-w-[calc(100vw-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[120] p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>
-              {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {detailVerse}
+              {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · {t('verse')} {detailVerse}
             </DialogTitle>
           </DialogHeader>
           {detailVerse !== null && (
@@ -1969,7 +1967,7 @@ export const HafsTajweedPageView = ({
                     ))}
                   </div>
                 ))}
-                <p className="text-xs text-muted-foreground">Touchez un verset pour voir sa traduction et son tafsir.</p>
+                
               </div>
             );
           })()}
@@ -2010,7 +2008,7 @@ export const HafsTajweedPageView = ({
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto z-[120]">
           <DialogHeader>
             <DialogTitle>
-              Tafsir — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · Verset {themeVerse}
+              {t('tafsir')} — {surahs.find((s) => s.number === menuSurah)?.name ?? surah?.name} · {t('verse')} {themeVerse}
             </DialogTitle>
           </DialogHeader>
           {themeVerse !== null && (

@@ -624,7 +624,7 @@ const SurahReader = () => {
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-xs font-medium text-foreground">Page</span>
+                <span className="text-xs font-medium text-foreground">{t('page')}</span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -650,7 +650,7 @@ const SurahReader = () => {
                   size="sm"
                   className="px-3"
                 >
-                  Go
+                  {t('go')}
                 </Button>
               </div>
             </div>
@@ -659,7 +659,7 @@ const SurahReader = () => {
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-2 mb-2">
                 <Layers className="h-4 w-4 text-primary" />
-                <span className="text-xs font-medium text-foreground">Juz</span>
+                <span className="text-xs font-medium text-foreground">{t('juz')}</span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -685,7 +685,7 @@ const SurahReader = () => {
                   size="sm"
                   className="px-3"
                 >
-                  Go
+                  {t('go')}
                 </Button>
               </div>
             </div>
@@ -714,8 +714,7 @@ const SurahReader = () => {
                         : 'text-muted-foreground hover:bg-muted border-border'
                     }`}
                   >
-                    <span className="block">{r.label}</span>
-                    <span className="block text-xs opacity-70 font-amiri" dir="rtl">{r.ar} — تجويد</span>
+                    <span className="block">{t.lang === 'ar' ? r.ar : r.label}</span>
                   </button>
                 );
               })}
@@ -940,7 +939,7 @@ const SurahReader = () => {
                               aria-label={`Lire la page ${pageNum} depuis le verset ${firstVerseOfPage}`}
                             >
                               <Play className="h-3.5 w-3.5" />
-                              <span className="text-xs">Lire la page</span>
+                              <span className="text-xs">{t('listenPage')}</span>
                             </Button>
                           </header>
 
@@ -1011,10 +1010,10 @@ const SurahReader = () => {
                       >
                         <span className="font-semibold text-primary">
                           {effectiveDisplayStyle === 'warsh-tajweed'
-                            ? 'Warsh / ورش'
+                            ? (t.lang === 'ar' ? 'ورش' : 'Warsh')
                             : effectiveDisplayStyle === 'qalun-tajweed'
-                              ? 'Qalun / قالون'
-                              : 'Hafs / حفص'}
+                              ? (t.lang === 'ar' ? 'قالون' : 'Qalun')
+                              : (t.lang === 'ar' ? 'حفص' : 'Hafs')}
                         </span>
                         <span aria-hidden="true">·</span>
                         <span className="truncate max-w-[38%]">{surah.name}</span>
@@ -1026,7 +1025,7 @@ const SurahReader = () => {
                           <>
                             <span aria-hidden="true">·</span>
                             <span>
-                              {quranAudio.isPlaying ? '▶ Verset ' : 'Verset '}
+                              {quranAudio.isPlaying ? '▶ ' : ''}{t('verse')} 
                               <span className="font-semibold text-foreground">{quranAudio.currentVerse}</span>
                             </span>
                           </>
@@ -1037,7 +1036,7 @@ const SurahReader = () => {
                             onClick={() => goToVersePage(playingVersePage)}
                             className="underline text-primary font-medium"
                           >
-                            Revenir à la lecture (p. {playingVersePage})
+                            {t('resumeReading')} ({t('page')} {playingVersePage})
                           </button>
                         )}
                       </div>
@@ -1055,7 +1054,7 @@ const SurahReader = () => {
                           disabled={versePageNum <= 1}
                           aria-label={t('prevPage')}
                         >
-                          ‹ Précédent
+                          ‹ {t('prevPage')}
                         </Button>
                         <Button
                           size="sm"
@@ -1069,7 +1068,7 @@ const SurahReader = () => {
                           }}
                           aria-label={`Lire la page ${versePageNum}`}
                         >
-                          <Play className="h-3.5 w-3.5 mr-1" /> Lire la page
+                          <Play className="h-3.5 w-3.5 mr-1" /> {t('listenPage')}
                         </Button>
                         <Button
                           size="sm"
@@ -1084,7 +1083,7 @@ const SurahReader = () => {
                           disabled={versePageNum >= 604}
                           aria-label={t('nextPage')}
                         >
-                          Suivant ›
+                          {t('nextPage')} ›
                         </Button>
                       </div>
                     </div>

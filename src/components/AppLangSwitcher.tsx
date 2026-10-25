@@ -1,4 +1,4 @@
-import { setAppLang, useAppLang, type AppLang } from '@/lib/i18n';
+import { setAppLang, useAppLang, useT, type AppLang } from '@/lib/i18n';
 import { useTtsLang } from '@/hooks/useTtsLang';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,7 @@ const OPTIONS: { value: AppLang; label: string }[] = [
 /** Les trois choix de langue affichés directement (menus + lecture audio). */
 export const AppLangSwitcher = ({ className }: { className?: string }) => {
   const lang = useAppLang();
+  const t = useT();
   const [, setTtsLang] = useTtsLang();
 
   const choose = (v: AppLang) => {
@@ -21,7 +22,7 @@ export const AppLangSwitcher = ({ className }: { className?: string }) => {
   return (
     <div
       role="group"
-      aria-label="Langue / اللغة / Language"
+      aria-label={t('language')}
       className={cn(
         'inline-flex items-center gap-0.5 rounded-full bg-muted/80 p-0.5',
         className,
