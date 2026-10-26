@@ -115,6 +115,8 @@ export const VerseCard = ({
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [speakingLang, setSpeakingLang] = useState<'fr' | 'en' | null>(null);
   const [showEnglish, setShowEnglish] = useState(false);
+  const [showTranslation] = useVerseExtra('translation');
+  const [showTafsir] = useVerseExtra('tafsir');
 
   const {
     text: enTranslation,

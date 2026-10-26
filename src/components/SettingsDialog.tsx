@@ -18,6 +18,8 @@ import { TextDisplayStyle, FontSize, VerseViewMode } from '@/hooks/useAppSetting
 import { AudioCacheSettings } from './AudioCacheSettings';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useVerseExtra } from '@/hooks/useVerseExtras';
+import { Switch } from './ui/switch';
 
 interface SettingsDialogProps {
   reciter: ReciterId;
@@ -53,6 +55,8 @@ const TEXT_DISPLAY_STYLES = [
 ];
 
 const FONT_SIZES = [
+  { id: 'xxsmall' as FontSize, key: 'fontXXSmall' as const },
+  { id: 'xsmall' as FontSize, key: 'fontXSmall' as const },
   { id: 'small' as FontSize, key: 'fontSmall' as const },
   { id: 'medium' as FontSize, key: 'fontMedium' as const },
   { id: 'large' as FontSize, key: 'fontLarge' as const },
@@ -74,6 +78,8 @@ export const SettingsDialog = ({
   triggerLabel,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showTranslation, setShowTranslation] = useVerseExtra('translation');
+  const [showTafsir, setShowTafsir] = useVerseExtra('tafsir');
   const [, setTtsLang] = useTtsLang();
   const appLang = useAppLang();
   const t = useT();
@@ -276,13 +282,29 @@ export const SettingsDialog = ({
             </div>
           )}
 
+          {/* Traduction / Tafsir sous les versets */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <Type className="h-3.5 w-3.5 text-primary" />
+              {t('verseExtras')}
+            </Label>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <Label htmlFor="show-translation" className="text-sm text-foreground cursor-pointer">{t('showTranslation')}</Label>
+              <Switch id="show-translation" checked={showTranslation} onCheckedChange={setShowTranslation} />
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <Label htmlFor="show-tafsir" className="text-sm text-foreground cursor-pointer">{t('showTafsir')}</Label>
+              <Switch id="show-tafsir" checked={showTafsir} onCheckedChange={setShowTafsir} />
+            </div>
+          </div>
+
           {/* Font Size */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <TextCursor className="h-3.5 w-3.5 text-primary" />
               {t('fontSize')}
             </Label>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-3 gap-1.5">
               {FONT_SIZES.map((size) => (
                 <button
                   key={size.id}
