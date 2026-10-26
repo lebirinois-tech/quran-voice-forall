@@ -117,6 +117,8 @@ export const VerseCard = ({
   const [showEnglish, setShowEnglish] = useState(false);
   const [showTranslation] = useVerseExtra('translation');
   const [showTafsir] = useVerseExtra('tafsir');
+  const [showTranslation] = useVerseExtra('translation');
+  const [showTafsir] = useVerseExtra('tafsir');
 
   const {
     text: enTranslation,
