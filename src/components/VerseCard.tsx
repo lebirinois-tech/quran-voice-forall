@@ -533,7 +533,7 @@ export const VerseCard = ({
       )}
 
       {/* Translation */}
-      {hideText ? null : (
+      {hideText || !showTranslation ? null : (
         <div className="border-t border-border pt-4">
           {/* French translation (always visible) */}
           <p className="text-muted-foreground text-base leading-relaxed">
@@ -606,15 +606,15 @@ export const VerseCard = ({
       )}
 
       {/* Tafsir Panel */}
-      <TafsirPanel
+      {showTafsir && <TafsirPanel
         surahNumber={surahNumber}
         verseNumber={verse.number}
         isOpen={isTafsirOpen}
         onToggle={() => setIsTafsirOpen(!isTafsirOpen)}
-      />
+      />}
 
       {/* Thematic Tafsir Panel (only if verse has curated themes) */}
-      {!hideText && (
+      {!hideText && showTafsir && (
         <ThematicTafsirPanel
           surahNumber={surahNumber}
           verseNumber={verse.number}
