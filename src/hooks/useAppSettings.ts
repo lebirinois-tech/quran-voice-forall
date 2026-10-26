@@ -8,7 +8,7 @@ export type TextDisplayStyle =
   | 'pages-hafs'
   | 'pages-warsh'
   | 'pages-qalun';
-export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
+export type FontSize = 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge';
 /** Mode d'affichage des versets : défilement continu ou page par page (une page du Mushaf à la fois). */
 export type VerseViewMode = 'scroll' | 'page';
 

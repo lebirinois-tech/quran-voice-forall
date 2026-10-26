@@ -33,8 +33,8 @@ export const VoiceCommandButton = ({
 
   return (
     <div className={cn("flex flex-col items-center gap-2", className)}>
-      {/* Language Selector */}
-      {onLangChange && (
+      {/* Sélecteur de langue retiré : la langue suit le choix de la barre du haut. */}
+      {false && onLangChange && (
         <div className="flex items-center gap-2">
           <Globe className="h-3.5 w-3.5 text-muted-foreground" />
           <Select value={voiceLang} onValueChange={(v) => onLangChange(v as VoiceLang)}>
