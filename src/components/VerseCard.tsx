@@ -1,3 +1,4 @@
+import { useVerseExtra } from '@/hooks/useVerseExtras';
 import { juzMapping } from '@/data/surahs';
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
@@ -115,6 +116,8 @@ export const VerseCard = ({
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [speakingLang, setSpeakingLang] = useState<'fr' | 'en' | null>(null);
   const [showEnglish, setShowEnglish] = useState(false);
+  const [showTranslation] = useVerseExtra('translation');
+  const [showTafsir] = useVerseExtra('tafsir');
 
   const {
     text: enTranslation,
@@ -334,6 +337,8 @@ export const VerseCard = ({
   // Map fontSize setting to Tailwind classes
   const getFontSizeClass = () => {
     switch (fontSize) {
+      case 'xxsmall': return 'text-2xl md:text-3xl';
+      case 'xsmall': return 'text-3xl md:text-4xl';
       case 'small': return 'text-4xl md:text-5xl';
       case 'medium': return 'text-5xl md:text-6xl';
       case 'large': return 'text-6xl md:text-7xl';
@@ -528,7 +533,7 @@ export const VerseCard = ({
       )}
 
       {/* Translation */}
-      {hideText ? null : (
+      {hideText || !showTranslation ? null : (
         <div className="border-t border-border pt-4">
           {/* French translation (always visible) */}
           <p className="text-muted-foreground text-base leading-relaxed">
@@ -601,15 +606,15 @@ export const VerseCard = ({
       )}
 
       {/* Tafsir Panel */}
-      <TafsirPanel
+      {showTafsir && <TafsirPanel
         surahNumber={surahNumber}
         verseNumber={verse.number}
         isOpen={isTafsirOpen}
         onToggle={() => setIsTafsirOpen(!isTafsirOpen)}
-      />
+      />}
 
       {/* Thematic Tafsir Panel (only if verse has curated themes) */}
-      {!hideText && (
+      {!hideText && showTafsir && (
         <ThematicTafsirPanel
           surahNumber={surahNumber}
           verseNumber={verse.number}

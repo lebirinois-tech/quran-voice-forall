@@ -1106,7 +1106,9 @@ const SurahReader = () => {
       <button
         type="button"
         onClick={() => setRecitationMenuOpen(true)}
-        className="fixed bottom-28 left-4 z-[90] flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className={`fixed z-[90] flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+          isMushafMode ? 'left-1 top-1/2 -translate-y-1/2 h-9 w-9 opacity-80' : 'bottom-48 left-4 h-12 w-12'
+        }`}
         aria-label={t('audioMenu')}
       >
         <Headphones className="h-6 w-6" />
