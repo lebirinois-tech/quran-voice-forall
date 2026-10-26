@@ -1,3 +1,4 @@
+import { useVerseExtra } from '@/hooks/useVerseExtras';
 import { juzMapping } from '@/data/surahs';
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
