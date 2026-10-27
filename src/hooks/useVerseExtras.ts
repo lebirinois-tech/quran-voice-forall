@@ -5,7 +5,9 @@ const KEYS = { translation: 'quran-show-translation', tafsir: 'quran-show-tafsir
 const EVENT = 'quran-verse-extras-change';
 type Extra = keyof typeof KEYS;
 
-const read = (k: Extra) => localStorage.getItem(KEYS[k]) !== '0';
+// La traduction est optionnelle : masquée tant que l'utilisateur ne l'active pas.
+const read = (k: Extra) =>
+  k === 'translation' ? localStorage.getItem(KEYS[k]) === '1' : localStorage.getItem(KEYS[k]) !== '0';
 
 export const useVerseExtra = (k: Extra): [boolean, (v: boolean) => void] => {
   const [value, setValue] = useState(() => read(k));
