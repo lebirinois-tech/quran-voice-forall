@@ -175,7 +175,7 @@ export const AudioPlayer = ({
     <div className={cn(
       embedded
         ? "relative bg-card border border-border shadow-soft rounded-2xl p-3"
-        : "fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated z-40 p-4 animate-slide-in",
+        : "fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated z-40 px-3 py-2 animate-slide-in",
       className
     )}>
       <div className={cn(embedded ? "w-full" : "container mx-auto max-w-2xl")}>
@@ -193,7 +193,7 @@ export const AudioPlayer = ({
         </div>
 
         {/* Verse Progress bar */}
-        <div className="mb-3">
+        <div className="mb-1">
           <div className="h-1 bg-muted/50 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-gold transition-all duration-300"
@@ -323,7 +323,7 @@ export const AudioPlayer = ({
 
 
           {/* Repeat & Download Buttons */}
-          <div className="flex-1 flex flex-wrap justify-end gap-0.5 sm:gap-1">
+          <div className="flex-1 flex flex-nowrap items-center justify-end gap-0.5 sm:gap-1">
 
 
             {/* Pause-to-repeat (after reciter) */}
@@ -340,7 +340,7 @@ export const AudioPlayer = ({
                         aria-label={t('repeatPause')}
                       >
                         <Mic2 className="h-4 w-4" />
-                        <span className="text-[11px] font-medium">{t('repeat')}</span>
+                        <span className="hidden sm:inline text-[11px] font-medium">{t('repeat')}</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-72 z-[130] pointer-events-auto" align="end">
