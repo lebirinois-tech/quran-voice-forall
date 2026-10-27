@@ -566,7 +566,7 @@ const SurahReader = () => {
 
   return (
     <div
-      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen bg-background pattern-islamic pb-32'}
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen bg-background pattern-islamic pb-56'}
       style={{ backgroundColor: appSettings.backgroundColor }}
     >
       {!isMushafMode && (
@@ -1097,7 +1097,7 @@ const SurahReader = () => {
       </main>
 
       {/* Voice Command Button */}
-      {!isMushafMode && <div className="fixed bottom-28 right-4 z-50">{voiceCommandControls}</div>}
+      {!isMushafMode && <div className="fixed bottom-40 right-3 z-50 scale-75 origin-bottom-right">{voiceCommandControls}</div>}
 
       {/* Audio Player — visible in all modes (verse-by-verse playback) */}
       {!isMushafMode && audioPlayerControls}
@@ -1107,7 +1107,7 @@ const SurahReader = () => {
         type="button"
         onClick={() => setRecitationMenuOpen(true)}
         className={`fixed z-[90] flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-          isMushafMode ? 'left-1 top-1/2 -translate-y-1/2 h-9 w-9 opacity-80' : 'bottom-48 left-4 h-12 w-12'
+          isMushafMode ? 'left-1 bottom-24 h-10 w-10 opacity-90' : 'bottom-40 left-3 h-11 w-11'
         }`}
         aria-label={t('audioMenu')}
       >
