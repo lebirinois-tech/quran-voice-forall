@@ -47,6 +47,9 @@ interface AudioPlayerProps {
   surahName?: string;
   className?: string;
   embedded?: boolean;
+  /** Boutons supplémentaires (casque, micro) intégrés à la barre. */
+  leadingControls?: React.ReactNode;
+  trailingControls?: React.ReactNode;
 }
 
 export const AudioPlayer = ({
@@ -75,6 +78,8 @@ export const AudioPlayer = ({
   surahName,
   className,
   embedded = false,
+  leadingControls,
+  trailingControls,
 }: AudioPlayerProps) => {
   const t = useT();
   const verseProgress = ((currentVerse) / totalVerses) * 100;
@@ -226,7 +231,8 @@ export const AudioPlayer = ({
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center justify-between gap-1 sm:gap-4">
+          {leadingControls && <div className="flex items-center shrink-0">{leadingControls}</div>}
           {/* Reciter Selector */}
           <div className="hidden sm:block flex-1 min-w-0">
             {onReciterChange ? (
