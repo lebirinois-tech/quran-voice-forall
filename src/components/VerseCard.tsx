@@ -1,4 +1,5 @@
 import { useVerseExtra } from '@/hooks/useVerseExtras';
+import { useT } from '@/lib/i18n';
 import { juzMapping } from '@/data/surahs';
 import { Verse, getVersePage, surahs } from '@/data/surahs';
 import { cn } from '@/lib/utils';
@@ -115,15 +116,15 @@ export const VerseCard = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [speakingLang, setSpeakingLang] = useState<'fr' | 'en' | null>(null);
-  const [showEnglish, setShowEnglish] = useState(false);
+  const t = useT();
+  const uiLang = t.lang;
   const [showTranslation] = useVerseExtra('translation');
   const [showTafsir] = useVerseExtra('tafsir');
 
   const {
     text: enTranslation,
     isLoading: isLoadingEn,
-    error: enError,
-  } = useEnglishTranslation(surahNumber, verse.number, !hideText && (showEnglish || ttsLang === 'en'));
+  } = useEnglishTranslation(surahNumber, verse.number, !hideText && (uiLang === 'en' || ttsLang === 'en'));
 
   useEffect(() => {
     return () => {
@@ -532,74 +533,33 @@ export const VerseCard = ({
         </p>
       )}
 
-      {/* Translation */}
+      {/* Translation — uniquement dans la langue choisie (EN si anglais, sinon FR) */}
       {hideText || !showTranslation ? null : (
         <div className="border-t border-border pt-4">
-          {/* French translation (always visible) */}
-          <p className="text-muted-foreground text-base leading-relaxed">
-            <span className="text-xs font-semibold text-primary mr-2">FR</span>
-            {verse.translation}
-          </p>
-
-          {/* English translation (shown when EN selected) */}
-          {(showEnglish || ttsLang === 'en') && (
-            <p className="text-muted-foreground text-base leading-relaxed mt-3 italic">
-              <span className="text-xs font-semibold text-primary mr-2 not-italic">EN</span>
+          {uiLang === 'en' ? (
+            <p className="text-muted-foreground text-base leading-relaxed">
               {enTranslation
                 ? enTranslation
                 : isLoadingEn
                   ? 'Loading English translation…'
                   : 'English translation unavailable'}
             </p>
+          ) : (
+            <p className="text-muted-foreground text-base leading-relaxed">
+              {verse.translation}
+            </p>
           )}
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <Button
-              variant={showEnglish ? "secondary" : "outline"}
+              variant={isSpeaking ? "secondary" : "outline"}
               size="sm"
-              onClick={() => setShowEnglish((v) => !v)}
+              onClick={() => handleSpeak(uiLang === 'en' ? 'en' : 'fr')}
               className="rounded-full h-8 text-xs gap-1.5"
-              aria-label={showEnglish ? "Masquer la traduction anglaise" : "Afficher la traduction anglaise"}
+              aria-label={uiLang === 'en' ? 'Listen' : 'Écouter'}
             >
-              {isLoadingEn && showEnglish && !enTranslation ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <FileText className="h-3.5 w-3.5" />
-              )}
-              {showEnglish ? '🇬🇧 Masquer EN' : '🇬🇧 Traduire EN'}
-            </Button>
-
-            <Button
-              variant={isSpeaking && speakingLang === 'fr' ? "secondary" : "outline"}
-              size="sm"
-              onClick={() => handleSpeak('fr')}
-              className="rounded-full h-8 text-xs gap-1.5"
-              aria-label={isSpeaking && speakingLang === 'fr' ? "Arrêter la lecture française" : "Écouter la traduction française (voix masculine)"}
-            >
-              {isSpeaking && speakingLang === 'fr' ? (
-                <Square className="h-3.5 w-3.5" />
-              ) : (
-                <Volume2 className="h-3.5 w-3.5" />
-              )}
-              {isSpeaking && speakingLang === 'fr' ? '🇫🇷 Arrêter' : '🇫🇷 Écouter'}
-            </Button>
-
-            <Button
-              variant={isSpeaking && speakingLang === 'en' ? "secondary" : "outline"}
-              size="sm"
-              onClick={() => handleSpeak('en')}
-              disabled={isSpeaking && speakingLang === 'fr'}
-              className="rounded-full h-8 text-xs gap-1.5"
-              aria-label={isSpeaking && speakingLang === 'en' ? "Stop English playback" : "Listen to English translation (male voice)"}
-            >
-              {isLoadingEn && !enTranslation ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : isSpeaking && speakingLang === 'en' ? (
-                <Square className="h-3.5 w-3.5" />
-              ) : (
-                <Volume2 className="h-3.5 w-3.5" />
-              )}
-              {isSpeaking && speakingLang === 'en' ? '🇬🇧 Stop' : '🇬🇧 Listen'}
+              {isSpeaking ? <Square className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+              {uiLang === 'en' ? (isSpeaking ? 'Stop' : 'Listen') : (isSpeaking ? 'Arrêter' : 'Écouter')}
             </Button>
           </div>
         </div>

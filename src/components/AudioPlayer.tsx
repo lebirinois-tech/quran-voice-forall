@@ -261,7 +261,7 @@ export const AudioPlayer = ({
           </div>
 
           {/* Playback Controls */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-0 sm:gap-2 shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -278,7 +278,7 @@ export const AudioPlayer = ({
               size="icon-lg"
               onClick={isPlaying ? onPause : onPlay}
               disabled={isLoading}
-              className="rounded-full"
+              className="rounded-full h-11 w-11 sm:h-14 sm:w-14"
               aria-label={isPlaying ? t('pause') : t('play')}
             >
               {isLoading ? (
@@ -309,7 +309,7 @@ export const AudioPlayer = ({
               >
                 <SelectTrigger
                   className={cn(
-                    "h-8 w-[64px] rounded-full px-2 text-xs font-bold",
+                    "h-8 w-[52px] sm:w-[64px] rounded-full px-1.5 text-xs font-bold",
                     playbackSpeed !== 1 && "text-primary border-primary bg-primary/10"
                   )}
                   aria-label={t('speed')}
@@ -330,6 +330,7 @@ export const AudioPlayer = ({
 
           {/* Repeat & Download Buttons */}
           <div className="flex-1 flex flex-nowrap items-center justify-end gap-0.5 sm:gap-1">
+            {trailingControls}
 
 
             {/* Pause-to-repeat (after reciter) */}
@@ -518,7 +519,7 @@ export const AudioPlayer = ({
                   variant="ghost"
                   size="icon"
                   disabled={isDownloading || isLoading}
-                  className="rounded-full"
+                  className="rounded-full hidden sm:inline-flex"
                   aria-label={t('downloadOptions')}
                 >
                   {isDownloading ? (

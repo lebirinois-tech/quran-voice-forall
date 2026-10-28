@@ -1,5 +1,5 @@
 import { useT } from '@/lib/i18n';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { VerseCard } from '@/components/VerseCard';
@@ -1096,23 +1096,36 @@ const SurahReader = () => {
         </div>
       </main>
 
-      {/* Voice Command Button */}
-      {!isMushafMode && <div className="fixed bottom-40 right-3 z-50 scale-75 origin-bottom-right">{voiceCommandControls}</div>}
+      {/* Mode Versets : casque et micro intégrés à la barre audio du bas */}
+      {!isMushafMode && React.cloneElement(audioPlayerControls, {
+        leadingControls: (
+          <button
+            type="button"
+            onClick={() => setRecitationMenuOpen(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
+            aria-label={t('audioMenu')}
+          >
+            <Headphones className="h-4 w-4" />
+          </button>
+        ),
+        trailingControls: (
+          <div className="flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
+            {voiceCommandControls}
+          </div>
+        ),
+      })}
 
-      {/* Audio Player — visible in all modes (verse-by-verse playback) */}
-      {!isMushafMode && audioPlayerControls}
-
-      {/* Bouton du menu « التلاوة الصوتية » — visible dans les deux modes */}
-      <button
-        type="button"
-        onClick={() => setRecitationMenuOpen(true)}
-        className={`fixed z-[90] flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-          isMushafMode ? 'left-1 bottom-24 h-10 w-10 opacity-90' : 'bottom-40 left-3 h-11 w-11'
-        }`}
-        aria-label={t('audioMenu')}
-      >
-        <Headphones className="h-6 w-6" />
-      </button>
+      {/* Mode Pages : bouton du menu audio */}
+      {isMushafMode && (
+        <button
+          type="button"
+          onClick={() => setRecitationMenuOpen(true)}
+          className="fixed z-[90] left-1 bottom-24 h-10 w-10 opacity-90 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated"
+          aria-label={t('audioMenu')}
+        >
+          <Headphones className="h-6 w-6" />
+        </button>
+      )}
 
       <RecitationMenu
         open={recitationMenuOpen}
