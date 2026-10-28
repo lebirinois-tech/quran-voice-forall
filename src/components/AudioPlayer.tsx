@@ -309,7 +309,7 @@ export const AudioPlayer = ({
               >
                 <SelectTrigger
                   className={cn(
-                    "h-8 w-[64px] rounded-full px-2 text-xs font-bold",
+                    "h-8 w-[52px] sm:w-[64px] rounded-full px-1.5 text-xs font-bold",
                     playbackSpeed !== 1 && "text-primary border-primary bg-primary/10"
                   )}
                   aria-label={t('speed')}
@@ -519,7 +519,7 @@ export const AudioPlayer = ({
                   variant="ghost"
                   size="icon"
                   disabled={isDownloading || isLoading}
-                  className="rounded-full"
+                  className="rounded-full hidden sm:inline-flex"
                   aria-label={t('downloadOptions')}
                 >
                   {isDownloading ? (
