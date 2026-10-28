@@ -330,6 +330,7 @@ export const AudioPlayer = ({
 
           {/* Repeat & Download Buttons */}
           <div className="flex-1 flex flex-nowrap items-center justify-end gap-0.5 sm:gap-1">
+            {trailingControls}
 
 
             {/* Pause-to-repeat (after reciter) */}

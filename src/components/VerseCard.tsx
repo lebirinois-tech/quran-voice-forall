@@ -556,7 +556,7 @@ export const VerseCard = ({
               size="sm"
               onClick={() => handleSpeak(uiLang === 'en' ? 'en' : 'fr')}
               className="rounded-full h-8 text-xs gap-1.5"
-              aria-label={t('listen')}
+              aria-label={uiLang === 'en' ? 'Listen' : 'Écouter'}
             >
               {isSpeaking ? <Square className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
               {uiLang === 'en' ? (isSpeaking ? 'Stop' : 'Listen') : (isSpeaking ? 'Arrêter' : 'Écouter')}
