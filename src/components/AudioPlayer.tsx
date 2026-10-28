@@ -261,7 +261,7 @@ export const AudioPlayer = ({
           </div>
 
           {/* Playback Controls */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-0 sm:gap-2 shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -278,7 +278,7 @@ export const AudioPlayer = ({
               size="icon-lg"
               onClick={isPlaying ? onPause : onPlay}
               disabled={isLoading}
-              className="rounded-full"
+              className="rounded-full h-11 w-11 sm:h-14 sm:w-14"
               aria-label={isPlaying ? t('pause') : t('play')}
             >
               {isLoading ? (
