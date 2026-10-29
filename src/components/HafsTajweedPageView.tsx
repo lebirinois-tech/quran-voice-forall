@@ -582,10 +582,10 @@ export const HafsTajweedPageView = ({
         textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
           const r = document.createRange();
           r.selectNodeContents(node);
-          Array.from(r.getClientRects()).forEach((rect) => { if (rect.width > 1 && rect.height > 1) t.push(rect.top); });
+          Array.from(r.getClientRects()).forEach((rect) => { if (rect.width > 1 && rect.height > 1) t.push(rect.top + rect.height / 2); });
         });
         t.sort((a, b) => a - b);
-        const tol = Math.max(4, (parseFloat(getComputedStyle(textEl).fontSize) || 20) * 0.6);
+        const tol = Math.max(6, (parseFloat(getComputedStyle(textEl).fontSize) || 20) * 0.6);
         const u: number[] = [];
         t.forEach((v) => { if (!u.some((x) => Math.abs(v - x) <= tol)) u.push(v); });
         return u.length;
@@ -611,7 +611,7 @@ export const HafsTajweedPageView = ({
           const range = document.createRange();
           range.selectNodeContents(node);
           Array.from(range.getClientRects()).forEach((rect) => {
-            if (rect.width > 1 && rect.height > 1) tops.push(rect.top);
+            if (rect.width > 1 && rect.height > 1) tops.push(rect.top + rect.height / 2);
           });
         });
         tops.sort((a, b) => a - b);
@@ -619,7 +619,7 @@ export const HafsTajweedPageView = ({
         // À ce stade les trois fontes Médine sont effectivement appliquées.
         // Le seuil d'une demi-ligne réunit les diacritiques d'une même rangée
         // sans fusionner deux rangées successives.
-        const sameLineTolerance = Math.max(4, px * lh * 0.45);
+        const sameLineTolerance = Math.max(6, px * lh * 0.5);
         tops.forEach((top) => {
           if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
         });
@@ -652,7 +652,7 @@ export const HafsTajweedPageView = ({
       for (let candidate = low; candidate <= high; candidate += 0.25) {
         const measured = measureAt(candidate, MEASURE_LH);
         if (measured.height > target) break;
-        if (measured.lineCount > MEDINA_LINE_COUNT) break;
+        if (measured.lineCount > MEDINA_LINE_COUNT) continue;
         const distance = Math.abs(candidate - desiredPx);
         if (measured.lineCount > bestLines || (measured.lineCount === bestLines && distance < bestDistance)) {
           px = candidate;
