@@ -63,6 +63,8 @@ interface HafsTajweedPageViewProps {
   onNavigateToJuz?: (juz: number) => void;
   playbackSpeed?: number;
   onSpeedChange?: (speed: number) => void;
+  /** Ouvre le menu audio depuis la barre de commandes du bas. */
+  onOpenAudioMenu?: () => void;
   /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). repeatCount: 0 = infini. */
   onPlayRange?: (startVerse: number, endVerse: number, loop: boolean, repeatCount?: number) => void;
 
@@ -105,6 +107,7 @@ export const HafsTajweedPageView = ({
   onNavigateToJuz,
   playbackSpeed = 1,
   onSpeedChange,
+  onOpenAudioMenu,
   onPlayRange,
 
   audioControls,
@@ -1303,6 +1306,17 @@ export const HafsTajweedPageView = ({
             </Button>
           )}
 
+          {onOpenAudioMenu && !isCompanion && (
+            <Button
+              type="button"
+              size="icon"
+              aria-label="Menu audio"
+              onClick={onOpenAudioMenu}
+              className="h-8 w-8 shrink-0 rounded-full bg-primary text-primary-foreground"
+            >
+              <Headphones className="h-4 w-4" />
+            </Button>
+          )}
           {onSpeedChange && (
             <Button
               type="button"
