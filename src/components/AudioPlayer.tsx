@@ -317,7 +317,7 @@ export const AudioPlayer = ({
                   <SelectValue>{playbackSpeed}x</SelectValue>
                 </SelectTrigger>
                 <SelectContent className="z-[130] min-w-[80px]">
-                  {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
+                  {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3].map((speed) => (
                     <SelectItem key={speed} value={String(speed)} className="text-xs">
                       {speed}x
                     </SelectItem>

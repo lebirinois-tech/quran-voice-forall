@@ -1,6 +1,6 @@
 import { useT } from '@/lib/i18n';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
@@ -63,6 +63,8 @@ interface HafsTajweedPageViewProps {
   onNavigateToJuz?: (juz: number) => void;
   playbackSpeed?: number;
   onSpeedChange?: (speed: number) => void;
+  /** Ouvre le menu audio depuis la barre de commandes du bas. */
+  onOpenAudioMenu?: () => void;
   /** Lance la lecture d'une plage de versets (verset, page, sourate ou juz). repeatCount: 0 = infini. */
   onPlayRange?: (startVerse: number, endVerse: number, loop: boolean, repeatCount?: number) => void;
 
@@ -105,6 +107,7 @@ export const HafsTajweedPageView = ({
   onNavigateToJuz,
   playbackSpeed = 1,
   onSpeedChange,
+  onOpenAudioMenu,
   onPlayRange,
 
   audioControls,
@@ -572,7 +575,24 @@ export const HafsTajweedPageView = ({
       const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
       const overflow = frameEl.scrollHeight - frameEl.clientHeight;
       const overflowing = overflow > 2;
-      if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
+      // Tant que la page n'affiche pas ses 15 lignes, on recalcule (police
+      // chargée tardivement sur Android, texte Warsh/Qaloun arrivé après).
+      const countNow = () => {
+        const t: number[] = [];
+        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
+          const r = document.createRange();
+          r.selectNodeContents(node);
+          Array.from(r.getClientRects()).forEach((rect) => { if (rect.width > 1 && rect.height > 1) t.push(rect.top + rect.height / 2); });
+        });
+        t.sort((a, b) => a - b);
+        const tol = Math.max(6, (parseFloat(getComputedStyle(textEl).fontSize) || 20) * 0.6);
+        const u: number[] = [];
+        t.forEach((v) => { if (!u.some((x) => Math.abs(v - x) <= tol)) u.push(v); });
+        return u.length;
+      };
+      const wantLines = currentPage === 1 ? 7 : 15;
+      const linesOk = countNow() >= wantLines - 1;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing && linesOk) return;
       sigRef.current = sig;
       lastTargetRef.current = target;
 
@@ -591,7 +611,7 @@ export const HafsTajweedPageView = ({
           const range = document.createRange();
           range.selectNodeContents(node);
           Array.from(range.getClientRects()).forEach((rect) => {
-            if (rect.width > 1 && rect.height > 1) tops.push(rect.top);
+            if (rect.width > 1 && rect.height > 1) tops.push(rect.top + rect.height / 2);
           });
         });
         tops.sort((a, b) => a - b);
@@ -599,7 +619,7 @@ export const HafsTajweedPageView = ({
         // À ce stade les trois fontes Médine sont effectivement appliquées.
         // Le seuil d'une demi-ligne réunit les diacritiques d'une même rangée
         // sans fusionner deux rangées successives.
-        const sameLineTolerance = Math.max(4, px * lh * 0.45);
+        const sameLineTolerance = Math.max(6, px * lh * 0.5);
         tops.forEach((top) => {
           if (!uniqueTops.some((seen) => Math.abs(top - seen) <= sameLineTolerance)) uniqueTops.push(top);
         });
@@ -617,7 +637,7 @@ export const HafsTajweedPageView = ({
       // plafond dépend de la largeur réelle, pas du modèle de téléphone.
       // Les champs de navigation et le titre intérieur ont été retirés : la
       // page dispose de plus de hauteur et peut employer un corps plus lisible.
-      const responsiveMaxPx = textEl.clientWidth < 500 ? 26 : MAX_PX;
+      const responsiveMaxPx = Math.max(MAX_PX, 44);
       const desiredPx = Math.min(responsiveMaxPx, Math.max(MIN_PX, 32 * fontScale));
 
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
@@ -626,30 +646,18 @@ export const HafsTajweedPageView = ({
       let high = responsiveMaxPx;
       let px = low;
       let bestDistance = Number.POSITIVE_INFINITY;
-      // Recherche bornée par la hauteur de quinze lignes : aucune taille
-      // examinée ne peut déjà dépasser verticalement le cadre.
-      for (let candidate = low; candidate <= high; candidate += 0.2) {
+      // Choisir la taille donnant le plus de lignes possible sans dépasser
+      // quinze ni la hauteur du cadre : la page se remplit comme à Médine.
+      let bestLines = -1;
+      for (let candidate = low; candidate <= high; candidate += 0.25) {
         const measured = measureAt(candidate, MEASURE_LH);
-        if (measured.lineCount !== MEDINA_LINE_COUNT || measured.height > target) continue;
+        if (measured.height > target) break;
+        if (measured.lineCount > MEDINA_LINE_COUNT) continue;
         const distance = Math.abs(candidate - desiredPx);
-        if (distance < bestDistance) {
+        if (measured.lineCount > bestLines || (measured.lineCount === bestLines && distance < bestDistance)) {
           px = candidate;
+          bestLines = measured.lineCount;
           bestDistance = distance;
-        }
-      }
-
-      // Repli défensif : si les glyphes du téléphone rendent le seuil très
-      // étroit, retenir la taille qui se rapproche le plus de quinze lignes.
-      if (!Number.isFinite(bestDistance)) {
-        let bestScore = Number.POSITIVE_INFINITY;
-        for (let candidate = low; candidate <= high; candidate += 0.2) {
-          const measured = measureAt(candidate, MEASURE_LH);
-          if (measured.height > target) continue;
-          const score = Math.abs(measured.lineCount - MEDINA_LINE_COUNT) * 100 + Math.abs(candidate - desiredPx);
-          if (score < bestScore) {
-            px = candidate;
-            bestScore = score;
-          }
         }
       }
 
@@ -1298,13 +1306,24 @@ export const HafsTajweedPageView = ({
             </Button>
           )}
 
+          {onOpenAudioMenu && !isCompanion && (
+            <Button
+              type="button"
+              size="icon"
+              aria-label="Menu audio"
+              onClick={onOpenAudioMenu}
+              className="h-8 w-8 shrink-0 rounded-full bg-primary text-primary-foreground"
+            >
+              <Headphones className="h-4 w-4" />
+            </Button>
+          )}
           {onSpeedChange && (
             <Button
               type="button"
               variant="outline"
               aria-label={`Vitesse de lecture : ${playbackSpeed}x`}
               onClick={() => {
-                const steps = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+                const steps = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
                 const i = steps.indexOf(playbackSpeed);
                 onSpeedChange(steps[(i === -1 ? 2 : i + 1) % steps.length]);
               }}

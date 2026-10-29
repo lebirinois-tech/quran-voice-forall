@@ -803,6 +803,7 @@ const SurahReader = () => {
               onNavigateToJuz={handleNavigateToJuz}
               playbackSpeed={quranAudio.playbackSpeed}
               onSpeedChange={quranAudio.changeSpeed}
+              onOpenAudioMenu={() => setRecitationMenuOpen(true)}
               onPlayRange={(start, end, loop, repeatCount = 1) => {
                 if (start === end) {
                   quranAudio.setRepeatMode(
@@ -1114,18 +1115,6 @@ const SurahReader = () => {
           </div>
         ),
       })}
-
-      {/* Mode Pages : bouton du menu audio */}
-      {isMushafMode && (
-        <button
-          type="button"
-          onClick={() => setRecitationMenuOpen(true)}
-          className="fixed z-[90] left-1 bottom-24 h-10 w-10 opacity-90 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated"
-          aria-label={t('audioMenu')}
-        >
-          <Headphones className="h-6 w-6" />
-        </button>
-      )}
 
       <RecitationMenu
         open={recitationMenuOpen}
