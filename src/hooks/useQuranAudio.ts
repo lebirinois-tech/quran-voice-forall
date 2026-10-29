@@ -17,6 +17,7 @@ export type QiraatId = keyof typeof QIRAAT_LABELS;
 // Trois lectures d'Al-Husary uniquement : Hafs, Warsh et Qalun.
 export const RECITER_IDS = [
   'husary',
+  'juhani',
   'husaryWarshPerVerse',
   'husaryQalunPerVerse',
 ] as const;
@@ -50,6 +51,8 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // HAFS (حفص عن عاصم) — Mahmoud Khalil Al-Husary (référence mondiale)
   // ═══════════════════════════════════════════════════════════════════════════
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
+  // Abdullah Awad Al-Juhani — Hafs, verset par verset (everyayah 128 kbps)
+  juhani: { id: 'ar.juhani', name: 'Abdullah Awad Al-Juhani', nameAr: 'عبد الله عواد الجهني', qiraat: 'hafs' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع)
@@ -104,7 +107,7 @@ interface UseQuranAudioOptions {
 
 const normalizePlaybackSpeed = (speed: number) => {
   if (!Number.isFinite(speed)) return 1;
-  return Math.min(2, Math.max(0.5, speed));
+  return Math.min(3, Math.max(0.5, speed));
 };
 
 const PLAYBACK_SPEED_STORAGE_KEY = 'quran-audio-playback-speed';
@@ -532,6 +535,7 @@ export const useQuranAudio = ({
   // everyayah.com folder names for each reciter
   const EVERYAYAH_FOLDERS: Record<string, string> = {
     husary: 'Husary_128kbps',
+    juhani: 'Abdullaah_3awwaad_Al-Juhaynee_128kbps',
   };
 
   const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
