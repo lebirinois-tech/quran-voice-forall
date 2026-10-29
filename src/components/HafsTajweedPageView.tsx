@@ -572,7 +572,24 @@ export const HafsTajweedPageView = ({
       const targetChanged = Math.abs(target - lastTargetRef.current) > 28;
       const overflow = frameEl.scrollHeight - frameEl.clientHeight;
       const overflowing = overflow > 2;
-      if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing) return;
+      // Tant que la page n'affiche pas ses 15 lignes, on recalcule (police
+      // chargée tardivement sur Android, texte Warsh/Qaloun arrivé après).
+      const countNow = () => {
+        const t: number[] = [];
+        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
+          const r = document.createRange();
+          r.selectNodeContents(node);
+          Array.from(r.getClientRects()).forEach((rect) => { if (rect.width > 1 && rect.height > 1) t.push(rect.top); });
+        });
+        t.sort((a, b) => a - b);
+        const tol = Math.max(4, (parseFloat(getComputedStyle(textEl).fontSize) || 20) * 0.6);
+        const u: number[] = [];
+        t.forEach((v) => { if (!u.some((x) => Math.abs(v - x) <= tol)) u.push(v); });
+        return u.length;
+      };
+      const wantLines = currentPage === 1 ? 7 : 15;
+      const linesOk = countNow() >= wantLines - 1;
+      if (measuredRef.current && sig === sigRef.current && !targetChanged && !overflowing && linesOk) return;
       sigRef.current = sig;
       lastTargetRef.current = target;
 
@@ -617,7 +634,7 @@ export const HafsTajweedPageView = ({
       // plafond dépend de la largeur réelle, pas du modèle de téléphone.
       // Les champs de navigation et le titre intérieur ont été retirés : la
       // page dispose de plus de hauteur et peut employer un corps plus lisible.
-      const responsiveMaxPx = textEl.clientWidth < 500 ? 26 : MAX_PX;
+      const responsiveMaxPx = Math.max(MAX_PX, 44);
       const desiredPx = Math.min(responsiveMaxPx, Math.max(MIN_PX, 32 * fontScale));
 
       // Le nombre de lignes croît avec la taille. Cette recherche trouve le
@@ -626,30 +643,18 @@ export const HafsTajweedPageView = ({
       let high = responsiveMaxPx;
       let px = low;
       let bestDistance = Number.POSITIVE_INFINITY;
-      // Recherche bornée par la hauteur de quinze lignes : aucune taille
-      // examinée ne peut déjà dépasser verticalement le cadre.
-      for (let candidate = low; candidate <= high; candidate += 0.2) {
+      // Choisir la taille donnant le plus de lignes possible sans dépasser
+      // quinze ni la hauteur du cadre : la page se remplit comme à Médine.
+      let bestLines = -1;
+      for (let candidate = low; candidate <= high; candidate += 0.25) {
         const measured = measureAt(candidate, MEASURE_LH);
-        if (measured.lineCount !== MEDINA_LINE_COUNT || measured.height > target) continue;
+        if (measured.height > target) break;
+        if (measured.lineCount > MEDINA_LINE_COUNT) break;
         const distance = Math.abs(candidate - desiredPx);
-        if (distance < bestDistance) {
+        if (measured.lineCount > bestLines || (measured.lineCount === bestLines && distance < bestDistance)) {
           px = candidate;
+          bestLines = measured.lineCount;
           bestDistance = distance;
-        }
-      }
-
-      // Repli défensif : si les glyphes du téléphone rendent le seuil très
-      // étroit, retenir la taille qui se rapproche le plus de quinze lignes.
-      if (!Number.isFinite(bestDistance)) {
-        let bestScore = Number.POSITIVE_INFINITY;
-        for (let candidate = low; candidate <= high; candidate += 0.2) {
-          const measured = measureAt(candidate, MEASURE_LH);
-          if (measured.height > target) continue;
-          const score = Math.abs(measured.lineCount - MEDINA_LINE_COUNT) * 100 + Math.abs(candidate - desiredPx);
-          if (score < bestScore) {
-            px = candidate;
-            bestScore = score;
-          }
         }
       }
 
@@ -1304,7 +1309,7 @@ export const HafsTajweedPageView = ({
               variant="outline"
               aria-label={`Vitesse de lecture : ${playbackSpeed}x`}
               onClick={() => {
-                const steps = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+                const steps = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
                 const i = steps.indexOf(playbackSpeed);
                 onSpeedChange(steps[(i === -1 ? 2 : i + 1) % steps.length]);
               }}

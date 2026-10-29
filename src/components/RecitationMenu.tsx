@@ -54,7 +54,7 @@ interface RecitationMenuProps {
   onStart: (config: RecitationStartConfig) => void;
 }
 
-const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 
 const COUNT_OPTIONS: { value: number; label: string }[] = [
   { value: 1, label: 'مرة واحدة / 1 fois' },
