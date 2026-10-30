@@ -84,6 +84,25 @@ interface HafsTajweedPageViewProps {
 const toArabicDigits = (n: number) =>
   String(n);
 
+// Centres verticaux des fragments de texte réels (et non des aplats
+// thématiques, dont le rembourrage faussait le compte des lignes).
+function collectTextCenters(root: HTMLElement): number[] {
+  const out: number[] = [];
+  root.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((row) => {
+    const walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT);
+    let n: Node | null;
+    while ((n = walker.nextNode())) {
+      if (!n.textContent?.trim()) continue;
+      const r = document.createRange();
+      r.selectNodeContents(n);
+      Array.from(r.getClientRects()).forEach((rect) => {
+        if (rect.width > 1 && rect.height > 1) out.push(rect.top + rect.height / 2);
+      });
+    }
+  });
+  return out;
+}
+
 export const HafsTajweedPageView = ({
   surahNumber,
   verses,
@@ -579,11 +598,7 @@ export const HafsTajweedPageView = ({
       // chargée tardivement sur Android, texte Warsh/Qaloun arrivé après).
       const countNow = () => {
         const t: number[] = [];
-        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
-          const r = document.createRange();
-          r.selectNodeContents(node);
-          Array.from(r.getClientRects()).forEach((rect) => { if (rect.width > 1 && rect.height > 1) t.push(rect.top + rect.height / 2); });
-        });
+        collectTextCenters(textEl).forEach((c) => t.push(c));
         t.sort((a, b) => a - b);
         const tol = Math.max(6, (parseFloat(getComputedStyle(textEl).fontSize) || 20) * 0.6);
         const u: number[] = [];
@@ -607,13 +622,7 @@ export const HafsTajweedPageView = ({
         textEl.style.lineHeight = String(lh);
         const height = textEl.scrollHeight;
         const tops: number[] = [];
-        textEl.querySelectorAll<HTMLElement>('[data-mushaf-verse-row]').forEach((node) => {
-          const range = document.createRange();
-          range.selectNodeContents(node);
-          Array.from(range.getClientRects()).forEach((rect) => {
-            if (rect.width > 1 && rect.height > 1) tops.push(rect.top + rect.height / 2);
-          });
-        });
+        collectTextCenters(textEl).forEach((c) => tops.push(c));
         tops.sort((a, b) => a - b);
         const uniqueTops: number[] = [];
         // À ce stade les trois fontes Médine sont effectivement appliquées.
@@ -651,7 +660,6 @@ export const HafsTajweedPageView = ({
       let bestLines = -1;
       for (let candidate = low; candidate <= high; candidate += 0.25) {
         const measured = measureAt(candidate, MEASURE_LH);
-        (window as any).__fitlog?.push([candidate, measured.lineCount, measured.height, target]);
         if (measured.height > target) break;
         if (measured.lineCount > MEDINA_LINE_COUNT) continue;
         const distance = Math.abs(candidate - desiredPx);
