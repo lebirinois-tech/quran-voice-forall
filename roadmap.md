@@ -69,4 +69,4 @@
 - Conflit de signature APK (« package en conflit avec un package déjà présent ») : clé permanente `signing/quran-acces.keystore` créée et branchée sur le workflow ; l'utilisateur doit désinstaller l'ancienne application de la tablette UNE dernière fois, puis installer le nouvel APK signé ; ensuite les mises à jour passeront par-dessus sans désinstallation.
 - Bouton « Aller — اذهب » ajouté à côté de la liste des sourates (la sélection ne naviguait pas sur la tablette) ; vérifié Playwright : choix puis validation ouvre bien la sourate.
 - Bouton « Aller — اذهب » et barre de recherche (FR/AR/numéro) ajoutés à la liste des sourates ; vérifié Playwright : « kahf » → Al-Kahf, « يس » → Ya-Sin, validation ouvre la sourate.
-- [ ] Recherche : clic sur un résultat ouvre le verset exact surligné (Pages et Versets)
+- [x] Recherche : clic sur un résultat ouvre le verset exact surligné (Pages et Versets)
