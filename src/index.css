@@ -380,3 +380,6 @@
   -webkit-box-decoration-break: clone;
   transition: background-color 200ms ease;
 }
+
+/* Verset trouvé par la recherche */
+.search-hit { background-color: hsl(var(--secondary) / 0.35) !important; border-radius: 0.15em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }

@@ -110,7 +110,7 @@ const QuranSearch = () => {
 
   const goToVerse = useCallback(
     (r: SearchResult) => {
-      navigate(`/surah/${r.surah}?verse=${r.verse}`);
+      navigate(`/surah/${r.surah}?verse=${r.verse}${r.page ? `&page=${r.page}` : ''}`);
     },
     [navigate]
   );

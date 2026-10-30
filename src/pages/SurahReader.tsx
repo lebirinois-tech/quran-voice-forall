@@ -192,15 +192,28 @@ const SurahReader = () => {
       const el = document.getElementById(id);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        el.classList.add('ring-2', 'ring-primary');
-        setTimeout(() => el.classList.remove('ring-2', 'ring-primary'), 3000);
+        el.classList.add('ring-4', 'ring-secondary', 'search-hit');
+        setTimeout(() => el.classList.remove('ring-4', 'ring-secondary', 'search-hit'), 6000);
       } else if (attempts < 10) {
         setTimeout(() => scrollToElement(id, attempts + 1), 300);
       }
     };
     
     if (verseParam) {
-      scrollToElement(`verse-${parseInt(verseParam)}`);
+      const vn = parseInt(verseParam);
+      // Mode Pages : surligner tous les fragments du verset dans le Mushaf.
+      const markMushaf = (attempts = 0) => {
+        const nodes = document.querySelectorAll<HTMLElement>(`[data-verse="${vn}"]`);
+        if (nodes.length) {
+          nodes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          nodes.forEach((n) => n.classList.add('search-hit'));
+          setTimeout(() => nodes.forEach((n) => n.classList.remove('search-hit')), 6000);
+        } else if (attempts < 20) {
+          setTimeout(() => markMushaf(attempts + 1), 300);
+        }
+      };
+      if (isMushafImageMode) markMushaf();
+      else scrollToElement(`verse-${vn}`);
     } else if (pageParam && !isMushafImageMode && verses.length > 0) {
       const targetPage = parseInt(pageParam);
       const targetVerse = verses.find(v => {
