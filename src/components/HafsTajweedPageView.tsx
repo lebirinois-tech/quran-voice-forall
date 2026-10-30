@@ -651,6 +651,7 @@ export const HafsTajweedPageView = ({
       let bestLines = -1;
       for (let candidate = low; candidate <= high; candidate += 0.25) {
         const measured = measureAt(candidate, MEASURE_LH);
+        (window as any).__fitlog?.push([candidate, measured.lineCount, measured.height, target]);
         if (measured.height > target) break;
         if (measured.lineCount > MEDINA_LINE_COUNT) continue;
         const distance = Math.abs(candidate - desiredPx);
