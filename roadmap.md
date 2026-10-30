@@ -1,5 +1,8 @@
 # Feuille de route
 
+## Recherche précise (30 octobre 2026)
+- [ ] Suggérer les mots du corpus pendant la saisie, afficher leurs occurrences et ouvrir le verset choisi surligné en Pages et Versets ; vérifier le parcours complet.
+
 ## En cours
 - [ ] Publier les nouvelles options audio et traductions après les vérifications demandées.
 - [ ] Afficher les menus dans la seule langue d’utilisation choisie (FR/AR/EN), notamment récitation et navigation Pages/Versets.
