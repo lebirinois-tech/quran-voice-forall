@@ -1,7 +1,7 @@
 # Feuille de route
 
 ## Récitateurs Qaloun et Warsh (31 octobre 2026)
-- [ ] Lecture synchronisée demandée : vérifier Yassen verset par verset et rechercher des repères fiables pour El Ganayni Qaloun.
+- [ ] Lecture synchronisée en Pages ET Versets : vérifier Yassen verset par verset et rechercher des repères fiables pour El Ganayni Qaloun.
 - [ ] Ajouter Mohammad Omar El Ganayni (Qaloun) et Yassen Al-Jazairi (Warsh), vérifier les sources et la lecture en Pages/Versets, puis publier.
 
 ## Al-Juhani (31 octobre 2026)
