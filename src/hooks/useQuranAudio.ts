@@ -619,6 +619,8 @@ export const useQuranAudio = ({
         return;
       }
       if (cachedUrl) {
+        // Local blob: URLs must not carry crossorigin (blocks playback on mobile WebViews).
+        newAudio.removeAttribute('crossorigin');
         try {
           await playAudioFromUrl(newAudio, cachedUrl);
           if (newAudio !== audioRef.current) return;

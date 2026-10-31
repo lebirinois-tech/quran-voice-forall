@@ -211,11 +211,24 @@ export const SettingsDialog = ({
               <Volume2 className="h-3.5 w-3.5 text-primary" />
               {t('reciter')}
             </Label>
-            <div className="p-3 rounded-lg bg-muted/50 border border-border">
-              <p className="text-sm text-foreground">
-                {appLang === 'ar' ? RECITERS[getSafeReciter(reciter)].nameAr : RECITERS[getSafeReciter(reciter)].name}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{t('reciterAuto')}</p>
+            <div className="grid gap-1.5">
+              {(Object.keys(RECITERS) as ReciterId[])
+                .filter((id) => RECITERS[id].qiraat === RECITERS[getSafeReciter(reciter)].qiraat)
+                .map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => onReciterChange(id)}
+                    className={cn(
+                      'p-2.5 rounded-lg border-2 text-sm text-start transition-all',
+                      id === getSafeReciter(reciter)
+                        ? 'border-primary ring-2 ring-primary/30 bg-primary/10 text-foreground font-semibold'
+                        : 'border-border bg-muted/50 text-foreground',
+                    )}
+                  >
+                    {appLang === 'ar' ? RECITERS[id].nameAr : RECITERS[id].name}
+                  </button>
+                ))}
             </div>
           </div>
 

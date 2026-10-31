@@ -213,7 +213,7 @@ export const AudioPlayer = ({
         <div className="flex items-center justify-between gap-1 sm:gap-4">
           {leadingControls && <div className="flex items-center shrink-0">{leadingControls}</div>}
           {/* Reciter Selector */}
-          <div className="hidden sm:block flex-1 min-w-0">
+          <div className="block flex-1 min-w-0 max-w-[110px] sm:max-w-none">
             {onReciterChange ? (
               <Select 
                 value={reciter} 
