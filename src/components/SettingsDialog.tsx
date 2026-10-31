@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { TafsirSourcePicker } from './TafsirSourcePicker';
 import { Settings, Volume2, Download, Palette, Check, Type, TextCursor, Languages } from 'lucide-react';
 import { useTtsLang } from '@/hooks/useTtsLang';
 import { setStoredVoiceLang } from '@/hooks/useVoiceCommands';
@@ -309,6 +310,7 @@ export const SettingsDialog = ({
               <Label htmlFor="show-tafsir" className="text-sm text-foreground cursor-pointer">{t('showTafsir')}</Label>
               <Switch id="show-tafsir" checked={showTafsir} onCheckedChange={setShowTafsir} />
             </div>
+            <TafsirSourcePicker className="justify-start pt-1" />
           </div>
 
           {/* Font Size */}
