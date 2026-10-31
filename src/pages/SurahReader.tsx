@@ -1034,22 +1034,22 @@ const SurahReader = () => {
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-primary text-lg disabled:opacity-40"
                   onClick={() => {
                     const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
-                    if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
-                    else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
+                    if (idx >= 0 && idx < versePageGroups.length - 1) goToVersePage(versePageGroups[idx + 1][0]);
+                    else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
                   }}
-                  disabled={versePageNum <= 1}
-                  aria-label={t('prevPage')}
+                  disabled={versePageNum >= 604}
+                  aria-label={t('nextPage')}
                 >‹</button>
                 <button
                   type="button"
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-primary text-lg disabled:opacity-40"
                   onClick={() => {
                     const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
-                    if (idx >= 0 && idx < versePageGroups.length - 1) goToVersePage(versePageGroups[idx + 1][0]);
-                    else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
+                    if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
+                    else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
                   }}
-                  disabled={versePageNum >= 604}
-                  aria-label={t('nextPage')}
+                  disabled={versePageNum <= 1}
+                  aria-label={t('prevPage')}
                 >›</button>
               </>
             )}
