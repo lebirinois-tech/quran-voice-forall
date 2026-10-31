@@ -8,7 +8,7 @@ import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2, Volume2, Square } from 'lucide-react';
 import { Button } from './ui/button';
-import { ReciterId, getReciterAudioUrl } from '@/hooks/useQuranAudio';
+import { RECITERS, ReciterId, getReciterAudioUrl } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { useTtsLang } from '@/hooks/useTtsLang';
 import { useEnglishTranslation } from '@/hooks/useEnglishTranslation';
