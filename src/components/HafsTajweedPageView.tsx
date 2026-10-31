@@ -934,15 +934,27 @@ export const HafsTajweedPageView = ({
               >
                 <MushafPageBadge page={currentPage} />
               </button>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(true)}
-                className="min-w-0 truncate rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
-                style={{ color: 'hsl(43, 62%, 25%)' }}
-                aria-label={t('chooseJuz')}
-              >
-                الجزء {toArabicDigits(currentJuz)}
-              </button>
+              <span className="flex min-w-0 items-center justify-start gap-1">
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(true)}
+                  className="min-w-0 truncate rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
+                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                  aria-label={t('chooseJuz')}
+                >
+                  الجزء {toArabicDigits(currentJuz)}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.assign('/search')}
+                  aria-label={t('quranSearchTitle')}
+                  title={t('quranSearchTitle')}
+                  className="shrink-0 rounded-full p-1"
+                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </span>
             </div>
 
             <div
@@ -1266,6 +1278,16 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
+            aria-label={t('prevPage')}
+            onClick={goPrev}
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
             aria-label={t('prevVerse')}
             onClick={() => onPreviousVerse?.()}
             className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
@@ -1356,16 +1378,6 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label={t('prevPage')}
-            onClick={goPrev}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
             aria-label={isFullscreen ? t('exitFullscreen') : t('fullscreen')}
             onClick={toggleFullscreen}
             className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
@@ -1381,17 +1393,6 @@ export const HafsTajweedPageView = ({
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <Home className="h-5 w-5" />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={t('quranSearchTitle')}
-            title={t('quranSearchTitle')}
-            onClick={() => window.location.assign('/search')}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
-          >
-            <Search className="h-5 w-5" />
           </Button>
           <Button
             type="button"
