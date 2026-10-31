@@ -116,16 +116,14 @@ export const useAudioCache = () => {
     let failCount = 0;
 
     try {
-      if (reciterInfo.fullSurah && reciterInfo.fullSurahBaseUrl) {
+      if (reciterInfo.fullSurah) {
         // Full-surah reciter: one MP3 per surah, no per-verse files.
-        const surahStr = formatNum(surahNumber);
-        const url = `${reciterInfo.fullSurahBaseUrl}${surahStr}.mp3`;
-        for (let v = 1; v <= totalVerses; v++) {
-          const ok = await downloadAudioFile(url, reciterId, surahNumber, v);
-          ok ? okCount++ : failCount++;
-          saveAudioUrl(reciterId, surahNumber, v, url);
-          setProgress(Math.round((v / totalVerses) * 100));
-        }
+        const url = getReciterAudioUrl(surahNumber, 1, reciterId);
+        const ok = await downloadAudioFile(url, reciterId, surahNumber, 1);
+        if (ok) okCount = totalVerses;
+        else failCount = 1;
+        saveAudioUrl(reciterId, surahNumber, 1, url);
+        setProgress(100);
       } else if (reciterInfo.archiveItem) {
         // archive.org per-verse inside a ZIP per surah
         const surahStr = formatNum(surahNumber);

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getOfflineAudioUrl } from '@/lib/offlineAudioStore';
 import { advanceRecitation, type RecitationSession } from '@/lib/recitationSession';
+import { ganayniSurahAudio } from '@/data/ganayniAudio';
 
 // Interface moved inside hook for better organization
 
@@ -21,6 +22,7 @@ export const RECITER_IDS = [
   'husaryWarshPerVerse',
   'yassinWarsh',
   'husaryQalunPerVerse',
+  'ganayniQalun',
 ] as const;
 
 export type ReciterId = (typeof RECITER_IDS)[number];
@@ -37,6 +39,7 @@ export interface ReciterInfo {
   fullSurah?: boolean;
   /** Full-surah MP3 base URL; surah number is appended as 3-digit padded `.mp3`. */
   fullSurahBaseUrl?: string;
+  fullSurahUrls?: Readonly<Record<number, string>>;
   /**
    * Archive.org item where per-verse MP3s are bundled inside one ZIP per surah.
    * URL pattern: `https://archive.org/download/{archiveItem}/{SSS}.zip/{SSSAAA}.mp3`.
@@ -90,6 +93,14 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
   },
+  ganayniQalun: {
+    id: 'qalun.ganayni',
+    name: 'Mohammad Omar El Ganayni (Qaloun — sourate complète)',
+    nameAr: 'محمد عمر الجنايني (قالون — سورة كاملة)',
+    qiraat: 'qalun',
+    fullSurah: true,
+    fullSurahUrls: ganayniSurahAudio,
+  },
 };
 
 export const isReciterId = (value: unknown): value is ReciterId =>
@@ -103,6 +114,11 @@ export const getReciterAudioUrl = (surah: number, verse: number, reciterId: Reci
   const surahStr = String(surah).padStart(3, '0');
   const verseStr = String(verse).padStart(3, '0');
   const info = RECITERS[getSafeReciter(reciterId)];
+  if (info.fullSurahUrls) {
+    const url = info.fullSurahUrls[surah];
+    if (!url) throw new Error(`Missing surah recording: ${surah}`);
+    return url;
+  }
   if (info.fullSurah && info.fullSurahBaseUrl) return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
   if (info.archiveItem) {
     const zipName = info.archiveZipPad === 2 ? String(surah).padStart(2, '0') : surahStr;
@@ -570,6 +586,8 @@ export const useQuranAudio = ({
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
     const selectedReciter = reciterRef.current;
+    // Full-surah sources cannot seek to an ayah without verified timings.
+    if (RECITERS[selectedReciter].fullSurah) verseNumber = 1;
     let newAudio: HTMLAudioElement | null = null;
     clearRepeatPauseTimers();
     if (targetSurah !== activeSurahRef.current) onSurahChangeRef.current?.(targetSurah, verseNumber);
@@ -672,6 +690,7 @@ export const useQuranAudio = ({
   }, [isPlaying, play, pause]);
 
   const nextVerse = useCallback(() => {
+    if (RECITERS[reciterRef.current].fullSurah) return;
     clearRepeatPauseTimers();
     if (currentVerse < totalVerses) {
       const next = currentVerse + 1;
@@ -684,6 +703,7 @@ export const useQuranAudio = ({
   }, [currentVerse, totalVerses, isPlaying, playVerse, onVerseChange, clearRepeatPauseTimers]);
 
   const previousVerse = useCallback(() => {
+    if (RECITERS[reciterRef.current].fullSurah) return;
     clearRepeatPauseTimers();
     if (currentVerse > 1) {
       const prev = currentVerse - 1;

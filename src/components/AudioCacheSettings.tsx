@@ -18,6 +18,7 @@ const DOWNLOADABLE_RECITERS: { id: ReciterId; label: string }[] = [
   { id: 'husaryWarshPerVerse', label: '🟠 Al-Husary (Warsh)' },
   { id: 'yassinWarsh', label: '🟠 Yassen Al-Jazairi (Warsh)' },
   { id: 'husaryQalunPerVerse', label: '🟣 Al-Husary (Qalun)' },
+  { id: 'ganayniQalun', label: '🟣 Mohammad Omar El Ganayni (Qaloun)' },
 ];
 
 type DownloadTab = 'audio' | 'text' | 'tafsir';
