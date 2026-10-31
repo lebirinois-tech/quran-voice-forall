@@ -361,7 +361,7 @@ export const VerseCard = ({
     <div
       id={id}
       className={cn(
-        "p-6 rounded-xl border border-border transition-all duration-300",
+        "p-3 sm:p-5 rounded-xl border border-border transition-all duration-300",
         // Page-based alternating background colors
         isEvenPage 
           ? "bg-primary/5 dark:bg-primary/10" 
@@ -385,10 +385,10 @@ export const VerseCard = ({
       }}
     >
       {/* Verse Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
           <div className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center",
+            "w-8 h-8 rounded-full flex items-center justify-center",
             "bg-primary/10"
           )}>
             <span className={cn(
@@ -414,7 +414,7 @@ export const VerseCard = ({
             variant="ghost"
             size="icon"
             onClick={handleShare}
-            className="rounded-full hover:bg-primary/10"
+            className="h-8 w-8 rounded-full hover:bg-primary/10"
             aria-label="Partager le verset"
           >
             <Share2 className="h-4 w-4 text-primary" />
@@ -442,7 +442,7 @@ export const VerseCard = ({
             size="icon"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="rounded-full hover:bg-primary/10"
+            className="h-8 w-8 rounded-full hover:bg-primary/10"
             aria-label="Télécharger l'audio"
           >
             {isDownloading ? (
@@ -457,7 +457,7 @@ export const VerseCard = ({
             size="icon"
             onClick={onPlay}
             disabled={isLoading}
-            className="rounded-full hover:bg-primary/10"
+            className="h-8 w-8 rounded-full hover:bg-primary/10"
             aria-label={isPlaying ? "Pause" : "Écouter ce verset"}
           >
             {isLoading ? (

@@ -1019,10 +1019,10 @@ const SurahReader = () => {
 
                   {/* Position courante + pagination — mode « page par page » (versets) */}
                   {isPagedVerseView && versePageNum !== null && (
-                    <div className="sticky bottom-24 z-20 space-y-2">
+                    <div className="sticky bottom-24 z-20 space-y-1">
                       {/* Indicateur de position clair (riwaya, sourate, page, verset lu) */}
                       <div
-                        className="rounded-2xl border border-border bg-background/92 backdrop-blur px-3 py-2 shadow-sm text-[11px] sm:text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
+                        className="rounded-2xl border border-border bg-background/92 backdrop-blur px-2 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
                         aria-live="polite"
                       >
                         <span className="font-semibold text-primary">
@@ -1058,11 +1058,11 @@ const SurahReader = () => {
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between gap-3 rounded-full border border-border bg-background/90 backdrop-blur px-3 py-2 shadow-sm">
+                      <div className="flex items-center justify-between gap-1 rounded-full border border-border bg-background/90 backdrop-blur px-1.5 py-1 shadow-sm">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-full"
+                          className="rounded-full h-8 px-2 text-xs shrink-0"
                           onClick={() => {
                             const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                             if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
@@ -1071,12 +1071,12 @@ const SurahReader = () => {
                           disabled={versePageNum <= 1}
                           aria-label={t('prevPage')}
                         >
-                          ‹ {t('prevPage')}
+                          ‹<span className="hidden sm:inline ml-1">{t('prevPage')}</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="rounded-full h-8 px-3 text-xs"
+                          className="rounded-full h-8 px-2 text-xs min-w-0"
                           onClick={() => {
                             const group = versePageGroups.find(([p]) => p === versePageNum);
                             if (!group) return;
@@ -1090,7 +1090,7 @@ const SurahReader = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-full"
+                          className="rounded-full h-8 px-2 text-xs shrink-0"
                           onClick={() => {
                             const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                             if (idx >= 0 && idx < versePageGroups.length - 1)
@@ -1100,7 +1100,7 @@ const SurahReader = () => {
                           disabled={versePageNum >= 604}
                           aria-label={t('nextPage')}
                         >
-                          {t('nextPage')} ›
+                          <span className="hidden sm:inline mr-1">{t('nextPage')}</span>›
                         </Button>
                       </div>
                     </div>
