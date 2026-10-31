@@ -1,5 +1,8 @@
 # Feuille de route
 
+## Récitateurs Qaloun et Warsh (31 octobre 2026)
+- [ ] Ajouter Mohammad Omar El Ganayni (Qaloun) et Yassen Al-Jazairi (Warsh), vérifier les sources et la lecture en Pages/Versets, puis publier.
+
 ## Al-Juhani (31 octobre 2026)
 - [x] Al-Juhani conservé au démarrage et entre Pages/Versets ; ancienne source effacée au changement de récitateur ; téléchargements alignés sur la source réelle. Lecture navigateur vérifiée en Versets (Al-Fatiha) et Pages (Yunus 100), tests réussis.
 
