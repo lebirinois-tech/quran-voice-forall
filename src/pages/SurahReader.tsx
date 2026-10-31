@@ -579,7 +579,7 @@ const SurahReader = () => {
 
   return (
     <div
-      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-36'}
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-2'}
       style={{ backgroundColor: appSettings.backgroundColor }}
     >
       {!isMushafMode && (
