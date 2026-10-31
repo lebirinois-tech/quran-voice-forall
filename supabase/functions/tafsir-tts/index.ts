@@ -1,6 +1,11 @@
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { corsHeaders as sdkCorsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { paidAiUser } from '../_shared/paidAiAuth.ts';
+
+const corsHeaders = {
+  ...sdkCorsHeaders,
+  'Access-Control-Allow-Headers': `${sdkCorsHeaders['Access-Control-Allow-Headers']}, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version`,
+};
 
 const MODEL = "google/gemini-3.1-flash-tts-preview";
 const VOICE = "Charon"; // male, calm and informative
