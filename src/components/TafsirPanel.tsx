@@ -52,10 +52,8 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
   // Fetch Tafsir when panel opens
   useEffect(() => {
-    if (isOpen && !tafsirText && !isLoading) {
-      fetchTafsir();
-    }
-  }, [isOpen, surahNumber, verseNumber, source, tafsirText]);
+    if (isOpen) fetchTafsir();
+  }, [isOpen, surahNumber, verseNumber, source]);
 
   const fetchTafsir = async () => {
     setIsLoading(true);
