@@ -579,7 +579,7 @@ const SurahReader = () => {
 
   return (
     <div
-      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen bg-background pattern-islamic pb-56'}
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-36'}
       style={{ backgroundColor: appSettings.backgroundColor }}
     >
       {!isMushafMode && (
@@ -603,7 +603,7 @@ const SurahReader = () => {
         />
       )}
 
-      <main className={isMushafMode ? 'h-[100dvh] overflow-hidden p-0' : 'container mx-auto px-4 py-6'}>
+      <main className={isMushafMode ? 'h-[100dvh] overflow-hidden p-0' : 'container mx-auto w-full max-w-full overflow-x-hidden px-3 py-4'}>
         {/* Surah Header */}
         {!isMushafMode && <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block mb-4">
@@ -1062,7 +1062,7 @@ const SurahReader = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-full h-8 px-2 text-xs shrink-0"
+                          className="rounded-full h-7 px-2 text-xs shrink-0"
                           onClick={() => {
                             const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                             if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
@@ -1076,7 +1076,7 @@ const SurahReader = () => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="rounded-full h-8 px-2 text-xs min-w-0"
+                          className="rounded-full h-7 px-2 text-xs min-w-0"
                           onClick={() => {
                             const group = versePageGroups.find(([p]) => p === versePageNum);
                             if (!group) return;
@@ -1085,12 +1085,12 @@ const SurahReader = () => {
                           }}
                           aria-label={`Lire la page ${versePageNum}`}
                         >
-                          <Play className="h-3.5 w-3.5 mr-1" /> {t('listenPage')}
+                          <Play className="h-3.5 w-3.5 sm:mr-1" /><span className="hidden sm:inline">{t('listenPage')}</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-full h-8 px-2 text-xs shrink-0"
+                          className="rounded-full h-7 px-2 text-xs shrink-0"
                           onClick={() => {
                             const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                             if (idx >= 0 && idx < versePageGroups.length - 1)
