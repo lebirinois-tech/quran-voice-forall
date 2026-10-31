@@ -24,7 +24,7 @@ import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search } from 'lucide-react';
+import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -1067,6 +1067,15 @@ const SurahReader = () => {
                           aria-label={t('nextPage')}
                         >
                           ›
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-full h-7 w-7 p-0 shrink-0 text-primary"
+                          onClick={handleGoHome}
+                          aria-label={t('backHome')}
+                        >
+                          <Home className="h-3.5 w-3.5" />
                         </Button>
                         <span className="min-w-0 flex-1 truncate text-center font-semibold text-primary">
                           {effectiveDisplayStyle === 'warsh-tajweed'
