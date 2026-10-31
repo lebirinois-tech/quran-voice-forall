@@ -1378,16 +1378,6 @@ export const HafsTajweedPageView = ({
             type="button"
             size="icon"
             variant="ghost"
-            aria-label={t('prevPage')}
-            onClick={goPrev}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
             aria-label={isFullscreen ? t('exitFullscreen') : t('fullscreen')}
             onClick={toggleFullscreen}
             className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
