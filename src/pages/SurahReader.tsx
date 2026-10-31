@@ -24,7 +24,7 @@ import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Play, BookOpen, Headphones } from 'lucide-react';
+import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
