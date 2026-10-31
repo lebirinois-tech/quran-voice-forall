@@ -1337,7 +1337,7 @@ export const HafsTajweedPageView = ({
                 const i = steps.indexOf(playbackSpeed);
                 onSpeedChange(steps[(i === -1 ? 2 : i + 1) % steps.length]);
               }}
-              className="h-9 shrink-0 rounded-full border-primary/40 px-2 text-xs font-bold text-primary"
+              className="hidden h-9 shrink-0 rounded-full border-primary/40 px-2 text-xs font-bold text-primary min-[420px]:inline-flex"
             >
               {playbackSpeed}x
             </Button>
@@ -1368,7 +1368,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={isFullscreen ? t('exitFullscreen') : t('fullscreen')}
             onClick={toggleFullscreen}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
           >
             {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
           </Button>
