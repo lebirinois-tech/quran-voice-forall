@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { IPhoneInstallDialog } from '@/components/IPhoneInstallDialog';
 
 type InstallOutcome = "accepted" | "dismissed" | "unavailable";
 
@@ -33,6 +34,7 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [isPreviewHost, setIsPreviewHost] = useState(false);
+  const [iPhoneHelpOpen, setIPhoneHelpOpen] = useState(false);
 
   useEffect(() => {
     const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
@@ -70,6 +72,10 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const install = async (): Promise<InstallOutcome> => {
+    if (isIOS) {
+      setIPhoneHelpOpen(true);
+      return "unavailable";
+    }
     if (!deferredPrompt) return "unavailable";
 
     try {
@@ -95,7 +101,10 @@ export function PwaInstallProvider({ children }: { children: React.ReactNode }) 
     [deferredPrompt, isAndroid, isIOS, isInstalled, isPreviewHost]
   );
 
-  return <PwaInstallContext.Provider value={value}>{children}</PwaInstallContext.Provider>;
+  return <PwaInstallContext.Provider value={value}>
+    {children}
+    <IPhoneInstallDialog open={iPhoneHelpOpen} onOpenChange={setIPhoneHelpOpen} />
+  </PwaInstallContext.Provider>;
 }
 
 export function usePwaInstall() {

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apkDownloadUrl } from '@/lib/apkDownload';
 import { useT } from '@/lib/i18n';
+import { usePwaInstall } from '@/contexts/PwaInstallContext';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -29,6 +30,12 @@ const Index = () => {
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const appSettings = useAppSettings();
   const t = useT();
+  const { isIOS, install } = usePwaInstall();
+  const handleInstallLink = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isIOS) return;
+    event.preventDefault();
+    void install();
+  };
   const { user, isAuthenticated, signOut, loading: authLoading } = useAuth();
   const { fetchProgress, getLastRead, progress } = useReadingProgress();
   const { isChecking, checkForUpdate } = useUpdateCheck();
@@ -208,7 +215,7 @@ const Index = () => {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* PWA Install */}
-              <Link to="/install" className="block">
+              <Link to="/install" onClick={handleInstallLink} className="block">
                 <div className="bg-primary/10 hover:bg-primary/15 border border-primary/20 rounded-xl p-4 text-center transition-colors h-full flex flex-col items-center justify-center gap-2">
                   <Smartphone className="h-6 w-6 text-primary" />
                   <div>
@@ -228,7 +235,7 @@ const Index = () => {
                 </div>
               </a>
               {/* IPA Download */}
-              <Link to="/install" className="block">
+              <Link to="/install" onClick={handleInstallLink} className="block">
                 <div className="bg-accent/10 hover:bg-accent/15 border border-accent/20 rounded-xl p-4 text-center transition-colors h-full flex flex-col items-center justify-center gap-2">
                   <Apple className="h-6 w-6 text-accent" />
                   <div>
@@ -500,7 +507,7 @@ const Index = () => {
               </Button>
             </Link>
             {/* Install Button */}
-            <Link to="/install">
+            <Link to="/install" onClick={handleInstallLink}>
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
                 {t('installApp')}

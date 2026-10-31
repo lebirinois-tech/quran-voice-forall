@@ -16,7 +16,7 @@ const Landing = () => {
   const appSettings = useAppSettings();
   const t = useT();
   const { isChecking, checkForUpdate } = useUpdateCheck();
-  const { deferredPrompt, isInstalled, install } = usePwaInstall();
+  const { deferredPrompt, isInstalled, isIOS, install } = usePwaInstall();
 
   // Sur l'APK natif (Capacitor) ou en mode standalone installé, on ouvre
   // directement l'application au lieu d'afficher la page d'installation.
@@ -43,7 +43,7 @@ const Landing = () => {
   };
 
   const handleInstall = async () => {
-    if (deferredPrompt) await install();
+    if (isIOS || deferredPrompt) await install();
     else navigate('/install');
   };
 

@@ -4,9 +4,11 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone, Monitor, Apple, CheckCircle2, Share, PlusSquare, ExternalLink } from 'lucide-react';
 import { apkDownloadUrl } from '@/lib/apkDownload';
+import { useT } from '@/lib/i18n';
 
 const Install = () => {
   const { deferredPrompt, isInstalled, isIOS, isAndroid, isPreviewHost, install } = usePwaInstall();
+  const t = useT();
   const publishedUrl = 'https://quran-voice-forall.lovable.app';
   const [status, setStatus] = useState<string | null>(null);
 
@@ -61,7 +63,7 @@ const Install = () => {
       return;
     }
     if (platform === 'ios') {
-      // iOS install is manual — do nothing here, instructions are shown below.
+      await install();
       return;
     }
     try {
@@ -109,7 +111,7 @@ const Install = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-card border-2 border-secondary/40 rounded-xl p-6 text-center shadow-lg">
+            {!isIOS && <div className="bg-card border-2 border-secondary/40 rounded-xl p-6 text-center shadow-lg">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
                   <Smartphone className="h-6 w-6 text-secondary" />
@@ -135,7 +137,7 @@ const Install = () => {
               <p className="text-xs text-muted-foreground mt-3">
                 تحميل مباشر — Autorisez les sources inconnues sur Android.
               </p>
-            </div>
+            </div>}
 
             <div className="bg-card border border-primary/30 rounded-xl p-6 text-center animate-scale-in shadow-lg">
               <div className="flex items-center justify-center gap-3 mb-4">
@@ -151,48 +153,10 @@ const Install = () => {
               </div>
 
               {platform === 'ios' ? (
-                <div className="space-y-4">
-                  {isIOSSafari ? (
-                    <>
-                      <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 text-left">
-                        <p className="font-semibold text-foreground mb-3 text-center">
-                          Installation iPhone avec Safari
-                        </p>
-                        <div className="space-y-3 text-sm text-foreground">
-                          <div className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">1</span>
-                            <span>Touchez le bouton <strong>Partager</strong> de Safari.</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">2</span>
-                            <span>Choisissez <strong>Sur l'écran d'accueil</strong>.</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">3</span>
-                            <span>Appuyez sur <strong>Ajouter</strong>.</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Button onClick={openApp} size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 w-full sm:w-auto">
-                        <ExternalLink className="h-6 w-6" />
-                        Ouvrir l'application
-                      </Button>
-                      <p className="text-sm text-muted-foreground">
-                        Apple ne permet pas d'installer avec un bouton automatique comme Android.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <Button onClick={copyPublishedForSafari} size="lg" className="gap-2 text-lg px-8 py-6 w-full sm:w-auto">
-                        <Apple className="h-6 w-6" />
-                        Copier le lien pour Safari
-                      </Button>
-                      <p className="text-sm text-muted-foreground">
-                        Sur iPhone, ouvrez le lien dans <strong>Safari</strong>, puis Partager → Sur l'écran d'accueil → Ajouter.
-                      </p>
-                    </>
-                  )}
-                </div>
+                <Button onClick={handleInstall} size="lg" className="gap-2 w-full">
+                  <Apple className="h-6 w-6" />
+                  {t('installApp')}
+                </Button>
               ) : (
                 <>
                   <Button
@@ -240,7 +204,7 @@ const Install = () => {
               )}
             </div>
 
-            <div className="bg-muted/30 rounded-xl p-6">
+            {!isIOS && <div className="bg-muted/30 rounded-xl p-6">
               <h3 className="font-semibold text-foreground mb-4 text-center">
                 Avantages de l'installation
               </h3>
@@ -262,9 +226,9 @@ const Install = () => {
                   <span>Icône sur l'écran</span>
                 </div>
               </div>
-            </div>
+            </div>}
 
-            <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
+            {!isIOS && <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
                   <Smartphone className="h-6 w-6 text-secondary" />
@@ -290,9 +254,9 @@ const Install = () => {
               <p className="text-xs text-muted-foreground mt-3">
                 Build automatique depuis GitHub Releases. Autorisez l'installation depuis des sources inconnues sur votre Android.
               </p>
-            </div>
+            </div>}
 
-            <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
+            {!isIOS && <div className="bg-card border border-secondary/30 rounded-xl p-6 text-center shadow-lg">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
                   <Apple className="h-6 w-6 text-secondary" />
@@ -311,7 +275,7 @@ const Install = () => {
                 ci-dessus : Safari → Partager ⬆️ → « Sur l'écran d'accueil ». L'app fonctionne
                 ensuite comme une vraie application native.
               </p>
-            </div>
+            </div>}
           </div>
         )}
       </main>
