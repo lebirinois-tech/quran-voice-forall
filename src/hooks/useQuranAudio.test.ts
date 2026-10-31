@@ -95,6 +95,18 @@ describe('Al-Juhani Hafs recitation', () => {
     expect(result.current.reciter).toBe('husaryWarshPerVerse');
   });
 
+  it('remembers Al-Juhani for Hafs and Yassine for Warsh across riwaya switches', () => {
+    const { result } = renderHook(() => useAppSettings());
+    act(() => result.current.onTextDisplayStyleChange('pages-hafs'));
+    act(() => result.current.onReciterChange('juhani'));
+    act(() => result.current.onTextDisplayStyleChange('pages-warsh'));
+    act(() => result.current.onReciterChange('yassinWarsh'));
+    act(() => result.current.onTextDisplayStyleChange('tajweed'));
+    expect(result.current.reciter).toBe('juhani');
+    act(() => result.current.onTextDisplayStyleChange('warsh-tajweed'));
+    expect(result.current.reciter).toBe('yassinWarsh');
+  });
+
   it('replaces a paused Husary source before resuming with Al-Juhani', async () => {
     const { result, rerender, unmount } = renderHook(
       ({ reciter }: { reciter: ReciterId }) => useQuranAudio({ surahNumber: 10, totalVerses: 109, reciter }),
