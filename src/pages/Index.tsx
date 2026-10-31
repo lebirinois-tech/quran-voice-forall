@@ -19,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apkDownloadUrl } from '@/lib/apkDownload';
-import { ipaDownloadUrl } from '@/lib/ipaDownload';
 import { useT } from '@/lib/i18n';
 
 const Index = () => {
@@ -229,15 +228,15 @@ const Index = () => {
                 </div>
               </a>
               {/* IPA Download */}
-              <a href={ipaDownloadUrl} target="_blank" rel="noopener noreferrer" className="block">
+              <Link to="/install" className="block">
                 <div className="bg-accent/10 hover:bg-accent/15 border border-accent/20 rounded-xl p-4 text-center transition-colors h-full flex flex-col items-center justify-center gap-2">
                   <Apple className="h-6 w-6 text-accent" />
                   <div>
-                    <p className="font-semibold text-foreground text-sm">iOS IPA</p>
-                    <p className="text-xs text-muted-foreground">{t('unsignedIpa')}</p>
+                    <p className="font-semibold text-foreground text-sm">iPhone / iPad</p>
+                    <p className="text-xs text-muted-foreground">Safari → Partager → Écran d'accueil</p>
                   </div>
                 </div>
-              </a>
+              </Link>
             </div>
             <p dir={t.lang === 'ar' ? 'rtl' : 'ltr'} className="text-xs text-muted-foreground text-center mt-3">
               {t('installNote')}
