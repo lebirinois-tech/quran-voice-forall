@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 import { getCachedTafsir, saveTafsirToCache } from '@/hooks/useTafsirCache';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { getOfflineTafsir } from '@/lib/offlineTafsir';
+import { getOfflineTafsir, useTafsirSource, getTafsirSourceLabel } from '@/lib/offlineTafsir';
+import { TafsirSourcePicker } from './TafsirSourcePicker';
 import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
 
 interface TafsirPanelProps {
@@ -46,13 +47,15 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
   const { speakingLang, toggle } = useTafsirSpeech(`${surahNumber}:${verseNumber}:${isOpen}`);
   const toggleSpeech = (lang: 'ar' | 'fr' | 'en', text: string | null) => { if (text) void toggle(lang, text); };
   const [error, setError] = useState<string | null>(null);
+  const [source] = useTafsirSource();
+  useEffect(() => { setTafsirText(null); setTafsirFr(null); setTafsirEn(null); }, [source, surahNumber, verseNumber]);
 
   // Fetch Tafsir when panel opens
   useEffect(() => {
     if (isOpen && !tafsirText && !isLoading) {
       fetchTafsir();
     }
-  }, [isOpen, surahNumber, verseNumber]);
+  }, [isOpen, surahNumber, verseNumber, source, tafsirText]);
 
   const fetchTafsir = async () => {
     setIsLoading(true);
@@ -60,9 +63,9 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
     // 1) Offline bundle first (Arabic Al-Muyassar — ships with the app)
     let ar = await getOfflineTafsir(surahNumber, verseNumber, 'ar');
-    if (!ar) ar = getCachedTafsir(surahNumber, verseNumber);
+    if (!ar && source === 'muyassar') ar = getCachedTafsir(surahNumber, verseNumber);
 
-    if (!ar) {
+    if (!ar && source === 'muyassar') {
       // 2) Network fallback if for some reason the bundle isn't available yet
       try {
         const response = await fetch(
@@ -77,7 +80,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
     if (ar) {
       setTafsirText(ar);
-      saveTafsirToCache(surahNumber, verseNumber, ar);
+      if (source === 'muyassar') saveTafsirToCache(surahNumber, verseNumber, ar);
     } else {
       setError('التفسير غير متوفر حالياً / Tafsir non disponible');
     }
@@ -156,6 +159,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
       {isOpen && (
         <div className="mt-3 p-4 rounded-lg bg-muted/30 border border-border/50 animate-fade-in">
+          <TafsirSourcePicker className="mb-3" />
           {isLoading ? (
             <div className="flex items-center justify-center py-6">
               <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -265,7 +269,7 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-4 text-center">
-                المصدر: تفسير الميسر / Source: Tafsir Al-Muyassar
+                المصدر: {getTafsirSourceLabel('ar', source)} / Source: {getTafsirSourceLabel('fr', source)}
               </p>
             </>
           ) : null}
