@@ -5,7 +5,8 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { getPrimaryThemeForVerse } from '@/data/quranThemes';
-import { getOfflineTafsir } from '@/lib/offlineTafsir';
+import { getOfflineTafsir, useTafsirSource, getTafsirSourceLabel } from '@/lib/offlineTafsir';
+import { TafsirSourcePicker } from './TafsirSourcePicker';
 import { getOfflineVerseTranslation } from '@/lib/offlineVerseTranslations';
 import { getAppLang } from '@/lib/i18n';
 import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
@@ -44,6 +45,7 @@ export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: Musha
   const [translations, setTranslations] = useState<Partial<Record<Lang, string>>>({});
   const [tafsirs, setTafsirs] = useState<Partial<Record<Lang, string>>>({});
   const [loading, setLoading] = useState(true);
+  const [source] = useTafsirSource();
   const { speakingLang, toggle } = useTafsirSpeech(`${surahNumber}:${verseNumber}:${activeLang}`);
   const { theme } = useMemo(() => getPrimaryThemeForVerse(surahNumber, verseNumber), [surahNumber, verseNumber]);
   const safeArabicHtml = useMemo(() => sanitizeTajweedHtml(arabicHtml), [arabicHtml]);
@@ -64,7 +66,7 @@ export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: Musha
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [surahNumber, verseNumber]);
+  }, [surahNumber, verseNumber, source]);
 
   return (
     <Tabs value={activeLang} onValueChange={(value) => setActiveLang(value as Lang)} className="min-w-0">
@@ -82,6 +84,7 @@ export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: Musha
         const tafsir = tafsirs[lang];
         return (
           <TabsContent key={lang} value={lang} className="mt-4 space-y-4">
+            <TafsirSourcePicker />
             <section
               className="overflow-hidden rounded-md border"
               style={{ borderColor: theme ? `hsl(${theme.hsl} / 0.45)` : undefined }}
@@ -115,7 +118,7 @@ export const MushafVerseStudy = ({ surahNumber, verseNumber, arabicHtml }: Musha
                 style={{ backgroundColor: theme ? `hsl(${theme.bgHsl} / 0.7)` : undefined }}
               >
                 <BookOpen className="h-4 w-4 text-primary" />
-                <span className="flex-1">{labels.tafsir}</span>
+                <span className="flex-1">{getTafsirSourceLabel(lang, source)}</span>
                 {tafsir && (
                   <Button
                     variant="outline"

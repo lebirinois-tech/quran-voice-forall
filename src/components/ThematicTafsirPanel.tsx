@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getThemeById, getThemesForVerse, QuranTheme, type ThemeId } from '@/data/quranThemes';
-import { getOfflineTafsir } from '@/lib/offlineTafsir';
+import { getOfflineTafsir, useTafsirSource, getTafsirSourceLabel } from '@/lib/offlineTafsir';
+import { TafsirSourcePicker } from './TafsirSourcePicker';
 import { ParagraphTafsir } from './ParagraphTafsir';
 import type { ThematicParagraph } from '@/lib/thematicParagraph';
 import { useTafsirSpeech } from '@/hooks/useTafsirSpeech';
@@ -17,7 +18,7 @@ const CACHE_PREFIX = 'quran-tafsir-mawdou3i-v2-';
 
 const cacheKey = (s: number, v: number, lang: Lang) => `${CACHE_PREFIX}${lang}-${s}-${v}`;
 
-const readCache = (s: number, v: number, lang: Lang): string | null => {
+const readCacheRaw = (s: number, v: number, lang: Lang): string | null => {
   try { return localStorage.getItem(cacheKey(s, v, lang)); } catch { return null; }
 };
 const writeCache = (s: number, v: number, lang: Lang, text: string) => {
@@ -41,6 +42,8 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
   const [activeLang, setActiveLang] = useState<Lang>('fr');
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [source] = useTafsirSource();
+  const readCache = (s: number, v: number, l: Lang) => (source === 'muyassar' ? readCacheRaw(s, v, l) : null);
   const { speakingLang, toggle: toggleSpeak } = useTafsirSpeech(`${surahNumber}:${verseNumber}:${isOpen}:${activeLang}`);
   const [availability, setAvailability] = useState<Record<Lang, string | null>>({ ar: null, fr: null, en: null });
 
@@ -72,7 +75,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
       if (!cancelled) await refreshAvailability();
     })();
     return () => { cancelled = true; };
-  }, [isOpen, activeLang, surahNumber, verseNumber, paragraph]);
+  }, [isOpen, activeLang, surahNumber, verseNumber, paragraph, source]);
 
 
   const generate = async () => {
@@ -126,6 +129,7 @@ export const ThematicTafsirPanel = ({ surahNumber, verseNumber, indexedThemeId, 
 
       {isOpen && (
         <div className="mt-3 p-4 rounded-lg bg-muted/30 border border-border/50 animate-fade-in space-y-4">
+          <TafsirSourcePicker />
           {/* Themes badges (only if curated) */}
           {themes.length > 0 && (
             <div className="flex flex-wrap gap-2">

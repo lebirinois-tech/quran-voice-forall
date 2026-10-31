@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Volume2, VolumeX } from 'lucide-react';
 import { Button } from './ui/button';
-import { getOfflineTafsir } from '@/lib/offlineTafsir';
+import { getOfflineTafsir, useTafsirSource, getTafsirSourceLabel } from '@/lib/offlineTafsir';
+import { TafsirSourcePicker } from './TafsirSourcePicker';
 import { getOfflineVerseTranslation } from '@/lib/offlineVerseTranslations';
 import type { ThematicParagraph } from '@/lib/thematicParagraph';
 import { surahs } from '@/data/surahs';
@@ -26,6 +27,7 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const { surah, start, end } = paragraph;
+  const [source] = useTafsirSource();
   const { speakingLang, toggle } = useTafsirSpeech(`${surah}:${start}:${end}:${lang}`);
   const speaking = speakingLang !== null;
   const unavailable = lang === 'fr' ? 'Contenu indisponible' : lang === 'en' ? 'Content unavailable' : 'المحتوى غير متوفر';
@@ -56,7 +58,7 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
       }
     })();
     return () => { cancelled = true; };
-  }, [surah, start, end, lang]);
+  }, [surah, start, end, lang, source]);
 
   function toggleSpeak() {
     const text = entries.map(entry => entry.tafsir ?? '').filter(Boolean).join(' ');
@@ -65,6 +67,7 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
 
   return (
     <section aria-label="Tafsir du paragraphe" className="min-w-0 space-y-4">
+      <TafsirSourcePicker />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-primary">
           {surahs.find(item => item.number === surah)?.name} · {surah}:{start}{end !== start ? `–${end}` : ''}
