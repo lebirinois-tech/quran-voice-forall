@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getSafeReciter, getReciterAudioUrl, useQuranAudio, type ReciterId } from './useQuranAudio';
+import { RECITERS, getSafeReciter, getReciterAudioUrl, useQuranAudio, type ReciterId } from './useQuranAudio';
 import { useAppSettings } from './useAppSettings';
 
 vi.mock('@/lib/offlineAudioStore', () => ({ getOfflineAudioUrl: vi.fn(async () => null) }));
@@ -18,6 +18,24 @@ beforeEach(() => {
 afterEach(() => {
   document.querySelectorAll('audio').forEach((audio) => audio.remove());
   vi.restoreAllMocks();
+});
+
+describe('Requested Warsh reciter', () => {
+  it('offers Yassen Al-Jazairi as a saved Warsh voice with individual verse files', () => {
+    expect(getSafeReciter('yassinWarsh')).toBe('yassinWarsh');
+    expect(RECITERS.yassinWarsh.qiraat).toBe('warsh');
+    expect(getReciterAudioUrl(10, 100, 'yassinWarsh')).toBe(
+      'https://everyayah.com/data/warsh/warsh_yassin_al_jazaery_64kbps/010100.mp3',
+    );
+  });
+  it('preserves Yassen when switching Warsh Pages and Verses', () => {
+    localStorage.setItem('quran-reciter', 'yassinWarsh');
+    const { result } = renderHook(() => useAppSettings());
+    act(() => result.current.onTextDisplayStyleChange('warsh-tajweed'));
+    expect(result.current.reciter).toBe('yassinWarsh');
+    act(() => result.current.onTextDisplayStyleChange('pages-warsh'));
+    expect(result.current.reciter).toBe('yassinWarsh');
+  });
 });
 
 describe('Al-Juhani Hafs recitation', () => {
