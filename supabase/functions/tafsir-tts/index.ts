@@ -1,4 +1,11 @@
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { corsHeaders as sdkCorsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { paidAiUser } from '../_shared/paidAiAuth.ts';
+
+const corsHeaders = {
+  ...sdkCorsHeaders,
+  'Access-Control-Allow-Headers': `${sdkCorsHeaders['Access-Control-Allow-Headers']}, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version`,
+};
 
 const MODEL = "google/gemini-3.1-flash-tts-preview";
 const VOICE = "Charon"; // male, calm and informative
@@ -14,6 +21,13 @@ const json = (body: unknown, status: number) =>
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+    const auth = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
+    const userId = await paidAiUser(req, async (token) => {
+      const { data, error } = await auth.auth.getClaims(token);
+      return error ? null : data?.claims ?? null;
+    });
+    if (!userId) return json({ error: 'Sign in required' }, 401);
     const { text, lang } = await req.json();
     if (typeof text !== "string" || !text.trim() || text.length > 1500) return json({ error: "Invalid text" }, 400);
     if (!["ar", "fr", "en"].includes(lang)) return json({ error: "Invalid lang" }, 400);

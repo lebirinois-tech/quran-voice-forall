@@ -1,4 +1,5 @@
 # Architecture
+- Billable Tafsir translation and speech functions require verified non-anonymous account JWTs through the shared paidAiUser guard; bundled content and cached/device speech remain usable without sign-in.
 - Startup validates saved reciters through getSafeReciter rather than a separate allowlist; streaming and downloads share getReciterAudioUrl, Pages/Verses preserves voices within the same qiraat, and reciter changes clear the old paused source to prevent wrong-reciter playback.
 - Full-surah reciters use exact verified recording catalogs and one offline blob per surah; without verified ayah timings, playback starts at verse 1 and precise verse stops, repetition and highlighting are unavailable.
 - All iPhone install entry points use the shared PwaInstallContext dialog with localized native-browser steps; iOS exposes no programmatic home-screen installation prompt.
