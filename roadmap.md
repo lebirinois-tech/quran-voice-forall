@@ -1,7 +1,7 @@
 # Feuille de route
 
 ## Al-Juhani (31 octobre 2026)
-- [ ] Corriger la conservation du récitateur Hafs entre Pages et Versets, la reprise audio et les sources de téléchargement ; vérifier la lecture réelle.
+- [x] Al-Juhani conservé au démarrage et entre Pages/Versets ; ancienne source effacée au changement de récitateur ; téléchargements alignés sur la source réelle. Lecture navigateur vérifiée en Versets (Al-Fatiha) et Pages (Yunus 100), tests réussis.
 
 ## Recherche précise (30 octobre 2026)
 - [ ] Suggérer les mots du corpus pendant la saisie, afficher leurs occurrences et ouvrir le verset choisi surligné en Pages et Versets ; vérifier le parcours complet.
