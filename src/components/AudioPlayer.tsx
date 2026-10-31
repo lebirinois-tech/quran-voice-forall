@@ -159,13 +159,13 @@ export const AudioPlayer = ({
     <div className={cn(
       embedded
         ? "relative bg-card border border-border shadow-soft rounded-2xl p-3"
-        : "fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated z-40 px-3 py-2 animate-slide-in",
+        : "fixed bottom-0 left-0 right-0 w-full max-w-full overflow-hidden bg-card border-t border-border shadow-elevated z-40 px-2 py-1.5 animate-slide-in",
       className
     )}>
-      <div className={cn(embedded ? "w-full" : "container mx-auto max-w-2xl")}>
+      <div className={cn(embedded ? "w-full" : "container mx-auto w-full max-w-2xl min-w-0 overflow-hidden")}>
         {/* Audio Progress bar (current verse audio) */}
         <div 
-          className="mb-2 cursor-pointer group"
+          className="mb-1 cursor-pointer group"
           onClick={handleProgressClick}
         >
           <div className="h-1.5 bg-muted rounded-full overflow-hidden group-hover:h-2 transition-all">
@@ -177,15 +177,15 @@ export const AudioPlayer = ({
         </div>
 
         {/* Verse Progress bar */}
-        <div className="mb-1">
+        <div className="mb-0.5">
           <div className="h-1 bg-muted/50 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-gold transition-all duration-300"
               style={{ width: `${verseProgress}%` }}
             />
           </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-muted-foreground">
+          <div className="flex justify-between mt-0.5">
+            <span className="text-[10px] text-muted-foreground">
               {t('verse')} {currentVerse} / {totalVerses}
               {repeatSettings.mode !== 'none' && (
                 <span className="ml-2 text-primary">
@@ -210,16 +210,16 @@ export const AudioPlayer = ({
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between gap-1 sm:gap-4">
+        <div className="flex items-center justify-between gap-0.5 sm:gap-3">
           {leadingControls && <div className="flex items-center shrink-0">{leadingControls}</div>}
           {/* Reciter Selector */}
-          <div className="block shrink-0 w-[70px] sm:w-auto sm:flex-1 sm:min-w-0">
+          <div className="block shrink-0 w-[54px] sm:w-auto sm:flex-1 sm:min-w-0">
             {onReciterChange ? (
               <Select 
                 value={reciter} 
                 onValueChange={(value) => onReciterChange(value as ReciterId)}
               >
-                <SelectTrigger className="w-full max-w-[180px] h-8 text-xs">
+                <SelectTrigger className="w-full max-w-[180px] h-7 text-[11px] px-1">
                   <SelectValue placeholder={t('reciter')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -240,16 +240,16 @@ export const AudioPlayer = ({
           </div>
 
           {/* Playback Controls */}
-          <div className="flex items-center gap-0 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-0 sm:gap-1 shrink-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={onPrevious}
               disabled={currentVerse <= 1 || isLoading}
-              className="rounded-full"
+              className="rounded-full h-8 w-8"
               aria-label={t('prevVerse')}
             >
-              <SkipBack className="h-5 w-5" />
+              <SkipBack className="h-4 w-4" />
             </Button>
 
             <Button
@@ -257,7 +257,7 @@ export const AudioPlayer = ({
               size="icon-lg"
               onClick={isPlaying ? onPause : onPlay}
               disabled={isLoading}
-              className="rounded-full h-11 w-11 sm:h-14 sm:w-14"
+              className="rounded-full h-10 w-10 sm:h-14 sm:w-14"
               aria-label={isPlaying ? t('pause') : t('play')}
             >
               {isLoading ? (
@@ -274,36 +274,12 @@ export const AudioPlayer = ({
               size="icon"
               onClick={onNext}
               disabled={currentVerse >= totalVerses || isLoading}
-              className="rounded-full"
+              className="rounded-full h-8 w-8"
               aria-label={t('nextVerse')}
             >
-              <SkipForward className="h-5 w-5" />
+              <SkipForward className="h-4 w-4" />
             </Button>
 
-            {/* Vitesse visible à côté du bouton lecture */}
-            {onSpeedChange && (
-              <Select
-                value={String(playbackSpeed)}
-                onValueChange={(v) => onSpeedChange(Number(v))}
-              >
-                <SelectTrigger
-                  className={cn(
-                    "h-8 w-[52px] sm:w-[64px] rounded-full px-1.5 text-xs font-bold",
-                    playbackSpeed !== 1 && "text-primary border-primary bg-primary/10"
-                  )}
-                  aria-label={t('speed')}
-                >
-                  <SelectValue>{playbackSpeed}x</SelectValue>
-                </SelectTrigger>
-                <SelectContent className="z-[130] min-w-[80px]">
-                  {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3].map((speed) => (
-                    <SelectItem key={speed} value={String(speed)} className="text-xs">
-                      {speed}x
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
           </div>
 
 
@@ -320,7 +296,7 @@ export const AudioPlayer = ({
                         variant={repeatPause.enabled ? 'default' : 'outline'}
                         size="sm"
                         className={cn(
-                          "rounded-full h-8 gap-1 px-2",
+                          "rounded-full h-8 w-8 sm:w-auto gap-0 sm:gap-1 px-0 sm:px-2",
                           repeatPause.enabled && "bg-primary text-primary-foreground"
                         )}
                         aria-label={t('repeatPause')}
@@ -381,15 +357,15 @@ export const AudioPlayer = ({
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "rounded-full",
+                      "rounded-full h-8 w-8",
                       repeatSettings.mode !== 'none' && "text-primary bg-primary/10"
                     )}
                     aria-label={t('repeatOptions')}
                   >
                     {repeatSettings.mode === 'verse' ? (
-                      <Repeat1 className="h-5 w-5" />
+                      <Repeat1 className="h-4 w-4" />
                     ) : (
-                      <Repeat className="h-5 w-5" />
+                      <Repeat className="h-4 w-4" />
                     )}
                   </Button>
                 </PopoverTrigger>

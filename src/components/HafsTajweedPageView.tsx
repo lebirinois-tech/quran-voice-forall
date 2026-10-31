@@ -1270,9 +1270,9 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={t('nextPage')}
             onClick={goNext}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="h-8 w-8 shrink-0 rounded-full text-primary"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -1280,9 +1280,9 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={t('prevPage')}
             onClick={goPrev}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="h-8 w-8 shrink-0 rounded-full text-primary"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -1290,18 +1290,18 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={t('prevVerse')}
             onClick={() => onPreviousVerse?.()}
-            className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
+            className="hidden h-8 w-8 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
           >
-            <SkipBack className="h-5 w-5" />
+            <SkipBack className="h-4 w-4" />
           </Button>
           <Button
             type="button"
             size="icon"
             aria-label={isAudioPlaying ? t('pause') : t('play')}
             onClick={() => onPlayPause?.()}
-            className="h-11 w-11 shrink-0 rounded-full shadow-lg"
+            className="h-10 w-10 shrink-0 rounded-full shadow-lg"
           >
-            {isAudioPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+            {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </Button>
           {onPlayRange && (
             <button
@@ -1310,7 +1310,7 @@ export const HafsTajweedPageView = ({
               title="Appui : lancer la plage · Double-appui : plus d'options"
               onClick={() => startScope(activeScope)}
               onDoubleClick={() => setScopeOpen(true)}
-              className="flex h-9 shrink-0 flex-col items-center justify-center rounded-full border border-primary/40 bg-background px-2.5 text-primary"
+              className="flex h-8 shrink-0 flex-col items-center justify-center rounded-full border border-primary/40 bg-background px-2 text-primary"
             >
               <span className="flex items-center gap-1 text-[10px] font-bold leading-none">
                 <ListMusic className="h-3 w-3" />
@@ -1332,7 +1332,7 @@ export const HafsTajweedPageView = ({
                   s === 'verse' ? 'page' : s === 'page' ? 'surah' : s === 'surah' ? 'juz' : 'verse'
                 )
               }
-              className="hidden h-9 w-8 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
+              className="hidden h-8 w-7 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -1349,30 +1349,15 @@ export const HafsTajweedPageView = ({
               <Headphones className="h-4 w-4" />
             </Button>
           )}
-          {onSpeedChange && (
-            <Button
-              type="button"
-              variant="outline"
-              aria-label={`Vitesse de lecture : ${playbackSpeed}x`}
-              onClick={() => {
-                const steps = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
-                const i = steps.indexOf(playbackSpeed);
-                onSpeedChange(steps[(i === -1 ? 2 : i + 1) % steps.length]);
-              }}
-              className="hidden h-9 shrink-0 rounded-full border-primary/40 px-2 text-xs font-bold text-primary min-[420px]:inline-flex"
-            >
-              {playbackSpeed}x
-            </Button>
-          )}
           <Button
             type="button"
             size="icon"
             variant="ghost"
             aria-label={t('nextVerse')}
             onClick={() => onNextVerse?.()}
-            className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
+            className="hidden h-8 w-8 shrink-0 rounded-full text-primary min-[400px]:inline-flex"
           >
-            <SkipForward className="h-5 w-5" />
+            <SkipForward className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -1380,9 +1365,9 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={isFullscreen ? t('exitFullscreen') : t('fullscreen')}
             onClick={toggleFullscreen}
-            className="hidden h-9 w-9 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
+            className="hidden h-8 w-8 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
           >
-            {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
           <Button
             type="button"
@@ -1390,9 +1375,9 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={t('backHome')}
             onClick={() => window.location.assign('/app')}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="h-8 w-8 shrink-0 rounded-full text-primary"
           >
-            <Home className="h-5 w-5" />
+            <Home className="h-4 w-4" />
           </Button>
           <Button
             type="button"
@@ -1401,9 +1386,9 @@ export const HafsTajweedPageView = ({
             aria-label={t('mushafControls')}
             onClick={() => setMenuOpen(true)}
             onDoubleClick={() => setShowMenuButton(false)}
-            className="h-9 w-9 shrink-0 rounded-full text-primary"
+            className="h-8 w-8 shrink-0 rounded-full text-primary"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
           </Button>
           {onToggleTwoPage && (
             <Button
@@ -1413,7 +1398,7 @@ export const HafsTajweedPageView = ({
               aria-label={twoPageMode ? t('onePage') : t('twoPages')}
               aria-pressed={!!twoPageMode}
               onClick={onToggleTwoPage}
-              className="h-9 shrink-0 rounded-full px-2 text-xs font-bold"
+              className="h-8 shrink-0 rounded-full px-2 text-[11px] font-bold"
               title={twoPageMode ? t('onePage') : t('twoPages')}
             >
               {twoPageMode ? '1' : '2'} <BookOpen className="ml-1 h-4 w-4" />

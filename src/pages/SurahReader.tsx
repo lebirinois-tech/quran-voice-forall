@@ -579,7 +579,7 @@ const SurahReader = () => {
 
   return (
     <div
-      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen bg-background pattern-islamic pb-56'}
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-0'}
       style={{ backgroundColor: appSettings.backgroundColor }}
     >
       {!isMushafMode && (
@@ -603,7 +603,7 @@ const SurahReader = () => {
         />
       )}
 
-      <main className={isMushafMode ? 'h-[100dvh] overflow-hidden p-0' : 'container mx-auto px-4 py-6'}>
+      <main className={isMushafMode ? 'h-[100dvh] overflow-hidden p-0' : 'container mx-auto w-full max-w-full overflow-x-hidden px-3 py-4'}>
         {/* Surah Header */}
         {!isMushafMode && <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block mb-4">
@@ -1019,50 +1019,16 @@ const SurahReader = () => {
 
                   {/* Position courante + pagination — mode « page par page » (versets) */}
                   {isPagedVerseView && versePageNum !== null && (
-                    <div className="sticky bottom-24 z-20 space-y-1">
-                      {/* Indicateur de position clair (riwaya, sourate, page, verset lu) */}
+                    <div className="sticky bottom-[88px] z-20">
+                      {/* Position courante + pagination, sur une seule rangée compacte */}
                       <div
-                        className="rounded-2xl border border-border bg-background/92 backdrop-blur px-2 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
+                        className="flex items-center gap-1 rounded-full border border-border bg-background/92 backdrop-blur px-1.5 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground"
                         aria-live="polite"
                       >
-                        <span className="font-semibold text-primary">
-                          {effectiveDisplayStyle === 'warsh-tajweed'
-                            ? (t.lang === 'ar' ? 'ورش' : 'Warsh')
-                            : effectiveDisplayStyle === 'qalun-tajweed'
-                              ? (t.lang === 'ar' ? 'قالون' : 'Qalun')
-                              : (t.lang === 'ar' ? 'حفص' : 'Hafs')}
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span className="truncate max-w-[38%]">{surah.name}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>
-                          <MushafPageBadge page={versePageNum} className="font-semibold text-foreground" />
-                        </span>
-                        {quranAudio.currentVerse > 0 && (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span>
-                              {quranAudio.isPlaying ? '▶ ' : ''}{t('verse')} 
-                              <span className="font-semibold text-foreground">{quranAudio.currentVerse}</span>
-                            </span>
-                          </>
-                        )}
-                        {playingVersePage !== null && playingVersePage !== versePageNum && (
-                          <button
-                            type="button"
-                            onClick={() => goToVersePage(playingVersePage)}
-                            className="underline text-primary font-medium"
-                          >
-                            {t('resumeReading')} ({t('page')} {playingVersePage})
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between gap-1 rounded-full border border-border bg-background/90 backdrop-blur px-1.5 py-1 shadow-sm">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-full h-8 px-2 text-xs shrink-0"
+                          className="rounded-full h-7 w-7 p-0 text-sm shrink-0"
                           onClick={() => {
                             const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                             if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
@@ -1071,12 +1037,12 @@ const SurahReader = () => {
                           disabled={versePageNum <= 1}
                           aria-label={t('prevPage')}
                         >
-                          ‹<span className="hidden sm:inline ml-1">{t('prevPage')}</span>
+                          ‹
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="rounded-full h-8 px-2 text-xs min-w-0"
+                          className="rounded-full h-7 w-7 p-0 shrink-0"
                           onClick={() => {
                             const group = versePageGroups.find(([p]) => p === versePageNum);
                             if (!group) return;
@@ -1085,12 +1051,12 @@ const SurahReader = () => {
                           }}
                           aria-label={`Lire la page ${versePageNum}`}
                         >
-                          <Play className="h-3.5 w-3.5 mr-1" /> {t('listenPage')}
+                          <Play className="h-3.5 w-3.5" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="rounded-full h-8 px-2 text-xs shrink-0"
+                          className="rounded-full h-7 w-7 p-0 text-sm shrink-0"
                           onClick={() => {
                             const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                             if (idx >= 0 && idx < versePageGroups.length - 1)
@@ -1100,8 +1066,31 @@ const SurahReader = () => {
                           disabled={versePageNum >= 604}
                           aria-label={t('nextPage')}
                         >
-                          <span className="hidden sm:inline mr-1">{t('nextPage')}</span>›
+                          ›
                         </Button>
+                        <span className="min-w-0 flex-1 truncate text-center font-semibold text-primary">
+                          {effectiveDisplayStyle === 'warsh-tajweed'
+                            ? (t.lang === 'ar' ? 'ورش' : 'Warsh')
+                            : effectiveDisplayStyle === 'qalun-tajweed'
+                              ? (t.lang === 'ar' ? 'قالون' : 'Qalun')
+                              : (t.lang === 'ar' ? 'حفص' : 'Hafs')}
+                        </span>
+                        <span className="min-w-0 flex-[2] truncate text-center">{surah.name}</span>
+                        <MushafPageBadge page={versePageNum} className="font-semibold text-foreground shrink-0" />
+                        {quranAudio.currentVerse > 0 && (
+                          <span className="shrink-0">
+                            {t('verse')} <span className="font-semibold text-foreground">{quranAudio.currentVerse}</span>
+                          </span>
+                        )}
+                        {playingVersePage !== null && playingVersePage !== versePageNum && (
+                          <button
+                            type="button"
+                            onClick={() => goToVersePage(playingVersePage)}
+                            className="underline text-primary font-medium shrink-0"
+                          >
+                            {t('resumeReading')} ({t('page')} {playingVersePage})
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}

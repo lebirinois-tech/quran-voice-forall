@@ -89,3 +89,7 @@
 - Bouton « Aller — اذهب » ajouté à côté de la liste des sourates (la sélection ne naviguait pas sur la tablette) ; vérifié Playwright : choix puis validation ouvre bien la sourate.
 - Bouton « Aller — اذهب » et barre de recherche (FR/AR/numéro) ajoutés à la liste des sourates ; vérifié Playwright : « kahf » → Al-Kahf, « يس » → Ya-Sin, validation ouvre la sourate.
 - [x] Recherche : clic sur un résultat ouvre le verset exact surligné (Pages et Versets)
+
+## En cours (31 octobre 2026, 09:35 UTC)
+- Mode Versets : page centrée (plus de défilement horizontal), capsule de navigation réduite à une seule rangée compacte (‹ ▶ › + riwaya · sourate · page · verset), barre audio du bas resserrée et vitesse retirée de la barre (elle reste dans le menu casque) ; vérifié Playwright 360px : débordement 0, dernier verset lisible, 10-18 px entre la capsule et la barre.
+- Mode Pages : boutons de la barre du bas réduits (h-8), bouton vitesse retiré ; vérifié Playwright 360px : barre 54 px, bord droit 325 px, débordement 0.
