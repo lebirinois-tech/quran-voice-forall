@@ -1,5 +1,8 @@
 # Feuille de route
 
+## Barre du mode Versets (31 octobre 2026)
+- [ ] Supprimer la capsule Hafs/sourate/page au-dessus de la barre ; remonter les menus d’environ 1 cm sur tablette tactile et préserver le dernier verset ; vérifier téléphone et tablette.
+
 ## Surbrillance audio Warsh et Qaloun
 - [x] Fond transparent qui masquait la surbrillance Warsh/Qaloun supprimé ; suivi déclaré sur chaque verset. Lecture réelle de Yunus 100 vérifiée sur écran téléphone en Pages et Versets avec Yassine Warsh et Al-Husary Qaloun ; pause vérifiée en Pages ; 11 tests audio réussis.
 - [ ] Vérification audio réelle Al-Husary Warsh : source distante non chargée pendant le test ; correction visuelle commune appliquée, lecture de cette source non confirmée.

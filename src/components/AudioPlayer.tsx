@@ -159,7 +159,7 @@ export const AudioPlayer = ({
     <div className={cn(
       embedded
         ? "relative bg-card border border-border shadow-soft rounded-2xl p-3"
-        : "fixed bottom-0 left-0 right-0 w-full max-w-full overflow-hidden bg-card border-t border-border shadow-elevated z-40 px-2 py-1.5 animate-slide-in",
+        : "verse-audio-toolbar fixed bottom-0 left-0 right-0 w-full max-w-full overflow-hidden bg-card border-t border-border shadow-elevated z-40 px-2 py-1.5 animate-slide-in",
       className
     )}>
       <div className={cn(embedded ? "w-full" : "container mx-auto w-full max-w-2xl min-w-0 overflow-hidden")}>
