@@ -1,3 +1,4 @@
+import { hafsDisplayText } from '@/lib/hafsDisplay';
 import { useVerseExtra } from '@/hooks/useVerseExtras';
 import { useT } from '@/lib/i18n';
 import { juzMapping } from '@/data/surahs';
@@ -271,7 +272,7 @@ export const VerseCard = ({
   // is intentionally ignored here.
   const effectiveTajweedHtml =
     textDisplayStyle === 'tajweed'
-      ? sanitizeTajweedHtml(applyAutoTajweed(verse.text.replace(/\u06DF/g, '\u0652')))
+      ? sanitizeTajweedHtml(applyAutoTajweed(hafsDisplayText(verse.text)))
       : undefined;
 
   // Auto-Tajweed coloring for Warsh / Qalun verse-by-verse modes
@@ -528,7 +529,7 @@ export const VerseCard = ({
           className={cn(getTextClassName(), "mb-4 text-right")}
           dir="rtl"
         >
-          {verse.text.replace(/\u06DF/g, '\u0652')}
+          {hafsDisplayText(verse.text)}
           <VerseEndNumber n={verse.number} />
         </p>
       )}
