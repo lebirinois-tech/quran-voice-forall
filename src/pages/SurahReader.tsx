@@ -1020,49 +1020,10 @@ const SurahReader = () => {
                   {/* Position courante + pagination — mode « page par page » (versets) */}
                   {isPagedVerseView && versePageNum !== null && (
                     <div className="sticky bottom-[88px] z-20">
-                      {/* Position courante + pagination, sur une seule rangée compacte */}
                       <div
-                        className="flex items-center gap-1 rounded-full border border-border bg-background/92 backdrop-blur px-1.5 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground"
+                        className="flex items-center gap-1 rounded-full border border-border bg-background/92 backdrop-blur px-3 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground"
                         aria-live="polite"
                       >
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="rounded-full h-7 w-7 p-0 text-sm shrink-0"
-                          onClick={() => {
-                            const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
-                            if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
-                            else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
-                          }}
-                          disabled={versePageNum <= 1}
-                          aria-label={t('prevPage')}
-                        >
-                          ‹
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="rounded-full h-7 w-7 p-0 text-sm shrink-0"
-                          onClick={() => {
-                            const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
-                            if (idx >= 0 && idx < versePageGroups.length - 1)
-                              goToVersePage(versePageGroups[idx + 1][0]);
-                            else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
-                          }}
-                          disabled={versePageNum >= 604}
-                          aria-label={t('nextPage')}
-                        >
-                          ›
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="rounded-full h-7 w-7 p-0 shrink-0 text-primary"
-                          onClick={handleGoHome}
-                          aria-label={t('backHome')}
-                        >
-                          <Home className="h-3.5 w-3.5" />
-                        </Button>
                         <span className="min-w-0 flex-1 truncate text-center font-semibold text-primary">
                           {effectiveDisplayStyle === 'warsh-tajweed'
                             ? (t.lang === 'ar' ? 'ورش' : 'Warsh')
@@ -1100,14 +1061,50 @@ const SurahReader = () => {
       {/* Mode Versets : casque et micro intégrés à la barre audio du bas */}
       {!isMushafMode && React.cloneElement(audioPlayerControls, {
         leadingControls: (
-          <button
-            type="button"
-            onClick={() => setRecitationMenuOpen(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
-            aria-label={t('audioMenu')}
-          >
-            <Headphones className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={() => setRecitationMenuOpen(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
+              aria-label={t('audioMenu')}
+            >
+              <Headphones className="h-4 w-4" />
+            </button>
+            {isPagedVerseView && versePageNum !== null && (
+              <>
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-primary text-lg disabled:opacity-40"
+                  onClick={() => {
+                    const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                    if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
+                    else if (versePageNum > 1) handleNavigateToPage(versePageNum - 1);
+                  }}
+                  disabled={versePageNum <= 1}
+                  aria-label={t('prevPage')}
+                >‹</button>
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-primary text-lg disabled:opacity-40"
+                  onClick={() => {
+                    const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
+                    if (idx >= 0 && idx < versePageGroups.length - 1) goToVersePage(versePageGroups[idx + 1][0]);
+                    else if (versePageNum < 604) handleNavigateToPage(versePageNum + 1);
+                  }}
+                  disabled={versePageNum >= 604}
+                  aria-label={t('nextPage')}
+                >›</button>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={handleGoHome}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-primary"
+              aria-label={t('backHome')}
+            >
+              <Home className="h-4 w-4" />
+            </button>
+          </div>
         ),
         trailingControls: (
           <div className="flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
