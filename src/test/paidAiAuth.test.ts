@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { paidAiUser } from './paidAiAuth';
+import { paidAiUser } from '../../supabase/functions/_shared/paidAiAuth';
 
 describe('Paid AI authentication', () => {
   it('rejects missing credentials before verification', async () => {
