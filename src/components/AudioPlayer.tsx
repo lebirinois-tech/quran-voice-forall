@@ -212,32 +212,7 @@ export const AudioPlayer = ({
         {/* Controls */}
         <div className="flex items-center justify-between gap-0.5 sm:gap-3">
           {leadingControls && <div className="flex items-center shrink-0">{leadingControls}</div>}
-          {/* Reciter Selector */}
-          <div className="block shrink-0 w-[54px] sm:w-auto sm:flex-1 sm:min-w-0">
-            {onReciterChange ? (
-              <Select 
-                value={reciter} 
-                onValueChange={(value) => onReciterChange(value as ReciterId)}
-              >
-                <SelectTrigger className="w-full max-w-[180px] h-7 text-[11px] px-1">
-                  <SelectValue placeholder={t('reciter')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {RECITER_IDS.map((key) => (
-                    <SelectItem key={key} value={key} className="text-xs">
-                      {t.lang === 'ar' ? RECITERS[key].nameAr : RECITERS[key].name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              surahName && (
-                <p className="text-sm font-medium text-foreground truncate">
-                  {surahName}
-                </p>
-              )
-            )}
-          </div>
+          {/* Le choix du récitateur se fait via le menu casque. */}
 
           {/* Playback Controls */}
           <div className="flex items-center gap-0 sm:gap-1 shrink-0">
