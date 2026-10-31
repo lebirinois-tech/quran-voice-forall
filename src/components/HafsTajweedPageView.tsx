@@ -1,7 +1,7 @@
 import { hafsDisplayText } from '@/lib/hafsDisplay';
 import { useT } from '@/lib/i18n';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones, Search } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
@@ -1381,6 +1381,17 @@ export const HafsTajweedPageView = ({
             className="h-9 w-9 shrink-0 rounded-full text-primary"
           >
             <Home className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={t('quranSearchTitle')}
+            title={t('quranSearchTitle')}
+            onClick={() => window.location.assign('/search')}
+            className="h-9 w-9 shrink-0 rounded-full text-primary"
+          >
+            <Search className="h-5 w-5" />
           </Button>
           <Button
             type="button"
