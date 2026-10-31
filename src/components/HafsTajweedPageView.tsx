@@ -1,3 +1,4 @@
+import { hafsDisplayText } from '@/lib/hafsDisplay';
 import { useT } from '@/lib/i18n';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones } from 'lucide-react';
@@ -1089,7 +1090,7 @@ export const HafsTajweedPageView = ({
                             .replace(/\u0671/g, '\u0627')
                             .includes('\u0627\u0644\u0644\u0647');
                           const html = word.kind === 'word'
-                            ? sanitizeTajweedHtml(applyAutoTajweed(word.text.replace(/\u06DF/g, '\u0652')))
+                            ? sanitizeTajweedHtml(applyAutoTajweed(hafsDisplayText(word.text)))
                             : word.text;
                           return (
                             <span

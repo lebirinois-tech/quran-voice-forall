@@ -1,3 +1,4 @@
+import { hafsDisplayText } from '@/lib/hafsDisplay';
 import { useEffect, useState } from 'react';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
@@ -79,7 +80,7 @@ const loadHafsIndex = (): Promise<Map<number, FullPageGroup[]>> => {
           if (ayah.numberInSurah === 1 && surahHasHeaderBasmala(surahNumber)) {
             text = stripLeadingBasmala(text);
           }
-          const html = sanitizeTajweedHtml(applyAutoTajweed(text.replace(/\u06DF/g, '\u0652')));
+          const html = sanitizeTajweedHtml(applyAutoTajweed(hafsDisplayText(text)));
           pushVerse(map, page, surahNumber, { number: ayah.numberInSurah, html });
         });
       }
