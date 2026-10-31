@@ -14,11 +14,12 @@ export const QIRAAT_LABELS = {
 
 export type QiraatId = keyof typeof QIRAAT_LABELS;
 
-// Trois lectures d'Al-Husary uniquement : Hafs, Warsh et Qalun.
+// Available voices, grouped by their Quran reading tradition.
 export const RECITER_IDS = [
   'husary',
   'juhani',
   'husaryWarshPerVerse',
+  'yassinWarsh',
   'husaryQalunPerVerse',
 ] as const;
 
@@ -30,6 +31,8 @@ export interface ReciterInfo {
   nameAr: string;
   qiraat: QiraatId;
   quranicAudioId?: number;
+  /** EveryAyah directory, including any riwaya subdirectory. */
+  everyAyahFolder?: string;
   /** When true, audio is delivered as a single MP3 per surah (no per-verse files). */
   fullSurah?: boolean;
   /** Full-surah MP3 base URL; surah number is appended as 3-digit padded `.mp3`. */
@@ -68,6 +71,13 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
       '64kb---ayat--alhosary---warsh---full-quran---mp3-----verse--by--verse---6236--',
     archiveZipPad: 2,
   },
+  yassinWarsh: {
+    id: 'warsh.yassin',
+    name: 'Yassen Al-Jazairi (Warsh)',
+    nameAr: 'ياسين الجزائري (ورش)',
+    qiraat: 'warsh',
+    everyAyahFolder: 'warsh/warsh_yassin_al_jazaery_64kbps',
+  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // QALUN (قالون عن نافع)
@@ -98,7 +108,7 @@ export const getReciterAudioUrl = (surah: number, verse: number, reciterId: Reci
     const zipName = info.archiveZipPad === 2 ? String(surah).padStart(2, '0') : surahStr;
     return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;
   }
-  const folder = reciterId === 'juhani' ? 'Abdullaah_3awwaad_Al-Juhaynee_128kbps' : 'Husary_128kbps';
+  const folder = info.everyAyahFolder ?? (reciterId === 'juhani' ? 'Abdullaah_3awwaad_Al-Juhaynee_128kbps' : 'Husary_128kbps');
   return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
 };
 
