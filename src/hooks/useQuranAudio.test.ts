@@ -38,6 +38,38 @@ describe('Requested Warsh reciter', () => {
   });
 });
 
+describe('Requested Qaloun reciter', () => {
+  it('offers El Ganayni with exact full-surah recordings for all 114 surahs', () => {
+    expect(getSafeReciter('ganayniQalun')).toBe('ganayniQalun');
+    expect(RECITERS.ganayniQalun.qiraat).toBe('qalun');
+    expect(RECITERS.ganayniQalun.fullSurah).toBe(true);
+    expect(Object.keys(RECITERS.ganayniQalun.fullSurahUrls ?? {})).toHaveLength(114);
+    expect(getReciterAudioUrl(1, 1, 'ganayniQalun')).toBe(
+      'https://media.assabile.com/assabile/recitations_7892537823/mp3/mohammad-omar-el-ganayni/mohammad-omar-el-ganayni-001-al-fatiha-42407-2757.mp3',
+    );
+    for (let surah = 1; surah <= 114; surah++) {
+      expect(getReciterAudioUrl(surah, 1, 'ganayniQalun')).toContain(`ganayni-${String(surah).padStart(3, '0')}-`);
+    }
+  });
+  it('keeps El Ganayni across Qaloun Pages and Verses', () => {
+    localStorage.setItem('quran-reciter', 'ganayniQalun');
+    const { result } = renderHook(() => useAppSettings());
+    act(() => result.current.onTextDisplayStyleChange('qalun-tajweed'));
+    expect(result.current.reciter).toBe('ganayniQalun');
+    act(() => result.current.onTextDisplayStyleChange('pages-qalun'));
+    expect(result.current.reciter).toBe('ganayniQalun');
+  });
+  it('starts full-surah recordings at verse 1 rather than claiming to seek to verse 100', async () => {
+    const { result, unmount } = renderHook(() => useQuranAudio({ surahNumber: 10, totalVerses: 109, reciter: 'ganayniQalun' }));
+    await act(async () => { await result.current.playVerse(100); });
+    expect(result.current.currentVerse).toBe(1);
+    expect(document.querySelector('audio')?.src).toBe(getReciterAudioUrl(10, 1, 'ganayniQalun'));
+    act(() => result.current.nextVerse());
+    expect(result.current.currentVerse).toBe(1);
+    unmount();
+  });
+});
+
 describe('Al-Juhani Hafs recitation', () => {
   it('recognizes the saved Al-Juhani choice at startup', () => {
     expect(getSafeReciter('juhani')).toBe('juhani');
