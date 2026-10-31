@@ -632,6 +632,9 @@ const SurahReader = () => {
               <BookOpen className="h-4 w-4" /> {t('pages')}
             </Button>
           </div>
+          <Button type="button" variant="outline" className="mb-3 w-full gap-2" onClick={() => navigate('/search')}>
+            <Search className="h-4 w-4" /> {t('quranSearchTitle')}
+          </Button>
           <div className="grid grid-cols-2 gap-3">
             {/* Page Navigation */}
             <div className="bg-card border border-border rounded-xl p-3">
