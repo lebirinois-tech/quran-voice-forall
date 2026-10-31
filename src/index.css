@@ -383,3 +383,18 @@
 
 /* Verset trouvé par la recherche */
 .search-hit { background-color: hsl(var(--secondary) / 0.35) !important; border-radius: 0.15em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+/* Reserve space for the single verse toolbar and native navigation areas. */
+.verse-reader {
+  --verse-toolbar-lift: 0px;
+  padding-bottom: calc(9rem + var(--verse-toolbar-lift) + env(safe-area-inset-bottom, 0px));
+}
+
+.verse-reader .verse-audio-toolbar {
+  bottom: calc(var(--verse-toolbar-lift) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Touch tablets need clearance above their system taskbar, in either orientation. */
+@media (min-width: 600px) and (max-width: 1400px) and (any-pointer: coarse) {
+  .verse-reader { --verse-toolbar-lift: 1cm; }
+}

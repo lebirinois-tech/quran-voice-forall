@@ -386,15 +386,6 @@ const SurahReader = () => {
     [versePageGroups, quranAudio.isPlaying, quranAudio.currentVerse, quranAudio.playVerse, quranAudio.repeatSettings.mode, quranAudio.setRepeatMode]
   );
 
-  // Page réellement en cours de lecture audio (pour l'indicateur de position)
-  const playingVersePage = useMemo(() => {
-    if (!isPagedVerseView || !quranAudio.currentVerse) return null;
-    const group = versePageGroups.find(([, vs]) =>
-      vs.some((v) => v.number === quranAudio.currentVerse)
-    );
-    return group ? group[0] : null;
-  }, [isPagedVerseView, quranAudio.currentVerse, versePageGroups]);
-
 
   // Compute verse range for the current Mushaf page using real API page data
   const currentPageVerseRange = useMemo(() => {
@@ -579,7 +570,7 @@ const SurahReader = () => {
 
   return (
     <div
-      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-0'}
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'verse-reader min-h-screen overflow-x-hidden bg-background pattern-islamic'}
       style={{ backgroundColor: appSettings.backgroundColor }}
     >
       {!isMushafMode && (
@@ -1016,40 +1007,6 @@ const SurahReader = () => {
                       );
                     });
                   })()}
-
-                  {/* Position courante + pagination — mode « page par page » (versets) */}
-                  {isPagedVerseView && versePageNum !== null && (
-                    <div className="sticky bottom-[88px] z-20">
-                      <div
-                        className="flex items-center gap-1 rounded-full border border-border bg-background/92 backdrop-blur px-3 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground"
-                        aria-live="polite"
-                      >
-                        <span className="min-w-0 flex-1 truncate text-center font-semibold text-primary">
-                          {effectiveDisplayStyle === 'warsh-tajweed'
-                            ? (t.lang === 'ar' ? 'ورش' : 'Warsh')
-                            : effectiveDisplayStyle === 'qalun-tajweed'
-                              ? (t.lang === 'ar' ? 'قالون' : 'Qalun')
-                              : (t.lang === 'ar' ? 'حفص' : 'Hafs')}
-                        </span>
-                        <span className="min-w-0 flex-[2] truncate text-center">{surah.name}</span>
-                        <MushafPageBadge page={versePageNum} className="font-semibold text-foreground shrink-0" />
-                        {quranAudio.currentVerse > 0 && (
-                          <span className="shrink-0">
-                            {t('verse')} <span className="font-semibold text-foreground">{quranAudio.currentVerse}</span>
-                          </span>
-                        )}
-                        {playingVersePage !== null && playingVersePage !== versePageNum && (
-                          <button
-                            type="button"
-                            onClick={() => goToVersePage(playingVersePage)}
-                            className="underline text-primary font-medium shrink-0"
-                          >
-                            {t('resumeReading')} ({t('page')} {playingVersePage})
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
 
                 </div>
               )}
