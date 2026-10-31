@@ -4,7 +4,7 @@
 - [x] Yassen Al-Jazairi (Warsh) ajouté ; lecture et surbrillance au verset 10:100 vérifiées en Pages et Versets.
 - [x] Mohammad Omar El Ganayni (Qaloun) ajouté ; 114 liens exacts, lecture complète de Yunus vérifiée en Pages et Versets. Source sans CORS : lecture directe autorisée, téléchargement hors ligne non proposé.
 - [ ] Synchronisation El Ganayni : bloquée par l’absence de fichiers par verset ou de repères temporels fiables correspondant à ses enregistrements ; ne pas inventer de minutage.
-- [ ] Publier après décision sur les alertes existantes concernant les dépenses IA en accès libre. Tests audio/session : 15 réussis ; dernière compilation sans erreur.
+- [ ] Corriger les alertes de dépenses IA en accès libre avant publication (choix utilisateur), vérifier le refus des appels sans compte et le fonctionnement connecté, puis publier.
 
 ## Al-Juhani (31 octobre 2026)
 - [x] Al-Juhani conservé au démarrage et entre Pages/Versets ; ancienne source effacée au changement de récitateur ; téléchargements alignés sur la source réelle. Lecture navigateur vérifiée en Versets (Al-Fatiha) et Pages (Yunus 100), tests réussis.
