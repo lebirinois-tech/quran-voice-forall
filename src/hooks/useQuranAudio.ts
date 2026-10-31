@@ -40,6 +40,8 @@ export interface ReciterInfo {
   /** Full-surah MP3 base URL; surah number is appended as 3-digit padded `.mp3`. */
   fullSurahBaseUrl?: string;
   fullSurahUrls?: Readonly<Record<number, string>>;
+  /** Some public media hosts permit playback but not CORS downloads. */
+  playbackWithoutCors?: boolean;
   /**
    * Archive.org item where per-verse MP3s are bundled inside one ZIP per surah.
    * URL pattern: `https://archive.org/download/{archiveItem}/{SSS}.zip/{SSSAAA}.mp3`.
@@ -99,6 +101,7 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     nameAr: 'محمد عمر الجنايني (قالون — سورة كاملة)',
     qiraat: 'qalun',
     fullSurah: true,
+    playbackWithoutCors: true,
     fullSurahUrls: ganayniSurahAudio,
   },
 };
@@ -604,6 +607,7 @@ export const useQuranAudio = ({
         disposeManagedAudioElement(audioRef.current);
       }
       newAudio = createManagedAudioElement();
+      if (RECITERS[selectedReciter].playbackWithoutCors) newAudio.removeAttribute('crossorigin');
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
       syncPlaybackSpeed(newAudio);
