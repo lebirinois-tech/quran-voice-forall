@@ -88,6 +88,20 @@ export const isReciterId = (value: unknown): value is ReciterId =>
 export const getSafeReciter = (value: unknown): ReciterId =>
   isReciterId(value) ? value : 'husary';
 
+/** Single source for streaming, verse downloads and offline downloads. */
+export const getReciterAudioUrl = (surah: number, verse: number, reciterId: ReciterId): string => {
+  const surahStr = String(surah).padStart(3, '0');
+  const verseStr = String(verse).padStart(3, '0');
+  const info = RECITERS[getSafeReciter(reciterId)];
+  if (info.fullSurah && info.fullSurahBaseUrl) return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
+  if (info.archiveItem) {
+    const zipName = info.archiveZipPad === 2 ? String(surah).padStart(2, '0') : surahStr;
+    return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;
+  }
+  const folder = reciterId === 'juhani' ? 'Abdullaah_3awwaad_Al-Juhaynee_128kbps' : 'Husary_128kbps';
+  return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
+};
+
 export type RepeatMode = 'none' | 'verse' | 'range' | 'page';
 
 export interface RepeatSettings {
@@ -241,19 +255,6 @@ export const useQuranAudio = ({
   const [isPausingForRepeat, setIsPausingForRepeat] = useState(false);
   const [pauseRemainingSec, setPauseRemainingSec] = useState(0);
 
-  // Sync reciter with external prop (et relance la lecture en cours avec la bonne riwaya)
-  useEffect(() => {
-    setReciter((prev) => {
-      if (prev === externalReciter) return prev;
-      if (isPlaying) {
-        // relance le verset courant avec le nouveau récitateur
-        setTimeout(() => playVerseRef.current(currentVerseRef.current), 0);
-      }
-      return externalReciter;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalReciter]);
-  
   const [recitationSession, _setRecitationSession] = useState<RecitationSession | null>(null);
   const sessionRef = useRef<RecitationSession | null>(null);
   const activeSurahRef = useRef(surahNumber);
@@ -277,7 +278,6 @@ export const useQuranAudio = ({
   const pauseTimeoutRef = useRef<number | null>(null);
   const pauseCountdownRef = useRef<number | null>(null);
   const reciterRef = useRef<ReciterId>(externalReciter);
-  useEffect(() => { reciterRef.current = reciter; }, [reciter]);
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
     schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
@@ -528,35 +528,6 @@ export const useQuranAudio = ({
   }, [setupAudioListeners, stopSpeedEnforcer, syncPlaybackSpeed]);
 
 
-  // Helper to format verse number for everyayah.com (e.g., 001, 002, 123)
-  const formatVerseNumber = (num: number) => num.toString().padStart(3, '0');
-  const formatSurahNumber = (num: number) => num.toString().padStart(3, '0');
-
-  // everyayah.com folder names for each reciter
-  const EVERYAYAH_FOLDERS: Record<string, string> = {
-    husary: 'Husary_128kbps',
-    juhani: 'Abdullaah_3awwaad_Al-Juhaynee_128kbps',
-  };
-
-  const getAudioUrl = useCallback((surah: number, verse: number, reciterId: ReciterId) => {
-    const surahStr = formatSurahNumber(surah);
-    const verseStr = formatVerseNumber(verse);
-    const info = RECITERS[reciterId];
-    if (info?.fullSurah && info.fullSurahBaseUrl) {
-      return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
-    }
-    if (info?.archiveItem) {
-      const zipName = (info.archiveZipPad === 2 ? surah.toString().padStart(2, '0') : surahStr);
-      return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;
-    }
-    const folder = EVERYAYAH_FOLDERS[reciterId];
-    if (folder) {
-      return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
-    }
-    // Fallback to Husary
-    return `https://everyayah.com/data/Husary_128kbps/${surahStr}${verseStr}.mp3`;
-  }, []);
-
   const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       syncPlaybackSpeed(audio);
@@ -588,6 +559,8 @@ export const useQuranAudio = ({
   }, [startSpeedEnforcer, syncPlaybackSpeed]);
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
+    const selectedReciter = reciterRef.current;
+    let newAudio: HTMLAudioElement | null = null;
     clearRepeatPauseTimers();
     if (targetSurah !== activeSurahRef.current) onSurahChangeRef.current?.(targetSurah, verseNumber);
     activeSurahRef.current = targetSurah;
@@ -602,34 +575,47 @@ export const useQuranAudio = ({
         stopSpeedEnforcer();
         disposeManagedAudioElement(audioRef.current);
       }
-      const newAudio = createManagedAudioElement();
+      newAudio = createManagedAudioElement();
       setupAudioListeners(newAudio);
       audioRef.current = newAudio;
       syncPlaybackSpeed(newAudio);
 
       // IndexedDB works in browsers and native WebViews, unlike Service Worker caches.
-      const cachedUrl = await getOfflineAudioUrl(reciter, targetSurah, verseNumber);
-      if (cachedUrl) {
-        await playAudioFromUrl(newAudio, cachedUrl);
-        setIsPlaying(true);
-        setCurrentVerse(verseNumber);
-        onVerseChangeRef.current?.(verseNumber);
+      const cachedUrl = await getOfflineAudioUrl(selectedReciter, targetSurah, verseNumber);
+      if (newAudio !== audioRef.current) {
+        if (cachedUrl) URL.revokeObjectURL(cachedUrl);
         return;
+      }
+      if (cachedUrl) {
+        try {
+          await playAudioFromUrl(newAudio, cachedUrl);
+          if (newAudio !== audioRef.current) return;
+          setIsPlaying(true);
+          setCurrentVerse(verseNumber);
+          onVerseChangeRef.current?.(verseNumber);
+          return;
+        } catch (error) {
+          if (newAudio !== audioRef.current || !navigator.onLine || newAudio.error == null) throw error;
+          // A damaged offline clip must not block the valid selected recording.
+          URL.revokeObjectURL(cachedUrl);
+        }
       }
 
       // Use everyayah.com directly for all reciters (cdn.islamic.network is unreliable)
-      const audioUrl = getAudioUrl(targetSurah, verseNumber, reciter);
+      const audioUrl = getReciterAudioUrl(targetSurah, verseNumber, selectedReciter);
       await playAudioFromUrl(newAudio, audioUrl);
+      if (newAudio !== audioRef.current) return;
       setIsPlaying(true);
       setCurrentVerse(verseNumber);
       onVerseChangeRef.current?.(verseNumber);
     } catch (error) {
+      if (newAudio !== audioRef.current) return;
       console.error('Error loading audio:', error);
       toast.error('Impossible de charger l\'audio');
     } finally {
-      setIsLoading(false);
+      if (newAudio === audioRef.current) setIsLoading(false);
     }
-  }, [reciter, getAudioUrl, setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed, clearRepeatPauseTimers]);
+  }, [setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed, clearRepeatPauseTimers]);
 
   const playVerse = useCallback(async (verseNumber: number) => {
     await playVerseAt(surahNumber, verseNumber);
@@ -707,14 +693,25 @@ export const useQuranAudio = ({
   }, [totalVerses, onVerseChange]);
 
   const changeReciter = useCallback((newReciter: ReciterId) => {
+    if (reciterRef.current === newReciter) return;
+    reciterRef.current = newReciter;
     setReciter(newReciter);
-    toast.success(`Récitateur: ${RECITERS[newReciter]?.name ?? newReciter}`);
-    // If currently playing, restart with new reciter
-    if (isPlaying) {
-      pause();
-      setTimeout(() => playVerse(currentVerse), 100);
+    const resume = isPlaying || isLoading;
+    pause();
+    // Remove the old source even while paused: Play must use the new voice.
+    disposeManagedAudioElement(audioRef.current);
+    audioRef.current = null;
+    setProgress(0);
+    setDuration(0);
+    setIsLoading(false);
+    if (resume) {
+      void playVerseAt(activeSurahRef.current, currentVerseRef.current);
     }
-  }, [isPlaying, pause, playVerse, currentVerse]);
+  }, [isPlaying, isLoading, pause, playVerseAt]);
+
+  useEffect(() => {
+    changeReciter(externalReciter);
+  }, [externalReciter, changeReciter]);
 
   const seek = useCallback((percentage: number) => {
     if (audioRef.current && audioRef.current.duration) {

@@ -1,4 +1,5 @@
 # Architecture
+- Streaming and downloads share getReciterAudioUrl; changing Pages/Verses preserves voices within the same qiraat, and changing reciter clears the old paused source to prevent wrong-reciter playback.
 - All iPhone install entry points use the shared PwaInstallContext dialog with localized native-browser steps; iOS exposes no programmatic home-screen installation prompt.
 - Quran search derives word suggestions and complete-word occurrences from the bundled corpus through the shared quranSearch module; each result carries its own surah, verse and page so navigation never substitutes the first occurrence.
 - Updates compare native installations only to the GitHub `latest` APK release version marker (legacy asset timestamp fallback), never to the web deployment; the singleton PWA registrar applies updates and the global monitor checks launch/foreground/online/5-minute intervals without reinstalling native bundles.

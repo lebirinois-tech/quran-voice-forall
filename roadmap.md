@@ -1,5 +1,8 @@
 # Feuille de route
 
+## Al-Juhani (31 octobre 2026)
+- [ ] Corriger la conservation du récitateur Hafs entre Pages et Versets, la reprise audio et les sources de téléchargement ; vérifier la lecture réelle.
+
 ## Recherche précise (30 octobre 2026)
 - [ ] Suggérer les mots du corpus pendant la saisie, afficher leurs occurrences et ouvrir le verset choisi surligné en Pages et Versets ; vérifier le parcours complet.
 
