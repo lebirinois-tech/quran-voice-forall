@@ -191,11 +191,11 @@ const SurahReader = () => {
     const scrollToElement = (id: string, attempts = 0) => {
       const el = document.getElementById(id);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.scrollIntoView({ behavior: 'auto', block: 'center' });
         el.classList.add('ring-4', 'ring-secondary', 'search-hit');
         setTimeout(() => el.classList.remove('ring-4', 'ring-secondary', 'search-hit'), 6000);
-      } else if (attempts < 10) {
-        setTimeout(() => scrollToElement(id, attempts + 1), 300);
+      } else if (attempts < 60) {
+        setTimeout(() => scrollToElement(id, attempts + 1), 80);
       }
     };
     
@@ -205,11 +205,11 @@ const SurahReader = () => {
       const markMushaf = (attempts = 0) => {
         const nodes = document.querySelectorAll<HTMLElement>(`[data-verse="${vn}"]`);
         if (nodes.length) {
-          nodes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          nodes[0].scrollIntoView({ behavior: 'auto', block: 'center' });
           nodes.forEach((n) => n.classList.add('search-hit'));
           setTimeout(() => nodes.forEach((n) => n.classList.remove('search-hit')), 6000);
-        } else if (attempts < 20) {
-          setTimeout(() => markMushaf(attempts + 1), 300);
+        } else if (attempts < 60) {
+          setTimeout(() => markMushaf(attempts + 1), 80);
         }
       };
       if (isMushafImageMode) markMushaf();

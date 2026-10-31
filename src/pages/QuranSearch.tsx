@@ -1,4 +1,7 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useDeferredValue } from 'react';
+
+let corpusCache: Promise<unknown> | null = null;
+const loadCorpus = () => (corpusCache ??= fetch('/data/quran-hafs-fr.json').then((r) => { if (!r.ok) { corpusCache = null; throw new Error('fetch failed'); } return r.json(); }));
 import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAppSettings } from '@/hooks/useAppSettings';
@@ -34,14 +37,10 @@ const QuranSearch = () => {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/data/quran-hafs-fr.json')
-      .then((r) => {
-        if (!r.ok) throw new Error('fetch failed');
-        return r.json();
-      })
-      .then((data: Corpus) => {
+    loadCorpus()
+      .then((data) => {
         if (!cancelled) {
-          setCorpus(data);
+          setCorpus(data as Corpus);
           setLoading(false);
         }
       })
@@ -76,9 +75,10 @@ const QuranSearch = () => {
     return entries;
   }, [corpus]);
 
+  const deferredQuery = useDeferredValue(query);
   const vocabulary = useMemo(() => buildVocabulary(index ?? []), [index]);
-  const suggestions = useMemo(() => exactWord ? [] : suggestWords(vocabulary, query), [vocabulary, query, exactWord]);
-  const results = useMemo(() => (index ?? []).filter(entry => matchesVerse(entry, query, exactWord)), [index, query, exactWord]);
+  const suggestions = useMemo(() => exactWord ? [] : suggestWords(vocabulary, deferredQuery), [vocabulary, deferredQuery, exactWord]);
+  const results = useMemo(() => (index ?? []).filter(entry => matchesVerse(entry, deferredQuery, exactWord)), [index, deferredQuery, exactWord]);
 
   const selectSuggestion = (word: string) => {
     const words = searchTokens(query);
