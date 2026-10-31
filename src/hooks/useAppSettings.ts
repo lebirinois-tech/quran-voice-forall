@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getSafeReciter, ReciterId } from './useQuranAudio';
+import { getSafeReciter, RECITERS, ReciterId } from './useQuranAudio';
 
 export type TextDisplayStyle =
   | 'tajweed'
@@ -122,8 +122,13 @@ export const useAppSettings = () => {
     // Aligne automatiquement le récitateur avec la qira'a affichée
     const matchingReciter = STYLE_TO_RECITER[style];
     if (matchingReciter) {
-      setReciter(matchingReciter);
-      localStorage.setItem(STORAGE_KEYS.RECITER, matchingReciter);
+      setReciter((current) => {
+        // Pages/Versets changes presentation, not the chosen Hafs voice.
+        const next = RECITERS[current].qiraat === RECITERS[matchingReciter].qiraat
+          ? current : matchingReciter;
+        localStorage.setItem(STORAGE_KEYS.RECITER, next);
+        return next;
+      });
     }
   }, []);
 

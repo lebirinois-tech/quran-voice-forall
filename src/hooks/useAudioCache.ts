@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { RECITERS, ReciterId } from './useQuranAudio';
+import { RECITERS, ReciterId, getReciterAudioUrl } from './useQuranAudio';
 import { surahs } from '@/data/surahs';
 import { putOfflineAudio } from '@/lib/offlineAudioStore';
 
@@ -143,8 +143,7 @@ export const useAudioCache = () => {
         // Hafs : URL directe, sans dépendre d'un second appel API par verset.
         for (let v = 1; v <= totalVerses; v++) {
           try {
-            const folder = reciterId === 'juhani' ? 'Abdullaah_3awwaad_Al-Juhaynee_128kbps' : 'Husary_128kbps';
-            const url = `https://everyayah.com/data/${folder}/${formatNum(surahNumber)}${formatNum(v)}.mp3`;
+            const url = getReciterAudioUrl(surahNumber, v, reciterId);
             const ok = await downloadAudioFile(url, reciterId, surahNumber, v);
             ok ? okCount++ : failCount++;
             saveAudioUrl(reciterId, surahNumber, v, url);

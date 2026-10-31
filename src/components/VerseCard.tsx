@@ -8,7 +8,7 @@ import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { Play, Pause, Loader2, FileText, Download, Bookmark, Share2, Volume2, Square } from 'lucide-react';
 import { Button } from './ui/button';
-import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
+import { RECITERS, ReciterId, getReciterAudioUrl } from '@/hooks/useQuranAudio';
 import { TextDisplayStyle, FontSize } from '@/hooks/useAppSettings';
 import { useTtsLang } from '@/hooks/useTtsLang';
 import { useEnglishTranslation } from '@/hooks/useEnglishTranslation';
@@ -289,14 +289,7 @@ export const VerseCard = ({
     setIsDownloading(true);
     try {
       // Même source que la lecture : archive.org pour Warsh/Qalun, everyayah pour Hafs.
-      const surahStr = String(surahNumber).padStart(3, '0');
-      const verseStr = String(verse.number).padStart(3, '0');
-      const info = RECITERS[reciter];
-      const audioUrl = info?.archiveItem
-        ? `https://archive.org/download/${info.archiveItem}/${
-            info.archiveZipPad === 2 ? String(surahNumber).padStart(2, '0') : surahStr
-          }.zip/${surahStr}${verseStr}.mp3`
-        : `https://everyayah.com/data/Husary_128kbps/${surahStr}${verseStr}.mp3`;
+      const audioUrl = getReciterAudioUrl(surahNumber, verse.number, reciter);
 
       const audioResponse = await fetch(audioUrl);
       if (!audioResponse.ok) throw new Error(`HTTP ${audioResponse.status}`);
