@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadOfflineTafsir } from "./lib/offlineTafsir";
 import { scheduleOfflineRiwayatBootstrap } from "./lib/autoOfflineRiwayat";
+import { getSafeReciter } from "./hooks/useQuranAudio";
 import {
   MUSHAF_PAGES_VERSION,
   MUSHAF_PAGES_VERSION_KEY,
@@ -172,11 +173,10 @@ const startApp = async () => {
   (() => {
     const FIRST_RUN_KEY = "quran-first-run-initialized-v1";
     const RECITER_MIGRATION_KEY = "quran-reciter-list-v2";
-    const allowedReciters = new Set(["husary", "husaryWarshPerVerse", "husaryQalunPerVerse"]);
     const savedReciter = localStorage.getItem("quran-reciter");
-
-    if (!allowedReciters.has(savedReciter || "")) {
-      localStorage.setItem("quran-reciter", "husary");
+    const safeReciter = getSafeReciter(savedReciter);
+    if (savedReciter !== safeReciter) {
+      localStorage.setItem("quran-reciter", safeReciter);
     }
 
     if (localStorage.getItem(RECITER_MIGRATION_KEY) !== "done") {
@@ -204,7 +204,9 @@ const startApp = async () => {
     localStorage.setItem(FIRST_RUN_KEY, new Date().toISOString());
   })();
 
-  createRoot(document.getElementById("root")!).render(<App />);
+  const root = document.getElementById("root");
+  if (!root) throw new Error("Application root is missing");
+  createRoot(root).render(<App />);
   // Pré-charge les datasets Tafsir bundle (AR Al-Muyassar + FR Al-Montada)
   // pour qu'ils soient disponibles immédiatement et hors-ligne.
   preloadOfflineTafsir();

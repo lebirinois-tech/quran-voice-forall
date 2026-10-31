@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getReciterAudioUrl, useQuranAudio, type ReciterId } from './useQuranAudio';
+import { getSafeReciter, getReciterAudioUrl, useQuranAudio, type ReciterId } from './useQuranAudio';
 import { useAppSettings } from './useAppSettings';
 
 vi.mock('@/lib/offlineAudioStore', () => ({ getOfflineAudioUrl: vi.fn(async () => null) }));
@@ -21,6 +21,10 @@ afterEach(() => {
 });
 
 describe('Al-Juhani Hafs recitation', () => {
+  it('recognizes the saved Al-Juhani choice at startup', () => {
+    expect(getSafeReciter('juhani')).toBe('juhani');
+    expect(getSafeReciter('removed-reciter')).toBe('husary');
+  });
   it('uses Al-Juhani verse files, including Yunus verse 100', () => {
     expect(getReciterAudioUrl(10, 100, 'juhani')).toBe(
       'https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps/010100.mp3',
