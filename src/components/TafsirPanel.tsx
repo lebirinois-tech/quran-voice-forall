@@ -112,6 +112,11 @@ export const TafsirPanel = ({ surahNumber, verseNumber, isOpen, onToggle }: Tafs
 
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.info(lang === 'fr' ? 'Connectez-vous pour demander une traduction supplémentaire.' : 'Sign in to request an additional translation.');
+        return;
+      }
       const { data, error } = await supabase.functions.invoke('translate-tafsir', {
         body: { text: tafsirText, targetLang: lang },
       });

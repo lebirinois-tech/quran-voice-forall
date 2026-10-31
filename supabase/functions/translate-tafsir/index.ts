@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { paidAiUser } from '../_shared/paidAiAuth.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +15,15 @@ serve(async (req) => {
   }
 
   try {
+    if (req.method !== 'POST') return new Response(null, { status: 405, headers: corsHeaders });
+    const auth = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
+    const userId = await paidAiUser(req, async (token) => {
+      const { data, error } = await auth.auth.getClaims(token);
+      return error ? null : data?.claims ?? null;
+    });
+    if (!userId) return new Response(JSON.stringify({ error: 'Sign in required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     const { text, targetLang } = await req.json();
+    if (!['fr', 'en'].includes(targetLang)) return new Response(JSON.stringify({ error: 'Invalid language' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     if (!text || !targetLang) {
       return new Response(JSON.stringify({ error: "Missing text or targetLang" }), {
         status: 400,
