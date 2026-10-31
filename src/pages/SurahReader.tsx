@@ -579,7 +579,7 @@ const SurahReader = () => {
 
   return (
     <div
-      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-44'}
+      className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'min-h-screen overflow-x-hidden bg-background pattern-islamic pb-20'}
       style={{ backgroundColor: appSettings.backgroundColor }}
     >
       {!isMushafMode && (
@@ -1019,7 +1019,7 @@ const SurahReader = () => {
 
                   {/* Position courante + pagination — mode « page par page » (versets) */}
                   {isPagedVerseView && versePageNum !== null && (
-                    <div className="sticky bottom-24 z-20 space-y-1">
+                    <div className="sticky bottom-[88px] z-20 space-y-1">
                       {/* Indicateur de position clair (riwaya, sourate, page, verset lu) */}
                       <div
                         className="rounded-2xl border border-border bg-background/92 backdrop-blur px-2 py-1 shadow-sm text-[10px] sm:text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
