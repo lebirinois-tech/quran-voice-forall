@@ -394,7 +394,8 @@
   bottom: calc(var(--verse-toolbar-lift) + env(safe-area-inset-bottom, 0px));
 }
 
-/* Touch tablets need clearance above their system taskbar, in either orientation. */
+/* Touch tablets need clearance above their system taskbar, in either orientation.
+   Measured on the user's own tablet: the bar must sit 6mm lower than the original 1cm lift. */
 @media (min-width: 600px) and (max-width: 1400px) and (any-pointer: coarse) {
-  .verse-reader { --verse-toolbar-lift: 1cm; }
+  .verse-reader { --verse-toolbar-lift: 4mm; }
 }
