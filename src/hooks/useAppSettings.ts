@@ -109,6 +109,7 @@ export const useAppSettings = () => {
   const handleReciterChange = useCallback((newReciter: ReciterId) => {
     setReciter(newReciter);
     localStorage.setItem(STORAGE_KEYS.RECITER, newReciter);
+    localStorage.setItem(`quran-reciter-${RECITERS[newReciter].qiraat}`, newReciter);
   }, []);
 
   const handleBackgroundColorChange = useCallback((color: string) => {
@@ -119,13 +120,14 @@ export const useAppSettings = () => {
   const handleTextDisplayStyleChange = useCallback((style: TextDisplayStyle) => {
     setTextDisplayStyle(style);
     localStorage.setItem(STORAGE_KEYS.TEXT_DISPLAY_STYLE, style);
-    // Aligne automatiquement le récitateur avec la qira'a affichée
     const matchingReciter = STYLE_TO_RECITER[style];
     if (matchingReciter) {
       setReciter((current) => {
-        // Pages/Versets changes presentation, not the chosen Hafs voice.
-        const next = RECITERS[current].qiraat === RECITERS[matchingReciter].qiraat
-          ? current : matchingReciter;
+        const qiraat = RECITERS[matchingReciter].qiraat;
+        if (RECITERS[current].qiraat === qiraat) return current;
+        // Restore the voice the user last chose for this riwaya.
+        const remembered = getSafeReciter(localStorage.getItem(`quran-reciter-${qiraat}`));
+        const next = RECITERS[remembered].qiraat === qiraat ? remembered : matchingReciter;
         localStorage.setItem(STORAGE_KEYS.RECITER, next);
         return next;
       });
