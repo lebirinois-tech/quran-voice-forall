@@ -1249,7 +1249,7 @@ export const HafsTajweedPageView = ({
       {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
       {showMenuButton && !isCompanion ? (
         <div
-          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-center gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur"
+          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-start gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur sm:justify-center"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
           <Button
@@ -1310,7 +1310,7 @@ export const HafsTajweedPageView = ({
                   s === 'verse' ? 'page' : s === 'page' ? 'surah' : s === 'surah' ? 'juz' : 'verse'
                 )
               }
-              className="h-9 w-8 shrink-0 rounded-full text-primary"
+              className="hidden h-9 w-8 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
