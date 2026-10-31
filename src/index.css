@@ -394,9 +394,7 @@
   bottom: calc(var(--verse-toolbar-lift) + env(safe-area-inset-bottom, 0px));
 }
 
-/* Touch tablets need clearance above their system taskbar, in either orientation.
-   Measured on the user's own tablet: the bar sits 1mm above the bottom edge
-   (1cm lift, then lowered 6mm, then lowered another 3mm). */
-@media (min-width: 600px) and (max-width: 1400px) and (any-pointer: coarse) {
-  .verse-reader { --verse-toolbar-lift: 1mm; }
-}
+/* Measured on the user's own tablet, in order: raised 1cm, lowered 6mm (4mm),
+   lowered 3mm (1mm), then lowered again to the bottom edge. The bar now sits
+   flush with the bottom of the screen on every device; the native safe-area
+   inset still applies where the system reserves its own strip. */
