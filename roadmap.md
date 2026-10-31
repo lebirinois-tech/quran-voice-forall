@@ -11,10 +11,12 @@
 - [x] Al-Juhani conservé au démarrage et entre Pages/Versets ; ancienne source effacée au changement de récitateur ; téléchargements alignés sur la source réelle. Lecture navigateur vérifiée en Versets (Al-Fatiha) et Pages (Yunus 100), tests réussis.
 
 ## Recherche précise (30 octobre 2026)
-- [ ] Suggérer les mots du corpus pendant la saisie, afficher leurs occurrences et ouvrir le verset choisi surligné en Pages et Versets ; vérifier le parcours complet.
+- [x] Suggérer les mots du corpus pendant la saisie, afficher leurs occurrences et ouvrir le verset choisi surligné en Pages et Versets ; parcours vérifié en navigateur (51 nœuds surlignés en Pages, 1 en Versets).
+- [x] Recherche déplacée en haut de page dans les deux modes (Pages et Versets) et retirée de la page d’accueil ; publication demandée le 31 octobre 2026.
 
 ## En cours
-- [ ] Publier les nouvelles options audio et traductions après les vérifications demandées.
+- [ ] Publier les nouvelles options audio et traductions après les vérifications demandées. (publication demandée le 31 octobre 2026 ; reste la confirmation sur l’appareil)
+
 - [ ] Afficher les menus dans la seule langue d’utilisation choisie (FR/AR/EN), notamment récitation et navigation Pages/Versets.
 - [ ] Menu audio Pages/Versets : ajouter sous le verset d’arrêt le choix d’une autre sourate et de son verset, ou la lecture jusqu’à la fin du Coran (capture du 24 octobre) ; vérifier le passage entre sourates et l’arrêt exact.
 - Mise à jour intelligente APK/PWA codée et testée (9 tests, Android simulé) : publication du site demandée le 23 octobre 2026 à 22:58 UTC ; APK n° 192 terminé avec succès (contrôle GitHub à 23:01 UTC). Attente : installation initiale sur tablette ; installation Android réelle non vérifiée ici.
