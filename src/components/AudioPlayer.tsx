@@ -296,7 +296,7 @@ export const AudioPlayer = ({
                         variant={repeatPause.enabled ? 'default' : 'outline'}
                         size="sm"
                         className={cn(
-                          "rounded-full h-8 gap-1 px-2",
+                          "rounded-full h-8 w-8 sm:w-auto gap-0 sm:gap-1 px-0 sm:px-2",
                           repeatPause.enabled && "bg-primary text-primary-foreground"
                         )}
                         aria-label={t('repeatPause')}
@@ -357,15 +357,15 @@ export const AudioPlayer = ({
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "rounded-full",
+                      "rounded-full h-8 w-8",
                       repeatSettings.mode !== 'none' && "text-primary bg-primary/10"
                     )}
                     aria-label={t('repeatOptions')}
                   >
                     {repeatSettings.mode === 'verse' ? (
-                      <Repeat1 className="h-5 w-5" />
+                      <Repeat1 className="h-4 w-4" />
                     ) : (
-                      <Repeat className="h-5 w-5" />
+                      <Repeat className="h-4 w-4" />
                     )}
                   </Button>
                 </PopoverTrigger>
