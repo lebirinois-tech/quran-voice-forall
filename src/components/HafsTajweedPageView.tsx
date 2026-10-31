@@ -1210,16 +1210,16 @@ export const HafsTajweedPageView = ({
                       setMenuVerse(v.number);
                     }}
                     style={{
-                      // Le fond est porté par chaque verset, et non uniquement
-                      // par le groupe : toute l'âyah reste ainsi colorée, même
-                      // lorsqu'elle revient à la ligne. La couleur forte du
-                      // thème est diluée pour rester claire sans masquer le Tajweed.
-                      backgroundColor: 'transparent',
+                      // Le fond thématique reste sur le groupe ; ne pas imposer
+                      // de fond inline qui masquerait la surbrillance audio.
                       boxDecorationBreak: 'clone',
                       WebkitBoxDecorationBreak: 'clone',
                       paddingInline: undefined,
                     }}
-                    className="inline cursor-pointer"
+                    className={cn(
+                      'inline cursor-pointer',
+                      isCurrent && highlightCurrentVerse && isAudioPlaying && 'verse-reciting'
+                    )}
                   >
                     {juzStartKeys.has(`${section.surahNumber}:${v.number}`) && (
                       <span
