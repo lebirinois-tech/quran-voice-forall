@@ -1,5 +1,8 @@
 # Feuille de route
 
+## Surbrillance audio Warsh et Qaloun
+- [ ] Reproduire et corriger le suivi du verset récité avec Al-Husary et Yassine, en Pages et Versets ; vérifier en navigateur.
+
 ## Récitateurs Qaloun et Warsh (31 octobre 2026)
 - [x] Yassen Al-Jazairi (Warsh) ajouté ; lecture et surbrillance au verset 10:100 vérifiées en Pages et Versets.
 - [x] Mohammad Omar El Ganayni (Qaloun) ajouté ; 114 liens exacts, lecture complète de Yunus vérifiée en Pages et Versets. Source sans CORS : lecture directe autorisée, téléchargement hors ligne non proposé.
