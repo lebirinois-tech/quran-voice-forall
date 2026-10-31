@@ -1041,20 +1041,6 @@ const SurahReader = () => {
                         </Button>
                         <Button
                           size="sm"
-                          variant="ghost"
-                          className="rounded-full h-7 w-7 p-0 shrink-0"
-                          onClick={() => {
-                            const group = versePageGroups.find(([p]) => p === versePageNum);
-                            if (!group) return;
-                            if (quranAudio.repeatSettings.mode === 'range') quranAudio.setRepeatMode('none', 1);
-                            quranAudio.playVerse(group[1][0].number);
-                          }}
-                          aria-label={`Lire la page ${versePageNum}`}
-                        >
-                          <Play className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
                           variant="outline"
                           className="rounded-full h-7 w-7 p-0 text-sm shrink-0"
                           onClick={() => {
