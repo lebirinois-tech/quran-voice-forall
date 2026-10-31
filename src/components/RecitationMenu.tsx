@@ -102,6 +102,7 @@ export const RecitationMenu = ({
   onStart,
 }: RecitationMenuProps) => {
   const t = useT();
+  const fullSurah = RECITERS[reciter].fullSurah === true;
   const [startSurah, setStartSurah] = useState(surahNumber);
   const [startVerse, setStartVerse] = useState(String(currentVerse || 1));
   const [stopEnabled, setStopEnabled] = useState(repeatSettings.mode === 'range');
@@ -141,6 +142,13 @@ export const RecitationMenu = ({
   const handlePlayClick = () => {
     if (isPlaying) {
       onPause();
+      return;
+    }
+    if (fullSurah) {
+      onStart({
+        surah: startSurah, verse: 1, repeat: { mode: 'none', count: 1 }, gapMultiplier: 0,
+        session: { start: { surah: startSurah, verse: 1 }, end: { surah: startSurah, verse: startMax }, passageCount: 1, completedPassages: 0 },
+      });
       return;
     }
     const start = clampLocation({ surah: startSurah, verse: parseInt(startVerse) || 1 });
@@ -224,7 +232,8 @@ export const RecitationMenu = ({
           {/* Surlignage du verset récité */}
           <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer">
             <Checkbox
-              checked={highlightEnabled}
+              disabled={fullSurah}
+              checked={highlightEnabled && !fullSurah}
               onCheckedChange={(checked) => onHighlightChange(checked === true)}
               aria-label={t('highlightVerse')}
             />
@@ -278,9 +287,10 @@ export const RecitationMenu = ({
               </Select>
               <Input
                 type="number"
+                disabled={fullSurah}
                 min={1}
                 max={startMax}
-                value={startVerse}
+                value={fullSurah ? '1' : startVerse}
                 onChange={(e) => setStartVerse(e.target.value)}
                 className="h-10 text-sm"
                 aria-label={t('verse')}
@@ -290,6 +300,7 @@ export const RecitationMenu = ({
           </Section>
 
           {/* Arrêt de la récitation */}
+          {!fullSurah && <>
           <Section title={t('stopAt')}>
             <div className="space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -394,6 +405,7 @@ export const RecitationMenu = ({
               </Select>
             </div>
           </Section>
+          </>}
         </div>
       </aside>
     </>

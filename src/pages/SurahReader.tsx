@@ -14,7 +14,7 @@ import { SettingsDialog } from '@/components/SettingsDialog';
 import { TajweedLegend } from '@/components/TajweedLegend';
 import { ThemeLegend } from '@/components/ThemeLegend';
 import { useVoiceCommands } from '@/hooks/useVoiceCommands';
-import { useQuranAudio } from '@/hooks/useQuranAudio';
+import { RECITERS, useQuranAudio } from '@/hooks/useQuranAudio';
 import { useQuranData } from '@/hooks/useQuranData';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useWarshData } from '@/hooks/useWarshData';
@@ -805,7 +805,7 @@ const SurahReader = () => {
               currentVerse={quranAudio.currentVerse}
               isAudioPlaying={quranAudio.isPlaying}
               verseProgress={quranAudio.progress}
-              highlightCurrentVerse={audioHighlight}
+              highlightCurrentVerse={audioHighlight && !RECITERS[appSettings.reciter].fullSurah}
               onVerseClick={(vn) => quranAudio.playVerse(vn)}
               onPlayPause={() => (quranAudio.isPlaying ? quranAudio.pause() : handlePlayRequest())}
               onNextVerse={quranAudio.nextVerse}
@@ -988,8 +988,8 @@ const SurahReader = () => {
                                 id={`verse-${verse.number}`}
                                 verse={verse}
                                 surahNumber={surah.number}
-                                isPlaying={quranAudio.isPlaying && quranAudio.currentVerse === verse.number}
-                                isHighlighted={audioHighlight && quranAudio.currentVerse === verse.number}
+                                isPlaying={quranAudio.isPlaying && !RECITERS[appSettings.reciter].fullSurah && quranAudio.currentVerse === verse.number}
+                                isHighlighted={audioHighlight && !RECITERS[appSettings.reciter].fullSurah && quranAudio.currentVerse === verse.number}
                                 isLoading={quranAudio.isLoading && quranAudio.currentVerse === verse.number}
                                 reciter={appSettings.reciter}
                                 textDisplayStyle={effectiveDisplayStyle}

@@ -16,6 +16,7 @@ const DOWNLOADABLE_RECITERS: { id: ReciterId; label: string }[] = [
   { id: 'husary', label: '🟢 Al-Husary (Hafs)' },
   { id: 'juhani', label: '🟢 Al-Juhani (Hafs)' },
   { id: 'husaryWarshPerVerse', label: '🟠 Al-Husary (Warsh)' },
+  { id: 'yassinWarsh', label: '🟠 Yassen Al-Jazairi (Warsh)' },
   { id: 'husaryQalunPerVerse', label: '🟣 Al-Husary (Qalun)' },
 ];
 
@@ -128,19 +129,20 @@ export const AudioCacheSettings = () => {
 
       {/* Reciter selector (only for audio) */}
       {activeTab === 'audio' && (
-        <div className="flex gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
           {DOWNLOADABLE_RECITERS.map((r) => (
-            <button
+            <Button
               key={r.id}
+              variant="outline"
               onClick={() => { setSelectedReciter(r.id); setShowSurahList(false); }}
-              className={`flex-1 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
+              className={`h-auto min-h-10 whitespace-normal p-2 rounded-lg border-2 text-xs font-medium transition-all ${
                 selectedReciter === r.id
                   ? 'border-primary ring-2 ring-primary/30 bg-primary/10 text-foreground'
                   : 'border-border hover:border-primary/50 bg-muted/50 text-foreground'
               }`}
             >
               {t.lang === 'ar' ? RECITERS[r.id].nameAr : r.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
