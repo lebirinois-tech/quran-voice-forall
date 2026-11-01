@@ -1,5 +1,8 @@
 # Feuille de route
 
+## Taille de police (1er novembre 2026)
+- [x] Boutons A-/A+ retirés de la barre du bas en mode Versets ; ils restent dans les Paramètres ⚙️ et agissent sur le mode en cours.
+
 ## Barre du mode Versets (31 octobre 2026)
 - [x] Capsule Hafs/sourate/page supprimée ; menus remontés de 1 cm sur tablette tactile avec marge système et espace réservé sous les versets. Vérifié à 360 px, tablette tactile 800 px et Windows 1280 px : aucun débordement, dernier verset visible ; flèches aller/retour et Accueil testés ; 16 tests audio réussis.
 - [x] Tablette de l'utilisateur : barre des menus redescendue de 6 mm (relevage porté de 1 cm à 4 mm), mesuré sur son appareil.
