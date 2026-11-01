@@ -1,5 +1,5 @@
 ## Harmonisation du choix riwaya et récitant (1er novembre 2026)
-- [ ] Regrouper dans les Paramètres un choix unique de riwaya (Hafs, Warsh, Qaloun) et de récitant de cette riwaya, sous le mode de lecture, sans liste à six combinaisons.
+- [x] Regroupé dans les Paramètres : mode de lecture (Versets/Pages), puis riwaya (Hafs, Warsh, Qaloun), puis récitants de cette riwaya seulement ; l'ancienne liste à six combinaisons a été retirée. Vérifié en navigateur : Warsh → Al-Husary (Warsh) + Yassen Al-Jazairi, Qaloun → Al-Husary (Qalun) + El Ganayni, et le mode est conservé lors du changement (pages-qalun → qalun-tajweed). 55 tests réussis.
 
 ## Mode de lecture dans les Paramètres (1er novembre 2026)
 - [x] Choix ou basculement entre modes Versets et Pages ajouté dans les Paramètres, juste sous le choix de langue ; la riwaya affichée (Hafs, Warsh, Qalun) est conservée lors du changement.
