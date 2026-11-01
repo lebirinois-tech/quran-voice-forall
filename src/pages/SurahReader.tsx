@@ -1072,6 +1072,32 @@ const SurahReader = () => {
         ),
         trailingControls: (
           <div className="flex items-center gap-0.5">
+            {(() => {
+              const sizes = ['xxsmall', 'xsmall', 'small', 'medium', 'large', 'xlarge'] as const;
+              const idx = Math.max(0, sizes.indexOf(appSettings.fontSize as (typeof sizes)[number]));
+              const step = (d: number) => {
+                const next = sizes[Math.min(sizes.length - 1, Math.max(0, idx + d))];
+                appSettings.onFontSizeChange(next);
+              };
+              return (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => step(-1)}
+                    disabled={idx === 0}
+                    className="flex h-8 w-7 items-center justify-center rounded-full text-xs font-bold text-primary disabled:opacity-40"
+                    aria-label="A-"
+                  >A-</button>
+                  <button
+                    type="button"
+                    onClick={() => step(1)}
+                    disabled={idx === sizes.length - 1}
+                    className="flex h-8 w-7 items-center justify-center rounded-full text-sm font-bold text-primary disabled:opacity-40"
+                    aria-label="A+"
+                  >A+</button>
+                </>
+              );
+            })()}
             {toolbarSettingsShortcut}
             <div className="flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
               {voiceCommandControls}
