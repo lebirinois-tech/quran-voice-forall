@@ -1085,14 +1085,14 @@ const SurahReader = () => {
                     type="button"
                     onClick={() => step(-1)}
                     disabled={idx === 0}
-                    className="flex h-8 w-7 items-center justify-center rounded-full text-xs font-bold text-primary disabled:opacity-40"
+                    className="flex h-8 w-6 items-center justify-center rounded-full text-xs font-bold text-primary disabled:opacity-40"
                     aria-label="A-"
                   >A-</button>
                   <button
                     type="button"
                     onClick={() => step(1)}
                     disabled={idx === sizes.length - 1}
-                    className="flex h-8 w-7 items-center justify-center rounded-full text-sm font-bold text-primary disabled:opacity-40"
+                    className="flex h-8 w-6 items-center justify-center rounded-full text-sm font-bold text-primary disabled:opacity-40"
                     aria-label="A+"
                   >A+</button>
                 </>
