@@ -139,6 +139,22 @@ const dict: Dict = {
     ar: 'يُحفظ التلوين الموضوعي للآيات في كلا الوضعين.',
     en: 'Thematic verse coloring is kept in both modes.',
   },
+  readingMode: { fr: 'Mode de lecture', ar: 'نمط القراءة', en: 'Reading mode' },
+  readingModeVersesDesc: {
+    fr: 'Les versets les uns après les autres, avec traduction et Tafsir',
+    ar: 'الآيات الواحدة تلو الأخرى مع الترجمة والتفسير',
+    en: 'Verses one after another, with translation and tafsir',
+  },
+  readingModePagesDesc: {
+    fr: 'Les pages du Mushaf de Médine, 15 lignes par page',
+    ar: 'صفحات مصحف المدينة، 15 سطراً في كل صفحة',
+    en: 'Medina Mushaf pages, 15 lines per page',
+  },
+  readingModeHint: {
+    fr: 'Le changement de mode conserve la riwaya affichée (Hafs, Warsh, Qalun).',
+    ar: 'تغيير النمط يحافظ على الرواية المعروضة (حفص، ورش، قالون).',
+    en: 'Switching mode keeps the displayed riwaya (Hafs, Warsh, Qalun).',
+  },
   fontSize: { fr: 'Taille de police', ar: 'حجم الخط', en: 'Font size' },
   fontXXSmall: { fr: 'Minuscule', ar: 'دقيق', en: 'Tiny' },
   fontXSmall: { fr: 'Très petit', ar: 'صغير جداً', en: 'Extra small' },
