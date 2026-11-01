@@ -319,22 +319,30 @@ export const SettingsDialog = ({
               <TextCursor className="h-3.5 w-3.5 text-primary" />
               {t('fontSize')}
             </Label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {FONT_SIZES.map((size) => (
-                <button
-                  key={size.id}
-                  onClick={() => onFontSizeChange(size.id)}
-                  className={`p-2 rounded-lg border-2 transition-all text-center ${
-                    fontSize === size.id
-                      ? 'border-primary ring-2 ring-primary/30 bg-primary/10'
-                      : 'border-border hover:border-primary/50 bg-muted/50'
-                  }`}
-                  aria-label={t(size.key)}
-                >
-                  <span className="text-xs font-medium text-foreground">{t(size.key)}</span>
-                </button>
-              ))}
-            </div>
+            {(() => {
+              const idx = Math.max(0, FONT_SIZES.findIndex((s) => s.id === fontSize));
+              const step = (d: number) =>
+                onFontSizeChange(FONT_SIZES[Math.min(FONT_SIZES.length - 1, Math.max(0, idx + d))].id);
+              return (
+                <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-border bg-muted/50 p-1.5">
+                  <button
+                    type="button"
+                    onClick={() => step(-1)}
+                    disabled={idx === 0}
+                    className="h-9 w-12 rounded-md border-2 border-primary text-sm font-bold text-primary disabled:opacity-40"
+                    aria-label="A-"
+                  >A-</button>
+                  <span className="text-xs font-medium text-foreground">{t(FONT_SIZES[idx].key)}</span>
+                  <button
+                    type="button"
+                    onClick={() => step(1)}
+                    disabled={idx === FONT_SIZES.length - 1}
+                    className="h-9 w-12 rounded-md border-2 border-primary text-base font-bold text-primary disabled:opacity-40"
+                    aria-label="A+"
+                  >A+</button>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Background Color */}
