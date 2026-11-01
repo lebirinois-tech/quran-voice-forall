@@ -3,7 +3,7 @@
 
 ## Mode de lecture dans les Paramètres (1er novembre 2026)
 - [x] Choix ou basculement entre modes Versets et Pages ajouté dans les Paramètres, juste sous le choix de langue ; la riwaya affichée (Hafs, Warsh, Qalun) est conservée lors du changement.
-- [ ] Vérifier que les récitants ajoutés (Al-Juhani Hafs, Yassine Warsh, El Ganayni Qaloun) sont bien proposés dans les Paramètres après ce changement.
+- [x] Récitants ajoutés vérifiés dans les Paramètres : Hafs → Al-Husary + Al-Juhani ; Warsh → Al-Husary (Warsh) + Yassen Al-Jazairi ; Qaloun → Al-Husary (Qalun) + El Ganayni. Le changement de riwaya conserve le mode de lecture et la préférence de récitant.
 
 ## Taille de police (1er novembre 2026)
 - [x] Boutons A-/A+ retirés de la barre du bas en mode Versets ; ils restent dans les Paramètres ⚙️ et agissent sur le mode en cours.
@@ -34,7 +34,7 @@
 - [x] Recherche déplacée en haut de page dans les deux modes (Pages et Versets) et retirée de la page d’accueil ; publication demandée le 31 octobre 2026.
 
 ## En cours
-- [ ] Publier les nouvelles options audio et traductions après les vérifications demandées. (publication demandée le 31 octobre 2026 ; reste la confirmation sur l’appareil)
+- [x] Publication demandée le 1er novembre 2026 (mode de lecture + riwaya + récitants dans les Paramètres) ; reste la confirmation sur chaque appareil après « Mise à jour ».
 
 - [ ] Afficher les menus dans la seule langue d’utilisation choisie (FR/AR/EN), notamment récitation et navigation Pages/Versets.
 - [ ] Menu audio Pages/Versets : ajouter sous le verset d’arrêt le choix d’une autre sourate et de son verset, ou la lecture jusqu’à la fin du Coran (capture du 24 octobre) ; vérifier le passage entre sourates et l’arrêt exact.
