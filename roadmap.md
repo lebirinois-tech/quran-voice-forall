@@ -1,4 +1,5 @@
-# Feuille de route
+## Harmonisation du choix riwaya et récitant (1er novembre 2026)
+- [ ] Regrouper dans les Paramètres un choix unique de riwaya (Hafs, Warsh, Qaloun) et de récitant de cette riwaya, sous le mode de lecture, sans liste à six combinaisons.
 
 ## Mode de lecture dans les Paramètres (1er novembre 2026)
 - [x] Choix ou basculement entre modes Versets et Pages ajouté dans les Paramètres, juste sous le choix de langue ; la riwaya affichée (Hafs, Warsh, Qalun) est conservée lors du changement.
