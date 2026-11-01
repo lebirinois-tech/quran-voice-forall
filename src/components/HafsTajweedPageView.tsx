@@ -72,6 +72,8 @@ interface HafsTajweedPageViewProps {
   audioControls?: ReactNode;
   voiceControls?: ReactNode;
   settingsControls?: ReactNode;
+  /** Raccourci Paramètres compact au milieu de la barre du bas. */
+  toolbarSettings?: ReactNode;
   onSwitchToVerses?: () => void;
   /** Affichage en double page : moitié de l'écran occupée par cette page. */
   spreadSide?: 'left' | 'right';
@@ -133,6 +135,7 @@ export const HafsTajweedPageView = ({
   audioControls,
   voiceControls,
   settingsControls,
+  toolbarSettings,
   onSwitchToVerses,
   spreadSide,
   isCompanion = false,
@@ -912,15 +915,27 @@ export const HafsTajweedPageView = ({
                 backgroundColor: 'hsl(43, 62%, 45% / 0.08)',
               }}
             >
-              <button
-                type="button"
-                onClick={() => setMenuOpen(true)}
-                className="min-w-0 shrink-0 whitespace-nowrap rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
-                style={{ color: 'hsl(43, 62%, 25%)' }}
-                aria-label={t('chooseSurah')}
-              >
-                سورة {surah?.nameArabic ?? ''}
-              </button>
+              <span className="flex min-w-0 items-center justify-start gap-1">
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(true)}
+                  className="min-w-0 shrink-0 whitespace-nowrap rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
+                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                  aria-label={t('chooseSurah')}
+                >
+                  سورة {surah?.nameArabic ?? ''}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.assign('/search')}
+                  aria-label={t('quranSearchTitle')}
+                  title={t('quranSearchTitle')}
+                  className="shrink-0 rounded-full p-1"
+                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </span>
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
@@ -934,27 +949,15 @@ export const HafsTajweedPageView = ({
               >
                 <MushafPageBadge page={currentPage} />
               </button>
-              <span className="flex min-w-0 items-center justify-start gap-1">
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(true)}
-                  className="min-w-0 truncate rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
-                  style={{ color: 'hsl(43, 62%, 25%)' }}
-                  aria-label={t('chooseJuz')}
-                >
-                  الجزء {toArabicDigits(currentJuz)}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.location.assign('/search')}
-                  aria-label={t('quranSearchTitle')}
-                  title={t('quranSearchTitle')}
-                  className="shrink-0 rounded-full p-1"
-                  style={{ color: 'hsl(43, 62%, 25%)' }}
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </span>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="min-w-0 truncate whitespace-nowrap rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
+                style={{ color: 'hsl(43, 62%, 25%)' }}
+                aria-label={t('chooseJuz')}
+              >
+                الجزء {toArabicDigits(currentJuz)}
+              </button>
             </div>
 
             <div
@@ -1349,6 +1352,7 @@ export const HafsTajweedPageView = ({
               <Headphones className="h-4 w-4" />
             </Button>
           )}
+          {toolbarSettings}
           <Button
             type="button"
             size="icon"

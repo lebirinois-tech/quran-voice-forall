@@ -568,6 +568,12 @@ const SurahReader = () => {
     />
   );
 
+  // Raccourci Paramètres compact, au milieu de la barre du bas (Pages et Versets).
+  const toolbarSettingsShortcut = React.cloneElement(mushafSettingsControls, {
+    triggerLabel: undefined,
+    triggerClassName: 'h-8 w-8 shrink-0 rounded-full text-primary hover:bg-primary/10 [&_svg]:!h-4 [&_svg]:!w-4',
+  });
+
   return (
     <div
       className={isMushafMode ? 'h-[100dvh] overflow-hidden bg-background' : 'verse-reader min-h-screen overflow-x-hidden bg-background pattern-islamic'}
@@ -826,6 +832,7 @@ const SurahReader = () => {
               audioControls={audioPlayerControls}
               voiceControls={voiceCommandControls}
               settingsControls={mushafSettingsControls}
+              toolbarSettings={toolbarSettingsShortcut}
               onSwitchToVerses={switchToVerses}
               spreadSide={spreadActive ? (currentMushafPage! % 2 === 1 ? 'right' : 'left') : undefined}
               twoPageMode={twoPageMode}
@@ -1064,8 +1071,11 @@ const SurahReader = () => {
           </div>
         ),
         trailingControls: (
-          <div className="flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
-            {voiceCommandControls}
+          <div className="flex items-center gap-0.5">
+            {toolbarSettingsShortcut}
+            <div className="flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
+              {voiceCommandControls}
+            </div>
           </div>
         ),
       })}
