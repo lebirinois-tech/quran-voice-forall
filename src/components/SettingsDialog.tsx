@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TafsirSourcePicker } from './TafsirSourcePicker';
-import { Settings, Volume2, Download, Palette, Check, Type, TextCursor, Languages } from 'lucide-react';
+import { Settings, Volume2, Download, Palette, Check, Type, TextCursor, Languages, BookOpen, List } from 'lucide-react';
 import { useTtsLang } from '@/hooks/useTtsLang';
 import { setStoredVoiceLang } from '@/hooks/useVoiceCommands';
 import { useAppLang, setAppLang, useT, AppLang } from '@/lib/i18n';
@@ -205,6 +205,63 @@ export const SettingsDialog = ({
               ))}
             </div>
             <p className="text-xs text-muted-foreground">{t('languageHint')}</p>
+          </div>
+
+          {/* Mode de lecture : Versets ou Pages (riwaya conservée) */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <BookOpen className="h-3.5 w-3.5 text-primary" />
+              {t('readingMode')}
+            </Label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {([
+                { id: 'verses', pages: false, nameKey: 'verses' as const, descKey: 'readingModeVersesDesc' as const, icon: List },
+                { id: 'pages', pages: true, nameKey: 'pages' as const, descKey: 'readingModePagesDesc' as const, icon: BookOpen },
+              ]).map((m) => {
+                const active = textDisplayStyle.startsWith('pages-') === m.pages;
+                const Icon = m.icon;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      const target: TextDisplayStyle = m.pages
+                        ? textDisplayStyle.includes('warsh')
+                          ? 'pages-warsh'
+                          : textDisplayStyle.includes('qalun')
+                            ? 'pages-qalun'
+                            : 'pages-hafs'
+                        : textDisplayStyle.includes('warsh')
+                          ? 'warsh-tajweed'
+                          : textDisplayStyle.includes('qalun')
+                            ? 'qalun-tajweed'
+                            : 'tajweed';
+                      if (target !== textDisplayStyle) {
+                        onTextDisplayStyleChange(target);
+                        toast.success(m.pages ? t('pages') : t('verses'));
+                      }
+                    }}
+                    className={cn(
+                      'p-2 rounded-lg border-2 text-start transition-all',
+                      active
+                        ? 'border-primary ring-2 ring-primary/30 bg-primary/10'
+                        : 'border-border bg-muted/50 hover:border-primary/50'
+                    )}
+                  >
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                      <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+                      {t(m.nameKey)}
+                      {active && <Check className="h-3 w-3 shrink-0 text-primary" />}
+                    </span>
+                    <span className="mt-1 block text-[10px] leading-tight text-muted-foreground">
+                      {t(m.descKey)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">{t('readingModeHint')}</p>
           </div>
 
           {/* Récitateur — automatique selon la riwaya affichée */}
