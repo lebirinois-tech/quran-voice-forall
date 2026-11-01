@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getOfflineAudioUrl } from '@/lib/offlineAudioStore';
 import { advanceRecitation, type RecitationSession } from '@/lib/recitationSession';
-import { ganayniSurahAudio } from '@/data/ganayniAudio';
 
 // Interface moved inside hook for better organization
 
@@ -22,7 +21,6 @@ export const RECITER_IDS = [
   'husaryWarshPerVerse',
   'yassinWarsh',
   'husaryQalunPerVerse',
-  'ganayniQalun',
 ] as const;
 
 export type ReciterId = (typeof RECITER_IDS)[number];
@@ -95,22 +93,13 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
   },
-  ganayniQalun: {
-    id: 'qalun.ganayni',
-    name: 'Mohammad Omar El Ganayni (Qaloun — sourate complète)',
-    nameAr: 'محمد عمر الجنايني (قالون — سورة كاملة)',
-    qiraat: 'qalun',
-    fullSurah: true,
-    playbackWithoutCors: true,
-    fullSurahUrls: ganayniSurahAudio,
-  },
 };
 
 export const isReciterId = (value: unknown): value is ReciterId =>
   typeof value === 'string' && value in RECITERS;
 
 export const getSafeReciter = (value: unknown): ReciterId =>
-  isReciterId(value) ? value : 'husary';
+  isReciterId(value) ? value : value === 'ganayniQalun' ? 'husaryQalunPerVerse' : 'husary';
 
 /** Single source for streaming, verse downloads and offline downloads. */
 export const getReciterAudioUrl = (surah: number, verse: number, reciterId: ReciterId): string => {
