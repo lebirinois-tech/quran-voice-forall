@@ -206,6 +206,15 @@ export const HafsTajweedPageView = ({
   useEffect(() => {
     localStorage.setItem('mushaf-font-scale', String(fontScalePct));
   }, [fontScalePct]);
+  // Les boutons A-/A+ des Paramètres agissent sur le mode Pages en cours.
+  useEffect(() => {
+    const onChange = (e: Event) => {
+      const v = Number((e as CustomEvent<number>).detail);
+      if (Number.isFinite(v)) setFontScalePct(Math.min(160, Math.max(60, v)));
+    };
+    window.addEventListener('mushaf-font-scale-change', onChange);
+    return () => window.removeEventListener('mushaf-font-scale-change', onChange);
+  }, []);
   useEffect(() => {
     localStorage.setItem('mushaf-theme-opacity', String(themeOpacityPct));
   }, [themeOpacityPct]);

@@ -79,6 +79,7 @@ export const SettingsDialog = ({
   triggerLabel,
 }: SettingsDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [, setScaleTick] = useState(0);
   const [showTranslation, setShowTranslation] = useVerseExtra('translation');
   const [showTafsir, setShowTafsir] = useVerseExtra('tafsir');
   const [, setTtsLang] = useTtsLang();
@@ -320,23 +321,41 @@ export const SettingsDialog = ({
               {t('fontSize')}
             </Label>
             {(() => {
+              const isPages = textDisplayStyle.startsWith('pages-');
               const idx = Math.max(0, FONT_SIZES.findIndex((s) => s.id === fontSize));
-              const step = (d: number) =>
+              const readScale = () => {
+                const raw = Number(localStorage.getItem('mushaf-font-scale'));
+                return Number.isFinite(raw) && raw >= 60 && raw <= 160 ? raw : 100;
+              };
+              const scale = isPages ? readScale() : 0;
+              const step = (d: number) => {
+                if (isPages) {
+                  const next = Math.min(160, Math.max(60, readScale() + d * 10));
+                  localStorage.setItem('mushaf-font-scale', String(next));
+                  window.dispatchEvent(new CustomEvent('mushaf-font-scale-change', { detail: next }));
+                  setScaleTick((n) => n + 1);
+                  return;
+                }
                 onFontSizeChange(FONT_SIZES[Math.min(FONT_SIZES.length - 1, Math.max(0, idx + d))].id);
+              };
+              const atMin = isPages ? scale <= 60 : idx === 0;
+              const atMax = isPages ? scale >= 160 : idx === FONT_SIZES.length - 1;
               return (
                 <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-border bg-muted/50 p-1.5">
                   <button
                     type="button"
                     onClick={() => step(-1)}
-                    disabled={idx === 0}
+                    disabled={atMin}
                     className="h-9 w-12 rounded-md border-2 border-primary text-sm font-bold text-primary disabled:opacity-40"
                     aria-label="A-"
                   >A-</button>
-                  <span className="text-xs font-medium text-foreground">{t(FONT_SIZES[idx].key)}</span>
+                  <span className="text-xs font-medium text-foreground">
+                    {isPages ? `${scale}%` : t(FONT_SIZES[idx].key)}
+                  </span>
                   <button
                     type="button"
                     onClick={() => step(1)}
-                    disabled={idx === FONT_SIZES.length - 1}
+                    disabled={atMax}
                     className="h-9 w-12 rounded-md border-2 border-primary text-base font-bold text-primary disabled:opacity-40"
                     aria-label="A+"
                   >A+</button>
