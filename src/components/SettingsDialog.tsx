@@ -292,9 +292,9 @@ export const SettingsDialog = ({
             </Label>
             <div className="grid grid-cols-3 gap-1.5">
               {([
-                { id: 'hafs', key: 'riwayaHafs' as const },
-                { id: 'warsh', key: 'riwayaWarsh' as const },
-                { id: 'qalun', key: 'riwayaQalun' as const },
+                { id: 'hafs' as Qiraat, key: 'riwayaHafs' as const },
+                { id: 'warsh' as Qiraat, key: 'riwayaWarsh' as const },
+                { id: 'qalun' as Qiraat, key: 'riwayaQalun' as const },
               ]).map((r) => (
                 <button
                   key={r.id}
