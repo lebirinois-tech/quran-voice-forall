@@ -139,7 +139,6 @@ const dict: Dict = {
     ar: 'يُحفظ التلوين الموضوعي للآيات في كلا الوضعين.',
     en: 'Thematic verse coloring is kept in both modes.',
   },
-  readingMode: { fr: 'Mode de lecture', ar: 'نمط القراءة', en: 'Reading mode' },
   readingModeVersesDesc: {
     fr: 'Les versets les uns après les autres, avec traduction et Tafsir',
     ar: 'الآيات الواحدة تلو الأخرى مع الترجمة والتفسير',
