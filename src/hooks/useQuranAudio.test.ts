@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RECITERS, getSafeReciter, getReciterAudioUrl, useQuranAudio, type ReciterId } from './useQuranAudio';
+import { RECITERS, RECITER_IDS, getSafeReciter, getReciterAudioUrl, useQuranAudio, type ReciterId } from './useQuranAudio';
 import { useAppSettings } from './useAppSettings';
 
 vi.mock('@/lib/offlineAudioStore', () => ({ getOfflineAudioUrl: vi.fn(async () => null) }));
