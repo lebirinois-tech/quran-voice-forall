@@ -1685,16 +1685,22 @@ export const HafsTajweedPageView = ({
                     <span>{t('fontSize')}</span>
                     <span className="font-bold text-foreground">{fontScalePct}%</span>
                   </div>
-                  <input
-                    type="range"
-                    min={60}
-                    max={160}
-                    step={5}
-                    value={fontScalePct}
-                    onChange={(e) => setFontScalePct(Number(e.target.value))}
-                    className="w-full accent-primary"
-                    aria-label={t('fontSize')}
-                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFontScalePct(Math.max(60, fontScalePct - 10))}
+                      disabled={fontScalePct <= 60}
+                      className="h-9 w-12 rounded-md border-2 border-primary text-sm font-bold text-primary disabled:opacity-40"
+                      aria-label="A-"
+                    >A-</button>
+                    <button
+                      type="button"
+                      onClick={() => setFontScalePct(Math.min(160, fontScalePct + 10))}
+                      disabled={fontScalePct >= 160}
+                      className="h-9 w-12 rounded-md border-2 border-primary text-base font-bold text-primary disabled:opacity-40"
+                      aria-label="A+"
+                    >A+</button>
+                  </div>
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
