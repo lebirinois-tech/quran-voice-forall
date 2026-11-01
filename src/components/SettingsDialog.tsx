@@ -90,6 +90,26 @@ export const SettingsDialog = ({
     setStoredVoiceLang(l);
     setTtsLang(l === 'en' ? 'en' : 'fr');
   };
+
+  // Riwaya affichée : Hafs, Warsh ou Qaloun, déduite du style courant.
+  type Qiraat = 'hafs' | 'warsh' | 'qalun';
+  const RIWAYA_KEYS: Record<Qiraat, 'riwayaHafs' | 'riwayaWarsh' | 'riwayaQalun'> = {
+    hafs: 'riwayaHafs',
+    warsh: 'riwayaWarsh',
+    qalun: 'riwayaQalun',
+  };
+  const activeQiraat: Qiraat = textDisplayStyle.includes('warsh')
+    ? 'warsh'
+    : textDisplayStyle.includes('qalun')
+      ? 'qalun'
+      : 'hafs';
+  const applyRiwaya = (q: Qiraat) => {
+    if (q === activeQiraat) return;
+    const inPages = textDisplayStyle.startsWith('pages-');
+    const target = (inPages ? `pages-${q}` : q === 'hafs' ? 'tajweed' : `${q}-tajweed`) as TextDisplayStyle;
+    onTextDisplayStyleChange(target);
+    toast.success(t(RIWAYA_KEYS[q]));
+  };
   const [isDownloadingSurah, setIsDownloadingSurah] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
 
@@ -264,6 +284,37 @@ export const SettingsDialog = ({
             <p className="text-xs text-muted-foreground">{t('readingModeHint')}</p>
           </div>
 
+          {/* Riwaya : Hafs, Warsh ou Qaloun — mode et récitateur conservés */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <BookOpen className="h-3.5 w-3.5 text-primary" />
+              {t('riwaya')}
+            </Label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {([
+                { id: 'hafs', key: 'riwayaHafs' as const },
+                { id: 'warsh', key: 'riwayaWarsh' as const },
+                { id: 'qalun', key: 'riwayaQalun' as const },
+              ]).map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  aria-pressed={activeQiraat === r.id}
+                  onClick={() => applyRiwaya(r.id)}
+                  className={cn(
+                    'p-2 rounded-lg border-2 text-xs font-semibold text-center transition-all',
+                    activeQiraat === r.id
+                      ? 'border-primary ring-2 ring-primary/30 bg-primary/10 text-foreground'
+                      : 'border-border bg-muted/50 text-foreground hover:border-primary/50'
+                  )}
+                >
+                  {t(r.key)}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">{t('riwayaHint')}</p>
+          </div>
+
           {/* Récitateur — automatique selon la riwaya affichée */}
           <div className="space-y-2">
             <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
@@ -272,7 +323,7 @@ export const SettingsDialog = ({
             </Label>
             <div className="grid gap-1.5">
               {(Object.keys(RECITERS) as ReciterId[])
-                .filter((id) => RECITERS[id].qiraat === RECITERS[getSafeReciter(reciter)].qiraat)
+                .filter((id) => RECITERS[id].qiraat === activeQiraat)
                 .map((id) => (
                   <button
                     key={id}
@@ -291,37 +342,6 @@ export const SettingsDialog = ({
             </div>
           </div>
 
-          {/* Text Display Style */}
-          <div className="space-y-2">
-            <Label className="text-foreground flex items-center gap-2 text-sm font-semibold">
-              <Type className="h-3.5 w-3.5 text-primary" />
-              {t('displayStyle')}
-            </Label>
-            <RadioGroup
-              value={textDisplayStyle}
-              onValueChange={(value) => onTextDisplayStyleChange(value as TextDisplayStyle)}
-              className="space-y-1"
-            >
-              {TEXT_DISPLAY_STYLES.map((style) => (
-                <div
-                  key={style.id}
-                  className="flex items-center space-x-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  <RadioGroupItem value={style.id} id={`style-${style.id}`} className="h-3.5 w-3.5" />
-                  <Label htmlFor={`style-${style.id}`} className="flex-1 cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{style.icon}</span>
-                      <div>
-                        <p className="text-foreground text-sm font-medium">{t(style.key)}</p>
-                        <p className="text-xs text-muted-foreground">{t(style.descKey)}</p>
-                      </div>
-                    </div>
-                  </Label>
-                  {textDisplayStyle === style.id && <Check className="h-3.5 w-3.5 text-primary" />}
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
 
           {/* Verse view mode — only relevant for verse-based (non "pages-") styles */}
           {onVerseViewModeChange && !textDisplayStyle.startsWith('pages-') && (
