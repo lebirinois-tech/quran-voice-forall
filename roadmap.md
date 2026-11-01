@@ -1,5 +1,9 @@
 # Feuille de route
 
+## Mode de lecture dans les Paramètres (1er novembre 2026)
+- [x] Choix ou basculement entre modes Versets et Pages ajouté dans les Paramètres, juste sous le choix de langue ; la riwaya affichée (Hafs, Warsh, Qalun) est conservée lors du changement.
+- [ ] Vérifier que les récitants ajoutés (Al-Juhani Hafs, Yassine Warsh, El Ganayni Qaloun) sont bien proposés dans les Paramètres après ce changement.
+
 ## Taille de police (1er novembre 2026)
 - [x] Boutons A-/A+ retirés de la barre du bas en mode Versets ; ils restent dans les Paramètres ⚙️ et agissent sur le mode en cours.
 
