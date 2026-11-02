@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { PwaInstallProvider } from "@/contexts/PwaInstallContext";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
+import { InstallOnlyGate } from "@/components/InstallOnlyGate";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import SurahReader from "./pages/SurahReader";
@@ -82,6 +83,7 @@ const App = () => (
         <AppErrorBoundary>
           <PwaInstallProvider>
             <BrowserRouter>
+              <InstallOnlyGate bypass={isPreviewRuntime}>
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/index" element={<Index />} />
@@ -96,6 +98,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </InstallOnlyGate>
             </BrowserRouter>
           </PwaInstallProvider>
         </AppErrorBoundary>
