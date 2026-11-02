@@ -20,16 +20,17 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 describe('Global update monitor', () => {
-  it('detects APK updates automatically but downloads only after the user presses the action', async () => {
+  it('downloads a new Android version automatically, once per build', async () => {
     render(<UpdatePrompt />);
     await act(() => vi.advanceTimersByTimeAsync(2000));
     expect(mocks.fetch).toHaveBeenCalledTimes(1);
-    expect(mocks.open).not.toHaveBeenCalled();
+    expect(mocks.open).toHaveBeenCalledTimes(1);
     expect(mocks.info).toHaveBeenCalledTimes(1);
     mocks.info.mock.calls[0][1].action.onClick();
-    expect(mocks.open).toHaveBeenCalledTimes(1);
+    expect(mocks.open).toHaveBeenCalledTimes(2);
     await act(() => vi.advanceTimersByTimeAsync(298000));
     expect(mocks.fetch).toHaveBeenCalledTimes(2);
+    expect(mocks.open).toHaveBeenCalledTimes(2);
     expect(mocks.info).toHaveBeenCalledTimes(1);
   });
   it('automatically applies web updates instead of offering an APK', async () => {
