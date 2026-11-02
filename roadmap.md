@@ -1,7 +1,7 @@
 ## Couleurs par Juz (2 novembre 2026)
 - [x] Bande du haut (sourate, page, Juz) et pourtour de la page coloriés dans les deux modes Pages et Versets : vert émeraude pour les Juz impairs, or pour les Juz pairs ; changement à chaque vrai début de Juz.
 - [x] Vérifié en navigateur sur 22 pages repères (1, 22, 42, 62, 122, 202, 562, 582, 587, 601, 604) : la couleur change exactement au début de chaque Juz, y compris le 30e qui commence page 582. Le Juz 30 occupe 23 pages (582-604) au lieu de 20 : c'est le découpage du Mushaf de Médine, pas un défaut. Utilisateur : « C'est ok ».
-- [ ] Publication de cette version : en attente du feu vert de l'utilisateur. Coloriage confirmé bon par l'utilisateur : « Pour le coloriage c'est ok ».
+- [x] Publication demandée le 2 novembre 2026 sur https://quran-voice-forall.lovable.app après contrôle de sécurité rapide (4 constatations, aucune grave). Coloriage confirmé bon par l'utilisateur : « Pour le coloriage c'est ok ».
 
 ## Téléchargement automatique (2 novembre 2026)
 - [x] En application Android, le téléchargement de la nouvelle version démarre tout seul dès qu'elle est détectée, sans appui sur un bouton ; l'installation elle-même reste confirmée par Android. 55 tests réussis, build OK.
