@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { isNativeApp } from "@/lib/appUpdates";
 
-const OPEN_PATHS = ["/install", "/reset"];
+/** Pages that change shared content or accounts; closed in a plain web browser. */
+const CLOSED_PATHS = ["/audio-upload", "/audio-library", "/auth"];
 
 const isInstalledApp = () => {
   if (typeof window === "undefined") return true;
@@ -14,9 +15,9 @@ const isInstalledApp = () => {
   );
 };
 
-/** In a plain web browser, only installation is reachable; the app itself opens once installed. */
+/** Website visitors can try the app (read-only) and install it; sharing/editing pages stay closed. */
 export function InstallOnlyGate({ children, bypass }: { children: ReactNode; bypass: boolean }) {
   const { pathname } = useLocation();
-  if (bypass || isInstalledApp() || OPEN_PATHS.includes(pathname)) return <>{children}</>;
+  if (bypass || isInstalledApp() || !CLOSED_PATHS.includes(pathname)) return <>{children}</>;
   return <Navigate to="/install" replace />;
 }
