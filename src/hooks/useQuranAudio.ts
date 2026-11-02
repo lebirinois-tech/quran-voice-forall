@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getOfflineAudioUrl } from '@/lib/offlineAudioStore';
+import { getJuzForVerse } from '@/data/surahs';
 import { advanceRecitation, type RecitationSession } from '@/lib/recitationSession';
 
 // Interface moved inside hook for better organization
@@ -21,6 +22,7 @@ export const RECITER_IDS = [
   'husaryWarshPerVerse',
   'yassinWarsh',
   'husaryQalunPerVerse',
+  'hudhaifiQalun',
 ] as const;
 
 export type ReciterId = (typeof RECITER_IDS)[number];
@@ -50,6 +52,9 @@ export interface ReciterInfo {
    * Default is 3 (e.g. `001.zip`). Some archives use 2 (e.g. `01.zip`).
    */
   archiveZipPad?: 2 | 3;
+  /** Archive ZIPs are grouped by juz (`{JJ}.zip`), with optional inner folders for listed juz. */
+  archiveZipByJuz?: boolean;
+  archiveJuzInnerFolders?: readonly number[];
 }
 
 export const RECITERS: Record<ReciterId, ReciterInfo> = {
@@ -93,6 +98,16 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     archiveItem:
       '32kb------6236-ayah--verse-by-verse----quran-----mp3----32kb___by__alhosary---',
   },
+  // Ali Al-Hudhaifi — Qaloun, 6236 fichiers verset par verset, ZIP par juz (juz 23-24 dans un sous-dossier).
+  hudhaifiQalun: {
+    id: 'hudhaifi_qalun_per_verse',
+    name: 'Ali Al-Hudhaifi (Qalun)',
+    nameAr: 'علي الحذيفي (قالون)',
+    qiraat: 'qalun',
+    archiveItem: '96kb--quran--by--alhozifi--by--qaloon---6236---ayaat-----__verse--by---verse--',
+    archiveZipByJuz: true,
+    archiveJuzInnerFolders: [23, 24],
+  },
 };
 
 export const isReciterId = (value: unknown): value is ReciterId =>
@@ -112,6 +127,11 @@ export const getReciterAudioUrl = (surah: number, verse: number, reciterId: Reci
     return url;
   }
   if (info.fullSurah && info.fullSurahBaseUrl) return `${info.fullSurahBaseUrl}${surahStr}.mp3`;
+  if (info.archiveItem && info.archiveZipByJuz) {
+    const juz = String(getJuzForVerse(surah, verse)).padStart(2, '0');
+    const inner = info.archiveJuzInnerFolders?.includes(Number(juz)) ? `${juz}/` : '';
+    return `https://archive.org/download/${info.archiveItem}/${juz}.zip/${inner}${surahStr}${verseStr}.mp3`;
+  }
   if (info.archiveItem) {
     const zipName = info.archiveZipPad === 2 ? String(surah).padStart(2, '0') : surahStr;
     return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;

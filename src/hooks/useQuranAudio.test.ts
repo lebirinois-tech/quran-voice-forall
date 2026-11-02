@@ -39,8 +39,16 @@ describe('Requested Warsh reciter', () => {
 });
 
 describe('Qaloun reciters', () => {
-  it('offers only Al-Husary for Qaloun', () => {
-    expect(RECITER_IDS.filter((id) => RECITERS[id].qiraat === 'qalun')).toEqual(['husaryQalunPerVerse']);
+  it('offers Al-Husary and Al-Hudhaifi for Qaloun', () => {
+    expect(RECITER_IDS.filter((id) => RECITERS[id].qiraat === 'qalun')).toEqual(['husaryQalunPerVerse', 'hudhaifiQalun']);
+  });
+  it('builds Al-Hudhaifi verse URLs from the juz archive', () => {
+    const base = 'https://archive.org/download/96kb--quran--by--alhozifi--by--qaloon---6236---ayaat-----__verse--by---verse--';
+    expect(getReciterAudioUrl(1, 1, 'hudhaifiQalun')).toBe(`${base}/01.zip/001001.mp3`);
+    expect(getReciterAudioUrl(2, 142, 'hudhaifiQalun')).toBe(`${base}/02.zip/002142.mp3`);
+    expect(getReciterAudioUrl(36, 28, 'hudhaifiQalun')).toBe(`${base}/23.zip/23/036028.mp3`);
+    expect(getReciterAudioUrl(41, 46, 'hudhaifiQalun')).toBe(`${base}/24.zip/24/041046.mp3`);
+    expect(getReciterAudioUrl(114, 6, 'hudhaifiQalun')).toBe(`${base}/30.zip/114006.mp3`);
   });
   it('moves a saved El Ganayni choice to Al-Husary Qaloun', () => {
     expect(getSafeReciter('ganayniQalun')).toBe('husaryQalunPerVerse');

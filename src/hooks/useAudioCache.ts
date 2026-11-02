@@ -131,7 +131,7 @@ export const useAudioCache = () => {
           ? surahNumber.toString().padStart(2, '0')
           : surahStr;
         for (let v = 1; v <= totalVerses; v++) {
-          const url = `https://archive.org/download/${reciterInfo.archiveItem}/${zipName}.zip/${surahStr}${formatNum(v)}.mp3`;
+          const url = getReciterAudioUrl(surahNumber, v, reciterId);
           const ok = await downloadAudioFile(url, reciterId, surahNumber, v);
           ok ? okCount++ : failCount++;
           saveAudioUrl(reciterId, surahNumber, v, url);
