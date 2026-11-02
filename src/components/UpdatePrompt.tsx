@@ -6,7 +6,7 @@ import { updateMessage } from '@/lib/updateMessages';
 
 let checking = false;
 const listeners = new Set<() => void>();
-let notifiedBuild = '';
+let autoDownloadedBuild = '';
 const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
 
 const checkUpdate = async (manual = false) => {
@@ -21,9 +21,11 @@ const checkUpdate = async (manual = false) => {
     const remote = await fetchInstalledUpdateVersion();
     if (remote && hasInstalledUpdate(remote)) {
       if (isNativeApp()) {
-        if (manual || notifiedBuild !== remote.buildId) {
-          notifiedBuild = remote.buildId;
-          toast.info(updateMessage('available'), {
+        // Le téléchargement démarre seul ; Android garde la confirmation d'installation.
+        if (manual || autoDownloadedBuild !== remote.buildId) {
+          autoDownloadedBuild = remote.buildId;
+          void openApkUpdate().catch(() => toast.error(updateMessage('downloadFailed')));
+          toast.info(updateMessage('autoDownload'), {
             id: 'apk-update', duration: Infinity,
             action: { label: updateMessage('install'), onClick: () => {
               void openApkUpdate().catch(() => toast.error(updateMessage('downloadFailed')));
