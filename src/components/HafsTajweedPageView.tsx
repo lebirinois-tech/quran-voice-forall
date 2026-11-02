@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse, surahPageStart } from '@/data/surahs';
+import { getJuzColors } from '@/lib/juzColors';
 
 // Clés "sourate:verset" des versets où commence un Juz (pour la marque ۞).
 const juzStartKeys = new Set(
@@ -904,7 +905,7 @@ export const HafsTajweedPageView = ({
           <div
             className="relative flex h-full w-full flex-col rounded-xl border-[3px] p-1 shadow-lg sm:p-1.5"
             style={{
-              borderColor: 'hsl(43, 62%, 45%)',
+              borderColor: getJuzColors(currentJuz).border,
               transformOrigin: 'top center',
               background: 'linear-gradient(135deg, hsl(43, 62%, 45% / 0.06) 0%, transparent 40%, transparent 60%, hsl(43, 62%, 45% / 0.06) 100%)',
             }}
@@ -919,9 +920,10 @@ export const HafsTajweedPageView = ({
             <div
               dir="rtl"
               className="mb-1 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-1 rounded-lg border px-2 py-1"
+              data-juz-band={currentJuz % 2 === 1 ? 'odd' : 'even'}
               style={{
-                borderColor: 'hsl(43, 55%, 58%)',
-                backgroundColor: 'hsl(43, 62%, 45% / 0.08)',
+                borderColor: getJuzColors(currentJuz).border,
+                backgroundColor: getJuzColors(currentJuz).band,
               }}
             >
               <span className="flex min-w-0 items-center justify-start gap-1">

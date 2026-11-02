@@ -22,6 +22,7 @@ import { useQalunData } from '@/hooks/useQalunData';
 import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
+import { getJuzColors } from '@/lib/juzColors';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search, Home } from 'lucide-react';
@@ -917,11 +918,12 @@ const SurahReader = () => {
                           key={pageNum}
                           aria-label={`Page ${pageNum}`}
                           className={`rounded-2xl border-[3px] overflow-hidden shadow-md ${
-                            isEvenPage ? 'bg-card border-secondary' : 'bg-muted/30 border-primary'
+                            isEvenPage ? 'bg-card' : 'bg-muted/30'
                           }`}
+                          style={{ borderColor: getJuzColors(juzNum).border }}
                         >
                           {/* Page header — sticky breadcrumb + play button */}
-                          <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-background/85 backdrop-blur border-b border-border">
+                          <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b" data-juz-band={juzNum % 2 === 1 ? 'odd' : 'even'} style={{ backgroundColor: getJuzColors(juzNum).band, borderColor: getJuzColors(juzNum).border }}>
                             <nav
                               aria-label="Chemin"
                               className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0"
