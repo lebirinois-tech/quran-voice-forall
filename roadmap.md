@@ -1,3 +1,6 @@
+## Téléchargement automatique (2 novembre 2026)
+- [x] En application Android, le téléchargement de la nouvelle version démarre tout seul dès qu'elle est détectée, sans appui sur un bouton ; l'installation elle-même reste confirmée par Android. 55 tests réussis, build OK.
+
 ## Harmonisation du choix riwaya et récitant (1er novembre 2026)
 - [x] Regroupé dans les Paramètres : mode de lecture (Versets/Pages), puis riwaya (Hafs, Warsh, Qaloun), puis récitants de cette riwaya seulement ; l'ancienne liste à six combinaisons a été retirée. Vérifié en navigateur : Warsh → Al-Husary (Warsh) + Yassen Al-Jazairi, Qaloun → Al-Husary (Qalun) + El Ganayni, et le mode est conservé lors du changement (pages-qalun → qalun-tajweed). 55 tests réussis.
 
