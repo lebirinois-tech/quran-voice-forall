@@ -8,6 +8,7 @@ import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse, surahPageStart } from '@/data/surahs';
 import { getJuzColors } from '@/lib/juzColors';
+import { PageReadingDialog } from '@/components/PageReadingDialog';
 
 // Clés "sourate:verset" des versets où commence un Juz (pour la marque ۞).
 const juzStartKeys = new Set(
@@ -158,6 +159,7 @@ export const HafsTajweedPageView = ({
   const { reciter } = useAppSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scopeOpen, setScopeOpen] = useState(false);
+  const [readingOpen, setReadingOpen] = useState(false);
   const [repeatCount, setRepeatCount] = useState(1); // 0 = boucle infinie
   const [activeScope, setActiveScope] = useState<'verse' | 'page' | 'surah' | 'juz'>('verse');
 
@@ -960,15 +962,29 @@ export const HafsTajweedPageView = ({
               >
                 <MushafPageBadge page={currentPage} />
               </button>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(true)}
-                className="min-w-0 truncate whitespace-nowrap rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
-                style={{ color: 'hsl(43, 62%, 25%)' }}
-                aria-label={t('chooseJuz')}
-              >
-                الجزء {toArabicDigits(currentJuz)}
-              </button>
+              <span className="flex min-w-0 items-center justify-end gap-1">
+                {onPlayRange && (
+                  <button
+                    type="button"
+                    onClick={() => setReadingOpen(true)}
+                    aria-label={t('listenPage')}
+                    title={t('listenPage')}
+                    className="shrink-0 rounded-full border p-1"
+                    style={{ color: 'hsl(43, 62%, 25%)', borderColor: 'hsl(43, 62%, 45%)' }}
+                  >
+                    <Play className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(true)}
+                  className="min-w-0 truncate whitespace-nowrap rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
+                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                  aria-label={t('chooseJuz')}
+                >
+                  الجزء {toArabicDigits(currentJuz)}
+                </button>
+              </span>
             </div>
 
             <div
@@ -1841,6 +1857,18 @@ export const HafsTajweedPageView = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {onPlayRange && (
+        <PageReadingDialog
+          open={readingOpen}
+          onOpenChange={setReadingOpen}
+          page={currentPage}
+          pageStart={pageVerses[0]?.number ?? 1}
+          pageEnd={pageVerses[pageVerses.length - 1]?.number ?? 1}
+          maxVerse={verses.length || 1}
+          onPlay={(s, e, n) => onPlayRange(s, e, n === 0, n)}
+        />
+      )}
 
       {/* Recorder dialog */}
 
