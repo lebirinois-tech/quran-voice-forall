@@ -23,6 +23,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { getJuzColors } from '@/lib/juzColors';
+import { PageReadingDialog } from '@/components/PageReadingDialog';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search, Home } from 'lucide-react';
@@ -818,17 +819,7 @@ const SurahReader = () => {
               playbackSpeed={quranAudio.playbackSpeed}
               onSpeedChange={quranAudio.changeSpeed}
               onOpenAudioMenu={() => setRecitationMenuOpen(true)}
-              onPlayRange={(start, end, loop, repeatCount = 1) => {
-                if (start === end) {
-                  quranAudio.setRepeatMode(
-                    loop || repeatCount > 1 ? 'verse' : 'none',
-                    loop ? 0 : repeatCount
-                  );
-                } else {
-                  quranAudio.setRepeatMode('range', loop ? 0 : repeatCount, start, end);
-                }
-                quranAudio.playVerse(start);
-              }}
+              onPlayRange={(start, end, loop, repeatCount = 1) => playReadingRange(start, end, loop ? 0 : repeatCount)}
 
               audioControls={audioPlayerControls}
               voiceControls={voiceCommandControls}
@@ -951,7 +942,7 @@ const SurahReader = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => quranAudio.playVerse(firstVerseOfPage)}
+                              onClick={() => setReadingDialog({ page: pageNum, start: firstVerseOfPage, end: lastVerseOfPage })}
                               className="h-8 gap-1.5 rounded-full shrink-0"
                               aria-label={`Lire la page ${pageNum} depuis le verset ${firstVerseOfPage}`}
                             >
