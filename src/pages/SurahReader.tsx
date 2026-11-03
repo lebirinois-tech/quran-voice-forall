@@ -177,6 +177,16 @@ const SurahReader = () => {
     onVerseChange: handleVerseChange,
   });
 
+  const [readingDialog, setReadingDialog] = useState<{ page: number; start: number; end: number } | null>(null);
+  const playReadingRange = (start: number, end: number, repeatCount: number) => {
+    if (start === end) {
+      quranAudio.setRepeatMode(repeatCount !== 1 ? 'verse' : 'none', repeatCount);
+    } else {
+      quranAudio.setRepeatMode('range', repeatCount, start, end);
+    }
+    quranAudio.playVerse(start);
+  };
+
   // Fetch surah metadata
   useEffect(() => {
     const foundSurah = surahs.find(s => s.number === num);
@@ -554,6 +564,17 @@ const SurahReader = () => {
   );
 
   const mushafSettingsControls = (
+    {readingDialog && (
+      <PageReadingDialog
+        open
+        onOpenChange={(o) => !o && setReadingDialog(null)}
+        page={readingDialog.page}
+        pageStart={readingDialog.start}
+        pageEnd={readingDialog.end}
+        maxVerse={surahs.find((s) => s.number === num)?.versesCount ?? 1}
+        onPlay={playReadingRange}
+      />
+    )}
     <SettingsDialog
       reciter={appSettings.reciter}
       onReciterChange={appSettings.onReciterChange}
