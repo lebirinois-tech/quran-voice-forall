@@ -208,6 +208,8 @@ const savePlaybackSpeed = (speed: number) => {
 const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   if (!audio) return;
   const normalizedSpeed = normalizePlaybackSpeed(speed);
+  // Rewriting an unchanged rate mid-playback makes some Android decoders crackle.
+  if (Math.abs(audio.playbackRate - normalizedSpeed) < 0.01 && Math.abs(audio.defaultPlaybackRate - normalizedSpeed) < 0.01) return;
   try {
     audio.defaultPlaybackRate = normalizedSpeed;
     audio.playbackRate = normalizedSpeed;
