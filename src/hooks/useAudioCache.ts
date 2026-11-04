@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { RECITERS, ReciterId, getReciterAudioUrl } from './useQuranAudio';
 import { surahs } from '@/data/surahs';
-import { putOfflineAudio } from '@/lib/offlineAudioStore';
+import { putOfflineAudio, clearOfflineAudio } from '@/lib/offlineAudioStore';
 
 // v2 indique que les fichiers sont réellement présents dans IndexedDB.
 const AUDIO_CACHE_KEY = 'quran-audio-cache-status-v2';
@@ -43,6 +43,21 @@ export const isSurahCached = (reciterId: string, surahNumber: number): boolean =
 export const getCachedSurahCount = (reciterId: string): number => {
   const status = getCacheStatus()[reciterId];
   return status ? Object.keys(status).length : 0;
+};
+
+/** Removes stored clips and their "downloaded" marks (one reciter or all). */
+export const clearAudioCache = async (reciterId?: string): Promise<boolean> => {
+  const ok = await clearOfflineAudio(reciterId);
+  const status = getCacheStatus();
+  const urls = getAudioUrlCacheSafe();
+  if (reciterId) { delete status[reciterId]; delete urls[reciterId]; }
+  setCacheStatus(reciterId ? status : {});
+  localStorage.setItem(AUDIO_URL_CACHE_KEY, JSON.stringify(reciterId ? urls : {}));
+  return ok;
+};
+
+const getAudioUrlCacheSafe = (): Record<string, Record<string, string>> => {
+  try { return JSON.parse(localStorage.getItem(AUDIO_URL_CACHE_KEY) || '{}'); } catch { return {}; }
 };
 
 // ─── Audio URL cache for offline playback ───────────────────────────

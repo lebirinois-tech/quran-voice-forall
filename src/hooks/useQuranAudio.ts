@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { getOfflineAudioUrl } from '@/lib/offlineAudioStore';
+import { getOfflineAudioUrl, isOnlineOnlyAudio } from '@/lib/offlineAudioStore';
 import { getJuzForVerse } from '@/data/surahs';
 import { advanceRecitation, type RecitationSession } from '@/lib/recitationSession';
 
@@ -208,6 +208,8 @@ const savePlaybackSpeed = (speed: number) => {
 const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   if (!audio) return;
   const normalizedSpeed = normalizePlaybackSpeed(speed);
+  // Rewriting an unchanged rate mid-playback makes some Android decoders crackle.
+  if (Math.abs(audio.playbackRate - normalizedSpeed) < 0.01 && Math.abs(audio.defaultPlaybackRate - normalizedSpeed) < 0.01) return;
   try {
     audio.defaultPlaybackRate = normalizedSpeed;
     audio.playbackRate = normalizedSpeed;
@@ -339,7 +341,7 @@ export const useQuranAudio = ({
       if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
         applyPlaybackSpeed(audio, playbackSpeedRef.current);
       }
-    }, 200);
+    }, 1000);
   }, [stopSpeedEnforcer]);
 
   // Wrappers that update BOTH state and ref synchronously
@@ -622,7 +624,9 @@ export const useQuranAudio = ({
       syncPlaybackSpeed(newAudio);
 
       // IndexedDB works in browsers and native WebViews, unlike Service Worker caches.
-      const cachedUrl = await getOfflineAudioUrl(selectedReciter, targetSurah, verseNumber);
+      // "Lecture en ligne" skips stored clips (unless offline) so damaged copies cannot play.
+      const preferOnline = isOnlineOnlyAudio() && navigator.onLine;
+      const cachedUrl = preferOnline ? null : await getOfflineAudioUrl(selectedReciter, targetSurah, verseNumber);
       if (newAudio !== audioRef.current) {
         if (cachedUrl) URL.revokeObjectURL(cachedUrl);
         return;

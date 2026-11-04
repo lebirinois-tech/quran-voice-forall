@@ -1,10 +1,12 @@
 import { useT } from '@/lib/i18n';
 import { useState } from 'react';
-import { Download, Check, Loader2, Wifi, BookOpen, FileText } from 'lucide-react';
+import { Download, Check, Loader2, Wifi, BookOpen, FileText, Trash2 } from 'lucide-react';
+import { Switch } from './ui/switch';
+import { isOnlineOnlyAudio, setOnlineOnlyAudio } from '@/lib/offlineAudioStore';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Progress } from './ui/progress';
-import { useAudioCache, isSurahCached, getCachedSurahCount } from '@/hooks/useAudioCache';
+import { useAudioCache, isSurahCached, getCachedSurahCount, clearAudioCache } from '@/hooks/useAudioCache';
 import { useTafsirCache, isTafsirSurahCached, getCachedTafsirSurahCount } from '@/hooks/useTafsirCache';
 import { useTextCache, isTextSurahCached, getCachedTextSurahCount } from '@/hooks/useTextCache';
 import { RECITERS, ReciterId } from '@/hooks/useQuranAudio';
@@ -32,6 +34,17 @@ export const AudioCacheSettings = () => {
   const [selectedReciter, setSelectedReciter] = useState<ReciterId | 'all'>('husary');
   const [showSurahList, setShowSurahList] = useState(false);
   const [activeTab, setActiveTab] = useState<DownloadTab>('audio');
+  const [onlineOnly, setOnlineOnly] = useState(isOnlineOnlyAudio);
+  const [, refresh] = useState(0);
+  const lbl = (fr: string, ar: string, en: string) => (t.lang === 'ar' ? ar : t.lang === 'en' ? en : fr);
+
+  const handleClearAudio = async () => {
+    const name = allRiwayat ? lbl('tous les récitants', 'جميع القراء', 'all reciters') : (t.lang === 'ar' ? RECITERS[selectedReciter as ReciterId].nameAr : RECITERS[selectedReciter as ReciterId].name);
+    if (!window.confirm(lbl(`Effacer l'audio enregistré de ${name} ?`, `حذف الصوت المحفوظ لـ ${name}؟`, `Delete saved audio for ${name}?`))) return;
+    const ok = await clearAudioCache(allRiwayat ? undefined : (selectedReciter as ReciterId));
+    refresh((n) => n + 1);
+    ok ? toast.success(lbl('Audio enregistré effacé', 'تم حذف الصوت المحفوظ', 'Saved audio deleted')) : toast.error(lbl('Effacement impossible', 'تعذر الحذف', 'Could not delete'));
+  };
 
   const allRiwayat = selectedReciter === 'all';
   const targetReciters: ReciterId[] = allRiwayat
@@ -211,6 +224,19 @@ export const AudioCacheSettings = () => {
           {showSurahList ? t('hide') : t('bySurah')}
         </Button>
       </div>
+
+      {activeTab === 'audio' && (
+        <div className="space-y-2 rounded-lg border border-border p-2">
+          <Button variant="outline" size="sm" className="w-full text-xs text-destructive" onClick={handleClearAudio} disabled={isDownloading}>
+            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            {lbl('Vider le cache audio', 'مسح الصوت المحفوظ', 'Clear audio cache')}
+          </Button>
+          <label className="flex items-center justify-between gap-2 text-xs text-foreground">
+            <span>{lbl('Toujours lire en ligne (son direct)', 'القراءة عبر الإنترنت دائماُ', 'Always play online')}</span>
+            <Switch checked={onlineOnly} onCheckedChange={(v) => { setOnlineOnly(v); setOnlineOnlyAudio(v); }} />
+          </label>
+        </div>
+      )}
 
       {/* Surah-by-surah list */}
       {showSurahList && (
