@@ -62,3 +62,27 @@ export const getOfflineAudioUrl = async (
     request.onerror = () => resolve(null);
   });
 };
+/** Deletes stored clips for one reciter, or every reciter when omitted. */
+export const clearOfflineAudio = async (reciter?: string): Promise<boolean> => {
+  const db = await openDb();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    const transaction = db.transaction(STORE, 'readwrite');
+    const store = transaction.objectStore(STORE);
+    if (!reciter) store.clear();
+    else {
+      const prefix = `${reciter}:`;
+      const range = IDBKeyRange.bound(prefix, `${prefix}\uffff`);
+      store.delete(range);
+    }
+    transaction.oncomplete = () => resolve(true);
+    transaction.onerror = () => resolve(false);
+    transaction.onabort = () => resolve(false);
+  });
+};
+
+const ONLINE_ONLY_KEY = 'quran-audio-online-only';
+export const isOnlineOnlyAudio = () =>
+  typeof localStorage !== 'undefined' && localStorage.getItem(ONLINE_ONLY_KEY) === '1';
+export const setOnlineOnlyAudio = (value: boolean) =>
+  localStorage.setItem(ONLINE_ONLY_KEY, value ? '1' : '0');
