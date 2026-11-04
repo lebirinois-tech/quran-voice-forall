@@ -1,3 +1,7 @@
+## Menu « Choix de la lecture » (4 novembre 2026)
+- [x] Bouton ▶ ajouté à côté de l'indicateur Juz dans la bande du haut du mode Pages ; en mode Versets, le bouton « Écouter la page » ouvre le même menu. Le menu (`src/components/PageReadingDialog.tsx`) propose : lire la page, un verset précis, une plage de versets, et 1/2/3/5/10/∞ répétitions.
+- [x] Vérifié en navigateur (Playwright, 1280x1800) dans les deux modes : le menu s'ouvre avec les bons numéros (page 2 = v. 1–5), la lecture de la page démarre réellement (fichiers mp3 demandés, versets enchaînés), et le choix « 2 » fait bien répéter le verset (reprise à 0 s une fois) avant de passer au verset suivant. Aucune erreur de console, aucun texte coupé.
+
 ## Couleurs par Juz (2 novembre 2026)
 - [x] Bande du haut (sourate, page, Juz) et pourtour de la page coloriés dans les deux modes Pages et Versets : vert émeraude pour les Juz impairs, or pour les Juz pairs ; changement à chaque vrai début de Juz.
 - [x] Vérifié en navigateur sur 22 pages repères (1, 22, 42, 62, 122, 202, 562, 582, 587, 601, 604) : la couleur change exactement au début de chaque Juz, y compris le 30e qui commence page 582. Le Juz 30 occupe 23 pages (582-604) au lieu de 20 : c'est le découpage du Mushaf de Médine, pas un défaut. Utilisateur : « C'est ok ».
