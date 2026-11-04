@@ -564,17 +564,6 @@ const SurahReader = () => {
   );
 
   const mushafSettingsControls = (
-    {readingDialog && (
-      <PageReadingDialog
-        open
-        onOpenChange={(o) => !o && setReadingDialog(null)}
-        page={readingDialog.page}
-        pageStart={readingDialog.start}
-        pageEnd={readingDialog.end}
-        maxVerse={surahs.find((s) => s.number === num)?.versesCount ?? 1}
-        onPlay={playReadingRange}
-      />
-    )}
     <SettingsDialog
       reciter={appSettings.reciter}
       onReciterChange={appSettings.onReciterChange}
