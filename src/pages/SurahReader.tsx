@@ -580,6 +580,19 @@ const SurahReader = () => {
     />
   );
 
+  // Menu de lecture partagé (Pages et Versets) : page, verset ou plage avec répétitions.
+  const pageReadingDialog = readingDialog && (
+    <PageReadingDialog
+      open
+      onOpenChange={(o) => !o && setReadingDialog(null)}
+      page={readingDialog.page}
+      pageStart={readingDialog.start}
+      pageEnd={readingDialog.end}
+      maxVerse={surahs.find((s) => s.number === num)?.versesCount ?? 1}
+      onPlay={playReadingRange}
+    />
+  );
+
   // Raccourci Paramètres compact, au milieu de la barre du bas (Pages et Versets).
   const toolbarSettingsShortcut = React.cloneElement(mushafSettingsControls, {
     triggerLabel: undefined,
@@ -1103,6 +1116,8 @@ const SurahReader = () => {
         onSpeedChange={quranAudio.changeSpeed}
         onStart={handleRecitationStart}
       />
+
+      {pageReadingDialog}
     </div>
   );
 };
