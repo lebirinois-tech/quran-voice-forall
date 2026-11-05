@@ -54,18 +54,24 @@ export function PageReadingDialog({ open, onOpenChange, page, pageStart, pageEnd
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm z-[120]">
+      <DialogContent className="sm:max-w-sm z-[120]" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{t('chooseReading')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           {onGoToPage && (
             <div className="flex items-center gap-2">
-              <span className="w-20 text-sm">{L('Page', 'الصفحة', 'Page')}</span>
-              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => goPage(page + 1)} aria-label={L('Page suivante', 'الصفحة التالية', 'Next page')}><ChevronLeft className="h-4 w-4" /></Button>
-              <Input type="number" inputMode="numeric" min={1} max={604} value={pageInput} onChange={(e) => setPageInput(Number(e.target.value))} onKeyDown={(e) => e.key === 'Enter' && goPage(pageInput)} className="h-10 text-center" aria-label={L('Numéro de page', 'رقم الصفحة', 'Page number')} />
-              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => goPage(page - 1)} aria-label={L('Page précédente', 'الصفحة السابقة', 'Previous page')}><ChevronRight className="h-4 w-4" /></Button>
-              <Button className="h-10 shrink-0" onClick={() => goPage(pageInput)}>{L('Aller', 'اذهب', 'Go')}</Button>
+              <span className="w-16 shrink-0 text-sm">{L('Page', 'الصفحة', 'Page')}</span>
+              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => goPage(pageInput + 1)} aria-label={L('Page suivante', 'الصفحة التالية', 'Next page')}><ChevronLeft className="h-4 w-4" /></Button>
+              <div
+                className="flex h-10 min-w-0 flex-1 items-center justify-center rounded-md border border-input bg-muted/40 text-base font-semibold tabular-nums"
+                role="status"
+                aria-live="polite"
+                aria-label={L('Numéro de page', 'رقم الصفحة', 'Page number')}
+              >
+                {pageInput}
+              </div>
+              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => goPage(pageInput - 1)} aria-label={L('Page précédente', 'الصفحة السابقة', 'Previous page')}><ChevronRight className="h-4 w-4" /></Button>
             </div>
           )}
           {onGoToSurah && (
