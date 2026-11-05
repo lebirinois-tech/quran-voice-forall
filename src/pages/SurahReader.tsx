@@ -590,6 +590,8 @@ const SurahReader = () => {
       pageEnd={readingDialog.end}
       maxVerse={surahs.find((s) => s.number === num)?.versesCount ?? 1}
       onPlay={playReadingRange}
+      onGoToPage={(p) => { setReadingDialog(null); handleNavigateToPage(p); }}
+      onGoToSurah={(n) => { setReadingDialog(null); navigate(`/surah/${n}?verse=1`); }}
     />
   );
 

@@ -819,6 +819,12 @@ export const HafsTajweedPageView = ({
         inner.style.width = '';
         if (used <= 0) return;
         const fill = used / available;
+        if (used > available * 0.985) {
+          const shrink = Math.max(0.8, (available * 0.985) / used);
+          inner.style.width = `${100 / shrink}%`;
+          inner.style.transform = `scaleX(${shrink})`;
+          return;
+        }
         // Ligne de fin de sourate très courte : pas d'étirement excessif.
         if (fill < 0.45 || currentPage <= 2) {
           inner.style.justifyContent = 'center';
@@ -836,7 +842,9 @@ export const HafsTajweedPageView = ({
       resetStretch();
       let size = Math.floor(currentDesired() * 0.82 * 10) / 10;
       root.style.fontSize = `${size}px`;
-      for (let i = 0; i < 40 && size > 10 && worstRatio() < 0.995; i += 1) {
+      // Taille uniforme sur tout le Mushaf : une ligne dense est resserrée
+      // seule (scaleX), la police de la page n'est réduite qu'en cas extrême.
+      for (let i = 0; i < 40 && size > 10 && worstRatio() < 0.8; i += 1) {
         size = Math.max(10, Math.floor(size * 0.985 * 10) / 10);
         root.style.fontSize = `${size}px`;
       }
@@ -1867,6 +1875,8 @@ export const HafsTajweedPageView = ({
           pageEnd={pageVerses[pageVerses.length - 1]?.number ?? 1}
           maxVerse={verses.length || 1}
           onPlay={(s, e, n) => onPlayRange(s, e, n === 0, n)}
+          onGoToPage={goToPage}
+          onGoToSurah={(n) => goToPage(surahPageStart[n] ?? 1)}
         />
       )}
 
