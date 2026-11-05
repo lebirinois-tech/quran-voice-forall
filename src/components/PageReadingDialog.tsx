@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Play, Repeat } from 'lucide-react';
+import { Play, Repeat, ChevronLeft, ChevronRight } from 'lucide-react';
+import { surahs } from '@/data/surahs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -16,10 +17,21 @@ type Props = {
   maxVerse: number;
   /** repeatCount: 0 = infinite. */
   onPlay: (start: number, end: number, repeatCount: number) => void;
+  /** Déplacement vers une page du Mushaf (1-604). */
+  onGoToPage?: (page: number) => void;
+  /** Déplacement vers une sourate (1-114). */
+  onGoToSurah?: (surah: number) => void;
 };
 
 /** Shared reading menu for Pages and Verses modes: page, single verse or verse range, with repetition. */
-export function PageReadingDialog({ open, onOpenChange, page, pageStart, pageEnd, maxVerse, onPlay }: Props) {
+export function PageReadingDialog({ open, onOpenChange, page, pageStart, pageEnd, maxVerse, onPlay, onGoToPage, onGoToSurah }: Props) {
+  const [pageInput, setPageInput] = useState(page);
+  useEffect(() => { setPageInput(page); }, [page]);
+  const goPage = (p: number) => {
+    const n = Math.min(604, Math.max(1, Math.round(p) || 1));
+    setPageInput(n);
+    onGoToPage?.(n);
+  };
   const t = useT();
   const fr = t.lang === 'fr';
   const ar = t.lang === 'ar';
@@ -47,6 +59,31 @@ export function PageReadingDialog({ open, onOpenChange, page, pageStart, pageEnd
           <DialogTitle>{t('chooseReading')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {onGoToPage && (
+            <div className="flex items-center gap-2">
+              <span className="w-20 text-sm">{L('Page', 'الصفحة', 'Page')}</span>
+              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => goPage(page + 1)} aria-label={L('Page suivante', 'الصفحة التالية', 'Next page')}><ChevronLeft className="h-4 w-4" /></Button>
+              <Input type="number" inputMode="numeric" min={1} max={604} value={pageInput} onChange={(e) => setPageInput(Number(e.target.value))} onKeyDown={(e) => e.key === 'Enter' && goPage(pageInput)} className="h-10 text-center" aria-label={L('Numéro de page', 'رقم الصفحة', 'Page number')} />
+              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => goPage(page - 1)} aria-label={L('Page précédente', 'الصفحة السابقة', 'Previous page')}><ChevronRight className="h-4 w-4" /></Button>
+              <Button className="h-10 shrink-0" onClick={() => goPage(pageInput)}>{L('Aller', 'اذهب', 'Go')}</Button>
+            </div>
+          )}
+          {onGoToSurah && (
+            <div className="flex items-center gap-2">
+              <span className="w-20 text-sm">{L('Sourate', 'السورة', 'Surah')}</span>
+              <select
+                className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+                defaultValue=""
+                onChange={(e) => e.target.value && onGoToSurah(Number(e.target.value))}
+                aria-label={L('Choisir une sourate', 'اختيار السورة', 'Choose surah')}
+              >
+                <option value="" disabled>{L('Choisir une sourate…', 'اختر سورة…', 'Choose a surah…')}</option>
+                {surahs.map((s) => (
+                  <option key={s.number} value={s.number}>{s.number}. {ar ? s.nameArabic : `${s.name} — ${s.nameArabic}`}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <Button variant="outline" className="h-12 w-full justify-between" onClick={() => go(pageStart, pageEnd)}>
             <span className="flex items-center gap-2"><Play className="h-4 w-4 text-primary" />{L('Lire la page', 'قراءة الصفحة', 'Read page')} {page}</span>
             <span className="text-xs text-muted-foreground">v. {pageStart}–{pageEnd}</span>
