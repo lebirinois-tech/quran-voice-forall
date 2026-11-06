@@ -1,3 +1,7 @@
+## Menu « Choix de la lecture » : numéro de page changé aux flèches (5 novembre 2026)
+- [x] Le numéro de page n'est plus un champ de saisie : il s'affiche dans un encadré entre deux flèches (bouton de gauche = page suivante, bouton de droite = page précédente), donc le clavier numérique ne s'ouvre plus. Le bouton « Aller » de cette ligne a été retiré (devenu inutile). L'ouverture du menu ne place plus le focus dans un champ de saisie.
+- [x] Vérifié en navigateur à 360 px en mode Pages (Al-Baqara) : le numéro passe de 2 à 3 avec la flèche de gauche, revient à 2 avec celle de droite, aucun clavier ouvert, aucun texte coupé. 58 tests réussis, build OK.
+
 ## Menu « Choix de la lecture » (4 novembre 2026)
 - [x] Bouton ▶ ajouté à côté de l'indicateur Juz dans la bande du haut du mode Pages ; en mode Versets, le bouton « Écouter la page » ouvre le même menu. Le menu (`src/components/PageReadingDialog.tsx`) propose : lire la page, un verset précis, une plage de versets, et 1/2/3/5/10/∞ répétitions.
 - [x] Vérifié en navigateur (Playwright, 1280x1800) dans les deux modes : le menu s'ouvre avec les bons numéros (page 2 = v. 1–5), la lecture de la page démarre réellement (fichiers mp3 demandés, versets enchaînés), et le choix « 2 » fait bien répéter le verset (reprise à 0 s une fois) avant de passer au verset suivant. Aucune erreur de console, aucun texte coupé.
