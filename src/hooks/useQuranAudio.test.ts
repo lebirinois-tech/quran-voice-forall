@@ -43,7 +43,7 @@ describe('Qaloun reciters', () => {
     expect(RECITER_IDS.filter((id) => RECITERS[id].qiraat === 'qalun')).toEqual(['husaryQalunPerVerse', 'hudhaifiQalun']);
   });
   it('builds Al-Hudhaifi verse URLs from the juz archive', () => {
-    const base = 'https://archive.org/download/96kb--quran--by--alhozifi--by--qaloon---6236---ayaat-----__verse--by---verse--';
+    const base = 'https://archive.org/download/way2sona_20160426_2135';
     expect(getReciterAudioUrl(1, 1, 'hudhaifiQalun')).toBe(`${base}/01.zip/001001.mp3`);
     expect(getReciterAudioUrl(2, 142, 'hudhaifiQalun')).toBe(`${base}/02.zip/002142.mp3`);
     expect(getReciterAudioUrl(36, 28, 'hudhaifiQalun')).toBe(`${base}/23.zip/23/036028.mp3`);
@@ -55,68 +55,103 @@ describe('Qaloun reciters', () => {
   });
 });
 
-describe('Al-Juhani Hafs recitation', () => {
-  it('recognizes the saved Al-Juhani choice at startup', () => {
-    expect(getSafeReciter('juhani')).toBe('juhani');
+describe('Maher Hafs recitation', () => {
+  it('recognizes the saved Maher choice at startup', () => {
+    expect(getSafeReciter('maher')).toBe('maher');
     expect(getSafeReciter('removed-reciter')).toBe('husary');
   });
-  it('uses Al-Juhani verse files, including Yunus verse 100', () => {
-    expect(getReciterAudioUrl(10, 100, 'juhani')).toBe(
-      'https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps/010100.mp3',
+  it('uses Maher verse files, including Yunus verse 100', () => {
+    expect(getReciterAudioUrl(10, 100, 'maher')).toBe(
+      'https://archive.org/download/way2sona_20160427_1847/010.zip/010100.mp3',
     );
-    expect(getReciterAudioUrl(1, 1, 'juhani')).toBe(
-      'https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps/001001.mp3',
+    expect(getReciterAudioUrl(1, 1, 'maher')).toBe(
+      'https://archive.org/download/way2sona_20160427_1847/001.zip/001001.mp3',
     );
   });
 
-  it('keeps Al-Juhani when switching Hafs between Pages and Verses', () => {
-    localStorage.setItem('quran-reciter', 'juhani');
+  it('keeps Maher when switching Hafs between Pages and Verses', () => {
+    localStorage.setItem('quran-reciter', 'maher');
     const { result } = renderHook(() => useAppSettings());
     act(() => result.current.onTextDisplayStyleChange('tajweed'));
-    expect(result.current.reciter).toBe('juhani');
+    expect(result.current.reciter).toBe('maher');
     act(() => result.current.onTextDisplayStyleChange('pages-hafs'));
-    expect(localStorage.getItem('quran-reciter')).toBe('juhani');
+    expect(localStorage.getItem('quran-reciter')).toBe('maher');
     act(() => result.current.onTextDisplayStyleChange('pages-warsh'));
     expect(result.current.reciter).toBe('husaryWarshPerVerse');
   });
 
-  it('remembers Al-Juhani for Hafs and Yassine for Warsh across riwaya switches', () => {
+  it('remembers Maher for Hafs and Yassine for Warsh across riwaya switches', () => {
     const { result } = renderHook(() => useAppSettings());
     act(() => result.current.onTextDisplayStyleChange('pages-hafs'));
-    act(() => result.current.onReciterChange('juhani'));
+    act(() => result.current.onReciterChange('maher'));
     act(() => result.current.onTextDisplayStyleChange('pages-warsh'));
     act(() => result.current.onReciterChange('yassinWarsh'));
     act(() => result.current.onTextDisplayStyleChange('tajweed'));
-    expect(result.current.reciter).toBe('juhani');
+    expect(result.current.reciter).toBe('maher');
     act(() => result.current.onTextDisplayStyleChange('warsh-tajweed'));
     expect(result.current.reciter).toBe('yassinWarsh');
   });
 
-  it('replaces a paused Husary source before resuming with Al-Juhani', async () => {
+  it('replaces a paused Husary source before resuming with Maher', async () => {
     const { result, rerender, unmount } = renderHook(
       ({ reciter }: { reciter: ReciterId }) => useQuranAudio({ surahNumber: 10, totalVerses: 109, reciter }),
       { initialProps: { reciter: 'husary' as ReciterId } },
     );
     await act(async () => { await result.current.playVerse(100); });
     act(() => result.current.pause());
-    rerender({ reciter: 'juhani' });
+    rerender({ reciter: 'maher' });
     act(() => result.current.play());
     await waitFor(() => expect(result.current.isPlaying).toBe(true));
-    expect(document.querySelector('audio')?.src).toBe(getReciterAudioUrl(10, 100, 'juhani'));
+    expect(document.querySelector('audio')?.src).toBe(getReciterAudioUrl(10, 100, 'maher'));
     unmount();
   });
 
-  it('changes the currently playing recording immediately to Al-Juhani', async () => {
+  it('changes the currently playing recording immediately to Maher', async () => {
     const { result, rerender, unmount } = renderHook(
       ({ reciter }: { reciter: ReciterId }) => useQuranAudio({ surahNumber: 1, totalVerses: 7, reciter }),
       { initialProps: { reciter: 'husary' as ReciterId } },
     );
     await act(async () => { await result.current.playVerse(1); });
-    rerender({ reciter: 'juhani' });
+    rerender({ reciter: 'maher' });
     await waitFor(() => {
       expect(result.current.isPlaying).toBe(true);
-      expect(document.querySelector('audio')?.src).toBe(getReciterAudioUrl(1, 1, 'juhani'));
+      expect(document.querySelector('audio')?.src).toBe(getReciterAudioUrl(1, 1, 'maher'));
     });
+    unmount();
+  });
+});
+
+describe('Persistent audio and acceleration', () => {
+  it('migrates the removed Juhani preference to Maher', () => {
+    expect(getSafeReciter('juhani')).toBe('maher');
+  });
+  it('keeps the same player between verses and reciters', async () => {
+    const { result, unmount } = renderHook(() => useQuranAudio({ surahNumber: 1, totalVerses: 7 }));
+    const player = document.querySelector('audio');
+    await act(async () => { await result.current.playVerse(1); });
+    await act(async () => { await result.current.playVerse(2); });
+    expect(document.querySelector('audio')).toBe(player);
+    expect(player?.src).toBe(getReciterAudioUrl(1, 2, 'husary'));
+    act(() => result.current.changeReciter('maher'));
+    await waitFor(() => expect(player?.src).toBe(getReciterAudioUrl(1, 2, 'maher')));
+    expect(document.querySelector('audio')).toBe(player);
+    unmount();
+  });
+  it('supports 3x for Al-Hudhaifi without speed timers or timeupdate rewrites', async () => {
+    const interval = vi.spyOn(window, 'setInterval');
+    const timeout = vi.spyOn(window, 'setTimeout');
+    const { result, unmount } = renderHook(() => useQuranAudio({ surahNumber: 1, totalVerses: 7, reciter: 'hudhaifiQalun' }));
+    act(() => result.current.changeSpeed(3));
+    await act(async () => { await result.current.playVerse(1); });
+    const player = document.querySelector('audio');
+    expect(player?.playbackRate).toBe(3);
+    expect(player?.defaultPlaybackRate).toBe(3);
+    interval.mockClear(); timeout.mockClear();
+    act(() => { player?.dispatchEvent(new Event('timeupdate')); player?.dispatchEvent(new Event('playing')); });
+    expect(interval).not.toHaveBeenCalled();
+    expect(timeout).not.toHaveBeenCalled();
+    await act(async () => { await result.current.playVerse(2); });
+    expect(player?.playbackRate).toBe(3);
     unmount();
   });
 });
