@@ -683,9 +683,11 @@ export const useQuranAudio = ({
     }
   }, [isPlaying, isLoading, pause, playVerseAt, clearSource]);
 
+  const changeReciterRef = useRef(changeReciter);
+  changeReciterRef.current = changeReciter;
   useEffect(() => {
-    changeReciter(externalReciter);
-  }, [externalReciter, changeReciter]);
+    changeReciterRef.current(externalReciter);
+  }, [externalReciter]);
 
   const seek = useCallback((percentage: number) => {
     if (audioRef.current && audioRef.current.duration) {
