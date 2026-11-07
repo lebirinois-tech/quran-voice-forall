@@ -18,7 +18,7 @@ export type QiraatId = keyof typeof QIRAAT_LABELS;
 // Available voices, grouped by their Quran reading tradition.
 export const RECITER_IDS = [
   'husary',
-  'juhani',
+  'maher',
   'husaryWarshPerVerse',
   'yassinWarsh',
   'husaryQalunPerVerse',
@@ -62,8 +62,7 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // HAFS (حفص عن عاصم) — Mahmoud Khalil Al-Husary (référence mondiale)
   // ═══════════════════════════════════════════════════════════════════════════
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
-  // Abdullah Awad Al-Juhani — Hafs, verset par verset (everyayah 128 kbps)
-  juhani: { id: 'ar.juhani', name: 'Abdullah Awad Al-Juhani', nameAr: 'عبد الله عواد الجهني', qiraat: 'hafs' },
+  maher: { id: 'ar.maher', name: 'Maher Al-Muaiqly', nameAr: 'ماهر المعيقلي', qiraat: 'hafs', archiveItem: 'way2sona_20160427_1847' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع)
@@ -104,7 +103,7 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
     name: 'Ali Al-Hudhaifi (Qalun)',
     nameAr: 'علي الحذيفي (قالون)',
     qiraat: 'qalun',
-    archiveItem: '96kb--quran--by--alhozifi--by--qaloon---6236---ayaat-----__verse--by---verse--',
+    archiveItem: 'way2sona_20160426_2135',
     archiveZipByJuz: true,
     archiveJuzInnerFolders: [23, 24],
   },
@@ -114,7 +113,7 @@ export const isReciterId = (value: unknown): value is ReciterId =>
   typeof value === 'string' && value in RECITERS;
 
 export const getSafeReciter = (value: unknown): ReciterId =>
-  isReciterId(value) ? value : value === 'ganayniQalun' ? 'husaryQalunPerVerse' : 'husary';
+  isReciterId(value) ? value : value === 'juhani' ? 'maher' : value === 'ganayniQalun' ? 'husaryQalunPerVerse' : 'husary';
 
 /** Single source for streaming, verse downloads and offline downloads. */
 export const getReciterAudioUrl = (surah: number, verse: number, reciterId: ReciterId): string => {
@@ -136,7 +135,7 @@ export const getReciterAudioUrl = (surah: number, verse: number, reciterId: Reci
     const zipName = info.archiveZipPad === 2 ? String(surah).padStart(2, '0') : surahStr;
     return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;
   }
-  const folder = info.everyAyahFolder ?? (reciterId === 'juhani' ? 'Abdullaah_3awwaad_Al-Juhaynee_128kbps' : 'Husary_128kbps');
+  const folder = info.everyAyahFolder ?? 'Husary_128kbps';
   return `https://everyayah.com/data/${folder}/${surahStr}${verseStr}.mp3`;
 };
 
@@ -227,23 +226,6 @@ const applyPlaybackSpeed = (audio: HTMLAudioElement | null, speed: number) => {
   }
 };
 
-const schedulePlaybackSpeed = (
-  audio: HTMLAudioElement | null,
-  speed: number,
-  getLatestSpeed?: () => number
-) => {
-  if (!audio) return;
-  const getSpeed = () => normalizePlaybackSpeed(getLatestSpeed?.() ?? speed);
-  applyPlaybackSpeed(audio, getSpeed());
-
-  if (typeof window === 'undefined') return;
-
-  window.requestAnimationFrame(() => applyPlaybackSpeed(audio, getSpeed()));
-  [50, 250, 1000].forEach((delay) => {
-    window.setTimeout(() => applyPlaybackSpeed(audio, getSpeed()), delay);
-  });
-};
-
 const createManagedAudioElement = () => {
   const audio = typeof document !== 'undefined'
     ? document.createElement('audio')
@@ -313,36 +295,29 @@ export const useQuranAudio = ({
   const currentRepeatCountRef = useRef(0);
   const onVerseChangeRef = useRef(onVerseChange);
   const playbackSpeedRef = useRef(readSavedPlaybackSpeed());
-  const speedEnforcerRef = useRef<number | null>(null);
+  const loadControllerRef = useRef<AbortController | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
   const repeatPauseRef = useRef<RepeatPauseSettings>(readSavedRepeatPause());
   const pauseTimeoutRef = useRef<number | null>(null);
   const pauseCountdownRef = useRef<number | null>(null);
   const reciterRef = useRef<ReciterId>(externalReciter);
 
   const syncPlaybackSpeed = useCallback((audio: HTMLAudioElement | null) => {
-    schedulePlaybackSpeed(audio, playbackSpeedRef.current, () => playbackSpeedRef.current);
+    applyPlaybackSpeed(audio, playbackSpeedRef.current);
   }, []);
 
-  const stopSpeedEnforcer = useCallback(() => {
-    if (speedEnforcerRef.current !== null) {
-      window.clearInterval(speedEnforcerRef.current);
-      speedEnforcerRef.current = null;
+  const clearSource = useCallback(() => {
+    loadControllerRef.current?.abort();
+    loadControllerRef.current = null;
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
     }
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    blobUrlRef.current = null;
   }, []);
-
-  const startSpeedEnforcer = useCallback((audio: HTMLAudioElement | null) => {
-    if (!audio || typeof window === 'undefined') return;
-    stopSpeedEnforcer();
-    speedEnforcerRef.current = window.setInterval(() => {
-      if (audio !== audioRef.current || audio.paused || audio.ended) {
-        stopSpeedEnforcer();
-        return;
-      }
-      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
-        applyPlaybackSpeed(audio, playbackSpeedRef.current);
-      }
-    }, 1000);
-  }, [stopSpeedEnforcer]);
 
   // Wrappers that update BOTH state and ref synchronously
   const setCurrentVerse = useCallback((v: number | ((prev: number) => number)) => {
@@ -385,9 +360,6 @@ export const useQuranAudio = ({
   const setupAudioListeners = useCallback((audio: HTMLAudioElement) => {
     audio.addEventListener('timeupdate', () => {
       if (audio !== audioRef.current) return;
-      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
-        syncPlaybackSpeed(audio);
-      }
       if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
@@ -399,35 +371,8 @@ export const useQuranAudio = ({
       setDuration(audio.duration);
     });
 
-    ['loadeddata', 'canplay', 'canplaythrough', 'durationchange'].forEach((eventName) => {
-      audio.addEventListener(eventName, () => {
-        if (audio !== audioRef.current) return;
-        syncPlaybackSpeed(audio);
-      });
-    });
-
-    audio.addEventListener('play', () => {
-      if (audio !== audioRef.current) return;
-      syncPlaybackSpeed(audio);
-      startSpeedEnforcer(audio);
-    });
-
-    audio.addEventListener('playing', () => {
-      if (audio !== audioRef.current) return;
-      syncPlaybackSpeed(audio);
-      startSpeedEnforcer(audio);
-    });
-
-    audio.addEventListener('ratechange', () => {
-      if (audio !== audioRef.current) return;
-      if (Math.abs(audio.playbackRate - playbackSpeedRef.current) > 0.01) {
-        syncPlaybackSpeed(audio);
-      }
-    });
-    
     audio.addEventListener('ended', () => {
       if (audio !== audioRef.current) return;
-      stopSpeedEnforcer();
       setIsPlaying(false);
       // Full-surah reciters: audio file is the entire surah, so just stop at end.
       // No auto-advance, no repetition (would loop the whole surah).
@@ -459,7 +404,7 @@ export const useQuranAudio = ({
             playVerseRef.current(v);
           }, waitMs);
         } else {
-          pauseTimeoutRef.current = window.setTimeout(() => { clearRepeatPauseTimers(); playVerseRef.current(v); }, 300);
+          pauseTimeoutRef.current = window.setTimeout(() => { clearRepeatPauseTimers(); playVerseRef.current(v); }, 0);
         }
       };
 
@@ -479,7 +424,7 @@ export const useQuranAudio = ({
         }
         const next = advance.next;
         clearRepeatPauseTimers();
-        const waitMs = rp.enabled && verseDurationMs > 0 ? Math.max(500, verseDurationMs * rp.multiplier) : 300;
+        const waitMs = rp.enabled && verseDurationMs > 0 ? Math.max(500, verseDurationMs * rp.multiplier) : 0;
         if (rp.enabled && verseDurationMs > 0) {
           setIsPausingForRepeat(true);
           setPauseRemainingSec(Math.ceil(waitMs / 1000));
@@ -543,13 +488,12 @@ export const useQuranAudio = ({
     audio.addEventListener('error', () => {
       if (audio !== audioRef.current) return;
       if (!audio.src || audio.src === '' || audio.src === window.location.href) return;
-      stopSpeedEnforcer();
       console.error('Audio error for src:', audio.src);
       setIsLoading(false);
       setIsPlaying(false);
       toast.error('Erreur de chargement audio');
     });
-  }, [startSpeedEnforcer, stopSpeedEnforcer, syncPlaybackSpeed]);
+  }, [clearRepeatPauseTimers, setCurrentRepeatCount, setCurrentVerse, setRecitationSession, syncPlaybackSpeed]);
 
   // Create initial audio element
   useEffect(() => {
@@ -559,110 +503,94 @@ export const useQuranAudio = ({
     syncPlaybackSpeed(audio);
     
     return () => {
-      stopSpeedEnforcer();
       if (pauseTimeoutRef.current !== null) window.clearTimeout(pauseTimeoutRef.current);
       if (pauseCountdownRef.current !== null) window.clearInterval(pauseCountdownRef.current);
+      loadControllerRef.current?.abort();
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
       disposeManagedAudioElement(audio);
       if (audioRef.current === audio) audioRef.current = null;
     };
-  }, [setupAudioListeners, stopSpeedEnforcer, syncPlaybackSpeed]);
+  }, [setupAudioListeners, syncPlaybackSpeed]);
 
 
-  const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string): Promise<void> => {
+  const playAudioFromUrl = useCallback((audio: HTMLAudioElement, url: string, signal: AbortSignal): Promise<void> => {
     return new Promise((resolve, reject) => {
-      syncPlaybackSpeed(audio);
+      const cleanup = () => {
+        audio.removeEventListener('canplay', onCanPlay);
+        audio.removeEventListener('error', onError);
+        signal.removeEventListener('abort', onAbort);
+      };
+      const onAbort = () => { cleanup(); reject(new DOMException('Playback superseded', 'AbortError')); };
       const onCanPlay = () => {
-        audio.removeEventListener('canplay', onCanPlay);
-        audio.removeEventListener('error', onError);
-        // Re-apply playback rate AFTER load (some browsers reset it on load)
+        cleanup();
+        if (signal.aborted) return reject(new DOMException('Playback superseded', 'AbortError'));
         syncPlaybackSpeed(audio);
-        audio.play().then(() => {
-          syncPlaybackSpeed(audio);
-          startSpeedEnforcer(audio);
-          resolve();
-        }).catch(reject);
+        audio.play().then(resolve, reject);
       };
-      const onError = () => {
-        audio.removeEventListener('canplay', onCanPlay);
-        audio.removeEventListener('error', onError);
-        reject(new Error('Audio load failed'));
-      };
+      const onError = () => { cleanup(); reject(new Error('Audio load failed')); };
+      if (signal.aborted) return onAbort();
+      signal.addEventListener('abort', onAbort, { once: true });
       audio.addEventListener('canplay', onCanPlay);
       audio.addEventListener('error', onError);
-      audio.defaultPlaybackRate = playbackSpeedRef.current;
-      audio.playbackRate = playbackSpeedRef.current;
       audio.src = url;
-      syncPlaybackSpeed(audio);
       audio.load();
-      syncPlaybackSpeed(audio);
     });
-  }, [startSpeedEnforcer, syncPlaybackSpeed]);
+  }, [syncPlaybackSpeed]);
 
   const playVerseAt = useCallback(async (targetSurah: number, verseNumber: number) => {
     const selectedReciter = reciterRef.current;
-    // Full-surah sources cannot seek to an ayah without verified timings.
     if (RECITERS[selectedReciter].fullSurah) verseNumber = 1;
-    let newAudio: HTMLAudioElement | null = null;
+    const audio = audioRef.current;
+    if (!audio) return;
     clearRepeatPauseTimers();
+    clearSource();
+    const controller = new AbortController();
+    loadControllerRef.current = controller;
     if (targetSurah !== activeSurahRef.current) onSurahChangeRef.current?.(targetSurah, verseNumber);
     activeSurahRef.current = targetSurah;
     currentVerseRef.current = verseNumber;
     setCurrentVerse(verseNumber);
+    setProgress(0);
+    setDuration(0);
     setIsPlaying(false);
     setIsLoading(true);
-    
     try {
-      // Create a fresh audio element to avoid corrupted state
-      if (audioRef.current) {
-        stopSpeedEnforcer();
-        disposeManagedAudioElement(audioRef.current);
-      }
-      newAudio = createManagedAudioElement();
-      if (RECITERS[selectedReciter].playbackWithoutCors) newAudio.removeAttribute('crossorigin');
-      setupAudioListeners(newAudio);
-      audioRef.current = newAudio;
-      syncPlaybackSpeed(newAudio);
-
-      // IndexedDB works in browsers and native WebViews, unlike Service Worker caches.
-      // "Lecture en ligne" skips stored clips (unless offline) so damaged copies cannot play.
       const preferOnline = isOnlineOnlyAudio() && navigator.onLine;
       const cachedUrl = preferOnline ? null : await getOfflineAudioUrl(selectedReciter, targetSurah, verseNumber);
-      if (newAudio !== audioRef.current) {
+      if (controller.signal.aborted) {
         if (cachedUrl) URL.revokeObjectURL(cachedUrl);
         return;
       }
+      // Playback does not need CORS, and local blobs must not carry it in Android WebViews.
+      audio.removeAttribute('crossorigin');
       if (cachedUrl) {
-        // Local blob: URLs must not carry crossorigin (blocks playback on mobile WebViews).
-        newAudio.removeAttribute('crossorigin');
+        blobUrlRef.current = cachedUrl;
         try {
-          await playAudioFromUrl(newAudio, cachedUrl);
-          if (newAudio !== audioRef.current) return;
+          await playAudioFromUrl(audio, cachedUrl, controller.signal);
+          if (controller.signal.aborted) return;
           setIsPlaying(true);
-          setCurrentVerse(verseNumber);
           onVerseChangeRef.current?.(verseNumber);
           return;
         } catch (error) {
-          if (newAudio !== audioRef.current || !navigator.onLine || newAudio.error == null) throw error;
-          // A damaged offline clip must not block the valid selected recording.
+          if (controller.signal.aborted || !navigator.onLine) throw error;
           URL.revokeObjectURL(cachedUrl);
+          blobUrlRef.current = null;
         }
       }
-
-      // Use everyayah.com directly for all reciters (cdn.islamic.network is unreliable)
-      const audioUrl = getReciterAudioUrl(targetSurah, verseNumber, selectedReciter);
-      await playAudioFromUrl(newAudio, audioUrl);
-      if (newAudio !== audioRef.current) return;
+      await playAudioFromUrl(audio, getReciterAudioUrl(targetSurah, verseNumber, selectedReciter), controller.signal);
+      if (controller.signal.aborted) return;
       setIsPlaying(true);
-      setCurrentVerse(verseNumber);
       onVerseChangeRef.current?.(verseNumber);
     } catch (error) {
-      if (newAudio !== audioRef.current) return;
+      if (controller.signal.aborted) return;
       console.error('Error loading audio:', error);
+      setIsPlaying(false);
       toast.error('Impossible de charger l\'audio');
     } finally {
-      if (newAudio === audioRef.current) setIsLoading(false);
+      if (!controller.signal.aborted) setIsLoading(false);
     }
-  }, [setupAudioListeners, playAudioFromUrl, stopSpeedEnforcer, syncPlaybackSpeed, clearRepeatPauseTimers]);
+  }, [playAudioFromUrl, clearSource, clearRepeatPauseTimers, setCurrentVerse]);
 
   const playVerse = useCallback(async (verseNumber: number) => {
     await playVerseAt(surahNumber, verseNumber);
@@ -679,7 +607,6 @@ export const useQuranAudio = ({
       syncPlaybackSpeed(audioRef.current);
       audioRef.current.play().then(() => {
         syncPlaybackSpeed(audioRef.current);
-        startSpeedEnforcer(audioRef.current);
       }).catch((error) => {
         console.error('Error playing audio:', error);
         setIsPlaying(false);
@@ -689,16 +616,15 @@ export const useQuranAudio = ({
     } else {
       playVerse(currentVerse);
     }
-  }, [currentVerse, playVerse, startSpeedEnforcer, syncPlaybackSpeed]);
+  }, [currentVerse, playVerse, syncPlaybackSpeed]);
 
   const pause = useCallback(() => {
     clearRepeatPauseTimers();
     if (audioRef.current) {
-      stopSpeedEnforcer();
       audioRef.current.pause();
       setIsPlaying(false);
     }
-  }, [stopSpeedEnforcer, clearRepeatPauseTimers]);
+  }, [clearRepeatPauseTimers]);
 
   const togglePlayPause = useCallback(() => {
     if (isPlaying) {
@@ -748,19 +674,20 @@ export const useQuranAudio = ({
     const resume = isPlaying || isLoading;
     pause();
     // Remove the old source even while paused: Play must use the new voice.
-    disposeManagedAudioElement(audioRef.current);
-    audioRef.current = null;
+    clearSource();
     setProgress(0);
     setDuration(0);
     setIsLoading(false);
     if (resume) {
       void playVerseAt(activeSurahRef.current, currentVerseRef.current);
     }
-  }, [isPlaying, isLoading, pause, playVerseAt]);
+  }, [isPlaying, isLoading, pause, playVerseAt, clearSource]);
 
+  const changeReciterRef = useRef(changeReciter);
+  changeReciterRef.current = changeReciter;
   useEffect(() => {
-    changeReciter(externalReciter);
-  }, [externalReciter, changeReciter]);
+    changeReciterRef.current(externalReciter);
+  }, [externalReciter]);
 
   const seek = useCallback((percentage: number) => {
     if (audioRef.current && audioRef.current.duration) {
