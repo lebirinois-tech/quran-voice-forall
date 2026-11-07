@@ -1,6 +1,6 @@
 import { useT } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
-import { Play, Pause, X, Loader2 } from 'lucide-react';
+import { Play, Pause, X, Loader2, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Input } from './ui/input';
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { useAudioCache } from '@/hooks/useAudioCache';
 import { cn } from '@/lib/utils';
 import { surahs } from '@/data/surahs';
 import { clampLocation, compareLocations, type RecitationSession } from '@/lib/recitationSession';
@@ -52,6 +53,11 @@ interface RecitationMenuProps {
   onSpeedChange: (speed: number) => void;
   /** Lance la lecture avec la configuration choisie dans le panneau. */
   onStart: (config: RecitationStartConfig) => void;
+  page: number;
+  pageStart: number;
+  pageEnd: number;
+  onGoToPage: (page: number) => void;
+  onGoToSurah: (surah: number) => void;
 }
 
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
@@ -73,11 +79,11 @@ const GAP_OPTIONS: { value: number; label: string }[] = [
 ];
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section className="rounded-xl border border-border overflow-hidden shadow-soft">
-    <h3 className="bg-primary text-primary-foreground text-center text-sm font-semibold py-2 px-3">
+  <section className="border-b border-border pb-3">
+    <h3 className="text-primary text-sm font-semibold py-2">
       {title}
     </h3>
-    <div className="bg-card p-3">{children}</div>
+    <div>{children}</div>
   </section>
 );
 
@@ -99,9 +105,12 @@ export const RecitationMenu = ({
   onPause,
   onReciterChange,
   onSpeedChange,
-  onStart,
+  onStart, page, pageStart, pageEnd, onGoToPage, onGoToSurah,
 }: RecitationMenuProps) => {
   const t = useT();
+  const { downloadSurahAudio, isDownloading, progress } = useAudioCache();
+  const L = (fr: string, ar: string, en: string) => t.lang === 'ar' ? ar : t.lang === 'en' ? en : fr;
+  const [scope, setScope] = useState<'page' | 'surah' | 'verse' | 'range'>('range');
   const fullSurah = RECITERS[reciter].fullSurah === true;
   const [startSurah, setStartSurah] = useState(surahNumber);
   const [startVerse, setStartVerse] = useState(String(currentVerse || 1));
@@ -151,8 +160,13 @@ export const RecitationMenu = ({
       });
       return;
     }
-    const start = clampLocation({ surah: startSurah, verse: parseInt(startVerse) || 1 });
-    const end = untilQuranEnd ? { surah: 114, verse: 6 }
+    const scopeStart = scope === 'page' ? pageStart : scope === 'surah' ? 1 : parseInt(startVerse) || 1;
+    const scopeSurah = scope === 'page' ? surahNumber : startSurah;
+    const start = clampLocation({ surah: scopeSurah, verse: scopeStart });
+    const end = scope === 'page' ? { surah: surahNumber, verse: pageEnd }
+      : scope === 'verse' ? start
+      : scope === 'surah' ? { surah: startSurah, verse: startMax }
+      : untilQuranEnd ? { surah: 114, verse: 6 }
       : stopEnabled ? clampLocation({ surah: stopSurah, verse: parseInt(stopVerse) || 1 })
       : { surah: start.surah, verse: startMax };
     if (compareLocations(end, start) < 0) {
@@ -169,12 +183,14 @@ export const RecitationMenu = ({
     });
   };
 
+  if (!open) return null;
+
   return (
     <>
       {/* Voile d'arrière-plan */}
       <div
         className={cn(
-          'fixed inset-0 z-[95] bg-black/50 transition-opacity duration-300',
+          'fixed inset-0 z-[95] bg-foreground/50 transition-opacity duration-300',
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
         onClick={() => onOpenChange(false)}
@@ -242,13 +258,13 @@ export const RecitationMenu = ({
 
           {/* Récitateur et vitesse */}
           <Section title={t('reciterSpeed')}>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               <Select value={reciter} onValueChange={(v) => onReciterChange(v as ReciterId)}>
-                <SelectTrigger className="h-10 text-xs" aria-label={t('reciter')}>
+                <SelectTrigger className="h-auto min-h-10 text-sm [&>span]:whitespace-normal [&>span]:text-left" aria-label={t('reciter')}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="z-[110]">
-                  {RECITER_IDS.map((key) => (
+                  {RECITER_IDS.filter((key) => RECITERS[key].qiraat === RECITERS[reciter].qiraat).map((key) => (
                     <SelectItem key={key} value={key} className="text-xs">
                       {t.lang === 'ar' ? RECITERS[key].nameAr : RECITERS[key].name}
                     </SelectItem>
@@ -270,8 +286,24 @@ export const RecitationMenu = ({
             </div>
           </Section>
 
+          <Section title={t('chooseReading')}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-center gap-3" dir="ltr">
+                <Button size="icon" variant="outline" disabled={page >= 604} aria-label={t('nextPage')} onClick={() => onGoToPage(Math.min(604, page + 1))}><ChevronLeft /></Button>
+                <span className="min-w-16 text-center font-semibold tabular-nums">{t('page')} {page}</span>
+                <Button size="icon" variant="outline" disabled={page <= 1} aria-label={t('prevPage')} onClick={() => onGoToPage(Math.max(1, page - 1))}><ChevronRight /></Button>
+              </div>
+              <select className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={surahNumber} aria-label={t('chooseSurah')} onChange={(e) => onGoToSurah(Number(e.target.value))}>
+                {surahs.map((s) => <option key={s.number} value={s.number}>{s.number}. {t.lang === 'ar' ? s.nameArabic : s.name}</option>)}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                {(['page', 'surah', 'verse', 'range'] as const).map((key) => <Button key={key} variant={scope === key ? 'default' : 'outline'} onClick={() => setScope(key)} aria-pressed={scope === key}>{key === 'range' ? L('Plage de versets', 'مقطع آيات', 'Verse range') : t(key)}</Button>)}
+              </div>
+            </div>
+          </Section>
+
           {/* Début de la récitation */}
-          <Section title={t('startFrom')}>
+          {(scope === 'verse' || scope === 'range') && <Section title={t('startFrom')}>
             <div className="grid grid-cols-2 gap-2">
               <Select value={String(startSurah)} onValueChange={(v) => setStartSurah(Number(v))}>
                 <SelectTrigger className="h-10 text-xs" aria-label={t('surah')}>
@@ -299,9 +331,11 @@ export const RecitationMenu = ({
             </div>
           </Section>
 
+          }
+
           {/* Arrêt de la récitation */}
           {!fullSurah && <>
-          <Section title={t('stopAt')}>
+          {scope === 'range' && <Section title={t('stopAt')}>
             <div className="space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
@@ -345,6 +379,8 @@ export const RecitationMenu = ({
               {validationError && <p role="alert" className="text-sm text-destructive">{t(validationError)}</p>}
             </div>
           </Section>
+
+          }
 
           {/* Répétition du verset */}
           <Section title={t('verseRepeat')}>
@@ -406,6 +442,10 @@ export const RecitationMenu = ({
             </div>
           </Section>
           </>}
+          <Button variant="outline" className="w-full gap-2" disabled={isDownloading} onClick={() => void downloadSurahAudio(reciter, surahNumber).catch(() => {})}>
+            {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {isDownloading ? `${Math.round(progress)}%` : L('Télécharger la sourate', 'تحميل السورة', 'Download surah')}
+          </Button>
         </div>
       </aside>
     </>

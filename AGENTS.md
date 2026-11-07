@@ -23,3 +23,6 @@
 - APK signing uses the committed stable keystore `signing/quran-acces.keystore` (alias `quran`), injected into the generated `android/app/build.gradle` by the workflow; never revert to per-runner debug keys, or Android rejects updates with a package conflict.
 
 - Recitation stop locations and cross-surah passage progression use the shared recitationSession module; the audio hook owns the session and active surah while reader navigation follows it, so endpoints and repetition counters survive surah changes.
+
+- Quran recitation reuses one attached HTMLAudioElement per hook lifetime; cancellable source loads and owned blob URLs prevent stale playback, while speed is applied at metadata/canplay or manual changes without enforcement timers.
+- Both reader modes open the shared RecitationMenu from the top; navigation, scope, reciter, speed, repetition and offline downloads stay in that panel to avoid duplicate playback settings.

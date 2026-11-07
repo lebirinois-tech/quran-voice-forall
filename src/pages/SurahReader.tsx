@@ -23,7 +23,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { getJuzColors } from '@/lib/juzColors';
-import { PageReadingDialog } from '@/components/PageReadingDialog';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
 import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search, Home } from 'lucide-react';
@@ -177,7 +176,6 @@ const SurahReader = () => {
     onVerseChange: handleVerseChange,
   });
 
-  const [readingDialog, setReadingDialog] = useState<{ page: number; start: number; end: number } | null>(null);
   const playReadingRange = (start: number, end: number, repeatCount: number) => {
     if (start === end) {
       quranAudio.setRepeatMode(repeatCount !== 1 ? 'verse' : 'none', repeatCount);
@@ -552,12 +550,10 @@ const SurahReader = () => {
       onPrevious={quranAudio.previousVerse}
       onReciterChange={appSettings.onReciterChange}
       onSeek={quranAudio.seek}
-      onRepeatModeChange={quranAudio.setRepeatMode}
       onSpeedChange={quranAudio.changeSpeed}
       repeatPause={quranAudio.repeatPause}
       isPausingForRepeat={quranAudio.isPausingForRepeat}
       pauseRemainingSec={quranAudio.pauseRemainingSec}
-      onRepeatPauseChange={quranAudio.setRepeatPauseSettings}
       surahName={`${surah.name} - ${surah.nameArabic}`}
       embedded={isMushafMode}
     />
@@ -577,21 +573,6 @@ const SurahReader = () => {
       onVerseViewModeChange={appSettings.onVerseViewModeChange}
       triggerLabel={t('settings')}
       triggerClassName="w-full justify-start gap-2 border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
-    />
-  );
-
-  // Menu de lecture partagé (Pages et Versets) : page, verset ou plage avec répétitions.
-  const pageReadingDialog = readingDialog && (
-    <PageReadingDialog
-      open
-      onOpenChange={(o) => !o && setReadingDialog(null)}
-      page={readingDialog.page}
-      pageStart={readingDialog.start}
-      pageEnd={readingDialog.end}
-      maxVerse={surahs.find((s) => s.number === num)?.versesCount ?? 1}
-      onPlay={playReadingRange}
-      onGoToPage={(p) => { setReadingDialog(null); handleNavigateToPage(p); }}
-      onGoToSurah={(n) => { setReadingDialog(null); navigate(`/surah/${n}?verse=1`); }}
     />
   );
 
@@ -646,6 +627,7 @@ const SurahReader = () => {
           </p>
         </div>}
 
+        {!isMushafMode && !isPagedVerseView && <div className="flex justify-center mb-4"><Button variant="outline" className="gap-2" onClick={() => setRecitationMenuOpen(true)}><Headphones className="h-4 w-4" />{t('audioMenu')}</Button></div>}
         {/* Quick Navigation */}
         {!isMushafMode && <div className="max-w-lg mx-auto mb-6 animate-fade-in">
           <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl border border-border bg-card p-2">
@@ -967,12 +949,12 @@ const SurahReader = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => setReadingDialog({ page: pageNum, start: firstVerseOfPage, end: lastVerseOfPage })}
+                              onClick={() => setRecitationMenuOpen(true)}
                               className="h-8 gap-1.5 rounded-full shrink-0"
-                              aria-label={`Lire la page ${pageNum} depuis le verset ${firstVerseOfPage}`}
+                              aria-label={t('audioMenu')}
                             >
                               <Play className="h-3.5 w-3.5" />
-                              <span className="text-xs">{t('listenPage')}</span>
+                              <span className="text-xs">{t('audioMenu')}</span>
                             </Button>
                           </header>
 
@@ -1043,20 +1025,12 @@ const SurahReader = () => {
       {/* Mode Versets : casque et micro intégrés à la barre audio du bas */}
       {!isMushafMode && React.cloneElement(audioPlayerControls, {
         leadingControls: (
-          <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              onClick={() => setRecitationMenuOpen(true)}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
-              aria-label={t('audioMenu')}
-            >
-              <Headphones className="h-4 w-4" />
-            </button>
+          <div className="flex items-center gap-3" dir="ltr">
             {isPagedVerseView && versePageNum !== null && (
               <>
-                <button
-                  type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-primary text-lg disabled:opacity-40"
+                <Button
+                  variant="outline" size="icon"
+                  className="h-11 w-11 shrink-0 rounded-full border border-border text-primary text-3xl disabled:opacity-40"
                   onClick={() => {
                     const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                     if (idx >= 0 && idx < versePageGroups.length - 1) goToVersePage(versePageGroups[idx + 1][0]);
@@ -1064,10 +1038,10 @@ const SurahReader = () => {
                   }}
                   disabled={versePageNum >= 604}
                   aria-label={t('nextPage')}
-                >‹</button>
-                <button
-                  type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-primary text-lg disabled:opacity-40"
+                >‹</Button>
+                <Button
+                  variant="outline" size="icon"
+                  className="h-11 w-11 shrink-0 rounded-full border border-border text-primary text-3xl disabled:opacity-40"
                   onClick={() => {
                     const idx = versePageGroups.findIndex(([p]) => p === versePageNum);
                     if (idx > 0) goToVersePage(versePageGroups[idx - 1][0]);
@@ -1075,7 +1049,7 @@ const SurahReader = () => {
                   }}
                   disabled={versePageNum <= 1}
                   aria-label={t('prevPage')}
-                >›</button>
+                >›</Button>
               </>
             )}
             <button
@@ -1117,9 +1091,13 @@ const SurahReader = () => {
         onReciterChange={appSettings.onReciterChange}
         onSpeedChange={quranAudio.changeSpeed}
         onStart={handleRecitationStart}
+        page={currentMushafPage ?? versePageNum ?? 1}
+        pageStart={currentPageVerseRange?.first ?? versePageGroups.find(([p]) => p === versePageNum)?.[1][0]?.number ?? 1}
+        pageEnd={currentPageVerseRange?.last ?? versePageGroups.find(([p]) => p === versePageNum)?.[1].at(-1)?.number ?? verses.length}
+        onGoToPage={handleNavigateToPage}
+        onGoToSurah={(n) => navigate(`/surah/${n}?verse=1`)}
       />
 
-      {pageReadingDialog}
     </div>
   );
 };

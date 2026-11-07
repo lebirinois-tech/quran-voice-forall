@@ -8,7 +8,6 @@ import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse, surahPageStart } from '@/data/surahs';
 import { getJuzColors } from '@/lib/juzColors';
-import { PageReadingDialog } from '@/components/PageReadingDialog';
 
 // Clés "sourate:verset" des versets où commence un Juz (pour la marque ۞).
 const juzStartKeys = new Set(
@@ -974,10 +973,10 @@ export const HafsTajweedPageView = ({
                 {onPlayRange && (
                   <button
                     type="button"
-                    onClick={() => setReadingOpen(true)}
-                    aria-label={t('listenPage')}
-                    title={t('listenPage')}
-                    className="shrink-0 rounded-full border p-1"
+                    onClick={onOpenAudioMenu}
+                    aria-label={t('audioMenu')}
+                    title={t('audioMenu')}
+                    className="h-9 w-9 shrink-0 rounded-full border p-1"
                     style={{ color: 'hsl(43, 62%, 25%)', borderColor: 'hsl(43, 62%, 45%)' }}
                   >
                     <Play className="h-3.5 w-3.5" />
@@ -1299,7 +1298,7 @@ export const HafsTajweedPageView = ({
       {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
       {showMenuButton && !isCompanion ? (
         <div
-          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-start gap-0.5 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur sm:justify-center"
+          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-start gap-2 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur sm:justify-center"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
           <Button
@@ -1308,9 +1307,9 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={t('nextPage')}
             onClick={goNext}
-            className="h-8 w-8 shrink-0 rounded-full text-primary"
+            className="h-11 w-11 shrink-0 rounded-full text-primary"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-7 w-7" />
           </Button>
           <Button
             type="button"
@@ -1318,9 +1317,9 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label={t('prevPage')}
             onClick={goPrev}
-            className="h-8 w-8 shrink-0 rounded-full text-primary"
+            className="h-11 w-11 shrink-0 rounded-full text-primary"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-7 w-7" />
           </Button>
           <Button
             type="button"
@@ -1341,52 +1340,6 @@ export const HafsTajweedPageView = ({
           >
             {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </Button>
-          {onPlayRange && (
-            <button
-              type="button"
-              aria-label={`Plage de lecture : ${playScopes[activeScope].label}`}
-              title="Appui : lancer la plage · Double-appui : plus d'options"
-              onClick={() => startScope(activeScope)}
-              onDoubleClick={() => setScopeOpen(true)}
-              className="flex h-8 shrink-0 flex-col items-center justify-center rounded-full border border-primary/40 bg-background px-2 text-primary"
-            >
-              <span className="flex items-center gap-1 text-[10px] font-bold leading-none">
-                <ListMusic className="h-3 w-3" />
-                {t(activeScope)}
-              </span>
-              <span className="mt-0.5 text-[9px] leading-none text-muted-foreground">
-                {scopeDetailLabel}
-              </span>
-            </button>
-          )}
-          {onPlayRange && (
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              aria-label="Changer la plage de lecture"
-              onClick={() =>
-                setActiveScope((s) =>
-                  s === 'verse' ? 'page' : s === 'page' ? 'surah' : s === 'surah' ? 'juz' : 'verse'
-                )
-              }
-              className="hidden h-8 w-7 shrink-0 rounded-full text-primary min-[420px]:inline-flex"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
-
-          {onOpenAudioMenu && !isCompanion && (
-            <Button
-              type="button"
-              size="icon"
-              aria-label="Menu audio"
-              onClick={onOpenAudioMenu}
-              className="h-8 w-8 shrink-0 rounded-full bg-primary text-primary-foreground"
-            >
-              <Headphones className="h-4 w-4" />
-            </Button>
-          )}
           {toolbarSettings}
           <Button
             type="button"
@@ -1651,38 +1604,6 @@ export const HafsTajweedPageView = ({
               </div>
             </section>
 
-            <section>
-              <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('audio')}</h4>
-              {audioControls ?? (
-                <div className="flex items-center gap-2 rounded-2xl border border-border bg-card p-3">
-                  {onPreviousVerse && (
-                    <Button size="icon" variant="outline" onClick={onPreviousVerse} aria-label={t('prevVerse')}>
-                      <SkipBack className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {onPlayPause && (
-                    <Button
-                      size="icon"
-                      onClick={() => { onPlayPause(); }}
-                      className="h-11 w-11 rounded-full"
-                      aria-label={isAudioPlaying ? t('pause') : t('play')}
-                    >
-                      {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                    </Button>
-                  )}
-                  {onNextVerse && (
-                    <Button size="icon" variant="outline" onClick={onNextVerse} aria-label={t('nextVerse')}>
-                      <SkipForward className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
-                    <Volume2 className="h-3.5 w-3.5" />
-                    {currentVerse ? `${t('verse')} ${currentVerse}` : '—'}
-                  </span>
-                </div>
-              )}
-            </section>
-
             {voiceControls && (
               <section>
                 <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">{t('voiceCommand')}</h4>
@@ -1816,69 +1737,6 @@ export const HafsTajweedPageView = ({
           </div>
         </SheetContent>
       </Sheet>
-
-      {/* Choix de la portée de lecture : verset, page, sourate, juz */}
-      <Dialog open={scopeOpen} onOpenChange={setScopeOpen}>
-        <DialogContent className="sm:max-w-sm z-[120]">
-          <DialogHeader>
-            <DialogTitle>{t('chooseReading')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            {(['verse', 'page', 'surah', 'juz'] as const).map((key) => {
-              const scope = playScopes[key];
-              return (
-                <Button
-                  key={key}
-                  variant="outline"
-                  className="h-12 w-full justify-between text-sm"
-                  onClick={() => startScope(key)}
-                >
-                  <span className="flex items-center gap-2">
-                    <Play className="h-4 w-4 text-primary" />
-                    {scope.label}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {scope.start === scope.end ? `v. ${scope.start}` : `v. ${scope.start}–${scope.end}`}
-                  </span>
-                </Button>
-              );
-            })}
-            <div className="space-y-1.5 pt-1">
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Repeat className="h-3.5 w-3.5" />
-                {t('repeatCount')}
-              </p>
-              <div className="grid grid-cols-6 gap-1">
-                {[1, 2, 3, 5, 10, 0].map((n) => (
-                  <Button
-                    key={n}
-                    variant={repeatCount === n ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-9 px-0 text-xs"
-                    onClick={() => setRepeatCount(n)}
-                  >
-                    {n === 0 ? '∞' : n}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {onPlayRange && (
-        <PageReadingDialog
-          open={readingOpen}
-          onOpenChange={setReadingOpen}
-          page={currentPage}
-          pageStart={pageVerses[0]?.number ?? 1}
-          pageEnd={pageVerses[pageVerses.length - 1]?.number ?? 1}
-          maxVerse={verses.length || 1}
-          onPlay={(s, e, n) => onPlayRange(s, e, n === 0, n)}
-          onGoToPage={goToPage}
-          onGoToSurah={(n) => goToPage(surahPageStart[n] ?? 1)}
-        />
-      )}
 
       {/* Recorder dialog */}
 
