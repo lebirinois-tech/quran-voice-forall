@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, typ
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones, Search } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { TajweedLegend } from './TajweedLegend';
 import { MushafPageBadge } from '@/components/MushafPageBadge';
 import { Verse, surahs } from '@/data/surahs';
 import { juzMapping, getJuzForVerse, surahPageStart } from '@/data/surahs';
@@ -1298,7 +1299,7 @@ export const HafsTajweedPageView = ({
       {/* Barre de commandes rapides, à fleur du cadre et masquable à la demande. */}
       {showMenuButton && !isCompanion ? (
         <div
-          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-start gap-2 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur sm:justify-center"
+          className="fixed left-1/2 z-[80] flex max-w-[96vw] -translate-x-1/2 flex-nowrap items-center justify-start gap-2 overflow-x-auto rounded-full border border-primary/25 bg-background/90 px-1.5 py-1.5 shadow-2xl backdrop-blur sm:justify-center" dir="ltr"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
         >
           <Button
@@ -1341,6 +1342,7 @@ export const HafsTajweedPageView = ({
             {isAudioPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </Button>
           {toolbarSettings}
+          <TajweedLegend compact />
           <Button
             type="button"
             size="icon"
