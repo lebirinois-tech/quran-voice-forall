@@ -745,16 +745,6 @@ const SurahReader = () => {
         )}
 
 
-        {/* Tajweed Legend - shown for all colored Tajweed modes (versets + pages) */}
-        {(appSettings.textDisplayStyle === 'tajweed' || 
-          appSettings.textDisplayStyle === 'warsh-tajweed' ||
-          appSettings.textDisplayStyle === 'qalun-tajweed' ||
-          appSettings.textDisplayStyle === 'pages-hafs' ||
-          appSettings.textDisplayStyle === 'pages-warsh' ||
-          appSettings.textDisplayStyle === 'pages-qalun') && (
-          <TajweedLegend />
-        )}
-
         {/* Quranic themes legend — text modes + Hafs/Warsh/Qalun pages (rendu texte thémé). */}
         {!isMushafMode &&
           (!isMushafImageMode ||
@@ -1065,7 +1055,8 @@ const SurahReader = () => {
         trailingControls: (
           <div className="flex items-center gap-0.5">
             {toolbarSettingsShortcut}
-            <div className="flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
+            <TajweedLegend compact />
+            <div className="hidden sm:flex h-8 w-8 items-center justify-center overflow-visible [&_button]:!h-8 [&_button]:!w-8 [&_svg]:!h-4 [&_svg]:!w-4">
               {voiceCommandControls}
             </div>
           </div>

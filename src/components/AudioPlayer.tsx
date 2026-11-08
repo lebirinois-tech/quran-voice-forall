@@ -221,7 +221,7 @@ export const AudioPlayer = ({
               size="icon"
               onClick={onPrevious}
               disabled={currentVerse <= 1 || isLoading}
-              className="rounded-full h-8 w-8"
+              className="hidden sm:inline-flex rounded-full h-8 w-8"
               aria-label={t('prevVerse')}
             >
               <SkipBack className="h-4 w-4" />
@@ -249,7 +249,7 @@ export const AudioPlayer = ({
               size="icon"
               onClick={onNext}
               disabled={currentVerse >= totalVerses || isLoading}
-              className="rounded-full h-8 w-8"
+              className="hidden sm:inline-flex rounded-full h-8 w-8"
               aria-label={t('nextVerse')}
             >
               <SkipForward className="h-4 w-4" />
