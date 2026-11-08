@@ -1114,7 +1114,7 @@ export const HafsTajweedPageView = ({
                 >
                   <div
                     data-line-inner=""
-                    className="flex h-full w-full items-stretch justify-between"
+                    className="flex h-full w-full shrink-0 items-stretch justify-between"
                     style={{ transformOrigin: 'right center' }}
                   >
                   {themedRuns.map((run, runPosition) => (
