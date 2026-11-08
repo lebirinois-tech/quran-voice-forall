@@ -5,4 +5,4 @@
 - [x] Vérifier les 61 tests, téléchargement réel de Maher puis lecture hors-ligne à 1x/3x, interfaces à 360 px sans débordement. Le son sur téléphone Android physique reste non vérifiable ici.
 
 - [x] Remettre la légende Tajweed dans la barre du bas des deux modes.
-- [ ] Publier les mises à jour.
+- [x] Publication demandée sur le lien existant ; déploiement programmé, sans confirmation de disponibilité ni de test sur Android physique.
