@@ -3,3 +3,5 @@
 - [ ] Maher Al-Muaiqly remplace Al-Juhani ; Al-Hudhaifi Qaloun utilise la source fournie.
 - [ ] Réunir les réglages dans le menu du haut et agrandir/espacer les flèches du bas dans les deux modes.
 - [ ] Vérifier les tests, la lecture hors-ligne et les deux interfaces sur téléphone.
+
+- [ ] Remettre la légende Tajweed dans la barre du bas des deux modes et publier.
