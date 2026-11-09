@@ -914,17 +914,26 @@ const SurahReader = () => {
                           <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b" data-juz-band={juzNum % 2 === 1 ? 'odd' : 'even'} style={{ backgroundColor: getJuzColors(juzNum).band, borderColor: getJuzColors(juzNum).border }}>
                             <nav
                               aria-label="Chemin"
-                              className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0"
+                              className="flex flex-1 items-center justify-center gap-1.5 text-xs text-muted-foreground min-w-0"
                             >
-                              <span className="font-semibold text-foreground truncate">
+                              <span
+                                className="font-semibold text-foreground truncate rounded-full border-2 px-2 py-0.5 shadow-sm"
+                                style={{ backgroundColor: 'hsl(195, 80%, 96%)', borderColor: 'hsl(43, 62%, 45%)' }}
+                              >
                                 {surah.name}
                               </span>
                               <span aria-hidden="true">›</span>
-                              <span className="whitespace-nowrap">
+                              <span
+                                className="whitespace-nowrap rounded-full border-2 px-2 py-0.5 shadow-sm"
+                                style={{ backgroundColor: 'hsl(195, 80%, 96%)', borderColor: 'hsl(43, 62%, 45%)' }}
+                              >
                                 Juz <span className="font-semibold text-foreground">{juzNum}</span>
                               </span>
                               <span aria-hidden="true">›</span>
-                              <span className="whitespace-nowrap">
+                              <span
+                                className="whitespace-nowrap rounded-full border-2 px-2 py-0.5 shadow-sm"
+                                style={{ backgroundColor: 'hsl(195, 80%, 96%)', borderColor: 'hsl(43, 62%, 45%)' }}
+                              >
                                 <MushafPageBadge page={pageNum} className="font-semibold text-foreground" />
                               </span>
                               <span aria-hidden="true">·</span>
