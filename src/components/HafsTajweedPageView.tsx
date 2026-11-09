@@ -940,8 +940,12 @@ export const HafsTajweedPageView = ({
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  className="min-w-0 shrink-0 whitespace-nowrap rounded-md px-1 py-0.5 text-right font-amiri text-base font-bold sm:text-lg"
-                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                  className="min-w-0 shrink-0 whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-right font-amiri text-base font-bold shadow-sm sm:text-lg"
+                  style={{
+                    color: 'hsl(43, 62%, 25%)',
+                    backgroundColor: 'hsl(195, 80%, 96%)',
+                    borderColor: 'hsl(43, 62%, 45%)',
+                  }}
                   aria-label={t('chooseSurah')}
                 >
                   سورة {surah?.nameArabic ?? ''}
@@ -951,8 +955,12 @@ export const HafsTajweedPageView = ({
                   onClick={() => window.location.assign('/search')}
                   aria-label={t('quranSearchTitle')}
                   title={t('quranSearchTitle')}
-                  className="shrink-0 rounded-full p-1"
-                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                  className="shrink-0 rounded-full border-2 p-1 shadow-sm"
+                  style={{
+                    color: 'hsl(43, 62%, 25%)',
+                    backgroundColor: 'hsl(195, 80%, 96%)',
+                    borderColor: 'hsl(43, 62%, 45%)',
+                  }}
                 >
                   <Search className="h-4 w-4" />
                 </button>
@@ -961,7 +969,7 @@ export const HafsTajweedPageView = ({
                 type="button"
                 onClick={() => setMenuOpen(true)}
                 aria-label={t('choosePage')}
-                className="whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-xs font-bold shadow-sm sm:text-sm"
+                className="justify-self-center whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-xs font-bold shadow-sm sm:text-sm"
                 style={{
                   backgroundColor: 'hsl(195, 80%, 96%)',
                   borderColor: 'hsl(43, 62%, 45%)',
@@ -986,8 +994,12 @@ export const HafsTajweedPageView = ({
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  className="min-w-0 truncate whitespace-nowrap rounded-md px-1 py-0.5 text-left font-amiri text-base font-bold sm:text-lg"
-                  style={{ color: 'hsl(43, 62%, 25%)' }}
+                  className="min-w-0 truncate whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-left font-amiri text-base font-bold shadow-sm sm:text-lg"
+                  style={{
+                    color: 'hsl(43, 62%, 25%)',
+                    backgroundColor: 'hsl(195, 80%, 96%)',
+                    borderColor: 'hsl(43, 62%, 45%)',
+                  }}
                   aria-label={t('chooseJuz')}
                 >
                   الجزء {toArabicDigits(currentJuz)}
