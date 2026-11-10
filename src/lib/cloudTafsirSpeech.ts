@@ -104,14 +104,13 @@ export async function playCloudChunk(text: string, lang: TafsirSpeechLang, playe
   if (cached) { onFirstAudio(); player.push(cached); return; }
 
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new CloudSpeechError('Sign in required', 401);
 
   const res = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/tafsir-tts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      Authorization: `Bearer ${session.access_token}`,
+      Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
     body: JSON.stringify({ text, lang }),
     signal,

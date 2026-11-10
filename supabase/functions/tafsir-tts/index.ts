@@ -15,6 +15,8 @@ const STYLE: Record<string, string> = {
   en: "Read the following text in English with a calm, measured male voice: ",
 };
 
+const RATE = new Map<string, number[]>();
+
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -27,7 +29,14 @@ Deno.serve(async (req) => {
       const { data, error } = await auth.auth.getClaims(token);
       return error ? null : data?.claims ?? null;
     });
-    if (!userId) return json({ error: 'Sign in required' }, 401);
+    // Public readers (APK/PWA without account) get the cloud voice, rate-limited per IP.
+    if (!userId) {
+      const ip = (req.headers.get('x-forwarded-for') ?? 'anon').split(',')[0].trim();
+      const now = Date.now();
+      const hits = (RATE.get(ip) ?? []).filter((t) => now - t < 3_600_000);
+      if (hits.length >= 120) return json({ error: 'Too many requests' }, 429);
+      hits.push(now); RATE.set(ip, hits);
+    }
     const { text, lang } = await req.json();
     if (typeof text !== "string" || !text.trim() || text.length > 1500) return json({ error: "Invalid text" }, 400);
     if (!["ar", "fr", "en"].includes(lang)) return json({ error: "Invalid lang" }, 400);
