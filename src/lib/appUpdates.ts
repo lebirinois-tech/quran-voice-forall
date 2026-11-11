@@ -38,12 +38,9 @@ export const fetchApkVersion = async (): Promise<VersionInfo | null> => {
 };
 
 export const openApkUpdate = async () => {
-  // Android, not the app, owns the final installation confirmation.
-  if (isNativeApp()) {
-    const { Browser } = await import('@capacitor/browser');
-    await Browser.open({ url: apkDownloadUrl });
-    return;
-  }
+  // Native: navigating the WebView to an external host makes Capacitor hand the link to the
+  // system browser, whose download manager completes the APK; in-app Custom Tabs left
+  // downloads stalled. Android still owns the final installation confirmation.
   window.location.assign(apkDownloadUrl);
 };
 
