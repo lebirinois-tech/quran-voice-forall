@@ -24,7 +24,7 @@ const checkUpdate = async (manual = false) => {
         // A tap on the notice starts one download; background auto-opens left stalled downloads.
         if (manual || autoDownloadedBuild !== remote.buildId) {
           autoDownloadedBuild = remote.buildId;
-          toast.info(updateMessage('tapToDownload'), {
+          toast.info(updateMessage('available'), {
             id: 'apk-update', duration: Infinity,
             action: { label: updateMessage('install'), onClick: () => {
               void openApkUpdate().catch(() => toast.error(updateMessage('downloadFailed')));
