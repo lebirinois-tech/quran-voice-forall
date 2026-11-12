@@ -6,7 +6,7 @@
 - All iPhone install entry points use the shared PwaInstallContext dialog with localized native-browser steps; iOS exposes no programmatic home-screen installation prompt.
 - Quran search derives word suggestions and complete-word occurrences from the bundled corpus through the shared quranSearch module; each result carries its own surah, verse and page so navigation never substitutes the first occurrence.
 - Updates compare native installations only to the GitHub `latest` APK release version marker (legacy asset timestamp fallback), never to the web deployment; the singleton PWA registrar applies updates and the global monitor checks launch/foreground/online/5-minute intervals without reinstalling native bundles.
-- APK updates download only when the user taps the update notice, which opens the release link with @capacitor/browser; background auto-opens and WebView navigation left downloads stalled or failed.
+- APK updates open the release link with @capacitor/browser automatically once per detected build (notice action retries); Android TV boxes only completed downloads this way, while tap-only or WebView navigation failed.
 
 - All Tafsir readers use the shared useTafsirSpeech hook: cloud male voice via the tafsir-tts function with clips cached in IndexedDB, falling back to device speech only when offline/transient errors occur; device voices mispronounce Fusha.
 

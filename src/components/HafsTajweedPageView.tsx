@@ -940,7 +940,7 @@ export const HafsTajweedPageView = ({
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  className="min-w-0 shrink-0 whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-right font-amiri text-base font-bold shadow-sm sm:text-lg"
+                  className="min-w-0 truncate whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-right font-amiri text-base font-bold shadow-sm sm:text-lg"
                   style={{
                     color: 'hsl(43, 62%, 25%)',
                     backgroundColor: 'hsl(195, 80%, 96%)',
@@ -985,10 +985,10 @@ export const HafsTajweedPageView = ({
                     onClick={onOpenAudioMenu}
                     aria-label={t('audioMenu')}
                     title={t('audioMenu')}
-                    className="h-9 w-9 shrink-0 rounded-full border p-1"
-                    style={{ color: 'hsl(43, 62%, 25%)', borderColor: 'hsl(43, 62%, 45%)' }}
+                    className="shrink-0 rounded-full border-2 p-1 shadow-sm"
+                    style={{ color: 'hsl(43, 62%, 25%)', backgroundColor: 'hsl(195, 80%, 96%)', borderColor: 'hsl(43, 62%, 45%)' }}
                   >
-                    <Play className="h-3.5 w-3.5" />
+                    <Play className="h-4 w-4" />
                   </button>
                 )}
                 <button

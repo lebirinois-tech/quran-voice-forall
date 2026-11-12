@@ -24,10 +24,8 @@ describe('Global update monitor', () => {
     render(<UpdatePrompt />);
     await act(() => vi.advanceTimersByTimeAsync(2000));
     expect(mocks.fetch).toHaveBeenCalledTimes(1);
-    expect(mocks.open).not.toHaveBeenCalled();
-    expect(mocks.info).toHaveBeenCalledTimes(1);
-    mocks.info.mock.calls[0][1].action.onClick();
     expect(mocks.open).toHaveBeenCalledTimes(1);
+    expect(mocks.info).toHaveBeenCalledTimes(1);
     await act(() => vi.advanceTimersByTimeAsync(298000));
     expect(mocks.fetch).toHaveBeenCalledTimes(2);
     expect(mocks.open).toHaveBeenCalledTimes(1);

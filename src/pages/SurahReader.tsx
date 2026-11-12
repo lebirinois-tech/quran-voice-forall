@@ -848,6 +848,8 @@ const SurahReader = () => {
               initialPage={companionPage!}
               onPageRequest={handleNavigateToPage}
               onNavigateToSurah={(s) => navigate(`/surah/${s}`)}
+              onOpenAudioMenu={() => setRecitationMenuOpen(true)}
+              onPlayRange={(start, end, loop, repeatCount = 1) => playReadingRange(start, end, loop ? 0 : repeatCount)}
             />
           )}
 

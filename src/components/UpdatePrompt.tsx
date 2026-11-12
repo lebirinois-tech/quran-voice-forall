@@ -21,10 +21,11 @@ const checkUpdate = async (manual = false) => {
     const remote = await fetchInstalledUpdateVersion();
     if (remote && hasInstalledUpdate(remote)) {
       if (isNativeApp()) {
-        // A tap on the notice starts one download; background auto-opens left stalled downloads.
+        // Le téléchargement démarre seul ; Android garde la confirmation d'installation.
         if (manual || autoDownloadedBuild !== remote.buildId) {
           autoDownloadedBuild = remote.buildId;
-          toast.info(updateMessage('available'), {
+          void openApkUpdate().catch(() => toast.error(updateMessage('downloadFailed')));
+          toast.info(updateMessage('autoDownload'), {
             id: 'apk-update', duration: Infinity,
             action: { label: updateMessage('install'), onClick: () => {
               void openApkUpdate().catch(() => toast.error(updateMessage('downloadFailed')));
