@@ -929,18 +929,18 @@ export const HafsTajweedPageView = ({
             {/* En-tête unique : sourate, page cliquable au centre et Juz. */}
             <div
               dir="rtl"
-              className="mb-1 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-1 rounded-lg border px-2 py-1"
+              className="mb-1 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-0.5 rounded-lg border px-1 py-0.5"
               data-juz-band={currentJuz % 2 === 1 ? 'odd' : 'even'}
               style={{
                 borderColor: getJuzColors(currentJuz).border,
                 backgroundColor: getJuzColors(currentJuz).band,
               }}
             >
-              <span className="flex min-w-0 items-center justify-start gap-1">
+              <span className="flex min-w-0 items-center justify-center gap-0.5">
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  className="min-w-0 truncate whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-right font-amiri text-base font-bold shadow-sm sm:text-lg"
+                  className="min-w-0 truncate whitespace-nowrap rounded-full border-2 px-1.5 py-0 text-right font-amiri text-[clamp(0.7rem,3.2cqi,1rem)] font-bold leading-snug shadow-sm"
                   style={{
                     color: 'hsl(43, 62%, 25%)',
                     backgroundColor: 'hsl(195, 80%, 96%)',
@@ -955,21 +955,21 @@ export const HafsTajweedPageView = ({
                   onClick={() => window.location.assign('/search')}
                   aria-label={t('quranSearchTitle')}
                   title={t('quranSearchTitle')}
-                  className="shrink-0 rounded-full border-2 p-1 shadow-sm"
+                  className="shrink-0 rounded-full border-2 p-0.5 shadow-sm"
                   style={{
                     color: 'hsl(43, 62%, 25%)',
                     backgroundColor: 'hsl(195, 80%, 96%)',
                     borderColor: 'hsl(43, 62%, 45%)',
                   }}
                 >
-                  <Search className="h-4 w-4" />
+                  <Search className="h-3.5 w-3.5" />
                 </button>
               </span>
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
                 aria-label={t('choosePage')}
-                className="justify-self-center whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-xs font-bold shadow-sm sm:text-sm"
+                className="justify-self-center whitespace-nowrap rounded-full border-2 px-1.5 py-0 text-[clamp(0.65rem,2.8cqi,0.875rem)] font-bold shadow-sm"
                 style={{
                   backgroundColor: 'hsl(195, 80%, 96%)',
                   borderColor: 'hsl(43, 62%, 45%)',
@@ -978,23 +978,23 @@ export const HafsTajweedPageView = ({
               >
                 <MushafPageBadge page={currentPage} />
               </button>
-              <span className="flex min-w-0 items-center justify-end gap-1">
+              <span className="flex min-w-0 items-center justify-center gap-0.5">
                 {onPlayRange && (
                   <button
                     type="button"
                     onClick={onOpenAudioMenu}
                     aria-label={t('audioMenu')}
                     title={t('audioMenu')}
-                    className="shrink-0 rounded-full border-2 p-1 shadow-sm"
+                    className="shrink-0 rounded-full border-2 p-0.5 shadow-sm"
                     style={{ color: 'hsl(43, 62%, 25%)', backgroundColor: 'hsl(195, 80%, 96%)', borderColor: 'hsl(43, 62%, 45%)' }}
                   >
-                    <Play className="h-4 w-4" />
+                    <Play className="h-3.5 w-3.5" />
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  className="min-w-0 truncate whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-left font-amiri text-base font-bold shadow-sm sm:text-lg"
+                  className="min-w-0 truncate whitespace-nowrap rounded-full border-2 px-1.5 py-0 text-left font-amiri text-[clamp(0.7rem,3.2cqi,1rem)] font-bold leading-snug shadow-sm"
                   style={{
                     color: 'hsl(43, 62%, 25%)',
                     backgroundColor: 'hsl(195, 80%, 96%)',
@@ -1819,7 +1819,7 @@ export const HafsTajweedPageView = ({
                       }}
                       className="justify-start gap-2"
                     >
-                      <Play className="h-4 w-4" />
+                      <Play className="h-3.5 w-3.5" />
                       {t('listenVerse')}
                     </Button>
                   </>
@@ -1833,7 +1833,7 @@ export const HafsTajweedPageView = ({
                     }}
                     className="justify-start gap-2"
                   >
-                    <Play className="h-4 w-4" />
+                    <Play className="h-3.5 w-3.5" />
                     {t('openToListen')}
                   </Button>
                 )}
