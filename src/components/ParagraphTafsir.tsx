@@ -22,7 +22,7 @@ function loadQuran() {
   return quranPromise;
 }
 
-export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagraph; lang: Lang }) {
+export function ParagraphTafsir({ paragraph, lang }: { paragraph: Omit<ThematicParagraph, 'themeId'> & { themeId?: ThematicParagraph['themeId'] }; lang: Lang }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -78,8 +78,8 @@ export function ParagraphTafsir({ paragraph, lang }: { paragraph: ThematicParagr
         </Button>
       </div>
       {(() => {
-        const official = getThemeById(paragraph.themeId);
-        return official && paragraph.themeId.startsWith('m') ? (
+        const official = paragraph.themeId ? getThemeById(paragraph.themeId) : undefined;
+        return official && paragraph.themeId?.startsWith('m') ? (
           <div dir="rtl" className="rounded-md border-r-4 p-3 text-right font-arabic text-lg leading-9 text-foreground" style={{ backgroundColor: `hsl(${official.bgHsl})`, borderColor: `hsl(${official.hsl})` }}>
             <span className="block text-xs font-semibold text-muted-foreground">التفسير</span>
             {official.labels.ar}

@@ -1,4 +1,7 @@
 import { useT } from '@/lib/i18n';
+import { selectVerse, isVerseSelected, type VerseSelection } from '@/lib/verseSelection';
+import { VerseSelectionActions } from '@/components/VerseSelectionActions';
+import type { QuranLocation } from '@/lib/recitationSession';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -66,6 +69,10 @@ const SurahReader = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const [searchParams] = useSearchParams();
   const [surah, setSurah] = useState<Surah | null>(null);
+  const [selection, setSelection] = useState<VerseSelection | null>(null);
+  const handleSelectVerse = useCallback((location: QuranLocation) => {
+    setSelection(current => selectVerse(current, location));
+  }, []);
   const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
   const [pageInput, setPageInput] = useState('');
   const [juzInput, setJuzInput] = useState('');
@@ -777,6 +784,8 @@ const SurahReader = () => {
               appSettings.textDisplayStyle === 'pages-warsh' ||
               appSettings.textDisplayStyle === 'pages-qalun') && (
             <HafsTajweedPageView
+              selection={selection}
+              onSelectVerse={handleSelectVerse}
               key={`${appSettings.textDisplayStyle}-${num}-${searchParams.get('page') || 'default'}`}
               surahNumber={num}
               verses={verses}
@@ -832,6 +841,8 @@ const SurahReader = () => {
             <HafsTajweedPageView
               key={`companion-${appSettings.textDisplayStyle}-${companionPage}`}
               isCompanion
+              selection={selection}
+              onSelectVerse={handleSelectVerse}
               spreadSide={companionPage! % 2 === 1 ? 'right' : 'left'}
               surahNumber={companionSurah}
               verses={companionVerses}
@@ -988,6 +999,8 @@ const SurahReader = () => {
                               <VerseCard
                                 key={verse.number}
                                 id={`verse-${verse.number}`}
+                                isSelected={isVerseSelected(selection, { surah: num, verse: verse.number })}
+                                onSelect={() => handleSelectVerse({ surah: num, verse: verse.number })}
                                 verse={verse}
                                 surahNumber={surah.number}
                                 isPlaying={quranAudio.isPlaying && !RECITERS[appSettings.reciter].fullSurah && quranAudio.currentVerse === verse.number}
@@ -1099,6 +1112,15 @@ const SurahReader = () => {
         onGoToPage={handleNavigateToPage}
         onGoToSurah={(n) => navigate(`/surah/${n}?verse=1`)}
       />
+
+      <VerseSelectionActions selection={selection} onCancel={() => setSelection(null)} onListen={() => {
+        if (!selection?.end) return;
+        handleRecitationStart({
+          surah: selection.start.surah, verse: selection.start.verse,
+          gapMultiplier: 0, repeat: { mode: 'none', count: 1 },
+          session: { start: selection.start, end: selection.end, passageCount: 1, completedPassages: 0 },
+        });
+      }} />
 
     </div>
   );

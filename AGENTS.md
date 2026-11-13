@@ -27,3 +27,4 @@
 
 - Quran recitation reuses one attached HTMLAudioElement per hook lifetime; cancellable source loads and owned blob URLs prevent stale playback, while speed is applied at metadata/canplay or manual changes without enforcement timers.
 - Both reader modes open the shared RecitationMenu from the top; navigation, scope, reciter, speed, repetition and offline downloads stay in that panel to avoid duplicate playback settings.
+- Touch range selection is owned by SurahReader with explicit surah/verse endpoints; page remounts and companion pages share it so navigation cannot discard the first tap, and audio uses the existing recitation session.
