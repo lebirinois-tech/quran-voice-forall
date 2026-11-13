@@ -4,5 +4,6 @@ describe('hafsDisplayText', () => {
   it('لآية', () => expect(hafsDisplayText('لَـَٔايَةً')).toBe('لَأٓيَةً'));
   it('الآخرة', () => expect(hafsDisplayText('لِلْـَٔاخِرَةِ')).toBe('لِلْأٓخِرَةِ'));
   it('keeps بآيات', () => expect(hafsDisplayText('بِـَٔايَـٰتِنَا')).toBe('بِـَٔايَـٰتِنَا'));
+  it('no black disc 525/236', () => { expect(hafsDisplayText('ٱلْمُصَۣيْطِرُونَ')).toBe('ٱلْمُصَيْطِرُونَ'); expect(hafsDisplayText('تَأْمَ۫نَّا')).toBe('تَأْمَنَّا'); });
   it('06DF', () => expect(hafsDisplayText('قَالُوا۟')).toBe('قَالُواْ'));
 });
