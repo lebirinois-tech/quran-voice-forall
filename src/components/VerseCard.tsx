@@ -69,6 +69,8 @@ const VerseEndNumber = ({ n }: { n: number }) => (
 );
 
 interface VerseCardProps {
+  isSelected?: boolean;
+  onSelect?: () => void;
   id?: string;
   verse: Verse;
   surahNumber: number;
@@ -90,6 +92,8 @@ interface VerseCardProps {
 }
 
 export const VerseCard = ({ 
+  isSelected = false,
+  onSelect,
   id,
   verse, 
   surahNumber, 
@@ -360,6 +364,11 @@ export const VerseCard = ({
   return (
     <div
       id={id}
+      data-selection-verse={`${surahNumber}:${verse.number}`}
+      onClick={event => {
+        if (!(event.target instanceof Element) || event.target.closest('button, a, input, select, [role="button"]')) return;
+        onSelect?.();
+      }}
       className={cn(
         "p-3 sm:p-5 rounded-xl border border-border transition-all duration-300",
         // Page-based alternating background colors
@@ -369,6 +378,7 @@ export const VerseCard = ({
         isPlaying && "verse-playing ring-4 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/30 scale-[1.01]",
         isHighlighted && !isPlaying && "verse-highlight ring-2 ring-primary/20",
         "animate-fade-in"
+        ,isSelected && 'ring-2 ring-secondary !bg-secondary/20'
       )}
       style={{
         animationDelay: `${verse.number * 0.05}s`,

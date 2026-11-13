@@ -1,4 +1,6 @@
 import { hafsDisplayText } from '@/lib/hafsDisplay';
+import { isVerseSelected, type VerseSelection } from '@/lib/verseSelection';
+import type { QuranLocation } from '@/lib/recitationSession';
 import { useT } from '@/lib/i18n';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones, Search } from 'lucide-react';
@@ -35,6 +37,8 @@ import { getThematicParagraph } from '@/lib/thematicParagraph';
 import { getMushafOpeningRows } from '@/lib/mushafOpeningLayout';
 
 interface HafsTajweedPageViewProps {
+  selection?: VerseSelection | null;
+  onSelectVerse?: (location: QuranLocation) => void;
   surahNumber: number;
   verses: Verse[];
   versesTajweed: Record<number, string>;
@@ -109,6 +113,8 @@ function collectTextCenters(root: HTMLElement): number[] {
 }
 
 export const HafsTajweedPageView = ({
+  selection = null,
+  onSelectVerse,
   surahNumber,
   verses,
   versesTajweed,
@@ -1159,12 +1165,18 @@ export const HafsTajweedPageView = ({
                               key={`${word.surah}-${word.verse}-${word.kind}-${wordPosition}`}
                               data-verse={word.surah === surahNumber ? word.verse : undefined}
                               data-w={word.kind === 'word' ? word.wordIndex : undefined}
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`${word.surah}:${word.verse}`}
+                              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectVerse?.({ surah: word.surah, verse: word.verse }); } }}
                               onClick={() => {
+                                if (onSelectVerse) { onSelectVerse({ surah: word.surah, verse: word.verse }); return; }
                                 setMenuSurah(word.surah);
                                 setMenuVerse(word.verse);
                               }}
                               className={cn(
                                 'cursor-pointer',
+                                isVerseSelected(selection, { surah: word.surah, verse: word.verse }) && '!bg-secondary/40 outline outline-1 outline-secondary',
                                 isAllahName && '[&_span]:!text-foreground',
                                 wordActive && 'verse-reciting'
                               )}
@@ -1255,7 +1267,12 @@ export const HafsTajweedPageView = ({
                     key={v.number}
                     data-mushaf-verse-row
                     data-verse={isMainSurah ? v.number : undefined}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${section.surahNumber}:${v.number}`}
+                    onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectVerse?.({ surah: section.surahNumber, verse: v.number }); } }}
                     onClick={() => {
+                      if (onSelectVerse) { onSelectVerse({ surah: section.surahNumber, verse: v.number }); return; }
                       setMenuSurah(section.surahNumber);
                       setMenuVerse(v.number);
                     }}
@@ -1268,6 +1285,7 @@ export const HafsTajweedPageView = ({
                     }}
                     className={cn(
                       'inline cursor-pointer',
+                      isVerseSelected(selection, { surah: section.surahNumber, verse: v.number }) && '!bg-secondary/40 outline outline-1 outline-secondary',
                       isCurrent && highlightCurrentVerse && isAudioPlaying && 'verse-reciting'
                     )}
                   >
