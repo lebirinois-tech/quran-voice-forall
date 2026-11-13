@@ -1,6 +1,6 @@
 # Architecture
 - Verse mode uses one fixed toolbar with native safe-area clearance and extra touch-tablet clearance; reserve matching reading space instead of adding floating status rows, to keep navigation visible without covering verses.
-- Tafsir translation requires verified account JWTs via paidAiUser; tafsir-tts also serves signed-out readers with a per-IP hourly limit so APK/PWA users keep the cloud male Fusha voice.
+- Tafsir translation requires verified account JWTs via paidAiUser; tafsir-tts returns 410 for all generation requests, including older APKs, to prevent metered speech usage.
 - Startup validates saved reciters through getSafeReciter rather than a separate allowlist; streaming and downloads share getReciterAudioUrl, Pages/Verses preserves voices within the same qiraat, and reciter changes clear the old paused source to prevent wrong-reciter playback.
 - Full-surah reciters use exact verified recording catalogs and one offline blob per surah; without verified ayah timings, playback starts at verse 1 and precise verse stops, repetition and highlighting are unavailable.
 - All iPhone install entry points use the shared PwaInstallContext dialog with localized native-browser steps; iOS exposes no programmatic home-screen installation prompt.
@@ -8,7 +8,7 @@
 - Updates compare native installations only to the GitHub `latest` APK release version marker (legacy asset timestamp fallback), never to the web deployment; the singleton PWA registrar applies updates and the global monitor checks launch/foreground/online/5-minute intervals without reinstalling native bundles.
 - APK updates open the release link with @capacitor/browser automatically once per detected build (notice action retries); Android TV boxes only completed downloads this way, while tap-only or WebView navigation failed.
 
-- All Tafsir readers use the shared useTafsirSpeech hook: cloud male voice via the tafsir-tts function with clips cached in IndexedDB, falling back to device speech only when offline/transient errors occur; device voices mispronounce Fusha.
+- All Tafsir readers use the shared useTafsirSpeech hook with device voices only; wait for available voices and prefer a known male Arabic voice, without claiming pronunciation quality on untested devices.
 
 - Verse-mode thematic tafsir resolves a contiguous same-theme run within one surah from the shared local index and displays every member's bundled text and tafsir; this avoids merging unrelated passages or presenting a single-verse analysis as a paragraph commentary.
 

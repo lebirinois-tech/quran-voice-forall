@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { configureTafsirUtterance, selectTafsirVoice, splitTafsirSpeech, type TafsirSpeechLang } from '@/lib/tafsirSpeech';
-import { CloudSpeechError, PcmPlayer, playCloudChunk, splitCloudChunks } from '@/lib/cloudTafsirSpeech';
+import { configureTafsirUtterance, loadTafsirVoices, selectTafsirVoice, splitTafsirSpeech, type TafsirSpeechLang } from '@/lib/tafsirSpeech';
 
 export function useTafsirSpeech(scope: string) {
   const [speakingLang, setSpeakingLang] = useState<TafsirSpeechLang | null>(null);
@@ -9,15 +8,11 @@ export function useTafsirSpeech(scope: string) {
   const session = useRef(0);
   const active = useRef(false);
   const current = useRef<SpeechSynthesisUtterance | null>(null);
-  const player = useRef<PcmPlayer | null>(null);
-  const abort = useRef<AbortController | null>(null);
 
   const finish = useCallback(() => {
     setSpeakingLang(null);
     setLoading(false);
     current.current = null;
-    player.current?.close();
-    player.current = null;
     if (active.current) {
       active.current = false;
       window.dispatchEvent(new CustomEvent('app:tts-end'));
@@ -25,17 +20,18 @@ export function useTafsirSpeech(scope: string) {
   }, []);
   const stop = useCallback(() => {
     session.current += 1;
-    abort.current?.abort();
-    abort.current = null;
     if (active.current) window.speechSynthesis?.cancel();
     finish();
   }, [finish]);
   useEffect(() => stop, [scope, stop]);
 
-  const speakWithDevice = (id: number, lang: TafsirSpeechLang, text: string) => {
+  const speakWithDevice = async (id: number, lang: TafsirSpeechLang, text: string) => {
     const synth = window.speechSynthesis;
     if (!synth) { toast.error('القراءة الصوتية غير مدعومة في هذا المتصفح'); finish(); return; }
-    const voice = selectTafsirVoice(synth.getVoices(), lang);
+    const voice = selectTafsirVoice(await loadTafsirVoices(synth), lang);
+    if (session.current !== id) return;
+    setLoading(false);
+    if (!voice) { toast.error(lang === 'ar' ? 'يرجى تثبيت صوت عربي في إعدادات الجهاز' : lang === 'fr' ? 'Installez une voix française dans les réglages de votre appareil.' : 'Install an English voice in your device settings.'); finish(); return; }
     const chunks = splitTafsirSpeech(text);
     let index = 0;
     const next = () => {
@@ -53,7 +49,7 @@ export function useTafsirSpeech(scope: string) {
     next();
   };
 
-  // Synchronous start: the AudioContext is created inside the user's tap (required on mobile).
+  // Device speech only: no metered speech requests, including for signed-in readers.
   const toggle = (lang: TafsirSpeechLang, text: string) => {
     if (speakingLang === lang) { stop(); return; }
     stop();
@@ -64,36 +60,7 @@ export function useTafsirSpeech(scope: string) {
     setLoading(true);
     window.dispatchEvent(new CustomEvent('app:tts-start'));
 
-    let p: PcmPlayer;
-    try { p = new PcmPlayer(); } catch { speakWithDevice(id, lang, text); setLoading(false); return; }
-    player.current = p;
-    const ctrl = new AbortController();
-    abort.current = ctrl;
-    const chunks = splitCloudChunks(text);
-
-    (async () => {
-      for (let i = 0; i < chunks.length; i++) {
-        if (session.current !== id) return;
-        try {
-          await playCloudChunk(chunks[i], lang, p, ctrl.signal, () => setLoading(false));
-        } catch (e) {
-          if (session.current !== id || ctrl.signal.aborted) return;
-          console.warn('[tafsir-tts]', e);
-          if (e instanceof CloudSpeechError && (e.status === 402 || e.status === 403)) {
-            toast.error(e.message); finish(); return;
-          }
-          // Offline or temporary failure: continue with the device voice.
-          toast.info('تعذّر الصوت السحابي، تُستعمل قراءة الجهاز');
-          await p.drained(ctrl.signal);
-          if (session.current !== id) return;
-          setLoading(false);
-          speakWithDevice(id, lang, chunks.slice(i).join(' '));
-          return;
-        }
-      }
-      await p.drained(ctrl.signal);
-      if (session.current === id) finish();
-    })();
+    void speakWithDevice(id, lang, text);
   };
   return { speakingLang, loading, toggle, stop };
 }
