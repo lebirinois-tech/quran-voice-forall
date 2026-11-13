@@ -23,7 +23,7 @@ export function VerseSelectionActions({ selection, onCancel, onListen }: {
     </div>}
     <Dialog open={!!selection.end} onOpenChange={open => { if (!open) cancel(); }}>
       <DialogContent className="z-[120] max-h-[85dvh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader><DialogTitle>{view === 'tafsir' ? t('tafsir') : t('verseRange')} · {label}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{view === 'tafsir' ? t('tafsir') : (t.lang === 'ar' ? 'المقطع المحدد' : t.lang === 'en' ? 'Selected passage' : 'Plage sélectionnée')} · {label}</DialogTitle></DialogHeader>
         <div className="flex flex-wrap gap-2">
           <Button className="gap-2" onClick={() => { onListen(); cancel(); }}><Headphones className="h-4 w-4" />{t.lang === 'ar' ? 'استماع للمقطع' : t.lang === 'en' ? 'Listen to passage' : 'Écouter la plage'}</Button>
           <Button variant="outline" className="gap-2" onClick={() => setView('tafsir')}><BookOpen className="h-4 w-4" />{t('tafsir')}</Button>
