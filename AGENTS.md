@@ -1,4 +1,5 @@
 # Architecture
+- The installed PWA permits any screen orientation in its manifest; keep rotation under device control rather than locking the reader to portrait.
 - Verse mode uses one fixed toolbar with native safe-area clearance and extra touch-tablet clearance; reserve matching reading space instead of adding floating status rows, to keep navigation visible without covering verses.
 - Tafsir translation requires verified account JWTs via paidAiUser; tafsir-tts returns 410 for all generation requests, including older APKs, to prevent metered speech usage.
 - Startup validates saved reciters through getSafeReciter rather than a separate allowlist; streaming and downloads share getReciterAudioUrl, Pages/Verses preserves voices within the same qiraat, and reciter changes clear the old paused source to prevent wrong-reciter playback.

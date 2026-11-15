@@ -12,7 +12,7 @@
   "background_color": "#FDF6E3",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
-  "orientation": "portrait",
+  "orientation": "any",
   "icons": [
     {
       "src": "/pwa-192x192.png",
