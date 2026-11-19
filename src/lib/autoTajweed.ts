@@ -99,7 +99,12 @@ export const applyAutoTajweed = (text: string): string => {
       if (chars[i - 1] === ALEF || chars[i - 1] === '\u0622') {
         let k = i - 2;
         while (k >= 0 && /[\u064B-\u065F\u0670]/.test(chars[k])) k--;
-        if (chars[k] === LAM) for (let m = k; m < i; m++) paint(m, COLORS.madd);
+        if (chars[k] === LAM) {
+          // Colorer tout le mot (ex. le Kaf de كَلَّآ) pour ne jamais le couper.
+          let start = k;
+          while (start > 0 && /[\u0621-\u064A\u064B-\u065F\u0670\u0671]/.test(chars[start - 1])) start--;
+          for (let m = start; m < i; m++) paint(m, COLORS.madd);
+        }
       }
       continue;
     }

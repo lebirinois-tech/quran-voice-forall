@@ -10,5 +10,5 @@ describe('hafsDisplayText', () => {
 
 import { applyAutoTajweed } from './autoTajweed';
 describe('lam-alef ligature', () => {
-  it('كلا keeps lam+alef in one span', () => expect(applyAutoTajweed('\u0643\u064E\u0644\u0651\u064E\u0627\u0653')).toBe('\u0643\u064E<span style="color: #DD0000;">\u0644\u0651\u064E\u0627\u0653</span>'));
+  it('كلا keeps lam+alef in one span', () => expect(applyAutoTajweed('\u0643\u064E\u0644\u0651\u064E\u0627\u0653')).toBe('<span style="color: #DD0000;">\u0643\u064E\u0644\u0651\u064E\u0627\u0653</span>'));
 });

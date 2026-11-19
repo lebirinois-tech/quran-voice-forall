@@ -10,6 +10,6 @@
 
 - [x] Remettre la légende Tajweed dans la barre du bas des deux modes.
 - [x] Publication demandée sur le lien existant ; déploiement programmé, sans confirmation de disponibilité ni de test sur Android physique.
-- [ ] التحقق بصريًا من كلمة «كَلَّآ» في الصفحات التي أرسلها المستخدم (348، 370، 569، 575، 577، 578، 585، 588، 593، 597) ثم النشر
+- [x] تصحيح «كَلَّآ»: الكلمة كاملة في وحدة واحدة
 - [x] الوضع الأفقي على الهاتف: صفحة بكامل العرض + تمرير عمودي (محفوظ 80e3bd3)
 - [ ] نشر كل التحديثات
