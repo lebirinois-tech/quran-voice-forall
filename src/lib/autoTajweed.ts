@@ -85,6 +85,11 @@ export const applyAutoTajweed = (text: string): string => {
     if (idx >= 0 && idx < chars.length) colors[idx] = color;
   };
 
+  // كَلَّا (madd lazim) : alif seul en rouge ; la ligature reste reliée.
+  for (let i = 5; i < chars.length; i++) {
+    if (chars.slice(i - 5, i + 1).join('') === '\u0643\u064E\u0644\u0651\u064E\u0627') paint(i, COLORS.madd);
+  }
+
   for (let i = 0; i < chars.length; i++) {
     const ch = chars[i];
     const prev = chars[i - 1];
