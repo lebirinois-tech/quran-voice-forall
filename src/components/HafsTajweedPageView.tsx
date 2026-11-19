@@ -565,18 +565,6 @@ export const HafsTajweedPageView = ({
   // la police jusqu'à obtenir quinze lignes de versets (sept pour la Fatiha).
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  // Téléphone tourné à l'horizontale (petite hauteur) : la page occupe toute
-  // la largeur de l'écran avec de grands caractères et défile verticalement,
-  // au lieu de rester tassée dans une colonne portrait au centre.
-  const [isPhoneLandscape, setIsPhoneLandscape] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(orientation: landscape) and (max-height: 620px)');
-    const update = () => setIsPhoneLandscape(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
-  const landscapeScroll = isPhoneLandscape && !spreadSide;
   const [lineHeight, setLineHeight] = useState(1.95);
   const [fontPx, setFontPx] = useState(0); // 0 = pas encore mesuré
 
@@ -914,8 +902,7 @@ export const HafsTajweedPageView = ({
           if (e.target === e.currentTarget) setShowMenuButton((v) => !v);
         }}
         className={cn(
-          'relative flex h-[100dvh] w-full flex-col justify-start pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
-          landscapeScroll ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden',
+          'relative flex h-[100dvh] w-full flex-col justify-start overflow-hidden pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
           showMenuButton || spreadSide
             ? 'pb-[calc(env(safe-area-inset-bottom,0px)+3.75rem)]'
             : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
@@ -927,13 +914,9 @@ export const HafsTajweedPageView = ({
       >
         {/* Cadre de page façon Mushaf : bordure double, contenu centré */}
         <div
-          className={cn('mx-auto w-full overflow-hidden [container-type:inline-size]', landscapeScroll ? 'shrink-0' : 'h-full')}
+          className="mx-auto h-full w-full overflow-hidden [container-type:inline-size]"
           // Format portrait d'une page Médine, comme sur téléphone, même sur écran large.
-          // En paysage téléphone : pleine largeur, hauteur proportionnelle à la
-          // largeur (ratio Médine 0.7), la page défile verticalement.
-          style={landscapeScroll
-            ? { maxWidth: 'none', height: 'calc(100vw / 0.7)' }
-            : { maxWidth: 'calc(100dvh * 0.7)' }}
+          style={{ maxWidth: 'calc(100dvh * 0.7)' }}
         >
           <div
             className="relative flex h-full w-full flex-col rounded-xl border-[3px] p-1 shadow-lg sm:p-1.5"
