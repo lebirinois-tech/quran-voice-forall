@@ -8,5 +8,7 @@ export function hafsDisplayText(text: string): string {
   return text
     .replace(/\u06DF/g, '\u0652')
     .replace(/[\u06E3\u06EB]/g, '')
+    // كَلَّآ → كَلَّا : la madda U+0653 casse la ligature Kaf + Lam-Alif dans la police.
+    .replace(/\u0643\u064E\u0644\u0651\u064E(?:\u0627\u0653|\u0622)/g, '\u0643\u064E\u0644\u0651\u064E\u0627')
     .replace(/(\u0644[\u064B-\u0652\u06E1]*)\u0640(?:\u0654\u064E|\u064E\u0654)\u0627/g, '$1\u0623\u0653');
 }
