@@ -27,5 +27,5 @@ export const sanitizeTajweedHtml = (html: string): string => {
     }
 
     return `<span style="color: ${colorMatch[1]};">`;
-  });
+  }).replace(/\uE053/g, '<span class="kalla-madd" aria-hidden="true"></span>');
 };

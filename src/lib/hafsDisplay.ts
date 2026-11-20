@@ -4,11 +4,15 @@
  * - Lam + ـٔ َ ا (ex. لَـَٔايَةً, ٱلْـَٔاخِرَةِ) → Lam + أٓ (لَأٓيَةً, ٱلْأٓخِرَةِ),
  *   graphie du Mushaf de Médine ; la hamza sur tatweel s'y affiche mal.
  */
+/** Marqueur interne : madda de « كَلَّآ » dessinée au-dessus du mot relié (voir sanitizeTajweedHtml). */
+export const KALLA_MADD_MARK = '\uE053';
+
 export function hafsDisplayText(text: string): string {
   return text
     .replace(/\u06DF/g, '\u0652')
     .replace(/[\u06E3\u06EB]/g, '')
-    // كَلَّآ → كَلَّا : la madda U+0653 casse la ligature Kaf + Lam-Alif dans la police.
-    .replace(/\u0643\u064E\u0644\u0651\u064E(?:\u0627\u0653|\u0622)/g, '\u0643\u064E\u0644\u0651\u064E\u0627')
+    // كَلَّآ (devant hamza) : la madda U+0653 casse la ligature Kaf + Lam-Alif dans la police ;
+    // on garde le mot relié et la madda est posée au-dessus via un marqueur.
+    .replace(/\u0643\u064E\u0644\u0651\u064E(?:\u0627\u0653|\u0622)/g, '\u0643\u064E\u0644\u0651\u064E\u0627' + KALLA_MADD_MARK)
     .replace(/(\u0644[\u064B-\u0652\u06E1]*)\u0640(?:\u0654\u064E|\u064E\u0654)\u0627/g, '$1\u0623\u0653');
 }

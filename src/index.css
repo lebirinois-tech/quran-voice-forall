@@ -397,3 +397,19 @@
    lowered 3mm (1mm), lowered to the bottom edge, then 2mm lower still: the bar
    now sits 2mm into the native safe-area strip (clamped at the screen edge),
    exactly as measured by the user on his own tablet. Do not raise it again. */
+
+/* Madda de « كَلَّآ » posée au-dessus du mot relié (la police sépare Kaf et Lam-Alif si U+0653 est dans le texte). */
+.kalla-madd {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1em;
+}
+.kalla-madd::after {
+  content: "\0653";
+  position: absolute;
+  top: -0.72em;
+  left: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+}

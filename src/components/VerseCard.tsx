@@ -532,7 +532,7 @@ export const VerseCard = ({
           className={cn(getTextClassName(), "mb-4 text-right")}
           dir="rtl"
         >
-          {hafsDisplayText(verse.text)}
+          <span dangerouslySetInnerHTML={{ __html: sanitizeTajweedHtml(hafsDisplayText(verse.text)) }} />
           <VerseEndNumber n={verse.number} />
         </p>
       )}
