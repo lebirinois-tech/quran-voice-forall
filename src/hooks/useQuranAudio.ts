@@ -19,6 +19,7 @@ export type QiraatId = keyof typeof QIRAAT_LABELS;
 export const RECITER_IDS = [
   'husary',
   'maher',
+  'raad',
   'husaryWarshPerVerse',
   'yassinWarsh',
   'husaryQalunPerVerse',
@@ -47,6 +48,8 @@ export interface ReciterInfo {
    * URL pattern: `https://archive.org/download/{archiveItem}/{SSS}.zip/{SSSAAA}.mp3`.
    */
   archiveItem?: string;
+  /** A single named ZIP containing all verse files at its root. */
+  archiveZipName?: string;
   /**
    * Zero-padding width for the surah-zip filename inside `archiveItem`.
    * Default is 3 (e.g. `001.zip`). Some archives use 2 (e.g. `01.zip`).
@@ -63,6 +66,11 @@ export const RECITERS: Record<ReciterId, ReciterInfo> = {
   // ═══════════════════════════════════════════════════════════════════════════
   husary: { id: 'ar.husary', name: 'Mahmoud Khalil Al-Husary', nameAr: 'محمود خليل الحصري', qiraat: 'hafs', quranicAudioId: 18 },
   maher: { id: 'ar.maher', name: 'Maher Al-Muaiqly', nameAr: 'ماهر المعيقلي', qiraat: 'hafs', archiveItem: 'way2sona_20160427_1847' },
+  raad: {
+    id: 'ar.raad', name: 'Raad Al Kourdy', nameAr: 'رعد الكردي', qiraat: 'hafs',
+    archiveItem: 'a128_202aaaaaaaaaa',
+    archiveZipName: 'مصحف رعد الكردي مقسم آيات كامل 128 ك ب في فولدر واحد.zip',
+  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // WARSH (ورش عن نافع)
@@ -132,6 +140,9 @@ export const getReciterAudioUrl = (surah: number, verse: number, reciterId: Reci
     return `https://archive.org/download/${info.archiveItem}/${juz}.zip/${inner}${surahStr}${verseStr}.mp3`;
   }
   if (info.archiveItem) {
+    if (info.archiveZipName) {
+      return `https://archive.org/download/${info.archiveItem}/${encodeURIComponent(info.archiveZipName)}/${surahStr}${verseStr}.mp3`;
+    }
     const zipName = info.archiveZipPad === 2 ? String(surah).padStart(2, '0') : surahStr;
     return `https://archive.org/download/${info.archiveItem}/${zipName}.zip/${surahStr}${verseStr}.mp3`;
   }

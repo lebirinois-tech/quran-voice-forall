@@ -17,6 +17,7 @@ import { ScrollArea } from './ui/scroll-area';
 const DOWNLOADABLE_RECITERS: { id: ReciterId; label: string }[] = [
   { id: 'husary', label: '🟢 Al-Husary (Hafs)' },
   { id: 'maher', label: '🟢 Maher Al-Muaiqly (Hafs)' },
+  { id: 'raad', label: '🟢 Raad Al Kourdy (Hafs)' },
   { id: 'husaryWarshPerVerse', label: '🟠 Al-Husary (Warsh)' },
   { id: 'yassinWarsh', label: '🟠 Yassen Al-Jazairi (Warsh)' },
   { id: 'husaryQalunPerVerse', label: '🟣 Al-Husary (Qalun)' },

@@ -20,6 +20,30 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('Raad Al Kourdy Hafs', () => {
+  it('offers Raad in Hafs without replacing the existing voices', () => {
+    expect(RECITER_IDS.filter((id) => RECITERS[id].qiraat === 'hafs')).toEqual(['husary', 'maher', 'raad']);
+    expect(getSafeReciter('raad')).toBe('raad');
+  });
+  it('uses the supplied complete verse archive from the first to the last verse', () => {
+    const base = 'https://archive.org/download/a128_202aaaaaaaaaa/' + encodeURIComponent('مصحف رعد الكردي مقسم آيات كامل 128 ك ب في فولدر واحد.zip');
+    expect(getReciterAudioUrl(1, 1, 'raad')).toBe(`${base}/001001.mp3`);
+    expect(getReciterAudioUrl(2, 255, 'raad')).toBe(`${base}/002255.mp3`);
+    expect(getReciterAudioUrl(114, 6, 'raad')).toBe(`${base}/114006.mp3`);
+  });
+  it('preserves Raad between Hafs Pages and Verses and after reopening settings', () => {
+    localStorage.setItem('quran-reciter', 'raad');
+    const { result, unmount } = renderHook(() => useAppSettings());
+    act(() => result.current.onTextDisplayStyleChange('tajweed'));
+    expect(result.current.reciter).toBe('raad');
+    act(() => result.current.onTextDisplayStyleChange('pages-hafs'));
+    expect(result.current.reciter).toBe('raad');
+    unmount();
+    const reopened = renderHook(() => useAppSettings());
+    expect(reopened.result.current.reciter).toBe('raad');
+  });
+});
+
 describe('Requested Warsh reciter', () => {
   it('offers Yassen Al-Jazairi as a saved Warsh voice with individual verse files', () => {
     expect(getSafeReciter('yassinWarsh')).toBe('yassinWarsh');
