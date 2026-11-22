@@ -1,3 +1,4 @@
+import HifzControl from "./pages/HifzControl";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -95,6 +96,7 @@ const App = () => (
                 <Route path="/audio-library" element={<AudioLibrary />} />
                 <Route path="/audio-upload" element={<AudioUpload />} />
                 <Route path="/search" element={<QuranSearch />} />
+                <Route path="/hifz" element={<HifzControl />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
