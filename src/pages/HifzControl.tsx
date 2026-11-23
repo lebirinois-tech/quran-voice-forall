@@ -32,9 +32,13 @@ const SpeechRecognitionCtor = typeof window !== 'undefined'
 
 const HifzControl = () => {
   const [corpus, setCorpus] = useState<Corpus | null>(null);
-  const [surah, setSurah] = useState(1);
+  const initialSurah = (() => {
+    const n = Number(new URLSearchParams(window.location.search).get('surah'));
+    return Number.isInteger(n) && n >= 1 && n <= 114 ? n : 1;
+  })();
+  const [surah, setSurah] = useState(initialSurah);
   const [from, setFrom] = useState(1);
-  const [to, setTo] = useState(7);
+  const [to, setTo] = useState(() => Math.min(7, surahs.find((s) => s.number === initialSurah)?.versesCount ?? 7));
   const [mode, setMode] = useState<'verses' | 'pages'>('pages');
   const [listening, setListening] = useState(false);
   const [finished, setFinished] = useState(false);

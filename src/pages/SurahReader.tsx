@@ -28,7 +28,7 @@ import { saveLocalReadingPosition } from '@/lib/readingPosition';
 import { getJuzColors } from '@/lib/juzColors';
 import { surahs, Surah, juzMapping, getVersePage, getFirstVerseOfPage, getJuzForVerse, type Verse } from '@/data/surahs';
 import { toast } from 'sonner';
-import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search, Home } from 'lucide-react';
+import { Loader2, FileText, Layers, Play, BookOpen, Headphones, Search, Home, GraduationCap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -1074,6 +1074,15 @@ const SurahReader = () => {
               aria-label={t('backHome')}
             >
               <Home className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/hifz?surah=${surahNumber}`)}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-primary"
+              aria-label="Mémorisation · مراجعة الحفظ"
+              title="Mémorisation · مراجعة الحفظ"
+            >
+              <GraduationCap className="h-4 w-4" />
             </button>
           </div>
         ),

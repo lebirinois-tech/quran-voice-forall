@@ -3,7 +3,7 @@ import { isVerseSelected, type VerseSelection } from '@/lib/verseSelection';
 import type { QuranLocation } from '@/lib/recitationSession';
 import { useT } from '@/lib/i18n';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Play, Pause, SkipBack, SkipForward, BookOpen, FileText, Sparkles, X, Menu, Mic, RotateCcw, Volume2, ListMusic, Repeat, Home, Headphones, Search, GraduationCap } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { TajweedLegend } from './TajweedLegend';
@@ -1402,6 +1402,17 @@ export const HafsTajweedPageView = ({
             className="h-8 w-8 shrink-0 rounded-full text-primary"
           >
             <Home className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Mémorisation · مراجعة الحفظ"
+            title="Mémorisation · مراجعة الحفظ"
+            onClick={() => window.location.assign(`/hifz?surah=${surahNumber}`)}
+            className="h-8 w-8 shrink-0 rounded-full text-primary"
+          >
+            <GraduationCap className="h-4 w-4" />
           </Button>
           <Button
             type="button"
