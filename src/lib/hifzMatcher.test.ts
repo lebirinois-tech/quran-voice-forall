@@ -15,6 +15,12 @@ describe('hifzMatcher', () => {
     expect(s).toEqual(['ok', 'ok', 'missed', 'missed']);
     expect(recitationScore(s)).toBe(50);
   });
+  it('marks a replaced word as wrong', () => {
+    expect(alignRecitation(fatiha, 'بسم الله الكريم الرحيم', true)).toEqual(['ok', 'ok', 'wrong', 'ok']);
+  });
+  it('live score counts only words already recited', () => {
+    expect(recitationScore(alignRecitation(fatiha, 'بسم الله'))).toBe(100);
+  });
   it('gives 100% for a full correct recitation', () => {
     expect(recitationScore(alignRecitation(fatiha, 'بسم الله الرحمن الرحيم', true))).toBe(100);
   });

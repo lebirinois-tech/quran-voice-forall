@@ -23,6 +23,7 @@ const STATUS_CLASS: Record<WordStatus, string> = {
   pending: '',
   ok: 'bg-primary/15',
   approx: 'bg-accent/40 ring-1 ring-accent',
+  wrong: 'bg-destructive/30 ring-2 ring-destructive',
   missed: 'bg-destructive/20 ring-1 ring-destructive line-through decoration-destructive',
 };
 
@@ -110,7 +111,7 @@ const HifzControl = () => {
   }, [status, listening, stop]);
 
   const revealed = (i: number) => finished || status[i] !== 'pending';
-  const errors = words.map((w, i) => ({ w, s: status[i] })).filter((x) => finished && (x.s === 'missed' || x.s === 'approx'));
+  const errors = words.map((w, i) => ({ w, s: status[i] })).filter((x) => finished && (x.s === 'missed' || x.s === 'wrong'));
 
   const renderWord = (w: Word, i: number) => (
     <span key={i} className="inline">
@@ -178,7 +179,7 @@ const HifzControl = () => {
         {finished && (
           <div className="rounded-lg border border-border bg-card p-4 text-center">
             <p className="text-4xl font-bold text-primary">{score}%</p>
-            <p className="text-sm text-muted-foreground">de justesse · {status.filter((s) => s === 'ok').length} mots justes, {status.filter((s) => s === 'approx').length} approximatifs, {status.filter((s) => s === 'missed').length} oubliés</p>
+            <p className="text-sm text-muted-foreground">de justesse · {status.filter((s) => s === 'ok' || s === 'approx').length} mots justes, {status.filter((s) => s === 'wrong').length} erronés, {status.filter((s) => s === 'missed').length} oubliés</p>
           </div>
         )}
 
@@ -196,7 +197,7 @@ const HifzControl = () => {
         {selected !== null && (
           <div className="rounded-md border border-border bg-card p-3 text-sm">
             Verset {words[selected].verse} — mot attendu : <span className="font-mushaf-hafs text-xl" dir="rtl">{words[selected].text}</span>
-            {' '}· {status[selected] === 'ok' ? 'juste' : status[selected] === 'approx' ? 'prononciation approximative' : 'oublié ou non reconnu'}
+            {' '}· {status[selected] === 'ok' ? 'juste' : status[selected] === 'approx' ? 'juste' : status[selected] === 'wrong' ? 'mot erroné' : 'oublié ou non reconnu'}
           </div>
         )}
 
@@ -205,7 +206,7 @@ const HifzControl = () => {
             <p className="mb-1 font-semibold">Erreurs ({errors.length})</p>
             <ul className="space-y-1">
               {errors.map(({ w, s }, k) => (
-                <li key={k}>Verset {w.verse} : <span dir="rtl" className="font-mushaf-hafs text-lg">{w.text}</span> — {s === 'missed' ? 'oublié' : 'approximatif'}</li>
+                <li key={k}>Verset {w.verse} : <span dir="rtl" className="font-mushaf-hafs text-lg">{w.text}</span> — {s === 'missed' ? 'oublié' : 'mot erroné'}</li>
               ))}
             </ul>
           </div>
