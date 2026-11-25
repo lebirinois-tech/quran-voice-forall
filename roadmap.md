@@ -1,4 +1,7 @@
 # Changements du 7 novembre 2026
+- [ ] Ajouter le suivi hors ligne par sourate, pages et juz, avec révision espacée et historique.
+- [ ] Relier le contrôle vocal au suivi et synchroniser le programme des comptes connectés.
+- [ ] Ajouter les rappels quotidiens Android et la pastille, puis vérifier les parcours.
 - [x] Ajouter Raad Al Kourdy Hafs depuis le catalogue fourni (6 236 fichiers) ; 17 tests réussis, lecture réelle et Al-Fatiha téléchargée puis lue sans Internet, écran 360 px vérifié. APK physique non vérifié.
 - [x] Sélection début/fin au toucher dans Pages et Versets, conservée entre pages et sourates, avec Audio et Tafsir.
 - [x] Tester la sélection et vérifier les deux modes à l’écran sans modifier installation ni mise à jour APK : 68 tests réussis, lecture audio réelle et Tafsir 2:5–2:10 vérifiés, petit écran sans débordement.

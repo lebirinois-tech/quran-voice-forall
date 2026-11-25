@@ -71,6 +71,27 @@ export type Database = {
         }
         Relationships: []
       }
+      hifz_plan_entries: {
+        Row: {
+          id: string
+          payload: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id: string
+          payload?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          payload?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
