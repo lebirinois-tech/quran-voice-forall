@@ -26,11 +26,22 @@ interface VerseRecorderProps {
   onHideRangeChange?: (range: { start: number; end: number } | null) => void;
 }
 
+interface WrongWord {
+  word: string;
+  issue?: string;
+  said?: string;
+}
+
 interface ComparisonResult {
   score: number;
   feedback: string;
   details?: string;
+  wrongWords?: WrongWord[];
 }
+
+// Compare words without diacritics so the AI's spelling matches the verse text.
+const normalizeWord = (w: string) =>
+  w.replace(/[ً-ٰٟۖ-ۭ]/g, '').replace(/[أإآٱ]/g, 'ا').trim();
 
 export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRecordingChange, pageVerses, onHideRangeChange }: VerseRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -382,6 +393,41 @@ export const VerseRecorder = ({ surahNumber, verseNumber, verseText, label, onRe
               <p className="text-muted-foreground">{comparisonResult.feedback}</p>
               {comparisonResult.details && (
                 <p className="text-xs text-muted-foreground/80">{comparisonResult.details}</p>
+              )}
+              {comparisonResult.wrongWords && comparisonResult.wrongWords.length > 0 && (
+                <div className="space-y-1.5 pt-1 border-t border-border/50">
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    Mots erronés ({comparisonResult.wrongWords.length}) — surlignés dans le texte :
+                  </p>
+                  <p dir="rtl" lang="ar" className="font-arabic text-lg leading-loose text-right">
+                    {selectedText.split(/\s+/).filter(Boolean).map((word, i) => {
+                      const wrong = comparisonResult.wrongWords!.find(
+                        (w) => normalizeWord(w.word) === normalizeWord(word)
+                      );
+                      return wrong ? (
+                        <span
+                          key={i}
+                          title={wrong.said ? `${wrong.issue || 'erreur'} — dit : ${wrong.said}` : wrong.issue || 'erreur'}
+                          className="text-destructive font-bold underline decoration-wavy underline-offset-4 cursor-help"
+                        >
+                          {word}{' '}
+                        </span>
+                      ) : (
+                        <span key={i}>{word} </span>
+                      );
+                    })}
+                  </p>
+                  <ul className="text-xs space-y-0.5">
+                    {comparisonResult.wrongWords.map((w, i) => (
+                      <li key={i} className="flex items-baseline gap-2">
+                        <span dir="rtl" lang="ar" className="font-arabic text-destructive font-bold">{w.word}</span>
+                        <span className="text-muted-foreground">
+                          {w.issue || 'erreur'}{w.said ? ` — dit : « ${w.said} »` : ''}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           )}

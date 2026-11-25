@@ -85,8 +85,13 @@ Réponds UNIQUEMENT en JSON valide avec ce format exact:
 {
   "score": <number 0-100>,
   "feedback": "<résumé court en français de la qualité, 1-2 phrases>",
-  "details": "<détails spécifiques sur les erreurs ou points à améliorer, en français>"
+  "details": "<détails spécifiques sur les erreurs ou points à améliorer, en français>",
+  "wrongWords": [
+    { "word": "<mot du texte original>", "issue": "<erreur: omis | remplacé | mal prononcé>", "said": "<ce qui a été dit, si remplacé>" }
+  ]
 }
+
+Pour "wrongWords": liste UNIQUEMENT les mots du texte original qui ont été oubliés, remplacés par un autre mot, ou clairement mal prononcés. Recopie chaque mot EXACTEMENT comme il apparaît dans le texte original fourni (avec ses voyelles). Si la récitation est correcte, renvoie un tableau vide [].
 
 Le score doit refléter: exactitude du texte (50%), prononciation/tajweed (30%), fluidité (20%).
 Si l'audio est inaudible ou ne contient pas de récitation, donne un score de 0 avec un feedback approprié.`,

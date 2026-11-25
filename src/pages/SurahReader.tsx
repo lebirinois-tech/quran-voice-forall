@@ -285,7 +285,6 @@ const SurahReader = () => {
 
   const handleNavigateToSurah = (surahNum: number) => {
     navigate(`/surah/${surahNum}`);
-    toast.success(`Navigation vers sourate ${surahNum}`);
   };
 
   const navigateToMushafPage = (pageNum: number, successMessage: string) => {
@@ -299,7 +298,6 @@ const SurahReader = () => {
     }
     navigate(`/surah/${targetSurah}?page=${pageNum}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast.success(successMessage);
   };
 
   const handleNavigateToPage = (pageNum: number) => {
