@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Mic, Square, RotateCcw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { surahs } from '@/data/surahs';
@@ -8,16 +8,13 @@ import { applyAutoTajweed } from '@/lib/autoTajweed';
 import { sanitizeTajweedHtml } from '@/lib/sanitize';
 import { alignRecitation, recitationScore, type WordStatus } from '@/lib/hifzMatcher';
 import { cn } from '@/lib/utils';
+import { HifzPlanDashboard } from '@/components/HifzPlanDashboard';
+import { useHifzPlan } from '@/contexts/HifzPlanContext';
+import { createHifzEntry, loadHifzCorpus, scoreToGrade, type HifzCorpus } from '@/lib/hifzPlan';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
-interface VerseEntry { numberInSurah: number; text: string; page: number }
-type Corpus = Record<string, { arabic: VerseEntry[] }>;
-let corpusCache: Promise<Corpus> | null = null;
-const loadCorpus = () => (corpusCache ??= fetch('/data/quran-hafs-fr.json').then((r) => {
-  if (!r.ok) { corpusCache = null; throw new Error('fetch failed'); }
-  return r.json();
-}));
-
-interface Word { verse: number; page: number; text: string; html: string; endOfVerse: boolean }
+interface Word { surah: number; verse: number; page: number; text: string; html: string; endOfVerse: boolean }
 
 const STATUS_CLASS: Record<WordStatus, string> = {
   pending: '',
@@ -32,7 +29,14 @@ const SpeechRecognitionCtor = typeof window !== 'undefined'
   : undefined;
 
 const HifzControl = () => {
-  const [corpus, setCorpus] = useState<Corpus | null>(null);
+  const plan = useHifzPlan();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get('tab') === 'plan' ? 'plan' : 'control';
+  const entryId = params.get('entry');
+  const trackedEntry = plan.entries.find(e => e.id === entryId);
+  const [corpus, setCorpus] = useState<HifzCorpus | null>(null);
+  const [loadError, setLoadError] = useState('');
+  const [reviewSaved, setReviewSaved] = useState(false);
   const initialSurah = (() => {
     const n = Number(new URLSearchParams(window.location.search).get('surah'));
     return Number.isInteger(n) && n >= 1 && n <= 114 ? n : 1;
@@ -49,21 +53,21 @@ const HifzControl = () => {
   const finalRef = useRef('');
   const wantRef = useRef(false);
 
-  useEffect(() => { loadCorpus().then(setCorpus).catch(() => setCorpus({})); }, []);
+  useEffect(() => { loadHifzCorpus().then(setCorpus).catch(() => setLoadError('Le texte ne peut pas être chargé. Reconnectez-vous puis réessayez.')); }, []);
 
   const versesCount = surahs.find((s) => s.number === surah)?.versesCount ?? 1;
   const words = useMemo<Word[]>(() => {
-    const verses = corpus?.[String(surah)]?.arabic ?? [];
-    return verses
-      .filter((v) => v.numberInSurah >= from && v.numberInSurah <= to)
+    const ranges = trackedEntry?.ranges ?? (entryId ? [] : [{ surah, from, to }]);
+    return ranges.flatMap(range => (corpus?.[String(range.surah)]?.arabic ?? [])
+      .filter((v) => v.numberInSurah >= range.from && v.numberInSurah <= range.to)
       .flatMap((v) => {
         const parts = hafsDisplayText(v.text).split(/\s+/).filter(Boolean);
         return parts.map((p, i) => ({
-          verse: v.numberInSurah, page: v.page, text: p,
+          surah: range.surah, verse: v.numberInSurah, page: v.page, text: p,
           html: sanitizeTajweedHtml(applyAutoTajweed(p)), endOfVerse: i === parts.length - 1,
         }));
-      });
-  }, [corpus, surah, from, to]);
+      }));
+  }, [corpus, surah, from, to, trackedEntry, entryId]);
 
   const status = useMemo(
     () => alignRecitation(words.map((w) => w.text), transcript, finished),
@@ -71,7 +75,18 @@ const HifzControl = () => {
   );
   const score = recitationScore(status);
 
-  const reset = () => { finalRef.current = ''; setTranscript(''); setFinished(false); setSelected(null); };
+  const reset = () => { finalRef.current = ''; setTranscript(''); setFinished(false); setSelected(null); setReviewSaved(false); };
+  const saveResult = () => {
+    if (reviewSaved) return;
+    const ranges = trackedEntry?.ranges ?? [{ surah, from, to }];
+    const matching = trackedEntry ?? plan.entries.find(e => JSON.stringify(e.ranges) === JSON.stringify(ranges));
+    const saved = matching ? plan.review(matching.id, scoreToGrade(score), score) : (() => {
+      const entry = createHifzEntry(`${surahs.find(s => s.number === surah)?.name} · versets ${from}–${to}`, ranges, 'surah', 'learning');
+      // A new tested passage is added before recording its first review.
+      return plan.save(entry) && plan.review(entry.id, scoreToGrade(score), score);
+    })();
+    if (saved) { setReviewSaved(true); toast.success('Résultat enregistré dans votre programme'); }
+  };
 
   const stop = useCallback(() => {
     wantRef.current = false;
@@ -127,8 +142,8 @@ const HifzControl = () => {
   );
 
   const groups = useMemo(() => {
-    const key = (w: Word) => (mode === 'pages' ? w.page : w.verse);
-    const out: { key: number; items: { w: Word; i: number }[] }[] = [];
+    const key = (w: Word) => (mode === 'pages' ? String(w.page) : `${w.surah}:${w.verse}`);
+    const out: { key: string; items: { w: Word; i: number }[] }[] = [];
     words.forEach((w, i) => {
       const k = key(w);
       if (!out.length || out[out.length - 1].key !== k) out.push({ key: k, items: [] });
@@ -143,11 +158,17 @@ const HifzControl = () => {
     <div className="min-h-screen bg-background pb-32">
       <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/95 px-3 py-2">
         <Button asChild variant="ghost" size="icon"><Link to="/index" aria-label="Retour"><ArrowLeft /></Link></Button>
-        <h1 className="text-base font-semibold">Contrôle de mémorisation · مراجعة الحفظ</h1>
+        <h1 className="text-base font-semibold">Mémorisation · الحفظ والمراجعة</h1>
       </header>
 
       <section className="mx-auto max-w-3xl space-y-3 p-3">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Tabs value={tab} onValueChange={value => { if (listening) return; const next = new URLSearchParams(params); if (value === 'plan') next.set('tab', 'plan'); else next.delete('tab'); setParams(next); }}>
+          <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="control" disabled={listening}>Contrôle · اختبار</TabsTrigger><TabsTrigger value="plan" disabled={listening}>Suivi & révision · متابعة</TabsTrigger></TabsList>
+        </Tabs>
+        {tab === 'plan' ? <HifzPlanDashboard /> : <>
+        {entryId && !trackedEntry && plan.ready && <p role="alert" className="text-sm text-destructive">Ce passage n’est pas disponible sur cet appareil ou ce compte.</p>}
+        {trackedEntry && <p className="border-l-2 border-primary py-2 pl-3 font-semibold">{trackedEntry.label} <span className="text-sm font-normal text-muted-foreground">· {trackedEntry.ranges.length} sourate(s)</span></p>}
+        {!entryId && <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <label className="col-span-2 flex flex-col text-xs">Sourate
             <select className={select} value={surah} disabled={listening} onChange={(e) => {
               const n = Number(e.target.value); setSurah(n); setFrom(1);
@@ -166,7 +187,7 @@ const HifzControl = () => {
               {Array.from({ length: versesCount }, (_, i) => <option key={i} value={i + 1} disabled={i + 1 < from}>{i + 1}</option>)}
             </select>
           </label>
-        </div>
+        </div>}
         <div className="flex gap-2">
           <Button variant={mode === 'pages' ? 'default' : 'outline'} size="sm" onClick={() => setMode('pages')}>Pages</Button>
           <Button variant={mode === 'verses' ? 'default' : 'outline'} size="sm" onClick={() => setMode('verses')}>Versets</Button>
@@ -180,10 +201,13 @@ const HifzControl = () => {
           <div className="rounded-lg border border-border bg-card p-4 text-center">
             <p className="text-4xl font-bold text-primary">{score}%</p>
             <p className="text-sm text-muted-foreground">de justesse · {status.filter((s) => s === 'ok' || s === 'approx').length} mots justes, {status.filter((s) => s === 'wrong').length} erronés, {status.filter((s) => s === 'missed').length} oubliés</p>
+            <p className="mt-2 text-xs text-muted-foreground">Estimation de reconnaissance vocale, à confirmer : elle ne mesure pas la qualité du Tajweed.</p>
+            <Button className="mt-3" onClick={saveResult} disabled={reviewSaved || !plan.ready}>{reviewSaved ? 'Révision enregistrée' : 'Enregistrer la révision'}</Button>
           </div>
         )}
 
-        {!corpus ? <Loader2 className="mx-auto animate-spin" /> : (
+        {listening && <p role="status" className="text-center font-semibold text-primary">{score}% de justesse · {status.filter(s => s !== 'pending').length}/{words.length} mots</p>}
+        {loadError ? <p role="alert" className="text-sm text-destructive">{loadError}</p> : !corpus ? <Loader2 className="mx-auto animate-spin" /> : (
           <div dir="rtl" className="space-y-4">
             {groups.map((g) => (
               <div key={`${mode}-${g.key}`} className="rounded-lg border-2 border-accent/60 bg-card p-4">
@@ -196,7 +220,7 @@ const HifzControl = () => {
 
         {selected !== null && (
           <div className="rounded-md border border-border bg-card p-3 text-sm">
-            Verset {words[selected].verse} — mot attendu : <span className="font-mushaf-hafs text-xl" dir="rtl">{words[selected].text}</span>
+            Sourate {words[selected].surah}, verset {words[selected].verse} — mot attendu : <span className="font-mushaf-hafs text-xl" dir="rtl">{words[selected].text}</span>
             {' '}· {status[selected] === 'ok' ? 'juste' : status[selected] === 'approx' ? 'juste' : status[selected] === 'wrong' ? 'mot erroné' : 'oublié ou non reconnu'}
           </div>
         )}
@@ -206,21 +230,22 @@ const HifzControl = () => {
             <p className="mb-1 font-semibold">Erreurs ({errors.length})</p>
             <ul className="space-y-1">
               {errors.map(({ w, s }, k) => (
-                <li key={k}>Verset {w.verse} : <span dir="rtl" className="font-mushaf-hafs text-lg">{w.text}</span> — {s === 'missed' ? 'oublié' : 'mot erroné'}</li>
+                <li key={k}>Sourate {w.surah}, verset {w.verse} : <span dir="rtl" className="font-mushaf-hafs text-lg">{w.text}</span> — {s === 'missed' ? 'oublié' : 'mot erroné'}</li>
               ))}
             </ul>
           </div>
         )}
+        </>}
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 flex justify-center gap-3 border-t border-border bg-background p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      {tab === 'control' && <div className="fixed inset-x-0 bottom-0 flex flex-wrap justify-center gap-3 border-t border-border bg-background p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {listening ? (
           <Button size="lg" variant="destructive" onClick={stop} className="gap-2"><Square /> Terminer</Button>
         ) : (
           <Button size="lg" onClick={start} disabled={!SpeechRecognitionCtor || !words.length} className="gap-2"><Mic /> Commencer</Button>
         )}
         <Button size="lg" variant="outline" onClick={reset} disabled={listening} className="gap-2"><RotateCcw /> Recommencer</Button>
-      </div>
+      </div>}
     </div>
   );
 };

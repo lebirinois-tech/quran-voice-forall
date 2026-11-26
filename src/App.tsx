@@ -1,4 +1,6 @@
 import HifzControl from "./pages/HifzControl";
+import { HifzPlanProvider } from '@/contexts/HifzPlanContext';
+import { HifzReminderMonitor } from '@/components/HifzReminderMonitor';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -84,6 +86,8 @@ const App = () => (
         <AppErrorBoundary>
           <PwaInstallProvider>
             <BrowserRouter>
+              <HifzPlanProvider>
+              <HifzReminderMonitor />
               <InstallOnlyGate bypass={isPreviewRuntime}>
               <Routes>
                 <Route path="/" element={<Landing />} />
@@ -101,6 +105,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </InstallOnlyGate>
+              </HifzPlanProvider>
             </BrowserRouter>
           </PwaInstallProvider>
         </AppErrorBoundary>
