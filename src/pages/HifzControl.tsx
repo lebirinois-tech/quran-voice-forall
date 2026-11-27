@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Mic, Square, RotateCcw, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mic, Square, RotateCcw, Loader2, Download, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { surahs } from '@/data/surahs';
 import { hafsDisplayText } from '@/lib/hafsDisplay';
@@ -52,6 +52,31 @@ const HifzControl = () => {
   const recRef = useRef<any>(null);
   const finalRef = useRef('');
   const wantRef = useRef(false);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioExt, setAudioExt] = useState('webm');
+  const clearAudio = useCallback(() => { setAudioUrl(u => { if (u) URL.revokeObjectURL(u); return null; }); }, []);
+  const startAudioCapture = async () => {
+    try {
+      if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) return;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+      const mr = new MediaRecorder(stream, { mimeType: mime });
+      const chunks: Blob[] = [];
+      mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+      mr.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        if (chunks.length) { setAudioExt(mime === 'audio/mp4' ? 'm4a' : 'webm'); setAudioUrl(URL.createObjectURL(new Blob(chunks, { type: mime }))); }
+      };
+      mediaRef.current = mr; mr.start();
+    } catch { /* recognition still works without the recording */ }
+  };
+  const stopAudioCapture = () => { if (mediaRef.current?.state === 'recording') mediaRef.current.stop(); mediaRef.current = null; };
+  const keepAudio = () => {
+    if (!audioUrl) return;
+    const a = document.createElement('a'); a.href = audioUrl; a.download = `controle-hifz-sourate-${surah}-${from}-${to}.${audioExt}`; a.click();
+    toast.success('Enregistrement conservé sur l’appareil');
+  };
 
   useEffect(() => { loadHifzCorpus().then(setCorpus).catch(() => setLoadError('Le texte ne peut pas être chargé. Reconnectez-vous puis réessayez.')); }, []);
 
@@ -75,7 +100,7 @@ const HifzControl = () => {
   );
   const score = recitationScore(status);
 
-  const reset = () => { finalRef.current = ''; setTranscript(''); setFinished(false); setSelected(null); setReviewSaved(false); };
+  const reset = () => { clearAudio(); finalRef.current = ''; setTranscript(''); setFinished(false); setSelected(null); setReviewSaved(false); };
   const saveResult = () => {
     if (reviewSaved) return;
     const ranges = trackedEntry?.ranges ?? [{ surah, from, to }];
@@ -91,6 +116,7 @@ const HifzControl = () => {
   const stop = useCallback(() => {
     wantRef.current = false;
     recRef.current?.stop();
+    stopAudioCapture();
     setListening(false);
     setFinished(true);
   }, []);
@@ -117,10 +143,11 @@ const HifzControl = () => {
     recRef.current = rec;
     wantRef.current = true;
     rec.start();
+    void startAudioCapture();
     setListening(true);
   };
 
-  useEffect(() => () => { wantRef.current = false; recRef.current?.abort?.(); }, []);
+  useEffect(() => () => { wantRef.current = false; recRef.current?.abort?.(); stopAudioCapture(); }, []);
   useEffect(() => {
     if (listening && status.length && status[status.length - 1] !== 'pending') stop();
   }, [status, listening, stop]);
@@ -203,6 +230,17 @@ const HifzControl = () => {
             <p className="text-sm text-muted-foreground">de justesse · {status.filter((s) => s === 'ok' || s === 'approx').length} mots justes, {status.filter((s) => s === 'wrong').length} erronés, {status.filter((s) => s === 'missed').length} oubliés</p>
             <p className="mt-2 text-xs text-muted-foreground">Estimation de reconnaissance vocale, à confirmer : elle ne mesure pas la qualité du Tajweed.</p>
             <Button className="mt-3" onClick={saveResult} disabled={reviewSaved || !plan.ready}>{reviewSaved ? 'Révision enregistrée' : 'Enregistrer la révision'}</Button>
+          </div>
+        )}
+
+        {finished && audioUrl && (
+          <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+            <p className="text-sm font-semibold">Réécouter votre récitation · استمع لتلاوتك</p>
+            <audio controls src={audioUrl} className="w-full" />
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={keepAudio} className="gap-2"><Download className="h-4 w-4" /> Conserver · حفظ</Button>
+              <Button size="sm" variant="outline" onClick={() => { clearAudio(); toast.success('Enregistrement effacé'); }} className="gap-2"><Trash2 className="h-4 w-4" /> Effacer · حذف</Button>
+            </div>
           </div>
         )}
 
