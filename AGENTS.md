@@ -30,3 +30,5 @@
 - Both reader modes open the shared RecitationMenu from the top; navigation, scope, reciter, speed, repetition and offline downloads stay in that panel to avoid duplicate playback settings.
 - Per-verse reciters stored in one named archive ZIP use archiveZipName in the shared URL resolver; this keeps streaming and offline downloads on the same verified files.
 - Touch range selection is owned by SurahReader with explicit surah/verse endpoints; page remounts and companion pages share it so navigation cannot discard the first tap, and audio uses the existing recitation session.
+- Hifz page selection resolves bundled corpus ranges and scrolls to the first pending page; this preserves exact page membership and cross-surah session progress.
+- Android hifz uses the OS SpeechRecognizer through the app-owned HifzSpeech bridge, installed by scripts/android/configure-hifz.mjs; WebView speech is unavailable on many TV boxes, so permission, final results, errors and cleanup are explicit. Native speech owns the microphone exclusively; browser recording remains unchanged.

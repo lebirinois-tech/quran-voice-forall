@@ -75,6 +75,7 @@ jobs:
         run: |
           bunx cap add android
           bunx cap sync android
+          node scripts/android/configure-hifz.mjs
 
       # Signature stable : sans elle, chaque runner signe avec une clé
       # différente et Android refuse la mise à jour (« package en conflit »).

@@ -17,3 +17,9 @@
 - [x] تصحيح «كَلَّآ»: الكلمة كاملة في وحدة واحدة
 - [x] الوضع الأفقي على الهاتف: صفحة بكامل العرض + تمرير عمودي (محفوظ 80e3bd3)
 - [ ] نشر كل التحديثات
+
+# Corrections mémorisation demandées
+- [ ] Transmettre la page courante et sélectionner une plage exacte de pages (page 2 : 2:1–5).
+- [ ] Faire monter automatiquement la page récitée pour laisser place à la suivante.
+- [ ] Ajouter la reconnaissance vocale native et les autorisations micro Android ; signaler les appareils sans service vocal.
+- [ ] Tester les plages et transitions, vérifier le navigateur ; microphone physique Android non disponible ici.

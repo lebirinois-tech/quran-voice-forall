@@ -1,4 +1,5 @@
 import { hafsDisplayText } from '@/lib/hafsDisplay';
+import { hifzPageLink } from '@/lib/hifzPages';
 import { isVerseSelected, type VerseSelection } from '@/lib/verseSelection';
 import type { QuranLocation } from '@/lib/recitationSession';
 import { useT } from '@/lib/i18n';
@@ -1409,7 +1410,7 @@ export const HafsTajweedPageView = ({
             variant="ghost"
             aria-label="Mémorisation · مراجعة الحفظ"
             title="Mémorisation · مراجعة الحفظ"
-            onClick={() => window.location.assign(`/hifz?surah=${surahNumber}`)}
+            onClick={() => window.location.assign(hifzPageLink(surahNumber, currentPage))}
             className="h-8 w-8 shrink-0 rounded-full text-primary"
           >
             <GraduationCap className="h-4 w-4" />

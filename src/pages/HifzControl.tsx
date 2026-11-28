@@ -13,6 +13,11 @@ import { useHifzPlan } from '@/contexts/HifzPlanContext';
 import { createHifzEntry, loadHifzCorpus, scoreToGrade, type HifzCorpus } from '@/lib/hifzPlan';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { Capacitor } from '@capacitor/core';
+import { Input } from '@/components/ui/input';
+import { resolveHifzRanges } from '@/lib/hifzPlan';
+import { activeHifzGroup } from '@/lib/hifzPages';
+import { startNativeHifzSpeech } from '@/lib/hifzNativeSpeech';
 
 interface Word { surah: number; verse: number; page: number; text: string; html: string; endOfVerse: boolean }
 
@@ -42,6 +47,14 @@ const HifzControl = () => {
     return Number.isInteger(n) && n >= 1 && n <= 114 ? n : 1;
   })();
   const [surah, setSurah] = useState(initialSurah);
+  const initialPage = Number(params.get('page') ?? params.get('pageStart'));
+  const validPage = Number.isInteger(initialPage) && initialPage >= 1 && initialPage <= 604;
+  const [scope, setScope] = useState<'surah' | 'pages'>(validPage ? 'pages' : 'surah');
+  const [pageStart, setPageStart] = useState(validPage ? initialPage : 1);
+  const [pageEnd, setPageEnd] = useState(() => {
+    const end = Number(params.get('pageEnd'));
+    return validPage && Number.isInteger(end) && end >= initialPage && end <= 604 ? end : validPage ? initialPage : 1;
+  });
   const [from, setFrom] = useState(1);
   const [to, setTo] = useState(() => Math.min(7, surahs.find((s) => s.number === initialSurah)?.versesCount ?? 7));
   const [mode, setMode] = useState<'verses' | 'pages'>('pages');
@@ -50,6 +63,12 @@ const HifzControl = () => {
   const [transcript, setTranscript] = useState('');
   const [selected, setSelected] = useState<number | null>(null);
   const recRef = useRef<any>(null);
+  const nativeAndroid = Capacitor.getPlatform() === 'android';
+  const speechAvailable = nativeAndroid || !!SpeechRecognitionCtor;
+  const nativeStopRef = useRef<(() => Promise<void>) | null>(null);
+  const sessionRef = useRef(0);
+  const [starting, setStarting] = useState(false);
+  const [speechError, setSpeechError] = useState('');
   const finalRef = useRef('');
   const wantRef = useRef(false);
   const mediaRef = useRef<MediaRecorder | null>(null);
@@ -60,6 +79,7 @@ const HifzControl = () => {
     try {
       if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) return;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!wantRef.current) { stream.getTracks().forEach(t => t.stop()); return; }
       const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
       const mr = new MediaRecorder(stream, { mimeType: mime });
       const chunks: Blob[] = [];
@@ -69,7 +89,7 @@ const HifzControl = () => {
         if (chunks.length) { setAudioExt(mime === 'audio/mp4' ? 'm4a' : 'webm'); setAudioUrl(URL.createObjectURL(new Blob(chunks, { type: mime }))); }
       };
       mediaRef.current = mr; mr.start();
-    } catch { /* recognition still works without the recording */ }
+    } catch { toast.warning('L’enregistrement audio n’est pas disponible. Le contrôle vocal reste actif.'); }
   };
   const stopAudioCapture = () => { if (mediaRef.current?.state === 'recording') mediaRef.current.stop(); mediaRef.current = null; };
   const keepAudio = () => {
@@ -81,8 +101,10 @@ const HifzControl = () => {
   useEffect(() => { loadHifzCorpus().then(setCorpus).catch(() => setLoadError('Le texte ne peut pas être chargé. Reconnectez-vous puis réessayez.')); }, []);
 
   const versesCount = surahs.find((s) => s.number === surah)?.versesCount ?? 1;
+  const ranges = useMemo(() => trackedEntry?.ranges ?? (entryId ? [] : scope === 'pages'
+    ? corpus ? resolveHifzRanges(corpus, 'pages', pageStart, pageEnd) : []
+    : [{ surah, from, to }]), [trackedEntry, entryId, scope, corpus, pageStart, pageEnd, surah, from, to]);
   const words = useMemo<Word[]>(() => {
-    const ranges = trackedEntry?.ranges ?? (entryId ? [] : [{ surah, from, to }]);
     return ranges.flatMap(range => (corpus?.[String(range.surah)]?.arabic ?? [])
       .filter((v) => v.numberInSurah >= range.from && v.numberInSurah <= range.to)
       .flatMap((v) => {
@@ -92,7 +114,7 @@ const HifzControl = () => {
           html: sanitizeTajweedHtml(applyAutoTajweed(p)), endOfVerse: i === parts.length - 1,
         }));
       }));
-  }, [corpus, surah, from, to, trackedEntry, entryId]);
+  }, [corpus, ranges]);
 
   const status = useMemo(
     () => alignRecitation(words.map((w) => w.text), transcript, finished),
@@ -100,13 +122,13 @@ const HifzControl = () => {
   );
   const score = recitationScore(status);
 
-  const reset = () => { clearAudio(); finalRef.current = ''; setTranscript(''); setFinished(false); setSelected(null); setReviewSaved(false); };
+  const reset = () => { clearAudio(); finalRef.current = ''; setTranscript(''); setFinished(false); setSelected(null); setReviewSaved(false); setSpeechError(''); };
   const saveResult = () => {
     if (reviewSaved) return;
-    const ranges = trackedEntry?.ranges ?? [{ surah, from, to }];
     const matching = trackedEntry ?? plan.entries.find(e => JSON.stringify(e.ranges) === JSON.stringify(ranges));
     const saved = matching ? plan.review(matching.id, scoreToGrade(score), score) : (() => {
-      const entry = createHifzEntry(`${surahs.find(s => s.number === surah)?.name} · versets ${from}–${to}`, ranges, 'surah', 'learning');
+      const label = scope === 'pages' ? `Pages ${pageStart}–${pageEnd}` : `${surahs.find(s => s.number === surah)?.name} · versets ${from}–${to}`;
+      const entry = createHifzEntry(label, ranges, scope, 'learning');
       // A new tested passage is added before recording its first review.
       return plan.save(entry) && plan.review(entry.id, scoreToGrade(score), score);
     })();
@@ -115,15 +137,43 @@ const HifzControl = () => {
 
   const stop = useCallback(() => {
     wantRef.current = false;
+    sessionRef.current += 1;
+    void nativeStopRef.current?.().catch(() => undefined);
+    nativeStopRef.current = null;
     recRef.current?.stop();
     stopAudioCapture();
     setListening(false);
     setFinished(true);
   }, []);
 
-  const start = () => {
-    if (!SpeechRecognitionCtor) return;
+  const start = async () => {
+    if (!speechAvailable || starting || !words.length) return;
     reset();
+    if (nativeAndroid) {
+      const session = ++sessionRef.current;
+      setStarting(true);
+      wantRef.current = true;
+      try {
+        const stopNative = await startNativeHifzSpeech(text => {
+          if (sessionRef.current === session) setTranscript(text);
+        }, message => {
+          if (sessionRef.current !== session) return;
+          wantRef.current = false;
+          setListening(false);
+          setSpeechError(message);
+        });
+        if (sessionRef.current !== session) { await stopNative(); return; }
+        nativeStopRef.current = stopNative;
+        setListening(wantRef.current);
+      } catch (error) {
+        if (sessionRef.current === session) {
+          wantRef.current = false;
+          setSpeechError(error instanceof Error ? error.message : 'Impossible d’accéder au microphone Android.');
+        }
+      } finally { if (sessionRef.current === session) setStarting(false); }
+      return;
+    }
+    if (!SpeechRecognitionCtor) return;
     const rec = new SpeechRecognitionCtor();
     rec.lang = 'ar-SA';
     rec.continuous = true;
@@ -139,15 +189,23 @@ const HifzControl = () => {
     };
     // Browsers end sessions after silence; restart while the user is still reciting.
     rec.onend = () => { if (wantRef.current) { try { rec.start(); } catch { /* ignore */ } } };
-    rec.onerror = (e: any) => { if (e.error === 'not-allowed') { wantRef.current = false; setListening(false); } };
+    rec.onerror = (e: any) => {
+      if (e.error === 'not-allowed' || e.error === 'audio-capture') {
+        wantRef.current = false; setListening(false); stopAudioCapture();
+        setSpeechError(e.error === 'not-allowed' ? 'Autorisez le microphone pour utiliser le contrôle vocal.' : 'Aucun microphone utilisable détecté. Vérifiez son branchement.');
+      }
+    };
     recRef.current = rec;
     wantRef.current = true;
-    rec.start();
+    try { rec.start(); } catch { wantRef.current = false; setSpeechError('Le microphone n’a pas pu démarrer. Réessayez.'); return; }
     void startAudioCapture();
     setListening(true);
   };
 
-  useEffect(() => () => { wantRef.current = false; recRef.current?.abort?.(); stopAudioCapture(); }, []);
+  useEffect(() => () => {
+    sessionRef.current += 1; wantRef.current = false; recRef.current?.abort?.(); stopAudioCapture();
+    void nativeStopRef.current?.().catch(() => undefined);
+  }, []);
   useEffect(() => {
     if (listening && status.length && status[status.length - 1] !== 'pending') stop();
   }, [status, listening, stop]);
@@ -179,6 +237,13 @@ const HifzControl = () => {
     return out;
   }, [words, mode]);
 
+  const pageRefs = useRef(new Map<string, HTMLDivElement>());
+  const activeGroup = activeHifzGroup(groups, status);
+  useEffect(() => {
+    if (!listening || mode !== 'pages' || !activeGroup) return;
+    pageRefs.current.get(activeGroup)?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }, [activeGroup, listening, mode]);
+
   const select = 'h-10 rounded-md border border-input bg-background px-2 text-sm';
 
   return (
@@ -195,7 +260,15 @@ const HifzControl = () => {
         {tab === 'plan' ? <HifzPlanDashboard /> : <>
         {entryId && !trackedEntry && plan.ready && <p role="alert" className="text-sm text-destructive">Ce passage n’est pas disponible sur cet appareil ou ce compte.</p>}
         {trackedEntry && <p className="border-l-2 border-primary py-2 pl-3 font-semibold">{trackedEntry.label} <span className="text-sm font-normal text-muted-foreground">· {trackedEntry.ranges.length} sourate(s)</span></p>}
-        {!entryId && <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {!entryId && <>
+        <Tabs value={scope} onValueChange={value => { setScope(value as 'surah' | 'pages'); reset(); }}>
+          <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="surah" disabled={listening || starting}>Sourate</TabsTrigger><TabsTrigger value="pages" disabled={listening || starting}>Plage de pages</TabsTrigger></TabsList>
+        </Tabs>
+        {scope === 'pages' ? <div className="grid grid-cols-2 gap-2">
+          <label className="flex flex-col text-xs">De la page<Input aria-label="De la page" type="number" min={1} max={604} value={pageStart} disabled={listening || starting} onChange={e => { const n = Number(e.target.value); setPageStart(n); if (pageEnd < n) setPageEnd(n); reset(); }} /></label>
+          <label className="flex flex-col text-xs">À la page<Input aria-label="À la page" type="number" min={pageStart} max={604} value={pageEnd} disabled={listening || starting} onChange={e => { setPageEnd(Number(e.target.value)); reset(); }} /></label>
+          {corpus && !ranges.length && <p role="alert" className="col-span-2 text-sm text-destructive">Choisissez des pages entre 1 et 604, dans l’ordre.</p>}
+        </div> : <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <label className="col-span-2 flex flex-col text-xs">Sourate
             <select className={select} value={surah} disabled={listening} onChange={(e) => {
               const n = Number(e.target.value); setSurah(n); setFrom(1);
@@ -215,14 +288,17 @@ const HifzControl = () => {
             </select>
           </label>
         </div>}
+        </>}
         <div className="flex gap-2">
           <Button variant={mode === 'pages' ? 'default' : 'outline'} size="sm" onClick={() => setMode('pages')}>Pages</Button>
           <Button variant={mode === 'verses' ? 'default' : 'outline'} size="sm" onClick={() => setMode('verses')}>Versets</Button>
         </div>
 
-        {!SpeechRecognitionCtor && (
+        {!speechAvailable && (
           <p className="rounded-md bg-destructive/10 p-3 text-sm">La reconnaissance vocale n'est pas disponible sur cet appareil. Utilisez Chrome sur Android ou ordinateur.</p>
         )}
+        {speechError && <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm">{speechError}</p>}
+        {nativeAndroid && listening && <p role="status" className="text-xs text-muted-foreground">Le contrôle vocal Android utilise le microphone seul ; l’enregistrement simultané n’est pas disponible.</p>}
 
         {finished && (
           <div className="rounded-lg border border-border bg-card p-4 text-center">
@@ -248,7 +324,7 @@ const HifzControl = () => {
         {loadError ? <p role="alert" className="text-sm text-destructive">{loadError}</p> : !corpus ? <Loader2 className="mx-auto animate-spin" /> : (
           <div dir="rtl" className="space-y-4">
             {groups.map((g) => (
-              <div key={`${mode}-${g.key}`} className="rounded-lg border-2 border-accent/60 bg-card p-4">
+              <div key={`${mode}-${g.key}`} data-hifz-page={mode === 'pages' ? g.key : undefined} ref={node => { if (node) pageRefs.current.set(g.key, node); else pageRefs.current.delete(g.key); }} className="scroll-mt-16 rounded-lg border-2 border-accent/60 bg-card p-4">
                 {mode === 'pages' && <p className="mb-2 text-center text-xs text-muted-foreground">Page {g.key}</p>}
                 <p className="quran-text font-mushaf-hafs text-3xl leading-[2.4]">{g.items.map(({ w, i }) => renderWord(w, i))}</p>
               </div>
@@ -280,9 +356,9 @@ const HifzControl = () => {
         {listening ? (
           <Button size="lg" variant="destructive" onClick={stop} className="gap-2"><Square /> Terminer</Button>
         ) : (
-          <Button size="lg" onClick={start} disabled={!SpeechRecognitionCtor || !words.length} className="gap-2"><Mic /> Commencer</Button>
+          <Button size="lg" onClick={start} disabled={!speechAvailable || !words.length || starting} className="gap-2">{starting ? <Loader2 className="animate-spin" /> : <Mic />} Commencer</Button>
         )}
-        <Button size="lg" variant="outline" onClick={reset} disabled={listening} className="gap-2"><RotateCcw /> Recommencer</Button>
+        <Button size="lg" variant="outline" onClick={reset} disabled={listening || starting} className="gap-2"><RotateCcw /> Recommencer</Button>
       </div>}
     </div>
   );
